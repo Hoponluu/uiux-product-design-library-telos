@@ -198,7 +198,7 @@ body { background: #F5F5F5; font-family: -apple-system, BlinkMacSystemFont, 'Seg
 .fc-btn-primary:hover { background: #3A2FBE; }
 
 /* ── DARK MODE ───────────────────────────────────────────── */
-body.dark { background: #090B1E; }
+body.dark { background: #090B1E; --panel-bg: #090B1E; }
 body.dark #tabs { background: rgba(9,11,30,0.97); border-color: rgba(255,255,255,0.08); }
 body.dark #tabs .logo { color: rgba(255,255,255,0.3); }
 body.dark .tab-btn { color: rgba(255,255,255,0.45); }
@@ -344,6 +344,95 @@ body.dark .gl-card-name { color: rgba(255,255,255,0.9); }
 body.dark .gl-desc { color: rgba(255,255,255,0.45); }
 body.dark .gl-no-url { color: rgba(255,255,255,0.2); }
 body.dark .gl-no-results { color: rgba(255,255,255,0.3); }
+
+/* ── CHALLENGE (scoped) ──────────────────────────────────── */
+.telos-challenge *, .telos-challenge *::before, .telos-challenge *::after { margin:0;padding:0;box-sizing:border-box; }
+.telos-challenge {
+  --brand-primary-50:#ECEBF8;--brand-primary-500:#2D2789;--brand-primary-700:#1D1A5E;
+  --brand-secondary-50:#FFF4E0;--brand-secondary-500:#F5A623;--brand-secondary-700:#B87812;
+  --brand-accent-50:#FCEAF0;--brand-accent-500:#E8547A;--brand-accent-700:#B33B59;
+  --neutral-white:#FFFFFF;--neutral-100:#F5F5F7;--neutral-300:#DEDEE8;--neutral-400:#9999AA;
+  --ca:#4A46C8;--cb:#F5A623;--cc:#0DBFA3;--cd:#E8547A;--ce:#7B6FE8;--cf:#FF6B35;
+  --bg:#FFFFFF;--surface:#F5F5F7;--card:#FFFFFF;--border:#DEDEE8;--text:#0D0C2B;--muted:#9999AA;
+  --pill-bg:#ECEBF8;--pill-border:rgba(45,39,137,.2);--pill-text:#1D1A5E;--pill-dot:#2D2789;
+  --lock-active-bg:#ECEBF8;--lock-active-border:rgba(45,39,137,.25);--lock-active-text:#1D1A5E;
+  --tag-a-bg:rgba(74,70,200,.1);--tag-a-text:#1D1A5E;
+  --tag-b-bg:rgba(245,166,35,.15);--tag-b-text:#B87812;
+  --tag-c-bg:rgba(13,191,163,.12);--tag-c-text:#077367;
+  --tag-d-bg:rgba(232,84,122,.12);--tag-d-text:#B33B59;
+  --tag-e-bg:rgba(123,111,232,.12);--tag-e-text:#4A3FB5;
+  --tag-f-bg:rgba(255,107,53,.12);--tag-f-text:#C44A15;
+  --card-hover-border:#9999AA;--btn-copy-hover-bg:#F5F5F7;--btn-copy-hover-border:#9999AA;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Inter',sans-serif;
+  color:var(--text);padding:32px 20px 56px;background:var(--bg);
+}
+body.dark .telos-challenge {
+  --bg:#090B1E;--surface:rgba(255,255,255,0.04);--card:rgba(255,255,255,0.05);
+  --border:rgba(255,255,255,0.1);--text:rgba(255,255,255,0.92);--muted:rgba(255,255,255,0.4);
+  --pill-bg:rgba(255,255,255,0.08);--pill-border:rgba(255,255,255,0.15);--pill-text:rgba(255,255,255,0.8);
+  --lock-active-bg:rgba(123,107,245,0.15);--lock-active-border:rgba(123,107,245,0.35);--lock-active-text:rgba(255,255,255,0.9);
+  --card-hover-border:rgba(255,255,255,0.2);--btn-copy-hover-bg:rgba(255,255,255,0.08);--btn-copy-hover-border:rgba(255,255,255,0.2);
+}
+.telos-challenge .wrap { max-width:940px;margin:0 auto; }
+.telos-challenge .header { text-align:center;margin-bottom:40px; }
+.telos-challenge .pill {
+  display:inline-flex;align-items:center;gap:6px;background:var(--pill-bg);
+  border:1px solid var(--pill-border);color:var(--pill-text);
+  font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  padding:6px 14px;border-radius:100px;margin-bottom:18px;
+}
+.telos-challenge .pill-dot { width:6px;height:6px;border-radius:50%;background:var(--pill-dot);animation:telos-pulse 2s ease-in-out infinite; }
+@keyframes telos-pulse { 0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.7)} }
+.telos-challenge .header h1 { font-size:clamp(26px,5.5vw,44px);font-weight:900;letter-spacing:-.035em;line-height:1.08;margin-bottom:10px;color:var(--text); }
+.telos-challenge .header h1 .grad { background:linear-gradient(125deg,var(--brand-primary-500) 0%,var(--brand-accent-500) 55%,var(--brand-secondary-500) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; }
+.telos-challenge .header p { color:var(--muted);font-size:14px;line-height:1.6; }
+.telos-challenge .grid { display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px; }
+@media (max-width:720px){.telos-challenge .grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:460px){.telos-challenge .grid{grid-template-columns:1fr}}
+.telos-challenge .card { background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px 18px 20px;position:relative;overflow:hidden;transition:border-color .2s,box-shadow .2s; }
+.telos-challenge .card::after { content:'';position:absolute;top:0;left:0;width:100%;height:3px;opacity:.9; }
+.telos-challenge .card-a::after{background:var(--ca)}.telos-challenge .card-b::after{background:var(--cb)}
+.telos-challenge .card-c::after{background:var(--cc)}.telos-challenge .card-d::after{background:var(--cd)}
+.telos-challenge .card-e::after{background:var(--ce)}.telos-challenge .card-f::after{background:var(--cf)}
+.telos-challenge .card:hover{border-color:var(--card-hover-border)}
+.telos-challenge .card.is-locked{opacity:.75}.telos-challenge .card.is-locked::after{opacity:.4}
+.telos-challenge .card-head { display:flex;align-items:center;justify-content:space-between;margin-bottom:14px; }
+.telos-challenge .cat-label { display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted); }
+.telos-challenge .cat-dot { width:7px;height:7px;border-radius:50%;flex-shrink:0; }
+.telos-challenge .dot-a{background:var(--ca)}.telos-challenge .dot-b{background:var(--cb)}
+.telos-challenge .dot-c{background:var(--cc)}.telos-challenge .dot-d{background:var(--cd)}
+.telos-challenge .dot-e{background:var(--ce)}.telos-challenge .dot-f{background:var(--cf)}
+.telos-challenge .lock-btn { background:none;border:1px solid var(--border);border-radius:9px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--muted);transition:background .15s,border-color .15s,color .15s;flex-shrink:0; }
+.telos-challenge .lock-btn:hover{background:var(--btn-copy-hover-bg);color:var(--text)}
+.telos-challenge .lock-btn.active{background:var(--lock-active-bg);border-color:var(--lock-active-border);color:var(--lock-active-text)}
+.telos-challenge .card-value { font-size:15px;font-weight:700;line-height:1.35;min-height:40px;display:flex;align-items:center;transition:opacity .08s;word-break:break-word;color:var(--text); }
+.telos-challenge .card-value.rolling{opacity:.45}
+.telos-challenge .output-box { background:var(--card);border:1px solid var(--border);border-radius:20px;padding:26px 28px;margin-bottom:22px;position:relative;overflow:hidden; }
+.telos-challenge .output-box::before { content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--ca),var(--cb),var(--cc),var(--cd),var(--ce),var(--cf)); }
+.telos-challenge .out-label { font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:6px; }
+.telos-challenge .out-label span{color:var(--brand-primary-500)}
+.telos-challenge .out-sentence { font-size:clamp(14px,2.2vw,17px);font-weight:600;line-height:1.75;color:var(--text); }
+.telos-challenge .tag { display:inline;border-radius:6px;padding:2px 9px;margin:1px;font-weight:700;font-size:inherit;white-space:nowrap; }
+.telos-challenge .tag-a{background:var(--tag-a-bg);color:var(--tag-a-text)}
+.telos-challenge .tag-b{background:var(--tag-b-bg);color:var(--tag-b-text)}
+.telos-challenge .tag-c{background:var(--tag-c-bg);color:var(--tag-c-text)}
+.telos-challenge .tag-d{background:var(--tag-d-bg);color:var(--tag-d-text)}
+.telos-challenge .tag-e{background:var(--tag-e-bg);color:var(--tag-e-text)}
+.telos-challenge .tag-f{background:var(--tag-f-bg);color:var(--tag-f-text)}
+.telos-challenge .actions { display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:18px; }
+.telos-challenge .btn-roll { background:linear-gradient(130deg,var(--brand-primary-500) 0%,var(--brand-accent-500) 100%);color:#fff;border:none;border-radius:14px;padding:16px 44px;font-family:inherit;font-size:17px;font-weight:800;cursor:pointer;letter-spacing:-.01em;transition:transform .18s,box-shadow .18s,opacity .18s;box-shadow:0 4px 24px rgba(45,39,137,.3);position:relative;overflow:hidden; }
+.telos-challenge .btn-roll::after{content:'';position:absolute;inset:0;background:linear-gradient(130deg,rgba(255,255,255,.15),transparent);opacity:0;transition:opacity .2s}
+.telos-challenge .btn-roll:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(45,39,137,.45)}
+.telos-challenge .btn-roll:hover::after{opacity:1}.telos-challenge .btn-roll:active{transform:translateY(0)}
+.telos-challenge .btn-roll:disabled{opacity:.55;cursor:default;transform:none;box-shadow:none}
+.telos-challenge .btn-copy { background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:14px;padding:16px 28px;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;transition:background .18s,border-color .18s,color .18s; }
+.telos-challenge .btn-copy:hover{background:var(--btn-copy-hover-bg);border-color:var(--btn-copy-hover-border)}
+.telos-challenge .btn-copy.ok{border-color:var(--cc);color:var(--cc)}
+.telos-challenge .hint{text-align:center;color:var(--muted);font-size:12.5px;line-height:1.7}
+.telos-challenge .stats{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:28px;font-size:11.5px;color:var(--muted)}
+.telos-challenge .stats strong{color:var(--brand-primary-700);font-weight:700}
+body.dark .telos-challenge .stats strong{color:rgba(150,140,255,0.9)}
+@media(max-width:480px){.telos-challenge .btn-roll,.telos-challenge .btn-copy{width:100%;text-align:center}}
 </style>
 </head>
 <body>
@@ -364,6 +453,7 @@ body.dark .gl-no-results { color: rgba(255,255,255,0.3); }
   <button class="tab-btn active" onclick="switchTab('graph',this)">🗺 Knowledge Graph</button>
   <button class="tab-btn" onclick="switchTab('glossary',this)">📖 Tra cứu</button>
   <button class="tab-btn" onclick="switchTab('flashcard',this)">🃏 Flashcard</button>
+  <button class="tab-btn" onclick="switchTab('challenge',this)">🎲 Challenge</button>
   <button id="mode-btn" class="tab-btn" onclick="toggleMode()" title="Light / Dark mode">🌙</button>
 </div>
 
@@ -441,6 +531,86 @@ body.dark .gl-no-results { color: rgba(255,255,255,0.3); }
     <div id="gl-content"></div>
   </div>
 </div>
+
+<!-- CHALLENGE PANEL -->
+<div id="panel-challenge" style="display:none;position:fixed;top:46px;left:0;right:0;bottom:0;overflow-y:auto;background:var(--panel-bg,#F5F5F5);">
+<div class="telos-challenge">
+<div class="wrap">
+  <header class="header">
+    <div class="pill"><span class="pill-dot"></span>một sản phẩm của TELOS Academy</div>
+    <h1>UI Design<br><span class="grad">Challenge Generator</span></h1>
+    <p>Random đề bài — rèn tư duy thiết kế mỗi ngày</p>
+  </header>
+  <div class="grid">
+    <div class="card card-a" id="card-a">
+      <div class="card-head">
+        <div class="cat-label"><span class="cat-dot dot-a"></span>Nền tảng</div>
+        <button class="lock-btn" id="lk-a" onclick="toggleLock('a')" title="Giữ tiêu chí này">🔓</button>
+      </div>
+      <div class="card-value" id="v-a">Mobile App</div>
+    </div>
+    <div class="card card-b" id="card-b">
+      <div class="card-head">
+        <div class="cat-label"><span class="cat-dot dot-b"></span>Ngành / Domain</div>
+        <button class="lock-btn" id="lk-b" onclick="toggleLock('b')" title="Giữ tiêu chí này">🔓</button>
+      </div>
+      <div class="card-value" id="v-b">Fintech / Ngân hàng</div>
+    </div>
+    <div class="card card-c" id="card-c">
+      <div class="card-head">
+        <div class="cat-label"><span class="cat-dot dot-c"></span>Loại màn hình</div>
+        <button class="lock-btn" id="lk-c" onclick="toggleLock('c')" title="Giữ tiêu chí này">🔓</button>
+      </div>
+      <div class="card-value" id="v-c">Dashboard thống kê cá nhân</div>
+    </div>
+    <div class="card card-d" id="card-d">
+      <div class="card-head">
+        <div class="cat-label"><span class="cat-dot dot-d"></span>Người dùng</div>
+        <button class="lock-btn" id="lk-d" onclick="toggleLock('d')" title="Giữ tiêu chí này">🔓</button>
+      </div>
+      <div class="card-value" id="v-d">Người đi làm bận rộn</div>
+    </div>
+    <div class="card card-e" id="card-e">
+      <div class="card-head">
+        <div class="cat-label"><span class="cat-dot dot-e"></span>Phong cách</div>
+        <button class="lock-btn" id="lk-e" onclick="toggleLock('e')" title="Giữ tiêu chí này">🔓</button>
+      </div>
+      <div class="card-value" id="v-e">Minimalist & Clean</div>
+    </div>
+    <div class="card card-f" id="card-f">
+      <div class="card-head">
+        <div class="cat-label"><span class="cat-dot dot-f"></span>Ràng buộc sáng tạo</div>
+        <button class="lock-btn" id="lk-f" onclick="toggleLock('f')" title="Giữ tiêu chí này">🔓</button>
+      </div>
+      <div class="card-value" id="v-f">Typography-driven</div>
+    </div>
+  </div>
+  <div class="output-box">
+    <div class="out-label"><span>✦</span> Đề bài của bạn</div>
+    <div class="out-sentence" id="sentence">
+      Hãy thiết kế màn hình
+      <span class="tag tag-c" id="o-c">Dashboard thống kê cá nhân</span>
+      cho ứng dụng
+      <span class="tag tag-b" id="o-b">Fintech / Ngân hàng</span>
+      trên
+      <span class="tag tag-a" id="o-a">Mobile App</span>,
+      dành cho
+      <span class="tag tag-d" id="o-d">Người đi làm bận rộn</span>,
+      theo phong cách
+      <span class="tag tag-e" id="o-e">Minimalist &amp; Clean</span>.
+      Ràng buộc:
+      <span class="tag tag-f" id="o-f">Typography-driven</span>.
+    </div>
+  </div>
+  <div class="actions">
+    <button class="btn-roll" id="btn-roll" onclick="rollAll()">🎲 Random Challenge</button>
+    <button class="btn-copy" id="btn-copy" onclick="copyIt()">📋 Copy đề bài</button>
+  </div>
+  <p class="hint">Bấm 🔓 trên một ô để giữ nguyên tiêu chí đó khi random lại</p>
+  <div class="stats">Tổng số đề bài có thể ra: <strong id="combo-count">—</strong> combinations</div>
+</div>
+</div>
+</div><!-- /.panel-challenge -->
 
 <div id="tooltip"></div>
 
@@ -587,6 +757,7 @@ function switchTab(tab, btn) {
   document.getElementById('panel-graph').style.display     = tab === 'graph'     ? 'block' : 'none';
   document.getElementById('panel-flashcard').style.display = tab === 'flashcard' ? 'block' : 'none';
   document.getElementById('panel-glossary').style.display  = tab === 'glossary'  ? 'block' : 'none';
+  document.getElementById('panel-challenge').style.display = tab === 'challenge' ? 'block' : 'none';
   if (tab === 'glossary') { renderGlossary(); setTimeout(() => document.getElementById('gl-search').focus(), 80); }
 }
 
@@ -1074,6 +1245,88 @@ document.addEventListener('keydown',e=>{
   if (nxt&&nxt.style.display==='block') nextCard();
   else if (document.getElementById('panel-flashcard').style.display!=='none') checkAnswer();
 });
+
+// ════════════════════════════════════════════════════════
+// UI CHALLENGE GENERATOR
+// ════════════════════════════════════════════════════════
+const POOL = {
+  a: ["Mobile App","Web App","Tablet App","Smartwatch App","Desktop App"],
+  b: ["Fintech / Ngân hàng","Healthcare / Y tế","E-commerce / Mua sắm","Food Delivery / Ẩm thực","Edtech / Giáo dục","Travel / Du lịch","Fitness / Sức khỏe","Entertainment / Giải trí","Real Estate / Bất động sản","HR / Tuyển dụng","Logistics / Vận chuyển","Social Network","Gaming","Nông nghiệp / Agritech","Legal / Pháp lý","Insurance / Bảo hiểm","Pet Care / Thú cưng","Mental Health","Event Management","Marketplace / C2C"],
+  c: ["Tìm kiếm & bộ lọc nâng cao","So sánh sản phẩm / dịch vụ","Tracking theo thời gian thực","Bản đồ & địa điểm","Dashboard thống kê cá nhân","Màn hình đặt lịch / Booking","Review & Đánh giá chi tiết","Màn hình thanh toán","Giao diện chat / Nhắn tin","Feed & Khám phá nội dung","Mini-game / Quiz tương tác","Wishlist & Bộ sưu tập","Notification Center","Màn hình thành tích / Badge","Lịch sử & Activity Log","Cá nhân hóa trải nghiệm","Báo cáo & Insights","Màn hình scan / QR"],
+  d: ["Sinh viên đại học","Người đi làm bận rộn","Người cao tuổi (60+)","Freelancer","Phụ huynh","Doanh nhân startup","Gen Z (18–24)","Người mới định cư / nhập cư","Người dùng vùng nông thôn","Chuyên gia y tế","Giáo viên / Giảng viên","Người yêu thể thao"],
+  e: ["Minimalist & Clean","Dark Mode","Glassmorphism","Bold & Playful","Luxury / Premium","Retro / Vintage","Neumorphism","Brutalism","Gradient Rich","Nature-inspired / Organic","Cyberpunk / Futuristic","Pastel & Soft"],
+  f: ["Chỉ dùng 2 màu chủ đạo","Không dùng ảnh thật (chỉ illustration / icon)","Typography-driven — chữ là nhân vật chính","Không có icon — chỉ dùng text & shape","Accessibility-first (contrast cao, font ≥ 16px)","Chỉ dùng hình học cơ bản","Phải có empty state thật sự đẹp","Không dùng màu trắng làm nền","Phải thể hiện micro-animation concept","Chỉ dùng 1 font family duy nhất","Phải có data visualization","Bottom sheet là thành phần trung tâm"]
+};
+
+(function() {
+  const total = Object.values(POOL).reduce((acc, arr) => acc * arr.length, 1);
+  const el = document.getElementById('combo-count');
+  if (el) el.textContent = new Intl.NumberFormat('vi-VN').format(total);
+})();
+
+const locked = { a: false, b: false, c: false, d: false, e: false, f: false };
+
+function toggleLock(k) {
+  locked[k] = !locked[k];
+  const btn  = document.getElementById('lk-' + k);
+  const card = document.getElementById('card-' + k);
+  if (locked[k]) { btn.textContent = '🔒'; btn.classList.add('active'); card.classList.add('is-locked'); }
+  else { btn.textContent = '🔓'; btn.classList.remove('active'); card.classList.remove('is-locked'); }
+}
+
+function pickRnd(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function animateRoll(k, finalVal, duration, onDone) {
+  const el = document.getElementById('v-' + k);
+  el.classList.add('rolling');
+  const t0 = Date.now();
+  function tick() {
+    const elapsed = Date.now() - t0;
+    if (elapsed >= duration) {
+      el.classList.remove('rolling');
+      el.textContent = finalVal;
+      document.getElementById('o-' + k).textContent = finalVal;
+      onDone && onDone();
+      return;
+    }
+    el.textContent = pickRnd(POOL[k]);
+    setTimeout(tick, 40 + (elapsed / duration) * (elapsed / duration) * 140);
+  }
+  tick();
+}
+
+let rolling = false;
+function rollAll() {
+  if (rolling) return;
+  const keys = ['a','b','c','d','e','f'];
+  const unlocked = keys.filter(k => !locked[k]);
+  if (!unlocked.length) return;
+  rolling = true;
+  const rollBtn = document.getElementById('btn-roll');
+  rollBtn.disabled = true;
+  rollBtn.textContent = '🎲 Rolling…';
+  const finals = {};
+  keys.forEach(k => { finals[k] = locked[k] ? document.getElementById('v-' + k).textContent : pickRnd(POOL[k]); });
+  let done = 0;
+  unlocked.forEach((k, i) => {
+    setTimeout(() => {
+      animateRoll(k, finals[k], 900 + i * 120, () => {
+        done++;
+        if (done === unlocked.length) { rolling = false; rollBtn.disabled = false; rollBtn.textContent = '🎲 Random Challenge'; }
+      });
+    }, i * 70);
+  });
+}
+
+function copyIt() {
+  const v = k => document.getElementById('v-' + k).textContent;
+  const text = ['✦ TELOS UI Design Challenge','',`Hãy thiết kế màn hình "${v('c')}" cho ứng dụng ${v('b')} trên ${v('a')},`,`dành cho ${v('d')}, theo phong cách ${v('e')}.`,`Ràng buộc: ${v('f')}.`,'','academy.telos.vn'].join('\n');
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('btn-copy');
+    btn.textContent = '✅ Đã copy!'; btn.classList.add('ok');
+    setTimeout(() => { btn.textContent = '📋 Copy đề bài'; btn.classList.remove('ok'); }, 2200);
+  }).catch(() => alert('Copy thất bại — hãy thử chọn text thủ công.'));
+}
 </script>
 </body>
 </html>
