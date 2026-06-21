@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/adminCMS", "destination": "/adminCMS.html" },
     { "source": "/", "destination": "/TELOS_Knowledge_Graph.html" }
   ],
   "headers": [

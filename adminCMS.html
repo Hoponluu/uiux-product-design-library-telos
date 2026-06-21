@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin CMS — TELOS Library</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif; background: #F5F5F5; color: #111; font-size: 14px; }
+
+/* ── AUTH ── */
+#auth-screen {
+  position: fixed; inset: 0; background: #F5F5F5;
+  display: flex; align-items: center; justify-content: center; z-index: 999;
+}
+#auth-screen.hidden { display: none; }
+.auth-box { background: #fff; border: 1px solid rgba(0,0,0,0.1); border-radius: 16px; padding: 40px; width: 340px; text-align: center; box-shadow: 0 4px 24px rgba(0,0,0,0.07); }
+.auth-logo { font-size: 12px; color: rgba(0,0,0,0.35); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 20px; }
+.auth-box h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+.auth-box p { font-size: 13px; color: rgba(0,0,0,0.45); margin-bottom: 28px; }
+.auth-input {
+  width: 100%; padding: 12px 14px; border: 1px solid rgba(0,0,0,0.14);
+  border-radius: 10px; font-size: 15px; font-family: inherit; outline: none; margin-bottom: 12px;
+  transition: border-color 0.15s;
+}
+.auth-input:focus { border-color: #241775; }
+.auth-error { color: #EF4A81; font-size: 12px; margin-bottom: 10px; min-height: 18px; }
+.btn-primary {
+  width: 100%; background: #241775; color: #fff; border: none;
+  padding: 13px; border-radius: 10px; font-size: 14px; font-weight: 600;
+  cursor: pointer; font-family: inherit; transition: background 0.15s;
+}
+.btn-primary:hover { background: #3A2FBE; }
+
+/* ── LAYOUT ── */
+#app { display: none; min-height: 100vh; }
+#app.visible { display: flex; flex-direction: column; }
+#topbar {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(255,255,255,0.97); backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  display: flex; align-items: center; padding: 0 24px; height: 52px; gap: 4px;
+}
+#topbar .logo { font-size: 12px; color: rgba(0,0,0,0.35); letter-spacing: 0.04em; margin-right: 20px; }
+.nav-btn {
+  background: transparent; border: none; cursor: pointer; font-family: inherit;
+  font-size: 13px; color: rgba(0,0,0,0.45); padding: 6px 14px; border-radius: 6px;
+  transition: all 0.15s;
+}
+.nav-btn:hover { color: rgba(0,0,0,0.75); }
+.nav-btn.active { background: rgba(0,0,0,0.07); color: #111; font-weight: 500; }
+#topbar .spacer { flex: 1; }
+.btn-logout { font-size: 12px; color: rgba(0,0,0,0.35); background: none; border: none; cursor: pointer; padding: 6px 10px; border-radius: 6px; font-family: inherit; }
+.btn-logout:hover { color: rgba(0,0,0,0.65); background: rgba(0,0,0,0.05); }
+
+#main { flex: 1; padding: 28px 24px; max-width: 1100px; width: 100%; margin: 0 auto; }
+
+/* ── PANELS ── */
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* ── TOOLBAR ── */
+.toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+.toolbar h2 { font-size: 17px; font-weight: 700; flex: 1; }
+.search-input {
+  padding: 8px 12px; border: 1px solid rgba(0,0,0,0.12); border-radius: 8px;
+  font-size: 13px; font-family: inherit; outline: none; width: 220px; transition: border-color 0.15s;
+}
+.search-input:focus { border-color: rgba(0,0,0,0.35); }
+.btn-add {
+  background: #241775; color: #fff; border: none; padding: 8px 16px;
+  border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
+  font-family: inherit; transition: background 0.15s; white-space: nowrap;
+}
+.btn-add:hover { background: #3A2FBE; }
+.btn-export {
+  background: transparent; color: #241775; border: 1px solid #241775; padding: 8px 16px;
+  border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
+  font-family: inherit; transition: all 0.15s; white-space: nowrap;
+}
+.btn-export:hover { background: #241775; color: #fff; }
+
+/* ── TABLE ── */
+.table-wrap { background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; overflow: hidden; }
+table { width: 100%; border-collapse: collapse; }
+thead { background: rgba(0,0,0,0.03); }
+th { padding: 11px 16px; text-align: left; font-size: 11px; font-weight: 600; color: rgba(0,0,0,0.45); text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid rgba(0,0,0,0.07); white-space: nowrap; }
+td { padding: 12px 16px; border-bottom: 1px solid rgba(0,0,0,0.05); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(0,0,0,0.015); }
+.td-name { font-weight: 500; }
+.td-slug { font-size: 12px; color: rgba(0,0,0,0.4); font-family: monospace; }
+.td-desc { font-size: 12px; color: rgba(0,0,0,0.5); max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.td-url a { font-size: 12px; color: #2E7FC0; text-decoration: none; }
+.td-url a:hover { text-decoration: underline; }
+.td-url .no-url { font-size: 12px; color: rgba(0,0,0,0.25); }
+.badge {
+  display: inline-block; padding: 2px 8px; border-radius: 20px;
+  font-size: 11px; font-weight: 500;
+}
+.badge-tieu-chi  { background: #FEE3EC; color: #C4245E; }
+.badge-cong-cu   { background: #E0F3FB; color: #1A6E9E; }
+.badge-khai-niem { background: #FFF8E0; color: #8A6800; }
+.badge-vai-tro   { background: #EDE8FA; color: #3D2080; }
+.badge-sub       { background: rgba(0,0,0,0.05); color: rgba(0,0,0,0.55); }
+.badge-pub { background: #E0F7EA; color: #1A7A42; }
+.badge-draft { background: rgba(0,0,0,0.05); color: rgba(0,0,0,0.4); }
+
+.td-actions { white-space: nowrap; }
+.btn-edit, .btn-del {
+  background: none; border: none; cursor: pointer; font-size: 12px; padding: 4px 8px; border-radius: 6px; font-family: inherit; transition: all 0.15s;
+}
+.btn-edit { color: rgba(0,0,0,0.45); }
+.btn-edit:hover { color: #241775; background: rgba(36,23,117,0.07); }
+.btn-del { color: rgba(0,0,0,0.35); }
+.btn-del:hover { color: #EF4A81; background: rgba(239,74,129,0.07); }
+
+.empty-state { padding: 48px; text-align: center; color: rgba(0,0,0,0.35); font-size: 13px; }
+
+/* ── MODAL ── */
+.modal-backdrop {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35);
+  z-index: 500; backdrop-filter: blur(2px); align-items: center; justify-content: center;
+}
+.modal-backdrop.open { display: flex; }
+.modal {
+  background: #fff; border-radius: 16px; width: 540px; max-width: calc(100vw - 32px);
+  max-height: 90vh; overflow-y: auto; box-shadow: 0 8px 40px rgba(0,0,0,0.15);
+}
+.modal-header { padding: 24px 24px 0; display: flex; justify-content: space-between; align-items: center; }
+.modal-header h3 { font-size: 17px; font-weight: 700; }
+.modal-close { background: none; border: none; cursor: pointer; font-size: 20px; color: rgba(0,0,0,0.35); padding: 4px; border-radius: 6px; line-height: 1; }
+.modal-close:hover { color: #111; background: rgba(0,0,0,0.06); }
+.modal-body { padding: 20px 24px 24px; display: flex; flex-direction: column; gap: 16px; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group label { font-size: 12px; font-weight: 600; color: rgba(0,0,0,0.55); text-transform: uppercase; letter-spacing: 0.04em; }
+.form-control {
+  padding: 10px 12px; border: 1px solid rgba(0,0,0,0.14); border-radius: 8px;
+  font-size: 14px; font-family: inherit; outline: none; transition: border-color 0.15s; width: 100%;
+}
+.form-control:focus { border-color: #241775; }
+textarea.form-control { resize: vertical; min-height: 80px; line-height: 1.5; }
+select.form-control { cursor: pointer; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-hint { font-size: 11px; color: rgba(0,0,0,0.38); margin-top: 2px; }
+.modal-footer { padding: 0 24px 24px; display: flex; gap: 10px; justify-content: flex-end; }
+.btn-cancel {
+  background: transparent; border: 1px solid rgba(0,0,0,0.12); color: rgba(0,0,0,0.5);
+  padding: 9px 18px; border-radius: 8px; font-size: 13px; cursor: pointer; font-family: inherit; transition: all 0.15s;
+}
+.btn-cancel:hover { border-color: rgba(0,0,0,0.25); color: rgba(0,0,0,0.75); }
+.btn-save {
+  background: #241775; color: #fff; border: none; padding: 9px 20px;
+  border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: background 0.15s; min-width: 90px;
+}
+.btn-save:hover { background: #3A2FBE; }
+.btn-save:disabled { background: rgba(0,0,0,0.15); cursor: not-allowed; }
+
+/* ── TOAST ── */
+#toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: #111; color: #fff; padding: 11px 20px; border-radius: 10px;
+  font-size: 13px; z-index: 900; transition: transform 0.25s; white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+#toast.show { transform: translateX(-50%) translateY(0); }
+#toast.error { background: #EF4A81; }
+
+/* ── EXPORT PANEL ── */
+.export-card { background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 28px; max-width: 600px; }
+.export-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+.export-card p { font-size: 13px; color: rgba(0,0,0,0.5); line-height: 1.6; margin-bottom: 20px; }
+.export-preview {
+  background: #F5F5F5; border-radius: 8px; padding: 14px 16px;
+  font-size: 12px; font-family: monospace; color: rgba(0,0,0,0.65);
+  line-height: 1.7; margin-bottom: 20px; white-space: pre-wrap; word-break: break-all;
+}
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="auth-screen">
+  <div class="auth-box">
+    <div class="auth-logo">TELOS Academy</div>
+    <h2>Admin CMS</h2>
+    <p>Nhập mật khẩu để truy cập</p>
+    <input class="auth-input" type="password" id="auth-input" placeholder="Mật khẩu..." onkeydown="if(event.key==='Enter')doLogin()"/>
+    <div class="auth-error" id="auth-error"></div>
+    <button class="btn-primary" onclick="doLogin()">Đăng nhập</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div id="topbar">
+    <div class="logo">TELOS · Admin</div>
+    <button class="nav-btn active" onclick="switchPanel('concepts',this)">Khái niệm</button>
+    <button class="nav-btn" onclick="switchPanel('categories',this)">Category</button>
+    <button class="nav-btn" onclick="switchPanel('export',this)">Export MD</button>
+    <div class="spacer"></div>
+    <button class="btn-logout" onclick="doLogout()">Đăng xuất</button>
+  </div>
+  <div id="main">
+
+    <!-- CONCEPTS PANEL -->
+    <div class="panel active" id="panel-concepts">
+      <div class="toolbar">
+        <h2>Khái niệm <span id="concept-count" style="font-size:13px;font-weight:400;color:rgba(0,0,0,0.35)"></span></h2>
+        <input class="search-input" id="concept-search" type="text" placeholder="Tìm kiếm..." oninput="renderConceptsTable()"/>
+        <button class="btn-add" onclick="openConceptModal()">+ Thêm mới</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Tên</th>
+              <th>Category</th>
+              <th>Mô tả</th>
+              <th>URL</th>
+              <th>Trạng thái</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="concept-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CATEGORIES PANEL -->
+    <div class="panel" id="panel-categories">
+      <div class="toolbar">
+        <h2>Category <span id="cat-count" style="font-size:13px;font-weight:400;color:rgba(0,0,0,0.35)"></span></h2>
+        <button class="btn-add" onclick="openCatModal()">+ Thêm mới</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Tên</th>
+              <th>Slug</th>
+              <th>Cấp</th>
+              <th>Parent</th>
+              <th>Màu</th>
+              <th>Thứ tự</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="cat-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- EXPORT PANEL -->
+    <div class="panel" id="panel-export">
+      <div class="toolbar"><h2>Export Markdown</h2></div>
+      <div class="export-card">
+        <h3>Danh sách khái niệm theo ABC</h3>
+        <p>Export toàn bộ khái niệm đã published, sắp xếp A→Z, theo định dạng Markdown với link và mô tả.</p>
+        <div class="export-preview" id="export-preview">Đang tải preview...</div>
+        <button class="btn-add" onclick="downloadMD()">⬇ Tải file .md</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- CONCEPT MODAL -->
+<div class="modal-backdrop" id="concept-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="concept-modal-title">Thêm khái niệm</h3>
+      <button class="modal-close" onclick="closeConceptModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="c-id"/>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tên *</label>
+          <input class="form-control" id="c-name" type="text" placeholder="VD: Usability" oninput="autoSlug()"/>
+        </div>
+        <div class="form-group">
+          <label>Slug *</label>
+          <input class="form-control" id="c-slug" type="text" placeholder="VD: usability"/>
+          <div class="form-hint">Tự tạo từ tên, có thể sửa tay</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Category *</label>
+        <select class="form-control" id="c-category"></select>
+      </div>
+      <div class="form-group">
+        <label>Mô tả ngắn</label>
+        <textarea class="form-control" id="c-desc" placeholder="Mô tả ngắn xuất hiện trong tooltip và flashcard..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>URL bài viết</label>
+        <input class="form-control" id="c-url" type="url" placeholder="https://academy.telos.vn/..."/>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Node size</label>
+          <input class="form-control" id="c-size" type="number" value="8" min="4" max="20"/>
+          <div class="form-hint">Kích thước node trên graph (mặc định: 8)</div>
+        </div>
+        <div class="form-group">
+          <label>Trạng thái</label>
+          <select class="form-control" id="c-published">
+            <option value="true">Published</option>
+            <option value="false">Draft</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeConceptModal()">Huỷ</button>
+      <button class="btn-save" id="concept-save-btn" onclick="saveConcept()">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- CATEGORY MODAL -->
+<div class="modal-backdrop" id="cat-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="cat-modal-title">Thêm category</h3>
+      <button class="modal-close" onclick="closeCatModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="cat-id"/>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tên *</label>
+          <input class="form-control" id="cat-name" type="text" placeholder="VD: Công cụ UX" oninput="autoCatSlug()"/>
+        </div>
+        <div class="form-group">
+          <label>Slug *</label>
+          <input class="form-control" id="cat-slug" type="text" placeholder="VD: cong-cu"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Parent category</label>
+        <select class="form-control" id="cat-parent">
+          <option value="">— Root (cấp 0) —</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Màu (hex)</label>
+          <input class="form-control" id="cat-color" type="color" value="#241775" style="padding:6px;height:42px;cursor:pointer;"/>
+        </div>
+        <div class="form-group">
+          <label>Thứ tự</label>
+          <input class="form-control" id="cat-order" type="number" value="0" min="0"/>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeCatModal()">Huỷ</button>
+      <button class="btn-save" id="cat-save-btn" onclick="saveCat()">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════════════════
+// CONFIG — service_role for write access (admin only)
+// ════════════════════════════════════════════════════════
+const SB_URL     = 'https://vvpqhsglgtfwjklvlvuh.supabase.co';
+const SB_SERVICE = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2cHFoc2dsZ3Rmd2prbHZsdnVoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MjAyOTIwNCwiZXhwIjoyMDk3NjA1MjA0fQ.KDA7R8BcJ6WNwvxzwyUczUnlt-pX1Mk0HLB_d2l7Wq8';
+
+// Password hash (SHA-256 of your password)
+// Default password: telos@admin — change by replacing this hash
+const PASSWORD_HASH = 'b6c3582a074e8a0028c8c2c4c4d7f5e6b1a2d3e4f5c6b7a8d9e0f1a2b3c4d5e6';
+
+// ════════════════════════════════════════════════════════
+// AUTH
+// ════════════════════════════════════════════════════════
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+async function doLogin() {
+  const val = document.getElementById('auth-input').value;
+  if (!val) return;
+  const hash = await sha256(val);
+  if (hash === PASSWORD_HASH) {
+    sessionStorage.setItem('telos-admin', '1');
+    document.getElementById('auth-screen').classList.add('hidden');
+    document.getElementById('app').classList.add('visible');
+    loadAll();
+  } else {
+    document.getElementById('auth-error').textContent = 'Mật khẩu không đúng';
+    document.getElementById('auth-input').value = '';
+  }
+}
+
+function doLogout() {
+  sessionStorage.removeItem('telos-admin');
+  location.reload();
+}
+
+// Auto-login if session exists
+window.addEventListener('DOMContentLoaded', () => {
+  if (sessionStorage.getItem('telos-admin')) {
+    document.getElementById('auth-screen').classList.add('hidden');
+    document.getElementById('app').classList.add('visible');
+    loadAll();
+  }
+  document.getElementById('auth-input').focus();
+});
+
+// ════════════════════════════════════════════════════════
+// SUPABASE HELPERS
+// ════════════════════════════════════════════════════════
+const H = () => ({
+  'apikey': SB_SERVICE,
+  'Authorization': 'Bearer ' + SB_SERVICE,
+  'Content-Type': 'application/json',
+  'Prefer': 'return=representation',
+});
+
+async function sbGet(table, params = '') {
+  const r = await fetch(`${SB_URL}/rest/v1/${table}?${params}`, { headers: H() });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+async function sbInsert(table, data) {
+  const r = await fetch(`${SB_URL}/rest/v1/${table}`, { method: 'POST', headers: H(), body: JSON.stringify(data) });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+async function sbUpdate(table, id, data) {
+  const r = await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${id}`, { method: 'PATCH', headers: H(), body: JSON.stringify(data) });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+async function sbDelete(table, id) {
+  const r = await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${id}`, { method: 'DELETE', headers: H() });
+  if (!r.ok) throw new Error(await r.text());
+}
+
+// ════════════════════════════════════════════════════════
+// DATA
+// ════════════════════════════════════════════════════════
+let allCats = [], allConcepts = [];
+
+async function loadAll() {
+  try {
+    [allCats, allConcepts] = await Promise.all([
+      sbGet('categories', 'select=*&order=depth,sort_order'),
+      sbGet('concepts',   'select=*&order=name'),
+    ]);
+    renderConceptsTable();
+    renderCatsTable();
+    buildExportPreview();
+  } catch(e) {
+    toast('Lỗi tải dữ liệu: ' + e.message, true);
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// PANEL SWITCHING
+// ════════════════════════════════════════════════════════
+function switchPanel(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'export') buildExportPreview();
+}
+
+// ════════════════════════════════════════════════════════
+// CONCEPTS TABLE
+// ════════════════════════════════════════════════════════
+const CAT_BADGE_CLASS = {
+  'tieu-chi':'badge-tieu-chi','cong-cu':'badge-cong-cu','khai-niem':'badge-khai-niem','vai-tro':'badge-vai-tro'
+};
+
+function getRootSlug(catId) {
+  const cat = allCats.find(c => c.id === catId);
+  if (!cat) return '';
+  if (!cat.parent_id) return cat.slug;
+  return getRootSlug(cat.parent_id);
+}
+
+function getCatLabel(catId) {
+  const cat = allCats.find(c => c.id === catId);
+  return cat ? cat.name : '—';
+}
+
+function renderConceptsTable() {
+  const q = (document.getElementById('concept-search')?.value || '').toLowerCase();
+  const filtered = allConcepts.filter(c =>
+    c.name.toLowerCase().includes(q) ||
+    (c.description || '').toLowerCase().includes(q) ||
+    (c.slug || '').toLowerCase().includes(q)
+  );
+  document.getElementById('concept-count').textContent = `(${filtered.length} / ${allConcepts.length})`;
+
+  const tbody = document.getElementById('concept-tbody');
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="6" class="empty-state">Không tìm thấy kết quả</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(c => {
+    const rootSlug  = getRootSlug(c.category_id);
+    const badgeClass = CAT_BADGE_CLASS[rootSlug] || 'badge-sub';
+    const catLabel  = getCatLabel(c.category_id);
+    const urlCell   = c.url
+      ? `<a href="${c.url}" target="_blank" title="${c.url}">${new URL(c.url).pathname.slice(1,30)}…</a>`
+      : `<span class="no-url">—</span>`;
+    const pubBadge  = c.is_published
+      ? `<span class="badge badge-pub">Published</span>`
+      : `<span class="badge badge-draft">Draft</span>`;
+    return `<tr>
+      <td><div class="td-name">${c.name}</div><div class="td-slug">${c.slug}</div></td>
+      <td><span class="badge ${badgeClass}">${catLabel}</span></td>
+      <td class="td-desc" title="${c.description || ''}">${c.description || '—'}</td>
+      <td class="td-url">${urlCell}</td>
+      <td>${pubBadge}</td>
+      <td class="td-actions">
+        <button class="btn-edit" onclick='openConceptModal(${JSON.stringify(c)})'>Sửa</button>
+        <button class="btn-del"  onclick="deleteConcept('${c.id}','${c.name.replace(/'/g,"\\'")}')">Xoá</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════════════
+// CONCEPT MODAL
+// ════════════════════════════════════════════════════════
+function openConceptModal(concept = null) {
+  document.getElementById('concept-modal-title').textContent = concept ? 'Sửa khái niệm' : 'Thêm khái niệm';
+  document.getElementById('c-id').value        = concept?.id || '';
+  document.getElementById('c-name').value      = concept?.name || '';
+  document.getElementById('c-slug').value      = concept?.slug || '';
+  document.getElementById('c-desc').value      = concept?.description || '';
+  document.getElementById('c-url').value       = concept?.url || '';
+  document.getElementById('c-size').value      = concept?.node_size || 8;
+  document.getElementById('c-published').value = concept ? String(concept.is_published) : 'true';
+
+  // Build category select
+  const sel = document.getElementById('c-category');
+  sel.innerHTML = allCats.map(cat => {
+    const indent = '　'.repeat(cat.depth);
+    return `<option value="${cat.id}" ${concept?.category_id === cat.id ? 'selected' : ''}>${indent}${cat.name}</option>`;
+  }).join('');
+
+  document.getElementById('concept-modal').classList.add('open');
+  setTimeout(() => document.getElementById('c-name').focus(), 50);
+}
+
+function closeConceptModal() {
+  document.getElementById('concept-modal').classList.remove('open');
+}
+
+function autoSlug() {
+  if (document.getElementById('c-id').value) return; // don't overwrite on edit
+  const name = document.getElementById('c-name').value;
+  document.getElementById('c-slug').value = toSlug(name);
+}
+
+function toSlug(str) {
+  return str.toLowerCase()
+    .replace(/đ/g,'d')
+    .normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+}
+
+async function saveConcept() {
+  const name  = document.getElementById('c-name').value.trim();
+  const slug  = document.getElementById('c-slug').value.trim();
+  const catId = document.getElementById('c-category').value;
+  if (!name || !slug || !catId) { toast('Vui lòng điền đủ thông tin bắt buộc (*)', true); return; }
+
+  const btn = document.getElementById('concept-save-btn');
+  btn.disabled = true; btn.textContent = 'Đang lưu...';
+
+  const payload = {
+    name, slug,
+    category_id:  catId,
+    description:  document.getElementById('c-desc').value.trim() || null,
+    url:          document.getElementById('c-url').value.trim() || null,
+    node_size:    parseInt(document.getElementById('c-size').value) || 8,
+    is_published: document.getElementById('c-published').value === 'true',
+  };
+
+  try {
+    const id = document.getElementById('c-id').value;
+    if (id) {
+      await sbUpdate('concepts', id, payload);
+      const idx = allConcepts.findIndex(c => c.id === id);
+      if (idx >= 0) allConcepts[idx] = { ...allConcepts[idx], ...payload };
+      toast('Đã cập nhật khái niệm');
+    } else {
+      const [created] = await sbInsert('concepts', payload);
+      allConcepts.push(created);
+      allConcepts.sort((a,b) => a.name.localeCompare(b.name, 'vi'));
+      toast('Đã thêm khái niệm mới');
+    }
+    closeConceptModal();
+    renderConceptsTable();
+    buildExportPreview();
+  } catch(e) {
+    toast('Lỗi: ' + e.message, true);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Lưu';
+  }
+}
+
+async function deleteConcept(id, name) {
+  if (!confirm(`Xoá khái niệm "${name}"? Thao tác không thể hoàn tác.`)) return;
+  try {
+    await sbDelete('concepts', id);
+    allConcepts = allConcepts.filter(c => c.id !== id);
+    renderConceptsTable();
+    buildExportPreview();
+    toast(`Đã xoá "${name}"`);
+  } catch(e) {
+    toast('Lỗi: ' + e.message, true);
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// CATEGORIES TABLE
+// ════════════════════════════════════════════════════════
+function renderCatsTable() {
+  document.getElementById('cat-count').textContent = `(${allCats.length})`;
+  const tbody = document.getElementById('cat-tbody');
+  if (!allCats.length) {
+    tbody.innerHTML = `<tr><td colspan="7" class="empty-state">Chưa có category</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = allCats.map(cat => {
+    const parentName = cat.parent_id ? (allCats.find(c => c.id === cat.parent_id)?.name || '—') : '—';
+    const indent = '　'.repeat(cat.depth);
+    const colorDot = cat.color ? `<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${cat.color};vertical-align:middle;margin-right:6px;border:1px solid rgba(0,0,0,0.1)"></span>` : '';
+    return `<tr>
+      <td><div class="td-name">${indent}${cat.name}</div></td>
+      <td class="td-slug">${cat.slug}</td>
+      <td><span class="badge badge-sub">Cấp ${cat.depth}</span></td>
+      <td>${parentName}</td>
+      <td>${colorDot}${cat.color || '—'}</td>
+      <td>${cat.sort_order}</td>
+      <td class="td-actions">
+        <button class="btn-edit" onclick='openCatModal(${JSON.stringify(cat)})'>Sửa</button>
+        <button class="btn-del"  onclick="deleteCat('${cat.id}','${cat.name.replace(/'/g,"\\'")}')">Xoá</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════════════
+// CATEGORY MODAL
+// ════════════════════════════════════════════════════════
+function openCatModal(cat = null) {
+  document.getElementById('cat-modal-title').textContent = cat ? 'Sửa category' : 'Thêm category';
+  document.getElementById('cat-id').value    = cat?.id || '';
+  document.getElementById('cat-name').value  = cat?.name || '';
+  document.getElementById('cat-slug').value  = cat?.slug || '';
+  document.getElementById('cat-color').value = cat?.color || '#241775';
+  document.getElementById('cat-order').value = cat?.sort_order ?? 0;
+
+  const sel = document.getElementById('cat-parent');
+  sel.innerHTML = '<option value="">— Root (cấp 0) —</option>' +
+    allCats.filter(c => c.depth < 2 && c.id !== cat?.id).map(c =>
+      `<option value="${c.id}" ${cat?.parent_id === c.id ? 'selected' : ''}>${'　'.repeat(c.depth)}${c.name}</option>`
+    ).join('');
+
+  document.getElementById('cat-modal').classList.add('open');
+  setTimeout(() => document.getElementById('cat-name').focus(), 50);
+}
+
+function closeCatModal() {
+  document.getElementById('cat-modal').classList.remove('open');
+}
+
+function autoCatSlug() {
+  if (document.getElementById('cat-id').value) return;
+  document.getElementById('cat-slug').value = toSlug(document.getElementById('cat-name').value);
+}
+
+async function saveCat() {
+  const name  = document.getElementById('cat-name').value.trim();
+  const slug  = document.getElementById('cat-slug').value.trim();
+  if (!name || !slug) { toast('Vui lòng điền tên và slug', true); return; }
+
+  const btn = document.getElementById('cat-save-btn');
+  btn.disabled = true; btn.textContent = 'Đang lưu...';
+
+  const parentId = document.getElementById('cat-parent').value || null;
+  const parentCat = parentId ? allCats.find(c => c.id === parentId) : null;
+  const depth = parentCat ? parentCat.depth + 1 : 0;
+
+  const payload = {
+    name, slug,
+    parent_id:  parentId,
+    depth,
+    color:      document.getElementById('cat-color').value || null,
+    sort_order: parseInt(document.getElementById('cat-order').value) || 0,
+  };
+
+  try {
+    const id = document.getElementById('cat-id').value;
+    if (id) {
+      await sbUpdate('categories', id, payload);
+      const idx = allCats.findIndex(c => c.id === id);
+      if (idx >= 0) allCats[idx] = { ...allCats[idx], ...payload };
+      toast('Đã cập nhật category');
+    } else {
+      const [created] = await sbInsert('categories', payload);
+      allCats.push(created);
+      allCats.sort((a,b) => a.depth - b.depth || a.sort_order - b.sort_order);
+      toast('Đã thêm category mới');
+    }
+    closeCatModal();
+    renderCatsTable();
+  } catch(e) {
+    toast('Lỗi: ' + e.message, true);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Lưu';
+  }
+}
+
+async function deleteCat(id, name) {
+  const hasChildren = allConcepts.some(c => c.category_id === id) || allCats.some(c => c.parent_id === id);
+  if (hasChildren) { toast(`Không thể xoá — "${name}" đang có khái niệm hoặc subcategory liên kết`, true); return; }
+  if (!confirm(`Xoá category "${name}"?`)) return;
+  try {
+    await sbDelete('categories', id);
+    allCats = allCats.filter(c => c.id !== id);
+    renderCatsTable();
+    toast(`Đã xoá "${name}"`);
+  } catch(e) {
+    toast('Lỗi: ' + e.message, true);
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// EXPORT MARKDOWN
+// ════════════════════════════════════════════════════════
+function buildMDContent() {
+  const published = allConcepts
+    .filter(c => c.is_published)
+    .sort((a,b) => a.name.localeCompare(b.name, 'vi'));
+
+  return published.map(c => {
+    const catLabel = getCatLabel(c.category_id).toLowerCase();
+    const nameStr  = c.url ? `[${c.name}](${c.url})` : `**${c.name}**`;
+    const descStr  = c.description ? `: ${c.description}` : '';
+    return `- ${nameStr} *(${catLabel})*${descStr}`;
+  }).join('\n');
+}
+
+function buildExportPreview() {
+  const content = buildMDContent();
+  const lines = content.split('\n');
+  const preview = lines.slice(0, 6).join('\n') + (lines.length > 6 ? `\n… và ${lines.length - 6} khái niệm nữa` : '');
+  document.getElementById('export-preview').textContent = preview;
+}
+
+function downloadMD() {
+  const content = buildMDContent();
+  const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'telos-concepts.md';
+  a.click(); URL.revokeObjectURL(url);
+  toast('Đã tải file telos-concepts.md');
+}
+
+// ════════════════════════════════════════════════════════
+// TOAST
+// ════════════════════════════════════════════════════════
+let toastTimer;
+function toast(msg, isError = false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show' + (isError ? ' error' : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.className = ''; }, 3000);
+}
+
+// Close modals on backdrop click
+document.getElementById('concept-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeConceptModal();
+});
+document.getElementById('cat-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeCatModal();
+});
+</script>
+</body>
+</html>
