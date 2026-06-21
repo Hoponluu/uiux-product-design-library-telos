@@ -236,6 +236,114 @@ body.dark #loading { background: #090B1E; }
 body.dark .loading-text { color: rgba(255,255,255,0.35); }
 #mode-btn { margin-left: auto; font-size: 15px; padding: 5px 10px; opacity: 0.65; }
 #mode-btn:hover { opacity: 1; color: inherit !important; background: transparent !important; }
+
+/* ── GLOSSARY ────────────────────────────────────────────── */
+#panel-glossary {
+  position: fixed; top: 46px; left: 0; right: 0; bottom: 0;
+  display: none; overflow-y: auto; background: #F5F5F5;
+}
+#gl-wrap { max-width: 1080px; margin: 0 auto; padding: 28px 20px 60px; }
+
+/* Search bar */
+#gl-search-wrap { position: relative; margin-bottom: 28px; }
+#gl-search {
+  width: 100%; padding: 13px 18px 13px 44px;
+  background: #fff; border: 1px solid rgba(0,0,0,0.12);
+  border-radius: 12px; font-size: 15px; font-family: inherit;
+  outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+#gl-search:focus { border-color: #241775; box-shadow: 0 0 0 3px rgba(36,23,117,0.08); }
+#gl-search-icon {
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  color: rgba(0,0,0,0.3); font-size: 16px; pointer-events: none;
+}
+#gl-search-clear {
+  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer; color: rgba(0,0,0,0.3);
+  font-size: 18px; line-height: 1; padding: 2px; display: none;
+}
+#gl-search-clear:hover { color: rgba(0,0,0,0.6); }
+#gl-autocomplete {
+  position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+  background: #fff; border: 1px solid rgba(0,0,0,0.1); border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1); z-index: 50;
+  max-height: 280px; overflow-y: auto; display: none;
+}
+.ac-item {
+  padding: 10px 16px; cursor: pointer; display: flex; align-items: center; gap: 10px;
+  transition: background 0.1s;
+}
+.ac-item:hover, .ac-item.focused { background: rgba(36,23,117,0.05); }
+.ac-item-name { font-size: 14px; font-weight: 500; flex: 1; }
+.ac-item-name mark { background: none; color: #241775; font-weight: 700; }
+.ac-item-cat { font-size: 11px; color: rgba(0,0,0,0.4); white-space: nowrap; }
+.ac-empty { padding: 14px 16px; color: rgba(0,0,0,0.4); font-size: 13px; text-align: center; }
+
+/* Stats row */
+#gl-stats { font-size: 12px; color: rgba(0,0,0,0.4); margin-bottom: 24px; }
+#gl-stats span { color: #241775; font-weight: 600; }
+
+/* Letter section */
+.gl-letter-section { margin-bottom: 32px; }
+.gl-letter-header {
+  font-size: 22px; font-weight: 800; color: rgba(0,0,0,0.12);
+  border-bottom: 1px solid rgba(0,0,0,0.07); padding-bottom: 8px; margin-bottom: 14px;
+  letter-spacing: -0.01em;
+}
+
+/* Masonry grid */
+.gl-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+@media (max-width: 900px) { .gl-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 425px) { .gl-grid { grid-template-columns: 1fr; } }
+
+/* Concept card */
+.gl-card {
+  background: #fff; border: 1px solid rgba(0,0,0,0.07); border-radius: 12px;
+  padding: 14px 16px; transition: box-shadow 0.15s, border-color 0.15s;
+  break-inside: avoid;
+}
+.gl-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-color: rgba(0,0,0,0.12); }
+.gl-card.highlight { border-color: #241775; box-shadow: 0 0 0 3px rgba(36,23,117,0.12); }
+.gl-card-name {
+  font-size: 14px; font-weight: 600; color: #111; margin-bottom: 4px; line-height: 1.3;
+}
+.gl-card-name a { color: inherit; text-decoration: none; }
+.gl-card-name a:hover { color: #241775; text-decoration: underline; text-underline-offset: 3px; }
+.gl-card-name mark { background: none; color: #241775; }
+.gl-cat-badge {
+  display: inline-block; font-size: 10px; font-weight: 500;
+  padding: 2px 7px; border-radius: 20px; margin-bottom: 7px; letter-spacing: 0.02em;
+}
+.gl-desc { font-size: 12px; color: rgba(0,0,0,0.52); line-height: 1.55; }
+.gl-no-url { font-size: 11px; color: rgba(0,0,0,0.25); margin-top: 6px; }
+.gl-no-results { text-align: center; padding: 60px 20px; color: rgba(0,0,0,0.35); font-size: 14px; }
+
+/* Dark mode glossary */
+body.dark #panel-glossary { background: #090B1E; }
+body.dark #gl-search { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); color: #fff; box-shadow: none; }
+body.dark #gl-search::placeholder { color: rgba(255,255,255,0.25); }
+body.dark #gl-search:focus { border-color: rgba(255,255,255,0.3); box-shadow: 0 0 0 3px rgba(255,255,255,0.06); }
+body.dark #gl-search-icon { color: rgba(255,255,255,0.3); }
+body.dark #gl-search-clear { color: rgba(255,255,255,0.3); }
+body.dark #gl-autocomplete { background: #1C1F35; border-color: rgba(255,255,255,0.1); }
+body.dark .ac-item:hover, body.dark .ac-item.focused { background: rgba(255,255,255,0.06); }
+body.dark .ac-item-name { color: rgba(255,255,255,0.9); }
+body.dark .ac-item-cat { color: rgba(255,255,255,0.35); }
+body.dark #gl-stats { color: rgba(255,255,255,0.35); }
+body.dark .gl-letter-header { color: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.07); }
+body.dark .gl-card { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.07); }
+body.dark .gl-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.14); }
+body.dark .gl-card.highlight { border-color: #7B6BF5; box-shadow: 0 0 0 3px rgba(123,107,245,0.2); }
+body.dark .gl-card-name { color: rgba(255,255,255,0.9); }
+body.dark .gl-desc { color: rgba(255,255,255,0.45); }
+body.dark .gl-no-url { color: rgba(255,255,255,0.2); }
+body.dark .gl-no-results { color: rgba(255,255,255,0.3); }
 </style>
 </head>
 <body>
@@ -254,6 +362,7 @@ body.dark .loading-text { color: rgba(255,255,255,0.35); }
 <div id="tabs">
   <div class="logo">TELOS Academy</div>
   <button class="tab-btn active" onclick="switchTab('graph',this)">🗺 Knowledge Graph</button>
+  <button class="tab-btn" onclick="switchTab('glossary',this)">📖 Tra cứu</button>
   <button class="tab-btn" onclick="switchTab('flashcard',this)">🃏 Flashcard</button>
   <button id="mode-btn" class="tab-btn" onclick="toggleMode()" title="Light / Dark mode">🌙</button>
 </div>
@@ -314,6 +423,22 @@ body.dark .loading-text { color: rgba(255,255,255,0.35); }
       <div id="fc-result-msg"></div>
       <button class="fc-btn-primary" onclick="startGame()">Chơi lại</button>
     </div>
+  </div>
+</div>
+
+<!-- GLOSSARY PANEL -->
+<div id="panel-glossary">
+  <div id="gl-wrap">
+    <div id="gl-search-wrap">
+      <span id="gl-search-icon">🔍</span>
+      <input id="gl-search" type="text" placeholder="Tìm khái niệm... (VD: usability, prototype, persona)"
+        autocomplete="off" autocorrect="off" spellcheck="false"
+        oninput="onGlSearch()" onkeydown="onGlKey(event)" onfocus="showAC()" />
+      <button id="gl-search-clear" onclick="clearGlSearch()">×</button>
+      <div id="gl-autocomplete"></div>
+    </div>
+    <div id="gl-stats"></div>
+    <div id="gl-content"></div>
   </div>
 </div>
 
@@ -426,7 +551,7 @@ function buildGraphData(categories, concepts) {
 // STATE
 // ════════════════════════════════════════════════════════
 let isDark = false, graphInitialized = false, graphInstance = null;
-let gNodes = [], labelEls = {}, allConcepts = [];
+let gNodes = [], labelEls = {}, allConcepts = [], allCats = [];
 
 // ════════════════════════════════════════════════════════
 // BOOT
@@ -443,6 +568,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   try {
     const { categories, concepts } = await fetchData();
     allConcepts = concepts;
+    allCats = categories;
     const { nodes, links } = buildGraphData(categories, concepts);
     document.getElementById('loading').classList.add('hidden');
     initGraph(nodes, links);
@@ -460,6 +586,8 @@ function switchTab(tab, btn) {
   btn.classList.add('active');
   document.getElementById('panel-graph').style.display     = tab === 'graph'     ? 'block' : 'none';
   document.getElementById('panel-flashcard').style.display = tab === 'flashcard' ? 'block' : 'none';
+  document.getElementById('panel-glossary').style.display  = tab === 'glossary'  ? 'block' : 'none';
+  if (tab === 'glossary') { renderGlossary(); setTimeout(() => document.getElementById('gl-search').focus(), 80); }
 }
 
 // ════════════════════════════════════════════════════════
@@ -744,6 +872,201 @@ function showResult(){
     'Hoàn hảo! Bạn nắm vững toàn bộ thuật ngữ.'];
   document.getElementById('fc-result-msg').textContent=msgs[score]||msgs[0];
 }
+
+// ════════════════════════════════════════════════════════
+// GLOSSARY
+// ════════════════════════════════════════════════════════
+let glQuery = '', acFocusIdx = -1;
+
+const CAT_BADGE_BG = {
+  'tieu-chi':  { bg:'#FEE3EC', color:'#C4245E' },
+  'cong-cu':   { bg:'#E0F3FB', color:'#1A6E9E' },
+  'khai-niem': { bg:'#FFF8E0', color:'#8A6800' },
+  'vai-tro':   { bg:'#EDE8FA', color:'#3D2080' },
+};
+
+function getConceptMeta(con) {
+  const cat = allCats.find(c => c.id === con.category_id);
+  if (!cat) return { rootSlug: '', catLabel: '' };
+  let root = cat;
+  while (root.parent_id) {
+    const p = allCats.find(c => c.id === root.parent_id);
+    if (!p) break;
+    root = p;
+  }
+  // Build label: root label + subcategory if exists
+  const rootLabel = CAT_LABEL[root.slug] || root.name;
+  const subLabel  = (cat.depth > 0 && cat.id !== root.id) ? ` — ${cat.name}` : '';
+  return { rootSlug: root.slug, catLabel: rootLabel + subLabel };
+}
+
+function highlight(text, q) {
+  if (!q) return text;
+  const re = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi');
+  return text.replace(re, '<mark>$1</mark>');
+}
+
+function renderGlossary(q = glQuery) {
+  const query = q.trim().toLowerCase();
+  const filtered = allConcepts.filter(c =>
+    c.is_published && (
+      !query ||
+      c.name.toLowerCase().includes(query) ||
+      (c.description || '').toLowerCase().includes(query)
+    )
+  ).sort((a,b) => a.name.localeCompare(b.name, 'vi'));
+
+  // Stats
+  const total = allConcepts.filter(c => c.is_published).length;
+  document.getElementById('gl-stats').innerHTML = query
+    ? `Tìm thấy <span>${filtered.length}</span> / ${total} khái niệm cho "<strong>${q.trim()}</strong>"`
+    : `<span>${total}</span> khái niệm · Sắp xếp A → Z`;
+
+  const content = document.getElementById('gl-content');
+
+  if (!filtered.length) {
+    content.innerHTML = `<div class="gl-no-results">Không tìm thấy khái niệm nào phù hợp với "<strong>${q.trim()}</strong>"</div>`;
+    return;
+  }
+
+  // Group by first letter
+  const groups = {};
+  for (const con of filtered) {
+    const letter = con.name[0].toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'')[0];
+    const key = /[A-Z]/.test(letter) ? letter : '#';
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(con);
+  }
+
+  const letters = Object.keys(groups).sort((a,b) => a.localeCompare(b));
+
+  content.innerHTML = letters.map(letter => {
+    const cards = groups[letter].map(con => {
+      const { rootSlug, catLabel } = getConceptMeta(con);
+      const style = CAT_BADGE_BG[rootSlug] || { bg:'rgba(0,0,0,0.06)', color:'rgba(0,0,0,0.5)' };
+      const nameHL = highlight(con.name, q.trim());
+      const nameEl = con.url
+        ? `<a href="${con.url}" target="_blank">${nameHL}</a>`
+        : nameHL;
+      const descHL = con.description ? highlight(con.description, q.trim()) : '';
+      return `<div class="gl-card" id="gl-${con.slug}">
+        <div class="gl-cat-badge" style="background:${style.bg};color:${style.color}">${catLabel}</div>
+        <div class="gl-card-name">${nameEl}</div>
+        ${descHL ? `<div class="gl-desc">${descHL}</div>` : ''}
+        ${!con.url ? '<div class="gl-no-url">Chưa có bài viết</div>' : ''}
+      </div>`;
+    }).join('');
+
+    return `<div class="gl-letter-section">
+      <div class="gl-letter-header">${letter}</div>
+      <div class="gl-grid">${cards}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── Search input ─────────────────────────────────────────
+function onGlSearch() {
+  glQuery = document.getElementById('gl-search').value;
+  document.getElementById('gl-search-clear').style.display = glQuery ? 'block' : 'none';
+  renderGlossary(glQuery);
+  buildAC(glQuery);
+}
+
+function clearGlSearch() {
+  document.getElementById('gl-search').value = '';
+  glQuery = '';
+  document.getElementById('gl-search-clear').style.display = 'none';
+  hideAC();
+  renderGlossary('');
+  document.getElementById('gl-search').focus();
+}
+
+// ── Autocomplete ─────────────────────────────────────────
+function buildAC(q) {
+  const ac = document.getElementById('gl-autocomplete');
+  const query = q.trim().toLowerCase();
+  if (!query) { hideAC(); return; }
+
+  const matches = allConcepts
+    .filter(c => c.is_published && c.name.toLowerCase().includes(query))
+    .sort((a,b) => {
+      // Prioritize starts-with
+      const aStarts = a.name.toLowerCase().startsWith(query);
+      const bStarts = b.name.toLowerCase().startsWith(query);
+      if (aStarts && !bStarts) return -1;
+      if (!aStarts && bStarts) return 1;
+      return a.name.localeCompare(b.name, 'vi');
+    })
+    .slice(0, 8);
+
+  acFocusIdx = -1;
+
+  if (!matches.length) {
+    ac.innerHTML = `<div class="ac-empty">Không tìm thấy khái niệm nào</div>`;
+    ac.style.display = 'block';
+    return;
+  }
+
+  ac.innerHTML = matches.map((c, i) => {
+    const { catLabel } = getConceptMeta(c);
+    return `<div class="ac-item" data-slug="${c.slug}" data-idx="${i}"
+      onmousedown="selectAC(event,'${c.slug}','${c.name.replace(/'/g,"\\'")}')"
+      onmouseover="acFocusIdx=${i};highlightAC()">
+      <div class="ac-item-name">${highlight(c.name, q.trim())}</div>
+      <div class="ac-item-cat">${catLabel}</div>
+    </div>`;
+  }).join('');
+  ac.style.display = 'block';
+}
+
+function selectAC(e, slug, name) {
+  e.preventDefault();
+  document.getElementById('gl-search').value = name;
+  glQuery = name;
+  document.getElementById('gl-search-clear').style.display = 'block';
+  hideAC();
+  renderGlossary(name);
+  // Scroll to + highlight card
+  setTimeout(() => {
+    const card = document.getElementById('gl-' + slug);
+    if (card) {
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      card.classList.add('highlight');
+      setTimeout(() => card.classList.remove('highlight'), 2000);
+    }
+  }, 80);
+}
+
+function showAC() { if (glQuery.trim()) buildAC(glQuery); }
+function hideAC() { document.getElementById('gl-autocomplete').style.display = 'none'; acFocusIdx = -1; }
+
+function highlightAC() {
+  document.querySelectorAll('.ac-item').forEach((el, i) =>
+    el.classList.toggle('focused', i === acFocusIdx));
+}
+
+function onGlKey(e) {
+  const ac = document.getElementById('gl-autocomplete');
+  const items = ac.querySelectorAll('.ac-item');
+  if (ac.style.display === 'none' || !items.length) {
+    if (e.key === 'Escape') clearGlSearch();
+    return;
+  }
+  if (e.key === 'ArrowDown') {
+    e.preventDefault(); acFocusIdx = Math.min(acFocusIdx + 1, items.length - 1); highlightAC();
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault(); acFocusIdx = Math.max(acFocusIdx - 1, 0); highlightAC();
+  } else if (e.key === 'Enter' && acFocusIdx >= 0) {
+    items[acFocusIdx].dispatchEvent(new MouseEvent('mousedown'));
+  } else if (e.key === 'Escape') {
+    hideAC();
+  }
+}
+
+// Close autocomplete on outside click
+document.addEventListener('click', e => {
+  if (!document.getElementById('gl-search-wrap').contains(e.target)) hideAC();
+});
 
 document.addEventListener('keydown',e=>{
   if (e.key!=='Enter') return;
