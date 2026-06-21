@@ -34,6 +34,22 @@ body { background: #F5F5F5; font-family: -apple-system, BlinkMacSystemFont, 'Seg
 /* ── 3D GRAPH ────────────────────────────────────────────── */
 #graph-3d { width: 100%; height: 100%; }
 
+/* ── LOADING ─────────────────────────────────────────────── */
+#loading {
+  position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+  background: #F5F5F5; z-index: 500; flex-direction: column; gap: 12px;
+}
+#loading.hidden { display: none; }
+.loading-dot {
+  width: 8px; height: 8px; border-radius: 50%; background: #241775;
+  display: inline-block; margin: 0 3px;
+  animation: bounce 1.2s infinite ease-in-out both;
+}
+.loading-dot:nth-child(1) { animation-delay: -0.32s; }
+.loading-dot:nth-child(2) { animation-delay: -0.16s; }
+@keyframes bounce { 0%,80%,100%{transform:scale(0)} 40%{transform:scale(1)} }
+.loading-text { font-size: 13px; color: rgba(0,0,0,0.4); margin-top: 4px; }
+
 /* ── TOOLTIP ─────────────────────────────────────────────── */
 #tooltip {
   position: fixed; background: #fff;
@@ -67,38 +83,23 @@ body { background: #F5F5F5; font-family: -apple-system, BlinkMacSystemFont, 'Seg
 #node-modal.open { transform: translateY(0); }
 #modal-handle {
   width: 36px; height: 4px; border-radius: 2px;
-  background: rgba(0,0,0,0.15); margin: 12px auto 0;
-  flex-shrink: 0;
+  background: rgba(0,0,0,0.15); margin: 12px auto 0; flex-shrink: 0;
 }
-#modal-body {
-  padding: 16px 24px 24px; overflow-y: auto; flex: 1;
-}
+#modal-body { padding: 16px 24px 24px; overflow-y: auto; flex: 1; }
 #modal-badge {
   font-size: 11px; font-weight: 500; letter-spacing: 0.04em;
-  text-transform: uppercase; color: rgba(0,0,0,0.4);
-  margin-bottom: 6px;
+  text-transform: uppercase; color: rgba(0,0,0,0.4); margin-bottom: 6px;
 }
-#modal-title {
-  font-size: 20px; font-weight: 700; color: #111;
-  line-height: 1.3; margin-bottom: 10px;
-}
-#modal-desc {
-  font-size: 14px; color: rgba(0,0,0,0.58);
-  line-height: 1.65; margin-bottom: 24px;
-}
+#modal-title { font-size: 20px; font-weight: 700; color: #111; line-height: 1.3; margin-bottom: 10px; }
+#modal-desc { font-size: 14px; color: rgba(0,0,0,0.58); line-height: 1.65; margin-bottom: 24px; }
 #modal-btn {
-  display: block; width: 100%;
-  background: #241775; color: #fff;
-  font-size: 15px; font-weight: 600;
-  padding: 15px; border-radius: 12px;
-  border: none; cursor: pointer;
-  font-family: inherit; text-align: center;
-  text-decoration: none;
+  display: block; width: 100%; background: #241775; color: #fff;
+  font-size: 15px; font-weight: 600; padding: 15px; border-radius: 12px;
+  border: none; cursor: pointer; font-family: inherit; text-align: center; text-decoration: none;
 }
 #modal-btn:hover { background: #3A2FBE; }
 #modal-btn-none {
-  display: block; width: 100%;
-  background: rgba(0,0,0,0.05); color: rgba(0,0,0,0.4);
+  display: block; width: 100%; background: rgba(0,0,0,0.05); color: rgba(0,0,0,0.4);
   font-size: 14px; padding: 14px; border-radius: 12px;
   border: none; font-family: inherit; text-align: center;
 }
@@ -125,69 +126,42 @@ body { background: #F5F5F5; font-family: -apple-system, BlinkMacSystemFont, 'Seg
 
 /* ── FLASHCARD ──────────────────────────────────────────── */
 #fc-wrap { max-width: 520px; margin: 0 auto; padding: 32px 20px 60px; }
-#fc-header {
-  display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;
-}
+#fc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
 #fc-progress { color: rgba(0,0,0,0.45); font-size: 13px; }
 #fc-score { font-size: 13px; color: rgba(0,0,0,0.6); }
 #fc-score span { color: #1EA355; font-weight: 600; }
-
 .fc-card {
   width: 100%; height: 380px; border-radius: 24px;
-  position: relative; overflow: hidden; margin-bottom: 16px;
-  transform-origin: center center;
+  position: relative; overflow: hidden; margin-bottom: 16px; transform-origin: center center;
 }
-.fc-face {
-  position: absolute; inset: 0; padding: 32px;
-  display: flex; flex-direction: column;
-}
+.fc-face { position: absolute; inset: 0; padding: 32px; display: flex; flex-direction: column; }
 #fc-front  { opacity: 1; pointer-events: auto; }
 #fc-back   { opacity: 0; pointer-events: none; }
 .card-revealed #fc-front { opacity: 0; pointer-events: none; }
 .card-revealed #fc-back  { opacity: 1; pointer-events: auto; }
-
-.fc-front-desc {
-  font-size: 24px; font-weight: 700; color: rgba(255,255,255,0.95);
-  line-height: 1.4; flex: 1;
-}
-.fc-front-badge {
-  font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.55);
-  margin-top: auto; padding-top: 20px;
-}
-.fc-back-desc {
-  font-size: 14px; font-weight: 400; color: rgba(255,255,255,0.6);
-  line-height: 1.55;
-}
+.fc-front-desc { font-size: 24px; font-weight: 700; color: rgba(255,255,255,0.95); line-height: 1.4; flex: 1; }
+.fc-front-badge { font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.55); margin-top: auto; padding-top: 20px; }
+.fc-back-desc { font-size: 14px; font-weight: 400; color: rgba(255,255,255,0.6); line-height: 1.55; }
 .fc-back-answer-wrap { flex: 1; display: flex; align-items: center; }
 .fc-back-answer-link {
   font-size: 40px; font-weight: 700; color: #fff; line-height: 1.2;
   text-decoration: underline; text-underline-offset: 6px;
   text-decoration-thickness: 2px; cursor: pointer; word-break: break-word;
 }
-.fc-back-answer-text {
-  font-size: 40px; font-weight: 700; color: #fff; line-height: 1.2; word-break: break-word;
-}
-.fc-back-badge {
-  font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.55);
-  margin-top: auto; padding-top: 20px;
-}
+.fc-back-answer-text { font-size: 40px; font-weight: 700; color: #fff; line-height: 1.2; word-break: break-word; }
+.fc-back-badge { font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.55); margin-top: auto; padding-top: 20px; }
 .fc-card.group-khai-niem .fc-front-desc   { color: #241775; }
 .fc-card.group-khai-niem .fc-front-badge  { color: rgba(36,23,117,0.5); }
 .fc-card.group-khai-niem .fc-back-desc    { color: rgba(36,23,117,0.65); }
 .fc-card.group-khai-niem .fc-back-answer-link { color: #241775; text-decoration-color: #241775; }
 .fc-card.group-khai-niem .fc-back-answer-text { color: #241775; }
 .fc-card.group-khai-niem .fc-back-badge   { color: rgba(36,23,117,0.5); }
-
-#fc-verdict {
-  height: 22px; font-size: 13px; font-weight: 600;
-  margin-bottom: 14px; text-align: center; transition: opacity 0.2s;
-}
+#fc-verdict { height: 22px; font-size: 13px; font-weight: 600; margin-bottom: 14px; text-align: center; transition: opacity 0.2s; }
 #fc-input-area { display: flex; flex-direction: column; gap: 10px; }
 #fc-input {
-  width: 100%; background: #fff;
-  border: 1px solid rgba(0,0,0,0.14); border-radius: 12px;
-  color: #111; font-size: 16px; padding: 14px 16px; outline: none;
-  font-family: inherit; transition: border-color 0.15s;
+  width: 100%; background: #fff; border: 1px solid rgba(0,0,0,0.14);
+  border-radius: 12px; color: #111; font-size: 16px; padding: 14px 16px;
+  outline: none; font-family: inherit; transition: border-color 0.15s;
 }
 #fc-input:focus { border-color: rgba(0,0,0,0.35); }
 #fc-input::placeholder { color: rgba(0,0,0,0.28); }
@@ -201,19 +175,15 @@ body { background: #F5F5F5; font-family: -apple-system, BlinkMacSystemFont, 'Seg
 #fc-btn-skip {
   background: transparent; border: 1px solid rgba(0,0,0,0.12);
   color: rgba(0,0,0,0.4); font-size: 13px; padding: 14px 16px;
-  border-radius: 12px; cursor: pointer; font-family: inherit;
-  transition: all 0.15s; white-space: nowrap;
+  border-radius: 12px; cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap;
 }
 #fc-btn-skip:hover { color: rgba(0,0,0,0.7); border-color: rgba(0,0,0,0.25); }
 #fc-btn-next {
-  width: 100%; background: rgba(0,0,0,0.04);
-  border: 1px solid rgba(0,0,0,0.1); color: rgba(0,0,0,0.55);
-  font-size: 14px; font-weight: 500; padding: 14px;
-  border-radius: 12px; cursor: pointer; font-family: inherit;
-  display: none; transition: all 0.15s;
+  width: 100%; background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.1);
+  color: rgba(0,0,0,0.55); font-size: 14px; font-weight: 500; padding: 14px;
+  border-radius: 12px; cursor: pointer; font-family: inherit; display: none; transition: all 0.15s;
 }
 #fc-btn-next:hover { background: rgba(0,0,0,0.08); color: #111; }
-
 #fc-start, #fc-result { text-align: center; padding: 48px 0; }
 .fc-screen-title { color: #111; font-size: 22px; font-weight: 700; margin-bottom: 10px; }
 .fc-screen-sub { color: rgba(0,0,0,0.45); font-size: 14px; margin-bottom: 36px; line-height: 1.65; }
@@ -261,14 +231,24 @@ body.dark #modal-title { color: rgba(255,255,255,0.92); }
 body.dark #modal-desc { color: rgba(255,255,255,0.55); }
 body.dark #modal-handle { background: rgba(255,255,255,0.15); }
 body.dark #modal-btn-none { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.3); }
-/* Glow: canvas filter amplifies node colors in dark mode */
 body.dark #graph-3d canvas { filter: saturate(1.5) brightness(1.2); }
-/* Mode toggle button */
+body.dark #loading { background: #090B1E; }
+body.dark .loading-text { color: rgba(255,255,255,0.35); }
 #mode-btn { margin-left: auto; font-size: 15px; padding: 5px 10px; opacity: 0.65; }
 #mode-btn:hover { opacity: 1; color: inherit !important; background: transparent !important; }
 </style>
 </head>
 <body>
+
+<!-- LOADING -->
+<div id="loading">
+  <div>
+    <span class="loading-dot"></span>
+    <span class="loading-dot"></span>
+    <span class="loading-dot"></span>
+  </div>
+  <div class="loading-text">Đang tải dữ liệu...</div>
+</div>
 
 <!-- TABS -->
 <div id="tabs">
@@ -294,15 +274,11 @@ body.dark #graph-3d canvas { filter: saturate(1.5) brightness(1.2); }
 <!-- FLASHCARD PANEL -->
 <div id="panel-flashcard">
   <div id="fc-wrap">
-
-    <!-- Start -->
     <div id="fc-start">
       <div class="fc-screen-title">Flashcard — Ôn thuật ngữ UI/UX</div>
       <div class="fc-screen-sub">10 thẻ ngẫu nhiên từ kho thuật ngữ.<br>Đọc mô tả → đoán tên khái niệm → lật thẻ xem đáp án.</div>
       <button class="fc-btn-primary" onclick="startGame()">Bắt đầu →</button>
     </div>
-
-    <!-- Game -->
     <div id="fc-game" style="display:none">
       <div id="fc-header">
         <div id="fc-progress">Câu <span id="fc-cur">1</span> / 10</div>
@@ -332,15 +308,12 @@ body.dark #graph-3d canvas { filter: saturate(1.5) brightness(1.2); }
         <button id="fc-btn-next" onclick="nextCard()">Câu tiếp theo →</button>
       </div>
     </div>
-
-    <!-- Result -->
     <div id="fc-result" style="display:none">
       <div id="fc-result-score"></div>
       <div id="fc-result-label">/ 10 câu đúng</div>
       <div id="fc-result-msg"></div>
       <button class="fc-btn-primary" onclick="startGame()">Chơi lại</button>
     </div>
-
   </div>
 </div>
 
@@ -362,161 +335,146 @@ body.dark #graph-3d canvas { filter: saturate(1.5) brightness(1.2); }
 <script src="https://unpkg.com/3d-force-graph@1.73.4/dist/3d-force-graph.min.js"></script>
 <script>
 // ════════════════════════════════════════════════════════
+// CONFIG
+// ════════════════════════════════════════════════════════
+const SUPABASE_URL  = 'https://vvpqhsglgtfwjklvlvuh.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2cHFoc2dsZ3Rmd2prbHZsdnVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwMjkyMDQsImV4cCI6MjA5NzYwNTIwNH0.tpa9hfNxcdN_Fu67NLSdMGUbUUrvCGX9v4jDqqyC4JA';
+
+// ════════════════════════════════════════════════════════
 // COLORS
 // ════════════════════════════════════════════════════════
-const C      = { root:'#241775','tieu-chi':'#EF4A81','cong-cu':'#40B0E0','khai-niem':'#FFC845','vai-tro':'#462B8B' };
-const C_SUB  = { 'vai-tro':'#7B56BF' };
-const C_ART  = { 'tieu-chi':'#F7A0BE','cong-cu':'#9FD8F2','khai-niem':'#FFE49B','vai-tro':'#B39ED8' };
-const GROUP_LABEL = { 'tieu-chi':'Tiêu chí Product','cong-cu':'Công cụ UX','khai-niem':'Khái niệm','vai-tro':'Vai trò' };
+const CAT_COLOR = {
+  'tieu-chi':  '#EF4A81',
+  'cong-cu':   '#40B0E0',
+  'khai-niem': '#FFC845',
+  'vai-tro':   '#462B8B',
+};
+const CAT_COLOR_PASTEL = {
+  'tieu-chi':  '#F7A0BE',
+  'cong-cu':   '#9FD8F2',
+  'khai-niem': '#FFE49B',
+  'vai-tro':   '#B39ED8',
+};
+const CAT_LABEL = {
+  'tieu-chi':  'Tiêu chí Product',
+  'cong-cu':   'Công cụ UX',
+  'khai-niem': 'Khái niệm',
+  'vai-tro':   'Vai trò',
+};
 
 function nodeColor(d) {
-  if (d.type==='root') return C.root;
-  if (d.type==='category') return C[d.group]||'#555';
-  if (d.type==='subcategory') return C_SUB[d.group]||C[d.group]||'#555';
-  // Articles without URL get pastel (already lighter); with URL get full color
-  if (d.type==='article') return d.url ? (C[d.group]||'#aaa') : (C_ART[d.group]||'#ccc');
-  return C_ART[d.group]||'#aaa';
+  if (d.type === 'root')        return '#241775';
+  if (d.type === 'category')    return CAT_COLOR[d.group]        || '#555';
+  if (d.type === 'subcategory') return '#7B56BF';
+  if (d.type === 'article')     return d.url ? (CAT_COLOR[d.group] || '#aaa') : (CAT_COLOR_PASTEL[d.group] || '#ccc');
+  return '#aaa';
 }
 
 // ════════════════════════════════════════════════════════
-// DATA
+// FETCH FROM SUPABASE
 // ════════════════════════════════════════════════════════
-const nodes = [
-  {id:'root',label:'Thuật ngữ\nUI/UX Product',type:'root',group:'root',url:null,r:28},
-  {id:'tieu-chi', label:'Tiêu chí Product',type:'category',group:'tieu-chi', url:null,r:20},
-  {id:'cong-cu',  label:'Công cụ UX',       type:'category',group:'cong-cu',  url:null,r:20},
-  {id:'khai-niem',label:'Khái niệm',         type:'category',group:'khai-niem',url:null,r:20},
-  {id:'vai-tro',  label:'Vai trò',           type:'category',group:'vai-tro',  url:null,r:20},
-  {id:'vt-design',     label:'Design',     type:'subcategory',group:'vai-tro',url:null,r:13},
-  {id:'vt-product',    label:'Product',    type:'subcategory',group:'vai-tro',url:null,r:13},
-  {id:'vt-engineering',label:'Engineering',type:'subcategory',group:'vai-tro',url:null,r:13},
-  {id:'vt-business',   label:'Business',   type:'subcategory',group:'vai-tro',url:null,r:13},
-  {id:'vt-cross',      label:'Cross-role', type:'subcategory',group:'vai-tro',url:null,r:13},
-  // Tiêu chí Product
-  {id:'usability',   label:'Usability',   type:'article',group:'tieu-chi',url:'https://academy.telos.vn/usability-la-gi-ux-design/',r:8,desc:'Mức độ người dùng có thể dùng sản phẩm hiệu quả, hiệu suất, và hài lòng trong ngữ cảnh thực tế.'},
-  {id:'learnability',label:'Learnability',type:'article',group:'tieu-chi',url:'https://academy.telos.vn/learnability-la-gi-ux-design/',r:8,desc:'Mức độ người dùng mới có thể tự hoàn thành task cơ bản trong lần đầu tiếp xúc với sản phẩm.'},
-  {id:'mvp',label:'MVP',type:'article',group:'tieu-chi',url:'https://academy.telos.vn/mo-hinh-mvp-trong-hoc-ui-ux-hoc-cach-hoan-thanh/',r:8,desc:'Phiên bản sản phẩm tối giản đủ để ra mắt và thu thập phản hồi thực tế từ người dùng sớm nhất.'},
-  {id:'desirability',label:'Desirability',type:'article',group:'tieu-chi',url:'https://academy.telos.vn/desirability-la-gi/',r:8,desc:'Mức độ người dùng thực sự muốn sử dụng sản phẩm — một trong ba trụ cột đánh giá sản phẩm bền vững.'},
-  {id:'feasibility', label:'Feasibility', type:'article',group:'tieu-chi',url:'https://academy.telos.vn/feasibility-la-gi-product-design/',r:8,desc:'Mức độ một giải pháp có thể được xây dựng trong thực tế với ràng buộc kỹ thuật, thời gian, và nguồn lực hiện có.'},
-  {id:'viability',   label:'Viability',   type:'article',group:'tieu-chi',url:'https://academy.telos.vn/viability-la-gi-product-design/',r:8,desc:'Mức độ sản phẩm tạo ra giá trị bền vững cho doanh nghiệp — doanh thu, chi phí, và vị trí cạnh tranh dài hạn.'},
-  // Công cụ UX
-  {id:'ai-ux-pattern',label:'AI UX Pattern',type:'article',group:'cong-cu',url:'https://academy.telos.vn/ai-ux-pattern-la-gi/',r:8,desc:'Các mẫu thiết kế giao diện phổ biến khi tích hợp tính năng AI vào sản phẩm.'},
-  {id:'bieu-do-xuong-ca',label:'Biểu đồ Xương Cá',type:'article',group:'cong-cu',url:'https://academy.telos.vn/bieu-do-xuong-ca-la-gi/',r:8,desc:'Công cụ phân tích nguyên nhân gốc rễ của một vấn đề, hình dung dưới dạng xương cá.'},
-  {id:'cognitive-walkthrough',label:'Cognitive Walkthrough',type:'article',group:'cong-cu',url:'https://academy.telos.vn/phuong-phap-cognitive-walkthrough/',r:8,desc:'Phương pháp đánh giá UX từ chuyên gia, tập trung vào khả năng người dùng mới tự tìm ra cách dùng.'},
-  {id:'customer-journey-map',label:'Customer Journey Map',type:'article',group:'cong-cu',url:'https://academy.telos.vn/customer-journey-map-hanh-trinh-khach-hang/',r:8,desc:'Sơ đồ mô tả toàn bộ hành trình của khách hàng khi tương tác với sản phẩm hoặc dịch vụ.'},
-  {id:'design-system',label:'Design System',type:'article',group:'cong-cu',url:'https://academy.telos.vn/design-system-la-gi/',r:8,desc:'Bộ thư viện component, token, và guideline dùng chung để đảm bảo nhất quán trong thiết kế và code.'},
-  {id:'empathy-map',label:'Empathy Map',type:'article',group:'cong-cu',url:'https://academy.telos.vn/huong-dan-nguoi-moi-ve-empathy-map-la-gi/',r:8,desc:'Công cụ tổng hợp insight người dùng theo 4 chiều: nói, nghĩ, làm, và cảm nhận.'},
-  {id:'grid-system',label:'Grid System',type:'article',group:'cong-cu',url:'https://academy.telos.vn/grid-system-la-gi-vai-tro-trong-ui-ux/',r:8,desc:'Hệ thống lưới giúp sắp xếp các thành phần giao diện nhất quán, cân đối và dễ responsive.'},
-  {id:'heuristic-evaluation',label:'Heuristic Evaluation',type:'article',group:'cong-cu',url:'https://academy.telos.vn/phuong-phap-heuristic-evaluation/',r:8,desc:'Phương pháp đánh giá UX từ chuyên gia dựa trên 10 nguyên lý usability của Jakob Nielsen.'},
-  {id:'mockup',label:'Mockup',type:'article',group:'cong-cu',url:'https://academy.telos.vn/mockup-la-gi-huong-dan-toan-tap-cho-nguoi-moi/',r:8,desc:'Bản thiết kế tĩnh thể hiện giao diện gần với sản phẩm thật, dùng để review visual trước khi prototype.'},
-  {id:'portfolio',label:'Portfolio',type:'article',group:'cong-cu',url:'https://academy.telos.vn/product-designer-portfolio-gom-gi/',r:8,desc:'Hồ sơ năng lực của designer — tập hợp các case study thể hiện tư duy và quy trình thiết kế.'},
-  {id:'problem-statement',label:'Problem Statement',type:'article',group:'cong-cu',url:'https://academy.telos.vn/problem-statement-cach-xac-dinh-cho-nguoi-moi-hoc-ui-ux/',r:8,desc:'Câu phát biểu súc tích xác định đúng vấn đề người dùng cần giải quyết, làm nền cho toàn bộ thiết kế.'},
-  {id:'prototype',label:'Prototype',type:'article',group:'cong-cu',url:'https://academy.telos.vn/prototype-la-gi-video-huong-dan/',r:8,desc:'Phiên bản mô phỏng sản phẩm có tương tác, dùng để test ý tưởng trước khi đưa vào development.'},
-  {id:'pure',label:'PURE',type:'article',group:'cong-cu',url:'https://academy.telos.vn/pure-phuong-phap-danh-gia-ux-tu-chuyen-gia-google/',r:8,desc:'Phương pháp đánh giá UX từ chuyên gia của Google, cho điểm định lượng theo 3 chiều cho mỗi bước tương tác.'},
-  {id:'sitemap',label:'Sitemap',type:'article',group:'cong-cu',url:'https://academy.telos.vn/sitemap-la-gi/',r:8,desc:'Sơ đồ cấu trúc thông tin của một website hoặc app, thể hiện quan hệ phân cấp giữa các trang.'},
-  {id:'usability-testing',label:'Usability Testing',type:'article',group:'cong-cu',url:null,r:8,desc:'Phương pháp quan sát người dùng thực tế thực hiện task để phát hiện vấn đề mà expert review không thấy được.'},
-  {id:'user-flow',label:'User Flow',type:'article',group:'cong-cu',url:'https://academy.telos.vn/user-flow-dan-loi-nguoi-dung-trong-tung-tuong-tac/',r:8,desc:'Sơ đồ các bước người dùng thực hiện để hoàn thành một task cụ thể trong sản phẩm.'},
-  {id:'user-persona',label:'User Persona',type:'article',group:'cong-cu',url:'https://academy.telos.vn/user-persona-la-gi-cach-tao-ra-1-user-persona/',r:8,desc:'Hồ sơ người dùng đại diện được xây dựng từ dữ liệu research, dùng để định hướng quyết định thiết kế.'},
-  {id:'ux-flow',label:'UX Flow',type:'article',group:'cong-cu',url:'https://academy.telos.vn/hieu-dung-ve-cac-ux-flow-pho-bien-hay-gap/',r:8,desc:'Các loại flow phổ biến trong UX — onboarding, checkout, empty state — và cách thiết kế từng loại.'},
-  {id:'ux-pattern',label:'UX Pattern',type:'article',group:'cong-cu',url:'https://academy.telos.vn/ux-pattern-chia-khoa-tao-nen-trai-nghiem/',r:8,desc:'Giải pháp thiết kế đã được kiểm chứng cho các vấn đề giao diện lặp đi lặp lại.'},
-  // Khái niệm
-  {id:'accessibility',label:'Accessibility',type:'article',group:'khai-niem',url:'https://academy.telos.vn/hieu-ve-thiet-ke-trai-nghiem-accessibility/',r:8,desc:'Thiết kế để mọi người dùng — kể cả người khuyết tật — đều có thể sử dụng được sản phẩm.'},
-  {id:'agile',label:'Agile',type:'article',group:'khai-niem',url:'https://academy.telos.vn/waterfall-va-agile-la-gi/',r:8,desc:'Quy trình phát triển sản phẩm theo vòng lặp ngắn, linh hoạt, ưu tiên phản hồi nhanh hơn kế hoạch cố định.'},
-  {id:'bo-cuc-website',label:'Bố cục Website',type:'article',group:'khai-niem',url:'https://academy.telos.vn/bo-cuc-website-la-gi-mot-huong-dan-tu-tong-the-den-truc-quan/',r:8,desc:'Cách tổ chức và sắp xếp các thành phần trên trang web để dẫn dắt sự chú ý người dùng.'},
-  {id:'design-thinking',label:'Design Thinking',type:'article',group:'khai-niem',url:'https://academy.telos.vn/tu-duy-thiet-ke-human-centered-design/',r:8,desc:'Tư duy thiết kế lấy con người làm trung tâm, gồm 5 giai đoạn từ empathize đến test.'},
-  {id:'double-diamond',label:'Double Diamond',type:'article',group:'khai-niem',url:null,r:8,desc:'Mô hình quy trình thiết kế 4 giai đoạn — tìm đúng vấn đề trước, rồi mới tìm đúng giải pháp.'},
-  {id:'thiet-ke',label:'Thiết kế',type:'article',group:'khai-niem',url:'https://academy.telos.vn/khao-sat-y-niem-thiet-ke-la-gi/',r:8,desc:'Khảo sát ý niệm thiết kế là gì — vượt ra ngoài thẩm mỹ để giải quyết vấn đề có chủ đích.'},
-  {id:'ux-design',label:'UX Design',type:'article',group:'khai-niem',url:'https://academy.telos.vn/ux-design-khong-chi-la-button-ma-la-tu-duy-product/',r:8,desc:'Thiết kế trải nghiệm người dùng — tư duy giải quyết vấn đề toàn diện, không chỉ là thiết kế giao diện.'},
-  {id:'ux-research',label:'UX Research',type:'article',group:'khai-niem',url:'https://academy.telos.vn/ux-research-la-gi-tu-duy-hay-chuc-danh/',r:8,desc:'Nghiên cứu người dùng để hiểu hành vi, nhu cầu, và vấn đề — nền tảng của mọi quyết định thiết kế.'},
-  {id:'waterfall',label:'Waterfall',type:'article',group:'khai-niem',url:'https://academy.telos.vn/waterfall-va-agile-la-gi/',r:8,desc:'Quy trình phát triển tuyến tính theo từng giai đoạn cố định — đối lập với Agile về tính linh hoạt.'},
-  {id:'wireframe',label:'Wireframe',type:'article',group:'khai-niem',url:'https://academy.telos.vn/wireframe-khung-xuong-cua-thiet-ke/',r:8,desc:'Bản phác thảo khung giao diện tập trung vào cấu trúc và layout, chưa có màu sắc hay visual chi tiết.'},
-  // Vai trò
-  {id:'product-designer',label:'Product Designer',type:'article',group:'vai-tro',url:'https://academy.telos.vn/product-designer-la-gi-va-3-tu-duy/',r:8,desc:'Vai trò thiết kế toàn diện — từ research, UX, đến UI — với tư duy gắn liền mục tiêu sản phẩm.'},
-  {id:'uiux-designer',label:'UI/UX Designer',type:'article',group:'vai-tro',url:'https://academy.telos.vn/cong-viec-cua-ui-ux-designer/',r:8,desc:'Vai trò thiết kế tập trung vào giao diện và trải nghiệm người dùng — kết hợp tư duy UX và kỹ năng UI.'},
-  {id:'design-engineer',label:'UX Design Engineer',type:'article',group:'vai-tro',url:'https://academy.telos.vn/ux-design-engineer-la-gi/',r:8,desc:'Vai trò kết hợp tư duy UX, kỹ năng thiết kế và khả năng kỹ thuật để tự triển khai trải nghiệm chất lượng cao.'},
-  {id:'product-manager',label:'Product Manager',type:'article',group:'vai-tro',url:'https://academy.telos.vn/product-manager-pm-la-gi-product-team/',r:8,desc:'Người chịu trách nhiệm về định hướng và kết quả sản phẩm — xác định cần làm gì, tại sao, và theo thứ tự nào.'},
-  {id:'product-owner',label:'Product Owner',type:'article',group:'vai-tro',url:'https://academy.telos.vn/product-owner-po-la-gi/',r:8,desc:'Vai trò Scrum quản lý product backlog và ra quyết định ưu tiên cho từng sprint — cầu nối giữa business và team.'},
-  {id:'frontend-dev',label:'Frontend Developer',type:'article',group:'vai-tro',url:null,r:8,desc:'Developer phụ trách giao diện người dùng — người biến file Figma thành sản phẩm thực chạy trên browser.'},
-  {id:'backend-dev',label:'Backend Developer',type:'article',group:'vai-tro',url:null,r:8,desc:'Developer phụ trách logic, dữ liệu, và API phía server — nền tảng vận hành của mọi sản phẩm.'},
-  {id:'fullstack-dev',label:'Full-stack Developer',type:'article',group:'vai-tro',url:null,r:8,desc:'Developer có khả năng làm cả Frontend lẫn Backend — linh hoạt và phù hợp với team nhỏ cần tốc độ.'},
-  {id:'devops',label:'DevOps / Platform Eng.',type:'article',group:'vai-tro',url:null,r:8,desc:'Người xây dựng hạ tầng, pipeline deploy, và đảm bảo hệ thống vận hành ổn định và có thể mở rộng.'},
-  {id:'software-architect',label:'Software Architect',type:'article',group:'vai-tro',url:null,r:8,desc:'Người thiết kế kiến trúc tổng thể hệ thống — quyết định cách các thành phần được tổ chức và giao tiếp dài hạn.'},
-  {id:'business-analyst',label:'Business Analyst',type:'article',group:'vai-tro',url:'https://academy.telos.vn/business-analyst-ba-la-gi-product-team/',r:8,desc:'Người phân tích yêu cầu kinh doanh và dịch chúng thành đặc tả kỹ thuật cho team design và engineering.'},
-  {id:'freelancer',label:'Freelancer',type:'article',group:'vai-tro',url:'https://academy.telos.vn/cach-lam-freelance-thiet-ke-giao-dien/',r:8,desc:'Hình thức làm việc độc lập nhận dự án theo hợp đồng — cách vận hành, tìm client và định giá dịch vụ.'},
-  {id:'intern',label:'Intern',type:'article',group:'vai-tro',url:'https://academy.telos.vn/intern-ui-ux-nhung-cam-nang-khi-di-thuc-tap/',r:8,desc:'Góc nhìn thực tế về vai trò thực tập sinh UI/UX — kỳ vọng, cách chuẩn bị và tận dụng thời gian intern.'},
-  {id:'vi-tri-nganh',label:'Vị trí ngành UI/UX',type:'article',group:'vai-tro',url:'https://academy.telos.vn/tim-hieu-cac-vi-tri-trong-nganh-ui-ux-design/',r:8,desc:'Tổng quan các chức danh phổ biến trong ngành UI/UX và phạm vi công việc của từng vị trí.'},
-];
-
-const links = [
-  {source:'root',target:'tieu-chi',ltype:'root-cat'},{source:'root',target:'cong-cu',ltype:'root-cat'},
-  {source:'root',target:'khai-niem',ltype:'root-cat'},{source:'root',target:'vai-tro',ltype:'root-cat'},
-  {source:'vai-tro',target:'vt-design',ltype:'cat-sub'},{source:'vai-tro',target:'vt-product',ltype:'cat-sub'},
-  {source:'vai-tro',target:'vt-engineering',ltype:'cat-sub'},{source:'vai-tro',target:'vt-business',ltype:'cat-sub'},
-  {source:'vai-tro',target:'vt-cross',ltype:'cat-sub'},
-  {source:'tieu-chi',target:'usability'},{source:'tieu-chi',target:'learnability'},{source:'tieu-chi',target:'mvp'},
-  {source:'tieu-chi',target:'desirability'},{source:'tieu-chi',target:'feasibility'},{source:'tieu-chi',target:'viability'},
-  {source:'cong-cu',target:'ai-ux-pattern'},{source:'cong-cu',target:'bieu-do-xuong-ca'},
-  {source:'cong-cu',target:'cognitive-walkthrough'},{source:'cong-cu',target:'customer-journey-map'},
-  {source:'cong-cu',target:'design-system'},{source:'cong-cu',target:'empathy-map'},
-  {source:'cong-cu',target:'grid-system'},{source:'cong-cu',target:'heuristic-evaluation'},
-  {source:'cong-cu',target:'mockup'},{source:'cong-cu',target:'portfolio'},
-  {source:'cong-cu',target:'problem-statement'},{source:'cong-cu',target:'prototype'},
-  {source:'cong-cu',target:'pure'},{source:'cong-cu',target:'sitemap'},
-  {source:'cong-cu',target:'usability-testing'},{source:'cong-cu',target:'user-flow'},
-  {source:'cong-cu',target:'user-persona'},{source:'cong-cu',target:'ux-flow'},{source:'cong-cu',target:'ux-pattern'},
-  {source:'khai-niem',target:'accessibility'},{source:'khai-niem',target:'agile'},
-  {source:'khai-niem',target:'bo-cuc-website'},{source:'khai-niem',target:'design-thinking'},
-  {source:'khai-niem',target:'double-diamond'},{source:'khai-niem',target:'thiet-ke'},
-  {source:'khai-niem',target:'ux-design'},{source:'khai-niem',target:'ux-research'},
-  {source:'khai-niem',target:'waterfall'},{source:'khai-niem',target:'wireframe'},
-  {source:'vt-design',target:'product-designer'},{source:'vt-design',target:'uiux-designer'},
-  {source:'vt-design',target:'design-engineer'},
-  {source:'vt-product',target:'product-manager'},{source:'vt-product',target:'product-owner'},
-  {source:'vt-engineering',target:'frontend-dev'},{source:'vt-engineering',target:'backend-dev'},
-  {source:'vt-engineering',target:'fullstack-dev'},{source:'vt-engineering',target:'devops'},
-  {source:'vt-engineering',target:'software-architect'},
-  {source:'vt-business',target:'business-analyst'},
-  {source:'vt-cross',target:'freelancer'},{source:'vt-cross',target:'intern'},{source:'vt-cross',target:'vi-tri-nganh'},
-];
+async function fetchData() {
+  const h = { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON };
+  const [catRes, conRes] = await Promise.all([
+    fetch(`${SUPABASE_URL}/rest/v1/categories?select=*&order=sort_order`, { headers: h }),
+    fetch(`${SUPABASE_URL}/rest/v1/concepts?select=*&is_published=eq.true&order=name`, { headers: h }),
+  ]);
+  if (!catRes.ok || !conRes.ok) throw new Error('Supabase fetch failed');
+  return { categories: await catRes.json(), concepts: await conRes.json() };
+}
 
 // ════════════════════════════════════════════════════════
-// TAB SWITCHING
+// BUILD GRAPH DATA
+// ════════════════════════════════════════════════════════
+function buildGraphData(categories, concepts) {
+  const nodes = [], links = [];
+  const catById = Object.fromEntries(categories.map(c => [c.id, c]));
+
+  // Root
+  nodes.push({ id: 'root', label: 'UI/UX Product', type: 'root', group: 'root', url: null, r: 28 });
+
+  // Categories
+  for (const cat of categories) {
+    if (cat.depth === 0) {
+      nodes.push({ id: cat.slug, label: cat.name, type: 'category', group: cat.slug, url: null, r: 20 });
+      links.push({ source: 'root', target: cat.slug, ltype: 'root-cat' });
+    } else {
+      const parentSlug = catById[cat.parent_id]?.slug;
+      nodes.push({ id: cat.slug, label: cat.name, type: 'subcategory', group: parentSlug || cat.slug, url: null, r: 13 });
+      if (parentSlug) links.push({ source: parentSlug, target: cat.slug, ltype: 'cat-sub' });
+    }
+  }
+
+  // Concepts — walk up to find root category for coloring
+  for (const con of concepts) {
+    const cat = catById[con.category_id];
+    if (!cat) continue;
+    let rootCat = cat;
+    while (rootCat.parent_id && catById[rootCat.parent_id]) rootCat = catById[rootCat.parent_id];
+
+    nodes.push({
+      id: con.slug, label: con.name, type: 'article',
+      group: rootCat.slug, url: con.url, r: con.node_size || 8, desc: con.description,
+    });
+    links.push({ source: cat.slug, target: con.slug, ltype: 'art' });
+  }
+
+  return { nodes, links };
+}
+
+// ════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════
+let isDark = false, graphInitialized = false, graphInstance = null;
+let gNodes = [], labelEls = {}, allConcepts = [];
+
+// ════════════════════════════════════════════════════════
+// BOOT
+// ════════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', async () => {
+  try {
+    if (localStorage.getItem('telos-theme') === 'dark') {
+      isDark = true;
+      document.body.classList.add('dark');
+      document.getElementById('mode-btn').textContent = '☀️';
+    }
+  } catch(e) {}
+
+  try {
+    const { categories, concepts } = await fetchData();
+    allConcepts = concepts;
+    const { nodes, links } = buildGraphData(categories, concepts);
+    document.getElementById('loading').classList.add('hidden');
+    initGraph(nodes, links);
+  } catch(err) {
+    document.querySelector('.loading-text').textContent = 'Không tải được dữ liệu. Vui lòng thử lại.';
+    console.error(err);
+  }
+});
+
+// ════════════════════════════════════════════════════════
+// TABS
 // ════════════════════════════════════════════════════════
 function switchTab(tab, btn) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('panel-graph').style.display     = tab === 'graph'     ? 'block' : 'none';
   document.getElementById('panel-flashcard').style.display = tab === 'flashcard' ? 'block' : 'none';
-  if (tab === 'graph') initGraph();
 }
 
 // ════════════════════════════════════════════════════════
 // DARK MODE
 // ════════════════════════════════════════════════════════
-let isDark = false;
-let gNodes = [];
-let labelEls = {};
-
 function updateLabelColors(dark) {
   gNodes.forEach(n => {
     const el = labelEls[n.id];
     if (!el) return;
-    const isRoot = n.type === 'root';
-    const isCat  = n.type === 'category';
-    const isSub  = n.type === 'subcategory';
+    const isRoot = n.type==='root', isCat = n.type==='category', isSub = n.type==='subcategory';
     if (dark) {
-      el.style.color = isRoot
-        ? 'rgba(255,255,255,0.95)'
-        : isCat  ? 'rgba(255,255,255,0.9)'
-        : isSub  ? 'rgba(255,255,255,0.65)'
-        : n.url  ? 'rgba(255,255,255,0.72)' : 'rgba(255,255,255,0.28)';
+      el.style.color = isRoot ? 'rgba(255,255,255,0.95)' : isCat ? 'rgba(255,255,255,0.9)' : isSub ? 'rgba(255,255,255,0.65)' : n.url ? 'rgba(255,255,255,0.72)' : 'rgba(255,255,255,0.28)';
       el.style.textShadow = '0 1px 5px rgba(0,0,0,0.95),0 -1px 5px rgba(0,0,0,0.95)';
     } else {
-      el.style.color = isRoot
-        ? '#241775'
-        : isCat  ? '#111'
-        : isSub  ? 'rgba(0,0,0,0.72)'
-        : n.url  ? 'rgba(0,0,0,0.65)' : 'rgba(0,0,0,0.32)';
+      el.style.color = isRoot ? '#241775' : isCat ? '#111' : isSub ? 'rgba(0,0,0,0.72)' : n.url ? 'rgba(0,0,0,0.65)' : 'rgba(0,0,0,0.32)';
       el.style.textShadow = '0 1px 3px rgba(255,255,255,0.85),0 -1px 3px rgba(255,255,255,0.85)';
     }
   });
@@ -535,49 +493,27 @@ function toggleMode() {
   try { localStorage.setItem('telos-theme', isDark ? 'dark' : 'light'); } catch(e) {}
 }
 
-// Restore saved theme — runs after DOM is ready
-window.addEventListener('DOMContentLoaded', () => {
-  try {
-    if (localStorage.getItem('telos-theme') === 'dark') {
-      isDark = true;
-      document.body.classList.add('dark');
-      const btn = document.getElementById('mode-btn');
-      if (btn) btn.textContent = '☀️';
-    }
-  } catch(e) {}
-});
-
 // ════════════════════════════════════════════════════════
 // 3D GRAPH
 // ════════════════════════════════════════════════════════
-let graphInitialized = false;
-let graphInstance = null;
-
-function initGraph() {
+function initGraph(nodes, links) {
   if (graphInitialized) return;
   graphInitialized = true;
 
   const container = document.getElementById('graph-3d');
-  container.style.position = 'relative'; // needed for overlay
+  container.style.position = 'relative';
   const nodeById = Object.fromEntries(nodes.map(n => [n.id, n]));
   gNodes = nodes.map(n => ({ ...n }));
-  const gLinks   = links.map(l => ({ ...l }));
+  const gLinks = links.map(l => ({ ...l }));
 
   graphInstance = ForceGraph3D()(container)
-    .width(container.clientWidth)
-    .height(container.clientHeight)
+    .width(container.clientWidth).height(container.clientHeight)
     .backgroundColor(isDark ? '#090B1E' : '#F5F5F5')
     .showNavInfo(false)
     .graphData({ nodes: gNodes, links: gLinks })
-
-    // ── Nodes ────────────────────────────────────────────
     .nodeColor(n => nodeColor(n))
     .nodeVal(n => Math.pow(n.r, 3) / 100)
-    .nodeOpacity(0.92)
-    .nodeResolution(16)
-    .nodeLabel('')   // disable built-in tooltip (we use custom below)
-
-    // ── Links ────────────────────────────────────────────
+    .nodeOpacity(0.92).nodeResolution(16).nodeLabel('')
     .linkColor(l => {
       const sid = typeof l.source === 'object' ? l.source.id : l.source;
       const s = nodeById[sid];
@@ -585,15 +521,10 @@ function initGraph() {
     })
     .linkOpacity(0.4)
     .linkWidth(l => l.ltype === 'root-cat' ? 2.5 : l.ltype === 'cat-sub' ? 1.5 : 0.8)
-
-    // ── Interaction ───────────────────────────────────────
     .onNodeClick(n => {
       if (!n || n.type === 'root') return;
-      if (window.innerWidth < 768) {
-        openModal(n);
-      } else {
-        if (n.url) window.open(n.url, '_blank');
-      }
+      if (window.innerWidth < 768) openModal(n);
+      else if (n.url) window.open(n.url, '_blank');
     })
     .onNodeHover(n => {
       const tip = document.getElementById('tooltip');
@@ -602,31 +533,24 @@ function initGraph() {
         tip.innerHTML =
           `<div class="tip-title">${n.label}</div>` +
           (n.desc ? `<div class="tip-desc">${n.desc}</div>` : '') +
-          (n.url
-            ? `<div class="tip-link">Nhấp để mở bài viết →</div>`
-            : `<div class="tip-none">Chưa có bài viết</div>`);
+          (n.url ? `<div class="tip-link">Nhấp để mở bài viết →</div>` : `<div class="tip-none">Chưa có bài viết</div>`);
       } else {
         tip.style.opacity = '0';
       }
       container.style.cursor = (n && n.url) ? 'pointer' : 'default';
     });
 
-  // Mouse → tooltip position
   container.addEventListener('mousemove', e => {
     const tip = document.getElementById('tooltip');
     tip.style.left = (e.clientX + 16) + 'px';
     tip.style.top  = (e.clientY - 12) + 'px';
   });
 
-  // Tune physics
-  graphInstance.d3Force('link')
-    .distance(l => l.ltype === 'root-cat' ? 220 : l.ltype === 'cat-sub' ? 140 : 90);
-  graphInstance.d3Force('charge')
-    .strength(n => n.type === 'root' ? -800 : n.type === 'category' ? -400 : n.type === 'subcategory' ? -200 : -80);
-
+  graphInstance.d3Force('link').distance(l => l.ltype === 'root-cat' ? 220 : l.ltype === 'cat-sub' ? 140 : 90);
+  graphInstance.d3Force('charge').strength(n => n.type==='root' ? -800 : n.type==='category' ? -400 : n.type==='subcategory' ? -200 : -80);
   setTimeout(() => graphInstance.cameraPosition({ x: 0, y: 0, z: 520 }), 100);
 
-  // ── STAR FIELD (dark mode) ───────────────────────────
+  // Star field
   const starCanvas = document.createElement('canvas');
   starCanvas.id = 'star-canvas';
   starCanvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;opacity:0;transition:opacity 0.45s;';
@@ -636,164 +560,65 @@ function initGraph() {
     starCanvas.height = container.clientHeight || window.innerHeight;
     const ctx = starCanvas.getContext('2d');
     for (let i = 0; i < 200; i++) {
-      const x = Math.random() * starCanvas.width;
-      const y = Math.random() * starCanvas.height;
-      const r = Math.random() * 1.1 + 0.15;
-      const a = Math.random() * 0.55 + 0.12;
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(255,255,255,${a.toFixed(2)})`;
-      ctx.fill();
+      const x = Math.random()*starCanvas.width, y = Math.random()*starCanvas.height;
+      const r = Math.random()*1.1+0.15, a = Math.random()*0.55+0.12;
+      ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+      ctx.fillStyle = `rgba(255,255,255,${a.toFixed(2)})`; ctx.fill();
     }
   })();
   if (isDark) starCanvas.style.opacity = '1';
 
-  // ── CSS LABEL OVERLAY ────────────────────────────────
-  // Pure HTML labels positioned via manual 3D→2D matrix projection
-  // No Three.js namespace required — uses camera matrices directly
+  // CSS label overlay
   const overlay = document.createElement('div');
   overlay.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden;z-index:10;';
   container.appendChild(overlay);
-
   labelEls = {};
   nodes.forEach(n => {
     const el = document.createElement('div');
     el.textContent = n.type === 'root' ? 'UI/UX Product' : n.label;
-
-    const isRoot = n.type === 'root';
-    const isCat  = n.type === 'category';
-    const isSub  = n.type === 'subcategory';
-    const isArt  = n.type === 'article';
-
+    const isRoot=n.type==='root', isCat=n.type==='category', isSub=n.type==='subcategory';
     el.style.cssText = [
-      'position:absolute',
-      'pointer-events:none',
-      'white-space:nowrap',
-      'transform:translateY(-50%)',
+      'position:absolute','pointer-events:none','white-space:nowrap','transform:translateY(-50%)',
       "font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
-      `font-size:${isRoot ? '12' : isCat ? '11' : isSub ? '10' : '9'}px`,
-      `font-weight:${(isRoot || isCat) ? '600' : '400'}`,
-      `color:${isRoot
-        ? '#241775'
-        : isCat
-          ? '#111'
-          : isSub
-            ? 'rgba(0,0,0,0.72)'
-            : n.url ? 'rgba(0,0,0,0.65)' : 'rgba(0,0,0,0.32)'}`,
+      `font-size:${isRoot?'12':isCat?'11':isSub?'10':'9'}px`,
+      `font-weight:${(isRoot||isCat)?'600':'400'}`,
+      `color:${isRoot?'#241775':isCat?'#111':isSub?'rgba(0,0,0,0.72)':n.url?'rgba(0,0,0,0.65)':'rgba(0,0,0,0.32)'}`,
       'text-shadow:0 1px 3px rgba(255,255,255,0.85),0 -1px 3px rgba(255,255,255,0.85)',
-      'opacity:0',
-      'transition:opacity 0.1s',
+      'opacity:0','transition:opacity 0.1s',
     ].join(';');
-
     overlay.appendChild(el);
     labelEls[n.id] = el;
   });
-
-  // Apply correct colors if starting in dark mode
   if (isDark) updateLabelColors(true);
 
-  // Manual 4×4 matrix projection — no THREE namespace needed
-  function project3D(x, y, z, cam) {
-    const m = cam.matrixWorldInverse.elements;
-    const p = cam.projectionMatrix.elements;
-    // View space
-    const vx = m[0]*x + m[4]*y + m[8]*z  + m[12];
-    const vy = m[1]*x + m[5]*y + m[9]*z  + m[13];
-    const vz = m[2]*x + m[6]*y + m[10]*z + m[14];
-    const vw = m[3]*x + m[7]*y + m[11]*z + m[15];
-    // Clip space
-    const cx = p[0]*vx + p[4]*vy + p[8]*vz  + p[12]*vw;
-    const cy = p[1]*vx + p[5]*vy + p[9]*vz  + p[13]*vw;
-    const cz = p[2]*vx + p[6]*vy + p[10]*vz + p[14]*vw;
-    const cw = p[3]*vx + p[7]*vy + p[11]*vz + p[15]*vw;
-    if (cw < 0.001) return null; // behind camera
-    const ndcZ = cz / cw;
-    if (ndcZ < -1 || ndcZ > 1) return null; // outside near/far planes
-    return { x: (cx/cw + 1) / 2, y: (-cy/cw + 1) / 2 };
+  function project3D(x,y,z,cam) {
+    const m=cam.matrixWorldInverse.elements, p=cam.projectionMatrix.elements;
+    const vx=m[0]*x+m[4]*y+m[8]*z+m[12], vy=m[1]*x+m[5]*y+m[9]*z+m[13];
+    const vz=m[2]*x+m[6]*y+m[10]*z+m[14], vw=m[3]*x+m[7]*y+m[11]*z+m[15];
+    const cx=p[0]*vx+p[4]*vy+p[8]*vz+p[12]*vw, cy=p[1]*vx+p[5]*vy+p[9]*vz+p[13]*vw;
+    const cz=p[2]*vx+p[6]*vy+p[10]*vz+p[14]*vw, cw=p[3]*vx+p[7]*vy+p[11]*vz+p[15]*vw;
+    if (cw<0.001) return null;
+    const ndcZ=cz/cw; if (ndcZ<-1||ndcZ>1) return null;
+    return { x:(cx/cw+1)/2, y:(-cy/cw+1)/2 };
   }
 
-  // Named function so both hooks can call it
   function updateLabels() {
-    const cam = graphInstance.camera();
-    const W   = container.clientWidth;
-    const H   = container.clientHeight;
-
+    const cam=graphInstance.camera(), W=container.clientWidth, H=container.clientHeight;
     gNodes.forEach(n => {
-      const el = labelEls[n.id];
-      if (!el || n.x === undefined) { if (el) el.style.opacity = '0'; return; }
-
-      const pos = project3D(n.x, n.y, n.z, cam);
-      if (!pos) { el.style.opacity = '0'; return; }
-
-      const sx = pos.x * W;
-      const sy = pos.y * H;
-      if (sx < -100 || sx > W + 100 || sy < -20 || sy > H + 20) {
-        el.style.opacity = '0'; return;
-      }
-
-      el.style.opacity = '1';
-      el.style.left = (sx + 10) + 'px';
-      el.style.top  = sy + 'px';
+      const el=labelEls[n.id];
+      if (!el||n.x===undefined){if(el)el.style.opacity='0';return;}
+      const pos=project3D(n.x,n.y,n.z,cam);
+      if (!pos){el.style.opacity='0';return;}
+      const sx=pos.x*W, sy=pos.y*H;
+      if (sx<-100||sx>W+100||sy<-20||sy>H+20){el.style.opacity='0';return;}
+      el.style.opacity='1'; el.style.left=(sx+10)+'px'; el.style.top=sy+'px';
     });
   }
 
-  // Fire during simulation ticks
   graphInstance.onEngineTick(updateLabels);
-
-  // Fire on camera move (drag/zoom after simulation settles)
   graphInstance.controls().addEventListener('change', updateLabels);
 }
 
-// ════════════════════════════════════════════════════════
-// MOBILE MODAL
-// ════════════════════════════════════════════════════════
-function openModal(n) {
-  const backdrop = document.getElementById('node-modal-backdrop');
-  const modal    = document.getElementById('node-modal');
-  const badge    = document.getElementById('modal-badge');
-  const title    = document.getElementById('modal-title');
-  const desc     = document.getElementById('modal-desc');
-  const btn      = document.getElementById('modal-btn');
-  const btnNone  = document.getElementById('modal-btn-none');
-
-  badge.textContent = GROUP_LABEL[n.group] || n.group || '';
-  badge.style.color = nodeColor(n);
-  title.textContent = n.label;
-  desc.textContent  = n.desc || '';
-  desc.style.display = n.desc ? 'block' : 'none';
-
-  if (n.url) {
-    btn.href        = n.url;
-    btn.textContent = 'Xem full bài viết →';
-    btn.style.display    = 'block';
-    btnNone.style.display = 'none';
-  } else {
-    btn.style.display    = 'none';
-    btnNone.style.display = 'block';
-  }
-
-  backdrop.classList.add('open');
-  requestAnimationFrame(() => modal.classList.add('open'));
-}
-
-function closeModal() {
-  const backdrop = document.getElementById('node-modal-backdrop');
-  const modal    = document.getElementById('node-modal');
-  modal.classList.remove('open');
-  setTimeout(() => backdrop.classList.remove('open'), 300);
-}
-
-// Swipe down to close
-(function () {
-  let startY = 0;
-  const modal = document.getElementById('node-modal');
-  modal.addEventListener('touchstart', e => { startY = e.touches[0].clientY; }, { passive: true });
-  modal.addEventListener('touchend',   e => {
-    if (e.changedTouches[0].clientY - startY > 60) closeModal();
-  }, { passive: true });
-})();
-
-window.addEventListener('load', initGraph);
 window.addEventListener('resize', () => {
   if (!graphInstance) return;
   const c = document.getElementById('graph-3d');
@@ -801,135 +626,130 @@ window.addEventListener('resize', () => {
 });
 
 // ════════════════════════════════════════════════════════
+// MOBILE MODAL
+// ════════════════════════════════════════════════════════
+function openModal(n) {
+  const badge=document.getElementById('modal-badge'), title=document.getElementById('modal-title');
+  const desc=document.getElementById('modal-desc'), btn=document.getElementById('modal-btn');
+  const btnNone=document.getElementById('modal-btn-none');
+  badge.textContent=CAT_LABEL[n.group]||n.group||''; badge.style.color=nodeColor(n);
+  title.textContent=n.label; desc.textContent=n.desc||'';
+  desc.style.display=n.desc?'block':'none';
+  if (n.url){btn.href=n.url;btn.textContent='Xem full bài viết →';btn.style.display='block';btnNone.style.display='none';}
+  else{btn.style.display='none';btnNone.style.display='block';}
+  document.getElementById('node-modal-backdrop').classList.add('open');
+  requestAnimationFrame(() => document.getElementById('node-modal').classList.add('open'));
+}
+function closeModal() {
+  document.getElementById('node-modal').classList.remove('open');
+  setTimeout(() => document.getElementById('node-modal-backdrop').classList.remove('open'), 300);
+}
+(function(){
+  let startY=0;
+  const modal=document.getElementById('node-modal');
+  modal.addEventListener('touchstart',e=>{startY=e.touches[0].clientY;},{passive:true});
+  modal.addEventListener('touchend',e=>{if(e.changedTouches[0].clientY-startY>60)closeModal();},{passive:true});
+})();
+
+// ════════════════════════════════════════════════════════
 // FLASHCARD
 // ════════════════════════════════════════════════════════
-let deck = [], cur = 0, score = 0;
+let deck=[], cur=0, score=0;
 
-function normalize(s) {
-  return s.toLowerCase().replace(/đ/gi, 'd')
-    .normalize('NFD').replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
+function normalize(s){
+  return s.toLowerCase().replace(/đ/gi,'d')
+    .normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/[^a-z0-9\s]/g,'').replace(/\s+/g,' ').trim();
 }
-function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
+function shuffle(arr){return [...arr].sort(()=>Math.random()-0.5);}
 
-function startGame() {
-  const pool = nodes.filter(n => n.type === 'article' && n.desc);
-  deck = shuffle(pool).slice(0, 10);
-  cur = 0; score = 0;
-  document.getElementById('fc-start').style.display  = 'none';
-  document.getElementById('fc-result').style.display = 'none';
-  document.getElementById('fc-game').style.display   = 'block';
+function getRootGroup(con){
+  const node=gNodes.find(n=>n.id===con.slug);
+  return node?node.group:'khai-niem';
+}
+
+function startGame(){
+  const pool=allConcepts.filter(n=>n.description);
+  deck=shuffle(pool).slice(0,10); cur=0; score=0;
+  document.getElementById('fc-start').style.display='none';
+  document.getElementById('fc-result').style.display='none';
+  document.getElementById('fc-game').style.display='block';
   renderCard();
 }
 
-function renderCard() {
-  const card   = deck[cur];
-  const col    = C[card.group] || '#555';
-  const cardEl = document.getElementById('fc-card');
-
-  document.getElementById('fc-cur').textContent = cur + 1;
-  document.getElementById('fc-pts').textContent = score;
-
-  cardEl.style.transition = 'none';
-  cardEl.style.transform  = 'scaleX(1)';
-  cardEl.classList.remove('card-revealed', 'group-khai-niem');
+function renderCard(){
+  const card=deck[cur], group=getRootGroup(card), col=CAT_COLOR[group]||'#555';
+  const cardEl=document.getElementById('fc-card');
+  document.getElementById('fc-cur').textContent=cur+1;
+  document.getElementById('fc-pts').textContent=score;
+  cardEl.style.transition='none'; cardEl.style.transform='scaleX(1)';
+  cardEl.classList.remove('card-revealed','group-khai-niem');
   void cardEl.offsetHeight;
-
-  cardEl.style.background = col;
-  if (card.group === 'khai-niem') cardEl.classList.add('group-khai-niem');
-
-  document.getElementById('fc-desc-front').textContent  = card.desc;
-  document.getElementById('fc-badge-front').textContent = GROUP_LABEL[card.group] || '';
-  document.getElementById('fc-desc-back').textContent   = card.desc;
-  document.getElementById('fc-badge-back').textContent  = GROUP_LABEL[card.group] || '';
-
-  const linkEl = document.getElementById('fc-answer-link');
-  const textEl = document.getElementById('fc-answer-text');
-  if (card.url) {
-    linkEl.textContent  = card.label + ' →';
-    linkEl.href         = card.url;
-    linkEl.style.display = 'block';
-    textEl.style.display = 'none';
-  } else {
-    textEl.textContent   = card.label;
-    textEl.style.display = 'block';
-    linkEl.style.display = 'none';
-  }
-
-  document.getElementById('fc-verdict').textContent = '';
-  document.getElementById('fc-verdict').style.color = '';
-  document.getElementById('fc-input').style.display  = 'block';
-  document.getElementById('fc-input').value          = '';
-  document.getElementById('fc-actions').style.display = 'flex';
-  document.getElementById('fc-btn-next').style.display = 'none';
-  setTimeout(() => document.getElementById('fc-input').focus(), 50);
+  cardEl.style.background=col;
+  if (group==='khai-niem') cardEl.classList.add('group-khai-niem');
+  document.getElementById('fc-desc-front').textContent=card.description;
+  document.getElementById('fc-badge-front').textContent=CAT_LABEL[group]||'';
+  document.getElementById('fc-desc-back').textContent=card.description;
+  document.getElementById('fc-badge-back').textContent=CAT_LABEL[group]||'';
+  const linkEl=document.getElementById('fc-answer-link'), textEl=document.getElementById('fc-answer-text');
+  if (card.url){linkEl.textContent=card.name+' →';linkEl.href=card.url;linkEl.style.display='block';textEl.style.display='none';}
+  else{textEl.textContent=card.name;textEl.style.display='block';linkEl.style.display='none';}
+  document.getElementById('fc-verdict').textContent='';
+  document.getElementById('fc-verdict').style.color='';
+  document.getElementById('fc-input').style.display='block';
+  document.getElementById('fc-input').value='';
+  document.getElementById('fc-actions').style.display='flex';
+  document.getElementById('fc-btn-next').style.display='none';
+  setTimeout(()=>document.getElementById('fc-input').focus(),50);
 }
 
-function flip(correct) {
-  const cardEl = document.getElementById('fc-card');
-
-  document.getElementById('fc-input').style.display   = 'none';
-  document.getElementById('fc-actions').style.display = 'none';
-  document.getElementById('fc-btn-next').style.display = 'block';
-
-  const vEl = document.getElementById('fc-verdict');
-  if      (correct === true)  { vEl.textContent = '✓ Chính xác!'; vEl.style.color = '#4CD97B'; }
-  else if (correct === false) { vEl.textContent = '✗ Chưa đúng';  vEl.style.color = '#EF4A81'; }
-  else                        { vEl.textContent = '→ Bỏ qua';      vEl.style.color = 'rgba(0,0,0,0.35)'; }
-  document.getElementById('fc-pts').textContent = score;
-
-  cardEl.style.transition = 'transform 0.15s ease-in';
-  cardEl.style.transform  = 'scaleX(0)';
-
-  cardEl.addEventListener('transitionend', function onMidpoint() {
-    cardEl.removeEventListener('transitionend', onMidpoint);
-    cardEl.style.transition = 'none';
-    cardEl.classList.add('card-revealed');
+function flip(correct){
+  const cardEl=document.getElementById('fc-card');
+  document.getElementById('fc-input').style.display='none';
+  document.getElementById('fc-actions').style.display='none';
+  document.getElementById('fc-btn-next').style.display='block';
+  const vEl=document.getElementById('fc-verdict');
+  if(correct===true){vEl.textContent='✓ Chính xác!';vEl.style.color='#4CD97B';}
+  else if(correct===false){vEl.textContent='✗ Chưa đúng';vEl.style.color='#EF4A81';}
+  else{vEl.textContent='→ Bỏ qua';vEl.style.color='rgba(0,0,0,0.35)';}
+  document.getElementById('fc-pts').textContent=score;
+  cardEl.style.transition='transform 0.15s ease-in';
+  cardEl.style.transform='scaleX(0)';
+  cardEl.addEventListener('transitionend',function onMid(){
+    cardEl.removeEventListener('transitionend',onMid);
+    cardEl.style.transition='none'; cardEl.classList.add('card-revealed');
     void cardEl.offsetHeight;
-    cardEl.style.transition = 'transform 0.15s ease-out';
-    cardEl.style.transform  = 'scaleX(1)';
-  }, { once: true });
+    cardEl.style.transition='transform 0.15s ease-out'; cardEl.style.transform='scaleX(1)';
+  },{once:true});
 }
 
-function checkAnswer() {
-  const val = document.getElementById('fc-input').value;
+function checkAnswer(){
+  const val=document.getElementById('fc-input').value;
   if (!val.trim()) return;
-  const card = deck[cur];
-  const ok = normalize(val) === normalize(card.label);
+  const ok=normalize(val)===normalize(deck[cur].name);
   if (ok) score++;
   flip(ok);
 }
+function skipCard(){flip(null);}
+function nextCard(){cur++;if(cur>=deck.length)showResult();else renderCard();}
 
-function skipCard() { flip(null); }
-
-function nextCard() {
-  cur++;
-  if (cur >= deck.length) showResult();
-  else renderCard();
-}
-
-function showResult() {
-  document.getElementById('fc-game').style.display   = 'none';
-  document.getElementById('fc-result').style.display = 'block';
-  document.getElementById('fc-result-score').textContent = score;
-  const msgs = [
-    'Cố gắng thêm nhé! Đọc bài và thử lại.',
-    'Cố gắng thêm nhé! Đọc bài và thử lại.',
+function showResult(){
+  document.getElementById('fc-game').style.display='none';
+  document.getElementById('fc-result').style.display='block';
+  document.getElementById('fc-result-score').textContent=score;
+  const msgs=['Cố gắng thêm nhé! Đọc bài và thử lại.','Cố gắng thêm nhé! Đọc bài và thử lại.',
     'Cố gắng thêm nhé!','Cố gắng thêm nhé!','Cố gắng thêm nhé!','Cố gắng thêm nhé!',
-    'Khá ổn! Ôn thêm một chút.',
-    'Tốt lắm! Ôn thêm một chút là vững.',
-    'Rất tốt! Chỉ còn một chút là hoàn hảo.',
-    'Xuất sắc! Gần đạt toàn điểm rồi!',
-    'Hoàn hảo! Bạn nắm vững toàn bộ thuật ngữ.'
-  ];
-  document.getElementById('fc-result-msg').textContent = msgs[score] || msgs[0];
+    'Khá ổn! Ôn thêm một chút.','Tốt lắm! Ôn thêm một chút là vững.',
+    'Rất tốt! Chỉ còn một chút là hoàn hảo.','Xuất sắc! Gần đạt toàn điểm rồi!',
+    'Hoàn hảo! Bạn nắm vững toàn bộ thuật ngữ.'];
+  document.getElementById('fc-result-msg').textContent=msgs[score]||msgs[0];
 }
 
-document.addEventListener('keydown', e => {
-  if (e.key !== 'Enter') return;
-  const nxt = document.getElementById('fc-btn-next');
-  if (nxt && nxt.style.display === 'block') nextCard();
-  else if (document.getElementById('panel-flashcard').style.display !== 'none') checkAnswer();
+document.addEventListener('keydown',e=>{
+  if (e.key!=='Enter') return;
+  const nxt=document.getElementById('fc-btn-next');
+  if (nxt&&nxt.style.display==='block') nextCard();
+  else if (document.getElementById('panel-flashcard').style.display!=='none') checkAnswer();
 });
 </script>
 </body>
