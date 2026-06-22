@@ -8,28 +8,112 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: #F5F5F5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif; overflow: hidden; }
 
-/* ── TABS ──────────────────────────────────────────────── */
+/* ── HEADER ─────────────────────────────────────────────── */
 #tabs {
-  position: fixed; top: 0; left: 0; right: 0; height: 46px;
-  background: rgba(245,245,245,0.97); backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(0,0,0,0.08);
-  display: flex; align-items: center; padding: 0 20px; gap: 4px; z-index: 200;
+  position: fixed; top: 0; left: 0; right: 0; height: 80px;
+  background: rgba(245,245,245,0.97); backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px; z-index: 200; gap: 16px;
 }
-#tabs .logo { color: rgba(0,0,0,0.35); font-size: 12px; margin-right: 16px; letter-spacing: 0.04em; }
+
+/* Logo */
+#header-logo {
+  width: 48px; height: 56px; flex-shrink: 0; cursor: pointer;
+  transition: opacity 0.2s, filter 0.2s; display: block;
+}
+#header-logo:hover { opacity: 0.6; }
+
+/* Pill tab selector */
+#tab-pill {
+  background: #f5f5f5; border: 1px solid #d4d4d4; border-radius: 160px;
+  display: flex; align-items: center; padding: 8px 10px; gap: 2px;
+  overflow-x: auto; -webkit-overflow-scrolling: touch; flex: 1;
+  max-width: 600px; margin: 0 auto;
+}
+#tab-pill::-webkit-scrollbar { display: none; }
 .tab-btn {
   background: transparent; border: none; cursor: pointer;
-  color: rgba(0,0,0,0.45); font-size: 13px; padding: 6px 14px;
-  border-radius: 6px; transition: all 0.15s; font-family: inherit;
+  color: #262626; font-size: 14px; font-weight: 500; padding: 10px 22px;
+  border-radius: 160px; transition: background 0.18s, color 0.18s;
+  font-family: inherit; white-space: nowrap; flex-shrink: 0; line-height: 1.4;
 }
-.tab-btn:hover { color: rgba(0,0,0,0.75); }
-.tab-btn.active { background: rgba(0,0,0,0.07); color: #111; font-weight: 500; }
+.tab-btn:hover { background: rgba(0,0,0,0.05); }
+.tab-btn.active { background: #241775; color: #fafafa; }
+
+/* Menu icon (3-element: square · rounded-square · arrow) */
+#menu-btn {
+  width: 40px; height: 40px; flex-shrink: 0;
+  position: relative; cursor: pointer; background: none; border: none; padding: 0;
+}
+.mdot {
+  position: absolute; top: 50%; background: #282935;
+  transform: translateY(-50%); transition: background 0.2s;
+}
+.mdot-c { left: 50%; width: 10px; height: 10px; border-radius: 6px; transform: translate(-50%,-50%); }
+.mdot-l { left: calc(50% - 14px); width: 10px; height: 10px; border-radius: 1px; transform: translate(-50%,-50%); }
+.mdot-r { left: calc(50% + 14px); width: 0; height: 0;
+  background: none; border-left: 5px solid transparent; border-right: 5px solid transparent;
+  border-top: 7px solid #282935; transform: translate(-50%,-50%); border-radius: 1px; transition: border-top-color 0.2s;
+}
 
 /* ── PANELS ─────────────────────────────────────────────── */
-#panel-graph { position: fixed; top: 46px; left: 0; right: 0; bottom: 0; }
+#panel-graph { position: fixed; top: 80px; left: 0; right: 0; bottom: 0; }
 #panel-flashcard {
-  position: fixed; top: 46px; left: 0; right: 0; bottom: 0;
+  position: fixed; top: 80px; left: 0; right: 0; bottom: 0;
   display: none; overflow-y: auto; background: #F5F5F5;
 }
+
+/* ── NAV OVERLAY (nhanluu.com style) ─────────────────────── */
+#nav-overlay {
+  position: fixed; inset: 0; z-index: 600;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+#nav-overlay.open { opacity: 1; pointer-events: all; }
+#nav-backdrop {
+  position: absolute; inset: 0; background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(3px);
+}
+#nav-panel {
+  position: absolute; right: 0; top: 0; bottom: 0; width: min(440px,100vw);
+  background: linear-gradient(90deg, rgba(33,33,33,0.05), #1a1a1a 70%);
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 64px 52px; gap: 0;
+  transform: translateX(100%);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+#nav-overlay.open #nav-panel { transform: translateX(0); }
+#nav-close {
+  position: absolute; top: 24px; right: 24px;
+  width: 48px; height: 48px; background: none; border: none;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.nav-x-line {
+  position: absolute; width: 22px; height: 2px; background: #fff; border-radius: 2px;
+  transition: transform 0.3s, opacity 0.3s;
+}
+.nav-x-line:nth-child(1) { transform: rotate(45deg); }
+.nav-x-line:nth-child(2) { transform: rotate(-45deg); }
+.nav-divider { width: 40px; height: 1px; background: rgba(255,255,255,0.12); margin-bottom: 40px; }
+.nav-link {
+  display: block; color: #c4c4c4; text-decoration: none;
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-size: clamp(28px,5vw,42px); font-weight: 900;
+  letter-spacing: 0.04em; line-height: 1.1;
+  margin-bottom: 32px;
+  transform: translateX(0); opacity: 0.7;
+  transition: transform 0.25s ease, opacity 0.25s ease, color 0.25s ease;
+}
+.nav-link:hover { transform: translateX(-16px); opacity: 1; color: #fff; }
+.nav-dark-toggle {
+  margin-top: 48px; display: flex; align-items: center; gap: 12px;
+  color: rgba(255,255,255,0.35); font-size: 13px; cursor: pointer;
+  background: none; border: none; font-family: inherit; padding: 0;
+  transition: color 0.2s;
+}
+.nav-dark-toggle:hover { color: rgba(255,255,255,0.7); }
+.nav-dark-icon { font-size: 18px; }
 
 /* ── 3D GRAPH ────────────────────────────────────────────── */
 #graph-3d { width: 100%; height: 100%; }
@@ -199,11 +283,15 @@ body { background: #F5F5F5; font-family: -apple-system, BlinkMacSystemFont, 'Seg
 
 /* ── DARK MODE ───────────────────────────────────────────── */
 body.dark { background: #090B1E; --panel-bg: #090B1E; }
-body.dark #tabs { background: rgba(9,11,30,0.97); border-color: rgba(255,255,255,0.08); }
-body.dark #tabs .logo { color: rgba(255,255,255,0.3); }
-body.dark .tab-btn { color: rgba(255,255,255,0.45); }
-body.dark .tab-btn:hover { color: rgba(255,255,255,0.85); }
-body.dark .tab-btn.active { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.95); }
+body.dark #tabs { background: rgba(9,11,30,0.97); border-color: rgba(255,255,255,0.07); }
+body.dark #tab-pill { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
+body.dark .tab-btn { color: rgba(255,255,255,0.5); }
+body.dark .tab-btn:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); }
+body.dark .tab-btn.active { background: #241775; color: #fafafa; }
+body.dark .mdot { background: rgba(255,255,255,0.7); }
+body.dark .mdot-r { background: none; border-top-color: rgba(255,255,255,0.7); }
+body.dark #header-logo svg path { fill: #fafafa; }
+body.dark #header-logo { filter: brightness(0) invert(1); }
 body.dark #graph-title { color: rgba(255,255,255,0.88); }
 body.dark #graph-title span { color: rgba(255,255,255,0.38); }
 body.dark .legend-item { color: rgba(255,255,255,0.52); }
@@ -234,12 +322,10 @@ body.dark #modal-btn-none { background: rgba(255,255,255,0.06); color: rgba(255,
 body.dark #graph-3d canvas { filter: saturate(1.5) brightness(1.2); }
 body.dark #loading { background: #090B1E; }
 body.dark .loading-text { color: rgba(255,255,255,0.35); }
-#mode-btn { margin-left: auto; font-size: 15px; padding: 5px 10px; opacity: 0.65; }
-#mode-btn:hover { opacity: 1; color: inherit !important; background: transparent !important; }
 
 /* ── GLOSSARY ────────────────────────────────────────────── */
 #panel-glossary {
-  position: fixed; top: 46px; left: 0; right: 0; bottom: 0;
+  position: fixed; top: 80px; left: 0; right: 0; bottom: 0;
   display: none; overflow-y: auto; background: #F5F5F5;
 }
 #gl-wrap { max-width: 1080px; margin: 0 auto; padding: 28px 20px 60px; }
@@ -447,14 +533,52 @@ body.dark .telos-challenge .stats strong{color:rgba(150,140,255,0.9)}
   <div class="loading-text">Đang tải dữ liệu...</div>
 </div>
 
-<!-- TABS -->
+<!-- HEADER -->
 <div id="tabs">
-  <div class="logo">TELOS Academy</div>
-  <button class="tab-btn active" onclick="switchTab('graph',this)">🗺 Knowledge Graph</button>
-  <button class="tab-btn" onclick="switchTab('glossary',this)">📖 Tra cứu</button>
-  <button class="tab-btn" onclick="switchTab('flashcard',this)">🃏 Flashcard</button>
-  <button class="tab-btn" onclick="switchTab('challenge',this)">🎲 Challenge</button>
-  <button id="mode-btn" class="tab-btn" onclick="toggleMode()" title="Light / Dark mode">🌙</button>
+  <!-- Logo (TELOS N-mark SVG) -->
+  <a id="header-logo" href="https://nhanluu.com" target="_blank" rel="noopener" title="nhanluu.com" aria-label="Nhân Lưu">
+    <svg fill="none" preserveAspectRatio="xMidYMid meet" viewBox="0 0 59.2927 68" style="width:100%;height:100%;">
+      <path d="M6.01217 51.8294C5.42909 51.8294 4.97559 51.4134 4.97559 50.8785V34.5363C4.97559 34.0014 5.42909 33.5855 6.01217 33.5855C6.59525 33.5855 7.04876 34.0014 7.04876 34.5363V50.8191C7.04876 51.4134 6.59525 51.8294 6.01217 51.8294Z" fill="#282935"/>
+      <path d="M4.59018 60.2257L0.749669 63.9689C0.0181436 64.7176 0.566789 65.9269 1.60312 65.9269H10.3814C11.4787 65.9269 12.0274 64.66 11.2349 63.9689L7.27244 60.2257C6.54092 59.5346 5.32171 59.5346 4.59018 60.2257Z" fill="#282935"/>
+      <path d="M18.2095 2.48779H5.27699C3.47812 2.48779 1.56488 3.00049 0.733673 4.5942C-0.386691 6.74233 -0.247232 9.44754 1.31306 11.4884L42.7211 65.4923C44.8629 68.2938 48.9086 68.8303 51.7048 66.6845C52.5377 66.0288 53.0732 65.0155 53.0732 63.9425V46.9546C53.0732 46.1797 52.8352 45.4644 52.3592 44.8683L20.9462 3.85875C20.2918 3.02426 19.2804 2.48779 18.2095 2.48779Z" fill="#282935"/>
+      <path d="M43.0069 14.9041C44.6607 16.3014 46.9256 17 49.8017 17C52.8934 17 55.2302 16.2237 56.8121 14.6712C58.4658 13.1963 59.2927 11.1005 59.2927 8.38357C59.2927 5.58905 58.5018 3.49315 56.9199 2.09589C55.3381 0.698633 53.0732 0 50.1252 0C47.0334 0 44.6607 0.737447 43.0069 2.21233C41.4251 3.76484 40.6342 5.89954 40.6342 8.61644C40.6342 11.411 41.4251 13.5069 43.0069 14.9041Z" fill="#282935"/>
+    </svg>
+  </a>
+
+  <!-- Pill tab selector -->
+  <div id="tab-pill">
+    <button class="tab-btn active" onclick="switchTab('graph',this)">Graph view</button>
+    <button class="tab-btn" onclick="switchTab('glossary',this)">A-Z</button>
+    <button class="tab-btn" onclick="switchTab('flashcard',this)">Flashcard Quiz</button>
+    <button class="tab-btn" onclick="switchTab('challenge',this)">UI Challenge</button>
+  </div>
+
+  <!-- Menu icon → nhanluu.com overlay -->
+  <button id="menu-btn" onclick="openNav()" aria-label="Menu" title="Menu">
+    <span class="mdot mdot-l"></span>
+    <span class="mdot mdot-c"></span>
+    <span class="mdot mdot-r"></span>
+  </button>
+</div>
+
+<!-- NAV OVERLAY (nhanluu.com style) -->
+<div id="nav-overlay" role="dialog" aria-modal="true" aria-label="Navigation">
+  <div id="nav-backdrop" onclick="closeNav()"></div>
+  <nav id="nav-panel">
+    <button id="nav-close" onclick="closeNav()" aria-label="Đóng menu">
+      <span class="nav-x-line"></span>
+      <span class="nav-x-line"></span>
+    </button>
+    <div class="nav-divider"></div>
+    <a class="nav-link" href="https://nhanluu.com/about-me/" target="_blank" rel="noopener">ABOUT ME</a>
+    <a class="nav-link" href="https://nhanluu.com/portfolio/" target="_blank" rel="noopener">PORTFOLIO</a>
+    <a class="nav-link" href="https://nhanluu.com/blog/" target="_blank" rel="noopener">BLOG</a>
+    <a class="nav-link" href="https://nhanluu.com/contact/" target="_blank" rel="noopener">CONTACT</a>
+    <button class="nav-dark-toggle" onclick="toggleMode()">
+      <span class="nav-dark-icon" id="nav-mode-icon">🌙</span>
+      <span id="nav-mode-label">Chế độ tối</span>
+    </button>
+  </nav>
 </div>
 
 <!-- GRAPH PANEL -->
@@ -533,7 +657,7 @@ body.dark .telos-challenge .stats strong{color:rgba(150,140,255,0.9)}
 </div>
 
 <!-- CHALLENGE PANEL -->
-<div id="panel-challenge" style="display:none;position:fixed;top:46px;left:0;right:0;bottom:0;overflow-y:auto;background:var(--panel-bg,#F5F5F5);">
+<div id="panel-challenge" style="display:none;position:fixed;top:80px;left:0;right:0;bottom:0;overflow-y:auto;background:var(--panel-bg,#F5F5F5);">
 <div class="telos-challenge">
 <div class="wrap">
   <header class="header">
@@ -731,7 +855,10 @@ window.addEventListener('DOMContentLoaded', async () => {
     if (localStorage.getItem('telos-theme') === 'dark') {
       isDark = true;
       document.body.classList.add('dark');
-      document.getElementById('mode-btn').textContent = '☀️';
+      const icon = document.getElementById('nav-mode-icon');
+      const lbl = document.getElementById('nav-mode-label');
+      if (icon) icon.textContent = '☀️';
+      if (lbl) lbl.textContent = 'Chế độ sáng';
     }
   } catch(e) {}
 
@@ -782,7 +909,10 @@ function updateLabelColors(dark) {
 function toggleMode() {
   isDark = !isDark;
   document.body.classList.toggle('dark', isDark);
-  document.getElementById('mode-btn').textContent = isDark ? '☀️' : '🌙';
+  const icon = document.getElementById('nav-mode-icon');
+  const label = document.getElementById('nav-mode-label');
+  if (icon) icon.textContent = isDark ? '☀️' : '🌙';
+  if (label) label.textContent = isDark ? 'Chế độ sáng' : 'Chế độ tối';
   const sc = document.getElementById('star-canvas');
   if (sc) sc.style.opacity = isDark ? '1' : '0';
   if (graphInstance) {
@@ -791,6 +921,19 @@ function toggleMode() {
   }
   try { localStorage.setItem('telos-theme', isDark ? 'dark' : 'light'); } catch(e) {}
 }
+
+// ════════════════════════════════════════════════════════
+// NAV OVERLAY
+// ════════════════════════════════════════════════════════
+function openNav() {
+  document.getElementById('nav-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeNav() {
+  document.getElementById('nav-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeNav(); });
 
 // ════════════════════════════════════════════════════════
 // 3D GRAPH
