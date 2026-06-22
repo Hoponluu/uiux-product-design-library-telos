@@ -1,9 +1,89 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" prefix="og: https://ogp.me/ns#">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TELOS Academy — Knowledge Graph</title>
+
+<!-- ── Primary SEO ───────────────────────────────────────── -->
+<title>Thư viện thuật ngữ UI/UX | TELOS Academy</title>
+<meta name="description" content="Tra cứu 60+ thuật ngữ UI/UX Product Design bằng tiếng Việt — từ UX Research, Interaction Design đến Design System và vai trò Product Designer. Miễn phí, có giải thích rõ ràng và link bài viết chi tiết.">
+<meta name="keywords" content="thuật ngữ UI UX, UI UX là gì, UX design tiếng việt, thuật ngữ product design, design system là gì, UX research, interaction design, TELOS Academy, thư viện thiết kế">
+<meta name="author" content="Nhân Lưu — TELOS Academy">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://uiux-library.nhanluu.com/">
+
+<!-- ── Open Graph (Facebook / LinkedIn) ─────────────────── -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://uiux-library.nhanluu.com/">
+<meta property="og:title" content="Thư viện thuật ngữ UI/UX | TELOS Academy">
+<meta property="og:description" content="Tra cứu 60+ thuật ngữ UI/UX Product Design bằng tiếng Việt. Knowledge Graph 3D, tra cứu A-Z, Flashcard và UI Challenge Generator — miễn phí.">
+<meta property="og:image" content="https://uiux-library.nhanluu.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="vi_VN">
+<meta property="og:site_name" content="TELOS Academy">
+
+<!-- ── Twitter Card ──────────────────────────────────────── -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:url" content="https://uiux-library.nhanluu.com/">
+<meta name="twitter:title" content="Thư viện thuật ngữ UI/UX | TELOS Academy">
+<meta name="twitter:description" content="Tra cứu 60+ thuật ngữ UI/UX Product Design bằng tiếng Việt. Knowledge Graph 3D, A-Z, Flashcard, UI Challenge — miễn phí.">
+<meta name="twitter:image" content="https://uiux-library.nhanluu.com/og-image.png">
+
+<!-- ── JSON-LD Structured Data ───────────────────────────── -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://uiux-library.nhanluu.com/#website",
+      "url": "https://uiux-library.nhanluu.com/",
+      "name": "Thư viện thuật ngữ UI/UX — TELOS Academy",
+      "description": "Tra cứu thuật ngữ UI/UX Product Design bằng tiếng Việt",
+      "inLanguage": "vi",
+      "publisher": {
+        "@type": "Organization",
+        "@id": "https://academy.telos.vn/#organization",
+        "name": "TELOS Academy",
+        "url": "https://academy.telos.vn",
+        "logo": { "@type": "ImageObject", "url": "https://academy.telos.vn/wp-content/uploads/telos-logo.png" }
+      },
+      "author": {
+        "@type": "Person",
+        "name": "Nhân Lưu",
+        "url": "https://nhanluu.com",
+        "jobTitle": "UX/Product Designer"
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": { "@type": "EntryPoint", "urlTemplate": "https://uiux-library.nhanluu.com/?q={search_term_string}" },
+        "query-input": "required name=search_term_string"
+      }
+    },
+    {
+      "@type": "DefinedTermSet",
+      "@id": "https://uiux-library.nhanluu.com/#glossary",
+      "name": "Bộ thuật ngữ UI/UX Product Design",
+      "description": "Tập hợp các thuật ngữ UI/UX, Product Design và UX Research được giải thích bằng tiếng Việt, biên soạn bởi TELOS Academy.",
+      "inLanguage": "vi",
+      "url": "https://uiux-library.nhanluu.com/",
+      "isPartOf": { "@id": "https://uiux-library.nhanluu.com/#website" }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "nhanluu.com", "item": "https://nhanluu.com" },
+        { "@type": "ListItem", "position": 2, "name": "Thư viện UI/UX", "item": "https://uiux-library.nhanluu.com/" }
+      ]
+    }
+  ]
+}
+</script>
+
+<!-- ── Preconnect ────────────────────────────────────────── -->
+<link rel="preconnect" href="https://vvpqhsglgtfwjklvlvuh.supabase.co">
+<link rel="dns-prefetch" href="https://unpkg.com">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: #F5F5F5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif; overflow: hidden; }
@@ -572,6 +652,18 @@ body.dark .about-tag { background: rgba(150,140,255,0.12); color: rgba(150,140,2
 </head>
 <body>
 
+<!-- SEO: hidden glossary for crawlers (populated by JS after API load) -->
+<div id="seo-glossary" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;">
+  <h1>Thư viện thuật ngữ UI/UX Product Design</h1>
+  <p>Tập hợp 60+ thuật ngữ UI/UX được giải thích bằng tiếng Việt bởi TELOS Academy.</p>
+</div>
+<noscript>
+  <div style="max-width:680px;margin:80px auto;padding:32px;font-family:sans-serif;">
+    <h1>Thư viện thuật ngữ UI/UX — TELOS Academy</h1>
+    <p>Trang này yêu cầu JavaScript để hiển thị đầy đủ. Vui lòng bật JavaScript hoặc truy cập <a href="https://academy.telos.vn">academy.telos.vn</a> để đọc các bài viết chi tiết.</p>
+  </div>
+</noscript>
+
 <!-- LOADING -->
 <div id="loading">
   <div>
@@ -975,6 +1067,8 @@ window.addEventListener('DOMContentLoaded', async () => {
     const { nodes, links } = buildGraphData(categories, concepts);
     document.getElementById('loading').classList.add('hidden');
     initGraph(nodes, links);
+    injectSeoContent(concepts, categories);
+    injectConceptsJsonLd(concepts, categories);
   } catch(err) {
     document.querySelector('.loading-text').textContent = 'Không tải được dữ liệu. Vui lòng thử lại.';
     console.error(err);
@@ -1576,6 +1670,60 @@ function copyIt() {
     btn.textContent = '✅ Đã copy!'; btn.classList.add('ok');
     setTimeout(() => { btn.textContent = '📋 Copy đề bài'; btn.classList.remove('ok'); }, 2200);
   }).catch(() => alert('Copy thất bại — hãy thử chọn text thủ công.'));
+}
+
+// ════════════════════════════════════════════════════════
+// SEO: inject noscript fallback + dynamic JSON-LD
+// ════════════════════════════════════════════════════════
+function injectSeoContent(concepts, categories) {
+  const catMap = {};
+  categories.forEach(c => { catMap[c.id] = c.name; });
+
+  const rows = concepts
+    .filter(c => c.is_published)
+    .sort((a, b) => a.name.localeCompare(b.name, 'vi'))
+    .map(c => {
+      const cat = catMap[c.category_id] || '';
+      const link = c.url ? ` — <a href="${c.url}" rel="noopener">Đọc thêm</a>` : '';
+      return `<dt><strong>${c.name}</strong> <em>(${cat})</em></dt><dd>${c.description || ''}${link}</dd>`;
+    }).join('');
+
+  const el = document.getElementById('seo-glossary');
+  if (el) el.innerHTML = `<dl>${rows}</dl>`;
+}
+
+function injectConceptsJsonLd(concepts, categories) {
+  const catMap = {};
+  categories.forEach(c => { catMap[c.id] = c.name; });
+
+  const items = concepts
+    .filter(c => c.is_published)
+    .map((c, i) => ({
+      "@type": "DefinedTerm",
+      "position": i + 1,
+      "name": c.name,
+      "description": c.description || '',
+      "inDefinedTermSet": "https://uiux-library.nhanluu.com/#glossary",
+      ...(c.url ? { "url": c.url } : {}),
+      "termCode": c.slug,
+      "subjectOf": { "@type": "Thing", "name": catMap[c.category_id] || '' }
+    }));
+
+  const ld = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "Danh sách thuật ngữ UI/UX",
+    "description": `${items.length} thuật ngữ UI/UX Product Design được giải thích bằng tiếng Việt`,
+    "url": "https://uiux-library.nhanluu.com/",
+    "numberOfItems": items.length,
+    "itemListElement": items
+  };
+
+  const script = document.createElement('script');
+  script.type = 'application/ld+json';
+  script.id = 'ld-concepts';
+  script.textContent = JSON.stringify(ld);
+  document.head.appendChild(script);
 }
 </script>
 </body>
