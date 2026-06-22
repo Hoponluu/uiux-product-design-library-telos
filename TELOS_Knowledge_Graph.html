@@ -605,27 +605,62 @@ body.dark .telos-challenge .stats strong{color:rgba(150,140,255,0.9)}
 /* ── VỀ DỰ ÁN PANEL ─────────────────────────────────────── */
 #panel-about {
   position: fixed; top: 80px; left: 0; right: 0; bottom: 0;
-  display: none; overflow-y: auto; background: #F5F5F5;
+  display: none; overflow-y: auto; background: #F2F2F7;
 }
 #about-wrap {
-  max-width: 680px; margin: 0 auto; padding: 52px 32px 80px;
+  max-width: 720px; margin: 0 auto; padding: 40px 20px 100px;
 }
-#about-wrap h2 { font-size: 28px; font-weight: 700; color: #111; margin-bottom: 8px; }
-#about-wrap .about-sub { font-size: 15px; color: rgba(0,0,0,0.45); margin-bottom: 36px; }
-.about-section { margin-bottom: 32px; }
-.about-section h3 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(0,0,0,0.35); margin-bottom: 12px; }
-.about-section p { font-size: 15px; line-height: 1.7; color: rgba(0,0,0,0.72); }
-.about-section a { color: #241775; text-decoration: none; font-weight: 500; }
-.about-section a:hover { text-decoration: underline; }
-.about-tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-.about-tag { background: rgba(36,23,117,0.07); color: #241775; border-radius: 20px; padding: 5px 14px; font-size: 13px; font-weight: 500; }
-body.dark #panel-about { background: #090B1E; }
-body.dark #about-wrap h2 { color: rgba(255,255,255,0.9); }
-body.dark #about-wrap .about-sub { color: rgba(255,255,255,0.35); }
-body.dark .about-section h3 { color: rgba(255,255,255,0.3); }
-body.dark .about-section p { color: rgba(255,255,255,0.6); }
-body.dark .about-section a { color: rgba(150,140,255,0.9); }
-body.dark .about-tag { background: rgba(150,140,255,0.12); color: rgba(150,140,255,0.9); }
+
+/* Q&A boxes */
+.about-qa {
+  background: #fff; border-radius: 20px;
+  padding: 24px 16px; margin-bottom: 12px;
+}
+.about-qa-title {
+  font-size: 20px; font-weight: 800; line-height: 1.3;
+  color: #E8547A; margin-bottom: 12px;
+}
+.about-qa-body {
+  font-size: 15px; line-height: 1.75; color: #1D1A5E;
+}
+.about-qa-body a { color: #E8547A; text-decoration: none; font-weight: 600; }
+.about-qa-body a:hover { text-decoration: underline; }
+
+/* Course section */
+.about-courses-title {
+  font-size: 22px; font-weight: 800; color: #1D1A5E;
+  margin: 32px 0 16px; line-height: 1.3;
+}
+.course-card {
+  background: #fff; border-radius: 20px;
+  padding: 20px 16px; margin-bottom: 10px;
+  display: flex; gap: 16px; align-items: flex-start;
+  text-decoration: none;
+  transition: box-shadow 0.18s, transform 0.18s;
+}
+.course-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); transform: translateY(-1px); }
+.course-thumb {
+  width: 56px; height: 56px; border-radius: 10px;
+  background: #E8E8F0; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+}
+.course-info { flex: 1; min-width: 0; }
+.course-title { font-size: 15px; font-weight: 700; color: #E8547A; margin-bottom: 5px; line-height: 1.4; }
+.course-desc { font-size: 13px; color: #1D1A5E; line-height: 1.6; opacity: 0.75; }
+
+/* Dark mode */
+body.dark #panel-about { background: #0D0F22; }
+body.dark .about-qa { background: rgba(255,255,255,0.05); }
+body.dark .about-qa-title { color: #F07090; }
+body.dark .about-qa-body { color: rgba(220,215,255,0.8); }
+body.dark .about-qa-body a { color: #F07090; }
+body.dark .about-courses-title { color: rgba(220,215,255,0.9); }
+body.dark .course-card { background: rgba(255,255,255,0.05); }
+body.dark .course-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+body.dark .course-thumb { background: rgba(255,255,255,0.08); }
+body.dark .course-title { color: #F07090; }
+body.dark .course-desc { color: rgba(220,215,255,0.6); }
 
 /* ── MOBILE BOTTOM BAR ───────────────────────────────────── */
 @media (max-width: 640px) {
@@ -891,46 +926,82 @@ body.dark .about-tag { background: rgba(150,140,255,0.12); color: rgba(150,140,2
 <!-- VỀ DỰ ÁN PANEL -->
 <div id="panel-about">
   <div id="about-wrap">
-    <h2>Thư viện thuật ngữ UI/UX</h2>
-    <p class="about-sub">Một dự án của <a href="https://nhanluu.com" target="_blank" rel="noopener">Nhân Lưu</a> × TELOS Academy</p>
 
-    <div class="about-section">
-      <h3>Mục tiêu</h3>
-      <p>Tập hợp và hệ thống hóa các thuật ngữ UI/UX Product Design bằng tiếng Việt — giúp designer Việt Nam tra cứu nhanh, học có hệ thống, và rèn tư duy thiết kế mỗi ngày.</p>
-    </div>
-
-    <div class="about-section">
-      <h3>Các tính năng</h3>
-      <div class="about-tag-row">
-        <span class="about-tag">🗺 Knowledge Graph 3D</span>
-        <span class="about-tag">🔤 Tra cứu A-Z</span>
-        <span class="about-tag">🃏 Flashcard Quiz</span>
-        <span class="about-tag">🎲 UI Challenge Generator</span>
+    <div class="about-qa">
+      <div class="about-qa-title">Dự Án Này Là Gì?</div>
+      <div class="about-qa-body">
+        Dự án này là một kho thư viện thuật ngữ của ngành UI/UX Product, được tổng hợp bởi <a href="https://nhanluu.com" target="_blank" rel="noopener">Nhân Lưu</a> — một cựu product designer hiện đang là giám đốc đào tạo tại <a href="https://academy.telos.vn" target="_blank" rel="noopener">TELOS Academy</a> — một trung tâm chuyên đào tạo về Product UI/UX Design dành cho người mới bắt đầu thành lập từ 2022.<br><br>
+        Các nội dung đang tồn tại trong kho thư viện này vẫn đang được cập nhật thêm, các khái niệm mới sẽ xuất hiện thêm (không đều nhưng hứa sẽ lên =)))
       </div>
     </div>
 
-    <div class="about-section">
-      <h3>Công nghệ</h3>
-      <div class="about-tag-row">
-        <span class="about-tag">3d-force-graph</span>
-        <span class="about-tag">Supabase</span>
-        <span class="about-tag">Vercel</span>
+    <div class="about-qa">
+      <div class="about-qa-title">Trong Dự Án Này Có Gì?</div>
+      <div class="about-qa-body">
+        Bạn sẽ thấy kho thư viện các thuật ngữ được sắp xếp một cách dễ quan sát theo sơ đồ Knowledge Graph trực quan, hoặc bạn cũng có thể tra cứu thuật ngữ như tra từ điển, theo thứ tự alphabet và tìm kiếm trực tiếp tên thuật ngữ. Các thuật ngữ đều có mô tả ngắn gọn và một bài viết dài chi tiết được dẫn link về (nằm ở website của <a href="https://academy.telos.vn" target="_blank" rel="noopener">TELOS Academy</a>).<br><br>
+        Bên cạnh đó, website này cũng có thêm 2 tool giúp bạn có thể tự ôn tập thêm thông qua hình thức flashcard và tự tạo đề bài ngẫu nhiên để luyện kỹ năng UI Design.
       </div>
     </div>
 
-    <div class="about-section">
-      <h3>Tác giả</h3>
-      <p>Thiết kế & phát triển bởi <a href="https://nhanluu.com" target="_blank" rel="noopener">Nhân Lưu</a> — UX/Product Designer.<br>
-      Nội dung biên soạn bởi đội ngũ <a href="https://academy.telos.vn" target="_blank" rel="noopener">TELOS Academy</a>.</p>
+    <div class="about-qa">
+      <div class="about-qa-title">Vì Sao Lại Có Dự Án Này?</div>
+      <div class="about-qa-body">
+        TELOS Academy đã đào tạo hơn 3000 học viên trong 4–5 năm qua. Trong suốt quá trình đào tạo đó những anh chị giảng viên và đội ngũ nhân sự vẫn không ngừng làm việc và học tập chứ không chỉ đơn thuần là đào tạo chay. Từ quá trình đó họ viết ra các bài viết chuyên môn về ngành, về những quan điểm và cả việc giải thích các khái niệm, công cụ của lĩnh vực.<br><br>
+        Nếu để nó chỉ được đăng mỗi trên blog của TELOS không thì phí quá, mình quyết định tổng hợp nó lại để dễ dàng hơn cho việc tra cứu, và cũng để thống kê lại xem các kiến thức trên còn thiếu ở chỗ nào không để tiếp tục viết bổ sung. Về mặt cá nhân, mình cũng đang rảnh và muốn vibe-code, nên mình lấy cái chủ đề này để làm luyện kỹ năng :)).
+      </div>
     </div>
 
-    <div class="about-section">
-      <h3>Liên hệ</h3>
-      <p>
-        <a href="https://nhanluu.com/contact/" target="_blank" rel="noopener">nhanluu.com/contact</a> ·
-        <a href="https://academy.telos.vn" target="_blank" rel="noopener">academy.telos.vn</a>
-      </p>
+    <div class="about-qa">
+      <div class="about-qa-title">Kiến Thức Xuất Hiện Ở Đây Đúng Hết Chứ?</div>
+      <div class="about-qa-body">
+        Đừng xem những nội dung ở đây là một thông tin tuyệt đối về mặt học thuật. Hãy xem đây là nguồn tham khảo có độ tin cậy cao từ góc nhìn của những người có chuyên môn. Hãy tìm hiểu thêm về những thuật ngữ này từ nhiều nguồn nữa.<br><br>
+        Bản thân mình, TELOS Academy và các tác giả của những bài viết này đều sẽ rất cảm ơn nếu bạn có thể chỉ ra những sai sót kiến thức mà chúng mình liệt kê, từ đó có thể chỉnh sửa lại đúng hơn.
+      </div>
     </div>
+
+    <div class="about-qa">
+      <div class="about-qa-title">Tôi Làm Gì Để Đóng Góp Cho Dự Án Này?</div>
+      <div class="about-qa-body">
+        Dự án này hoàn toàn miễn phí. Mình cũng không kỳ vọng bạn sẽ donate hay ủng hộ gì về mặt tài chính :D. Nếu thích quá thì có thể gửi lại vài lời cảm ơn là đủ làm mình vui cả ngày rồi =)).<br><br>
+        Nếu bạn cảm kích giá trị dự án đã mang lại, hãy chia sẻ về nó và <a href="https://academy.telos.vn" target="_blank" rel="noopener">TELOS Academy</a> (trung tâm mình thành lập và chính tay thiết kế lộ trình đào tạo, tuyển dụng các giảng viên xịn xò), để giúp các bạn học viên phù hợp có thể biết đến nó. Vậy là được rồi :))
+      </div>
+    </div>
+
+    <!-- Courses -->
+    <div class="about-courses-title">Các Khóa Học Bạn Có Thể Sẽ Quan Tâm</div>
+
+    <a class="course-card" href="https://academy.telos.vn/lo-trinh-tro-thanh-ux-ui-designer/" target="_blank" rel="noopener">
+      <div class="course-thumb">🎓</div>
+      <div class="course-info">
+        <div class="course-title">Lộ Trình Trở Thành Product Designer</div>
+        <div class="course-desc">Cái này TELOS đào tạo, trong tầm 3~12 tháng, mức học phí 11~34tr</div>
+      </div>
+    </a>
+
+    <a class="course-card" href="https://hocfigma.nhanluu.com/" target="_blank" rel="noopener">
+      <div class="course-thumb">✏️</div>
+      <div class="course-info">
+        <div class="course-title">Các Lớp Figma Của Mình</div>
+        <div class="course-desc">Cũng học cùng TELOS á, nếu học qua Udemy thì tầm 600k, nếu học tại lớp kỹ hơn thì 4tr</div>
+      </div>
+    </a>
+
+    <a class="course-card" href="https://academy.telos.vn/khoa-hoc-product-design-thinking-doanh-nghiep/" target="_blank" rel="noopener">
+      <div class="course-thumb">🏢</div>
+      <div class="course-info">
+        <div class="course-title">Các Chương Trình Đào Tạo Cho Doanh Nghiệp</div>
+        <div class="course-desc">Tụi mình có đào tạo B2B, tùy vào mỗi bên với các nhu cầu khác nhau, từ AI, tool, Product Mindset... Tùy nhu cầu, TELOS sẽ tư vấn để các bạn có chương trình học phù hợp</div>
+      </div>
+    </a>
+
+    <a class="course-card" href="https://www.facebook.com/groups/figmavn" target="_blank" rel="noopener">
+      <div class="course-thumb">💬</div>
+      <div class="course-info">
+        <div class="course-title">Tham Gia Cộng Đồng Cùng Học Figma & UI/UX Product Design</div>
+        <div class="course-desc">Cái này miễn phí =)), tham gia đi, link tại đây.</div>
+      </div>
+    </a>
+
   </div>
 </div>
 
