@@ -24,11 +24,12 @@ body { background: #F5F5F5; font-family: -apple-system, BlinkMacSystemFont, 'Seg
 }
 #header-logo:hover { opacity: 0.6; }
 
-/* Pill tab selector — hug content */
+/* Pill tab selector — fixed, centered in header */
 #tab-pill {
+  position: fixed; top: 12px; left: 50%; transform: translateX(-50%); z-index: 201;
   background: #f5f5f5; border: 1px solid #d4d4d4; border-radius: 160px;
   display: flex; align-items: center; padding: 8px 10px; gap: 2px;
-  width: fit-content; flex-shrink: 0;
+  width: fit-content;
 }
 .tab-btn {
   background: transparent; border: none; cursor: pointer;
@@ -285,7 +286,7 @@ body { background: #F5F5F5; font-family: -apple-system, BlinkMacSystemFont, 'Seg
 /* ── DARK MODE ───────────────────────────────────────────── */
 body.dark { background: #090B1E; --panel-bg: #090B1E; }
 body.dark #tabs { background: rgba(9,11,30,0.97); border-color: rgba(255,255,255,0.07); }
-body.dark #tab-pill { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
+body.dark #tab-pill { background: rgba(30,28,60,0.97); border-color: rgba(255,255,255,0.1); }
 body.dark .tab-btn { color: rgba(255,255,255,0.5); }
 body.dark .tab-btn:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); }
 body.dark .tab-btn.active { background: #241775; color: #fafafa; }
@@ -550,12 +551,11 @@ body.dark .about-tag { background: rgba(150,140,255,0.12); color: rgba(150,140,2
 @media (max-width: 640px) {
   #tabs { height: 56px; }
   #tab-pill {
-    position: fixed; bottom: 0; left: 0; right: 0; top: auto;
+    top: auto; bottom: 0; left: 0; right: 0; transform: none;
     height: 64px; width: 100%; border-radius: 0;
     background: rgba(245,245,245,0.97); backdrop-filter: blur(12px);
     border: none; border-top: 1px solid rgba(0,0,0,0.08);
-    padding: 0; gap: 0; justify-content: space-around; z-index: 200;
-    overflow-x: visible;
+    padding: 0; gap: 0; justify-content: space-around;
   }
   .tab-btn { flex: 1; padding: 8px 4px; border-radius: 0; font-size: 10px; font-weight: 500; gap: 3px; }
   .tab-btn:hover { background: transparent; }
@@ -594,30 +594,30 @@ body.dark .about-tag { background: rgba(150,140,255,0.12); color: rgba(150,140,2
     </svg>
   </a>
 
-  <!-- Pill tab selector (desktop) / Bottom bar (mobile) -->
-  <div id="tab-pill">
-    <button class="tab-btn active" onclick="switchTab('graph',this)">
-      <span class="tb-icon">🗺</span><span class="tb-label">Graph view</span>
-    </button>
-    <button class="tab-btn" onclick="switchTab('glossary',this)">
-      <span class="tb-icon">🔤</span><span class="tb-label">A-Z</span>
-    </button>
-    <button class="tab-btn" onclick="switchTab('flashcard',this)">
-      <span class="tb-icon">🃏</span><span class="tb-label">Flashcard Quiz</span>
-    </button>
-    <button class="tab-btn" onclick="switchTab('challenge',this)">
-      <span class="tb-icon">🎲</span><span class="tb-label">UI Challenge</span>
-    </button>
-    <button class="tab-btn" onclick="switchTab('about',this)">
-      <span class="tb-icon">ℹ️</span><span class="tb-label">Về dự án</span>
-    </button>
-  </div>
-
   <!-- Menu icon → nhanluu.com overlay -->
   <button id="menu-btn" onclick="openNav()" aria-label="Menu" title="Menu">
     <span class="mdot mdot-l"></span>
     <span class="mdot mdot-c"></span>
     <span class="mdot mdot-r"></span>
+  </button>
+</div>
+
+<!-- TAB PILL (outside #tabs to avoid backdrop-filter stacking context) -->
+<div id="tab-pill">
+  <button class="tab-btn active" onclick="switchTab('graph',this)">
+    <span class="tb-icon">🗺</span><span class="tb-label">Graph view</span>
+  </button>
+  <button class="tab-btn" onclick="switchTab('glossary',this)">
+    <span class="tb-icon">🔤</span><span class="tb-label">A-Z</span>
+  </button>
+  <button class="tab-btn" onclick="switchTab('flashcard',this)">
+    <span class="tb-icon">🃏</span><span class="tb-label">Flashcard Quiz</span>
+  </button>
+  <button class="tab-btn" onclick="switchTab('challenge',this)">
+    <span class="tb-icon">🎲</span><span class="tb-label">UI Challenge</span>
+  </button>
+  <button class="tab-btn" onclick="switchTab('about',this)">
+    <span class="tb-icon">ℹ️</span><span class="tb-label">Về dự án</span>
   </button>
 </div>
 
