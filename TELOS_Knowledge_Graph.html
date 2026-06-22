@@ -24,22 +24,23 @@ body { background: #F5F5F5; font-family: -apple-system, BlinkMacSystemFont, 'Seg
 }
 #header-logo:hover { opacity: 0.6; }
 
-/* Pill tab selector */
+/* Pill tab selector — hug content */
 #tab-pill {
   background: #f5f5f5; border: 1px solid #d4d4d4; border-radius: 160px;
   display: flex; align-items: center; padding: 8px 10px; gap: 2px;
-  overflow-x: auto; -webkit-overflow-scrolling: touch; flex: 1;
-  max-width: 600px; margin: 0 auto;
+  width: fit-content; flex-shrink: 0;
 }
-#tab-pill::-webkit-scrollbar { display: none; }
 .tab-btn {
   background: transparent; border: none; cursor: pointer;
   color: #262626; font-size: 14px; font-weight: 500; padding: 10px 22px;
   border-radius: 160px; transition: background 0.18s, color 0.18s;
   font-family: inherit; white-space: nowrap; flex-shrink: 0; line-height: 1.4;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
 }
 .tab-btn:hover { background: rgba(0,0,0,0.05); }
 .tab-btn.active { background: #241775; color: #fafafa; }
+.tb-icon { display: none; font-size: 20px; line-height: 1; }
+.tb-label { display: block; }
 
 /* Menu icon (3-element: square · rounded-square · arrow) */
 #menu-btn {
@@ -519,6 +520,54 @@ body.dark .telos-challenge {
 .telos-challenge .stats strong{color:var(--brand-primary-700);font-weight:700}
 body.dark .telos-challenge .stats strong{color:rgba(150,140,255,0.9)}
 @media(max-width:480px){.telos-challenge .btn-roll,.telos-challenge .btn-copy{width:100%;text-align:center}}
+
+/* ── VỀ DỰ ÁN PANEL ─────────────────────────────────────── */
+#panel-about {
+  position: fixed; top: 80px; left: 0; right: 0; bottom: 0;
+  display: none; overflow-y: auto; background: #F5F5F5;
+}
+#about-wrap {
+  max-width: 680px; margin: 0 auto; padding: 52px 32px 80px;
+}
+#about-wrap h2 { font-size: 28px; font-weight: 700; color: #111; margin-bottom: 8px; }
+#about-wrap .about-sub { font-size: 15px; color: rgba(0,0,0,0.45); margin-bottom: 36px; }
+.about-section { margin-bottom: 32px; }
+.about-section h3 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(0,0,0,0.35); margin-bottom: 12px; }
+.about-section p { font-size: 15px; line-height: 1.7; color: rgba(0,0,0,0.72); }
+.about-section a { color: #241775; text-decoration: none; font-weight: 500; }
+.about-section a:hover { text-decoration: underline; }
+.about-tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.about-tag { background: rgba(36,23,117,0.07); color: #241775; border-radius: 20px; padding: 5px 14px; font-size: 13px; font-weight: 500; }
+body.dark #panel-about { background: #090B1E; }
+body.dark #about-wrap h2 { color: rgba(255,255,255,0.9); }
+body.dark #about-wrap .about-sub { color: rgba(255,255,255,0.35); }
+body.dark .about-section h3 { color: rgba(255,255,255,0.3); }
+body.dark .about-section p { color: rgba(255,255,255,0.6); }
+body.dark .about-section a { color: rgba(150,140,255,0.9); }
+body.dark .about-tag { background: rgba(150,140,255,0.12); color: rgba(150,140,255,0.9); }
+
+/* ── MOBILE BOTTOM BAR ───────────────────────────────────── */
+@media (max-width: 640px) {
+  #tabs { height: 56px; }
+  #tab-pill {
+    position: fixed; bottom: 0; left: 0; right: 0; top: auto;
+    height: 64px; width: 100%; border-radius: 0;
+    background: rgba(245,245,245,0.97); backdrop-filter: blur(12px);
+    border: none; border-top: 1px solid rgba(0,0,0,0.08);
+    padding: 0; gap: 0; justify-content: space-around; z-index: 200;
+    overflow-x: visible;
+  }
+  .tab-btn { flex: 1; padding: 8px 4px; border-radius: 0; font-size: 10px; font-weight: 500; gap: 3px; }
+  .tab-btn:hover { background: transparent; }
+  .tab-btn.active { background: transparent; color: #241775; }
+  .tb-icon { display: block; }
+  #panel-graph, #panel-flashcard, #panel-about { bottom: 64px; }
+  #panel-glossary { bottom: 64px; }
+  #panel-challenge { bottom: 64px !important; }
+  body.dark #tab-pill { background: rgba(9,11,30,0.97); border-top-color: rgba(255,255,255,0.07); }
+  body.dark .tab-btn.active { color: rgba(150,140,255,0.9); background: transparent; }
+  body.dark .tab-btn { color: rgba(255,255,255,0.45); }
+}
 </style>
 </head>
 <body>
@@ -545,12 +594,23 @@ body.dark .telos-challenge .stats strong{color:rgba(150,140,255,0.9)}
     </svg>
   </a>
 
-  <!-- Pill tab selector -->
+  <!-- Pill tab selector (desktop) / Bottom bar (mobile) -->
   <div id="tab-pill">
-    <button class="tab-btn active" onclick="switchTab('graph',this)">Graph view</button>
-    <button class="tab-btn" onclick="switchTab('glossary',this)">A-Z</button>
-    <button class="tab-btn" onclick="switchTab('flashcard',this)">Flashcard Quiz</button>
-    <button class="tab-btn" onclick="switchTab('challenge',this)">UI Challenge</button>
+    <button class="tab-btn active" onclick="switchTab('graph',this)">
+      <span class="tb-icon">🗺</span><span class="tb-label">Graph view</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('glossary',this)">
+      <span class="tb-icon">🔤</span><span class="tb-label">A-Z</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('flashcard',this)">
+      <span class="tb-icon">🃏</span><span class="tb-label">Flashcard Quiz</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('challenge',this)">
+      <span class="tb-icon">🎲</span><span class="tb-label">UI Challenge</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('about',this)">
+      <span class="tb-icon">ℹ️</span><span class="tb-label">Về dự án</span>
+    </button>
   </div>
 
   <!-- Menu icon → nhanluu.com overlay -->
@@ -736,6 +796,52 @@ body.dark .telos-challenge .stats strong{color:rgba(150,140,255,0.9)}
 </div>
 </div><!-- /.panel-challenge -->
 
+<!-- VỀ DỰ ÁN PANEL -->
+<div id="panel-about">
+  <div id="about-wrap">
+    <h2>Thư viện thuật ngữ UI/UX</h2>
+    <p class="about-sub">Một dự án của <a href="https://nhanluu.com" target="_blank" rel="noopener">Nhân Lưu</a> × TELOS Academy</p>
+
+    <div class="about-section">
+      <h3>Mục tiêu</h3>
+      <p>Tập hợp và hệ thống hóa các thuật ngữ UI/UX Product Design bằng tiếng Việt — giúp designer Việt Nam tra cứu nhanh, học có hệ thống, và rèn tư duy thiết kế mỗi ngày.</p>
+    </div>
+
+    <div class="about-section">
+      <h3>Các tính năng</h3>
+      <div class="about-tag-row">
+        <span class="about-tag">🗺 Knowledge Graph 3D</span>
+        <span class="about-tag">🔤 Tra cứu A-Z</span>
+        <span class="about-tag">🃏 Flashcard Quiz</span>
+        <span class="about-tag">🎲 UI Challenge Generator</span>
+      </div>
+    </div>
+
+    <div class="about-section">
+      <h3>Công nghệ</h3>
+      <div class="about-tag-row">
+        <span class="about-tag">3d-force-graph</span>
+        <span class="about-tag">Supabase</span>
+        <span class="about-tag">Vercel</span>
+      </div>
+    </div>
+
+    <div class="about-section">
+      <h3>Tác giả</h3>
+      <p>Thiết kế & phát triển bởi <a href="https://nhanluu.com" target="_blank" rel="noopener">Nhân Lưu</a> — UX/Product Designer.<br>
+      Nội dung biên soạn bởi đội ngũ <a href="https://academy.telos.vn" target="_blank" rel="noopener">TELOS Academy</a>.</p>
+    </div>
+
+    <div class="about-section">
+      <h3>Liên hệ</h3>
+      <p>
+        <a href="https://nhanluu.com/contact/" target="_blank" rel="noopener">nhanluu.com/contact</a> ·
+        <a href="https://academy.telos.vn" target="_blank" rel="noopener">academy.telos.vn</a>
+      </p>
+    </div>
+  </div>
+</div>
+
 <div id="tooltip"></div>
 
 <!-- MOBILE NODE MODAL -->
@@ -885,6 +991,7 @@ function switchTab(tab, btn) {
   document.getElementById('panel-flashcard').style.display = tab === 'flashcard' ? 'block' : 'none';
   document.getElementById('panel-glossary').style.display  = tab === 'glossary'  ? 'block' : 'none';
   document.getElementById('panel-challenge').style.display = tab === 'challenge' ? 'block' : 'none';
+  document.getElementById('panel-about').style.display     = tab === 'about'     ? 'block' : 'none';
   if (tab === 'glossary') { renderGlossary(); setTimeout(() => document.getElementById('gl-search').focus(), 80); }
 }
 
