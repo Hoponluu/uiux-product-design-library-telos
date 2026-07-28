@@ -1,4 +1,8 @@
 {
+  "redirects": [
+    { "source": "/TELOS_Knowledge_Graph.html", "destination": "/", "permanent": true },
+    { "source": "/adminCMS.html", "destination": "/adminCMS", "permanent": true }
+  ],
   "rewrites": [
     { "source": "/adminCMS", "destination": "/adminCMS.html" },
     { "source": "/", "destination": "/TELOS_Knowledge_Graph.html" }
