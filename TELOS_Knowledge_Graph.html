@@ -677,11 +677,10 @@ body.dark .course-desc { color: rgba(220,215,255,0.6); }
 /* ── ASCII WAVE BLOCK ───────────────────────────────────── */
 .ascii-band {
   width: 100%; overflow: hidden; flex-shrink: 0;
-  background: #1D1A5E;
+  background: transparent;
 }
-body.dark .ascii-band { background: #090B1E; }
 .ascii-block {
-  position: relative; width: 100%; height: 192px;
+  position: relative; width: 100%; height: 300px;
   overflow: hidden; cursor: crosshair; user-select: none;
 }
 .ascii-cell {
@@ -689,9 +688,11 @@ body.dark .ascii-band { background: #090B1E; }
   font-family: 'Courier New', Courier, monospace;
   font-size: 9px; line-height: 1; letter-spacing: 0.5px;
   will-change: transform; pointer-events: none; white-space: pre;
-  color: rgba(255,255,255,0.10);
+  color: rgba(29,26,94,0.10);
 }
-.ascii-cell.fg { color: rgba(255,255,255,0.82); }
+.ascii-cell.fg { color: rgba(29,26,94,0.75); }
+body.dark .ascii-cell { color: rgba(255,255,255,0.10); }
+body.dark .ascii-cell.fg { color: rgba(255,255,255,0.82); }
 
 /* ── MOBILE BOTTOM BAR ───────────────────────────────────── */
 @media (max-width: 640px) {
@@ -1865,11 +1866,17 @@ function injectConceptsJsonLd(concepts, categories) {
     const cv = document.createElement('canvas');
     cv.width = cols * S; cv.height = rows * S;
     const ctx = cv.getContext('2d');
-    const fsize = Math.round(rows * S * 0.72);
+    let fsize = Math.round(rows * S * 0.72);
     ctx.font = '900 ' + fsize + 'px "Arial Black",Arial,sans-serif';
     ctx.fillStyle = '#fff';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
+    const maxW = cv.width * 0.94;
+    const tw = ctx.measureText(label).width;
+    if (tw > maxW) {
+      fsize = Math.floor(fsize * maxW / tw);
+      ctx.font = '900 ' + fsize + 'px "Arial Black",Arial,sans-serif';
+    }
     ctx.fillText(label, cv.width / 2, cv.height / 2);
     const d = ctx.getImageData(0, 0, cv.width, cv.height).data;
     const out = [];
@@ -1910,7 +1917,7 @@ function injectConceptsJsonLd(concepts, categories) {
       this.cells = [];
       this.mx = -9999; this.my = -9999;
       this._raf = null;
-      this._label = el.dataset.asciiLabel || 'TELOS';
+      this._label = el.dataset.asciiLabel || 'UI/UX Library';
       this._imgSrc = el.dataset.asciiImg || null;
       this._build();
       this._listen();
