@@ -857,7 +857,7 @@ body.dark .ascii-cell.fg { color: rgba(255,255,255,0.82); }
       <button class="fc-btn-primary" onclick="startGame()">Chơi lại</button>
     </div>
   </div>
-  <div class="ascii-band"><div class="ascii-block" data-ascii></div></div>
+  <div class="ascii-band"><div class="ascii-block" data-ascii data-ascii-img="/UIUX%20Library.svg"></div></div>
 </div>
 
 <!-- GLOSSARY PANEL -->
@@ -1042,7 +1042,7 @@ body.dark .ascii-cell.fg { color: rgba(255,255,255,0.82); }
       <a href="https://academy.telos.vn" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:3px;">TELOS Academy</a>
     </p>
   </div>
-  <div class="ascii-band"><div class="ascii-block" data-ascii></div></div>
+  <div class="ascii-band"><div class="ascii-block" data-ascii data-ascii-img="/UIUX%20Library.svg"></div></div>
 </div>
 
 <div id="tooltip"></div>
@@ -1920,12 +1920,18 @@ function injectConceptsJsonLd(concepts, categories) {
     return centerGrid(out, rows, cols);
   }
 
-  /* Build a pattern from an Image element */
+  /* Build a pattern from an Image element (aspect-ratio preserved: "contain" fit, centered) */
   function makePatternFromImage(cols, rows, img) {
     const cv = document.createElement('canvas');
     cv.width = cols; cv.height = rows;
     const ctx = cv.getContext('2d');
-    ctx.drawImage(img, 0, 0, cols, rows);
+    const iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height;
+    const imgAspect = iw / ih, boxAspect = cols / rows;
+    let drawW, drawH;
+    if (imgAspect > boxAspect) { drawW = cols; drawH = cols / imgAspect; }
+    else { drawH = rows; drawW = rows * imgAspect; }
+    const dx = (cols - drawW) / 2, dy = (rows - drawH) / 2;
+    ctx.drawImage(img, dx, dy, drawW, drawH);
     const d = ctx.getImageData(0, 0, cols, rows).data;
     const out = [];
     for (let r = 0; r < rows; r++) {
@@ -1937,7 +1943,7 @@ function injectConceptsJsonLd(concepts, categories) {
         out[r][c] = (d[i+3] > 50) && (lum < 160);
       }
     }
-    return out;
+    return centerGrid(out, rows, cols);
   }
 
   class AsciiBlock {
