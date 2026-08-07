@@ -688,10 +688,10 @@ body.dark .course-desc { color: rgba(220,215,255,0.6); }
   font-family: 'Courier New', Courier, monospace;
   font-size: 6px; line-height: 1; letter-spacing: 0.3px;
   will-change: transform; pointer-events: none; white-space: pre;
-  color: rgba(29,26,94,0.10);
+  color: rgba(29,26,94,0.16);
 }
 .ascii-cell.fg { color: rgba(29,26,94,0.75); }
-body.dark .ascii-cell { color: rgba(255,255,255,0.10); }
+body.dark .ascii-cell { color: rgba(255,255,255,0.16); }
 body.dark .ascii-cell.fg { color: rgba(255,255,255,0.82); }
 
 /* ── MOBILE BOTTOM BAR ───────────────────────────────────── */
@@ -1848,11 +1848,11 @@ function injectConceptsJsonLd(concepts, categories) {
   'use strict';
 
   const CW = 6.5, CH = 9;           // cell width / height px (2x character density vs. original 9x13)
-  const REPEL_R = 95;               // mouse repulsion radius px
-  const REPEL_F = 5.5;              // repulsion force strength
+  const REPEL_R = 130;              // mouse repulsion radius px
+  const REPEL_F = 9;                // repulsion force strength
   const SPRING  = 0.095;            // spring constant (return to origin)
   const DAMP    = 0.80;             // velocity damping
-  const BASE_SC = 0.0009;           // base scramble probability per cell/frame
+  const BASE_SC = 0.0025;           // base scramble probability per cell/frame
 
   const FG  = '▓▒░█◆■@#$%&*+=!';   // foreground (dense) characters
   const BG  = '·.:, ';              // background (sparse) characters
@@ -1971,7 +1971,7 @@ function injectConceptsJsonLd(concepts, categories) {
             const fg = pat[r] && pat[r][c];
             const ox = offX + c * CW;
             const oy = offY + r * CH;
-            const base = fg ? pick(FG) : (Math.random() < 0.22 ? pick(BG) : ' ');
+            const base = fg ? pick(FG) : (Math.random() < 0.45 ? pick(BG) : ' ');
             const span = document.createElement('span');
             span.className = 'ascii-cell' + (fg ? ' fg' : '');
             span.textContent = base;
@@ -2039,12 +2039,12 @@ function injectConceptsJsonLd(concepts, categories) {
           ? 'translate(' + tx.toFixed(2) + 'px,' + ty.toFixed(2) + 'px)' : '';
 
         // Scramble probability — boosted near cursor
-        const scBoost = d2 < 25600 ? (1 - Math.sqrt(d2) / 160) * 0.013 : 0;
+        const scBoost = d2 < 32400 ? (1 - Math.sqrt(d2) / 180) * 0.03 : 0;
         if (!c.sc && Math.random() < BASE_SC + scBoost) {
           c.sc = true;
           c.el.textContent = pick(c.fg ? FG : MIX);
           setTimeout(function(cell){ cell.el.textContent = cell.base; cell.sc = false; },
-            80 + Math.random() * 280, c);
+            50 + Math.random() * 150, c);
         }
       }
       this._raf = requestAnimationFrame(() => this._tick());
