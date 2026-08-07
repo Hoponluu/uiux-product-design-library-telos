@@ -674,6 +674,25 @@ body.dark .course-thumb { background: rgba(255,255,255,0.08); }
 body.dark .course-title { color: #F07090; }
 body.dark .course-desc { color: rgba(220,215,255,0.6); }
 
+/* ── ASCII WAVE BLOCK ───────────────────────────────────── */
+.ascii-band {
+  width: 100%; overflow: hidden; flex-shrink: 0;
+  background: #1D1A5E;
+}
+body.dark .ascii-band { background: #090B1E; }
+.ascii-block {
+  position: relative; width: 100%; height: 192px;
+  overflow: hidden; cursor: crosshair; user-select: none;
+}
+.ascii-cell {
+  position: absolute;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 9px; line-height: 1; letter-spacing: 0.5px;
+  will-change: transform; pointer-events: none; white-space: pre;
+  color: rgba(255,255,255,0.10);
+}
+.ascii-cell.fg { color: rgba(255,255,255,0.82); }
+
 /* ── MOBILE BOTTOM BAR ───────────────────────────────────── */
 @media (max-width: 640px) {
   #tabs { height: 56px; }
@@ -837,6 +856,7 @@ body.dark .course-desc { color: rgba(220,215,255,0.6); }
       <button class="fc-btn-primary" onclick="startGame()">Chơi lại</button>
     </div>
   </div>
+  <div class="ascii-band"><div class="ascii-block" data-ascii></div></div>
 </div>
 
 <!-- GLOSSARY PANEL -->
@@ -1021,6 +1041,7 @@ body.dark .course-desc { color: rgba(220,215,255,0.6); }
       <a href="https://academy.telos.vn" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:3px;">TELOS Academy</a>
     </p>
   </div>
+  <div class="ascii-band"><div class="ascii-block" data-ascii></div></div>
 </div>
 
 <div id="tooltip"></div>
@@ -1176,6 +1197,10 @@ function switchTab(tab, btn) {
   document.getElementById('panel-challenge').style.display = tab === 'challenge' ? 'block' : 'none';
   document.getElementById('panel-about').style.display     = tab === 'about'     ? 'block' : 'none';
   if (tab === 'glossary') { renderGlossary(); setTimeout(() => document.getElementById('gl-search').focus(), 80); }
+  // ASCII blocks: pause all, then init/resume the visible one
+  window._pauseAscii && window._pauseAscii();
+  if (tab === 'flashcard') window._initAscii && window._initAscii(document.getElementById('panel-flashcard'));
+  if (tab === 'about')     window._initAscii && window._initAscii(document.getElementById('panel-about'));
 }
 
 // ════════════════════════════════════════════════════════
@@ -1814,6 +1839,199 @@ function injectConceptsJsonLd(concepts, categories) {
   script.textContent = JSON.stringify(ld);
   document.head.appendChild(script);
 }
+
+/* ══════════════════════════════════════════════════════════
+   ASCII WAVE BLOCK ENGINE
+   ══════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  const CW = 9, CH = 13;           // cell width / height px
+  const REPEL_R = 95;               // mouse repulsion radius px
+  const REPEL_F = 5.5;              // repulsion force strength
+  const SPRING  = 0.095;            // spring constant (return to origin)
+  const DAMP    = 0.80;             // velocity damping
+  const BASE_SC = 0.0009;           // base scramble probability per cell/frame
+
+  const FG  = '▓▒░█◆■@#$%&*+=!';   // foreground (dense) characters
+  const BG  = '·.:, ';              // background (sparse) characters
+  const MIX = '▒░@#:.·+~?!-';      // scramble pool
+
+  function pick(s) { return s[0 | (Math.random() * s.length)]; }
+
+  /* Build a boolean grid (true = foreground) by rendering text to canvas */
+  function makePattern(cols, rows, label) {
+    const S = 6; // render scale for clean antialiasing
+    const cv = document.createElement('canvas');
+    cv.width = cols * S; cv.height = rows * S;
+    const ctx = cv.getContext('2d');
+    const fsize = Math.round(rows * S * 0.72);
+    ctx.font = '900 ' + fsize + 'px "Arial Black",Arial,sans-serif';
+    ctx.fillStyle = '#fff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(label, cv.width / 2, cv.height / 2);
+    const d = ctx.getImageData(0, 0, cv.width, cv.height).data;
+    const out = [];
+    for (let r = 0; r < rows; r++) {
+      out[r] = [];
+      for (let c = 0; c < cols; c++) {
+        const px = Math.round((c + 0.5) * S);
+        const py = Math.round((r + 0.5) * S);
+        out[r][c] = d[(py * cv.width + px) * 4 + 3] > 90; // alpha channel
+      }
+    }
+    return out;
+  }
+
+  /* Build a pattern from an Image element */
+  function makePatternFromImage(cols, rows, img) {
+    const cv = document.createElement('canvas');
+    cv.width = cols; cv.height = rows;
+    const ctx = cv.getContext('2d');
+    ctx.drawImage(img, 0, 0, cols, rows);
+    const d = ctx.getImageData(0, 0, cols, rows).data;
+    const out = [];
+    for (let r = 0; r < rows; r++) {
+      out[r] = [];
+      for (let c = 0; c < cols; c++) {
+        const i = (r * cols + c) * 4;
+        // luminance threshold
+        const lum = 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2];
+        out[r][c] = (d[i+3] > 50) && (lum < 160);
+      }
+    }
+    return out;
+  }
+
+  class AsciiBlock {
+    constructor(el) {
+      this.el = el;
+      this.cells = [];
+      this.mx = -9999; this.my = -9999;
+      this._raf = null;
+      this._label = el.dataset.asciiLabel || 'TELOS';
+      this._imgSrc = el.dataset.asciiImg || null;
+      this._build();
+      this._listen();
+    }
+
+    _build() {
+      this.pause();
+      this.el.innerHTML = '';
+      const W = this.el.offsetWidth, H = this.el.offsetHeight;
+      if (!W || !H) return;
+
+      const cols = Math.floor(W / CW);
+      const rows = Math.floor(H / CH);
+      const offX = (W - cols * CW) / 2;
+      const offY = (H - rows * CH) / 2;
+
+      const doBuild = (pat) => {
+        this.cells = [];
+        const frag = document.createDocumentFragment();
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const fg = pat[r] && pat[r][c];
+            const ox = offX + c * CW;
+            const oy = offY + r * CH;
+            const base = fg ? pick(FG) : (Math.random() < 0.22 ? pick(BG) : ' ');
+            const span = document.createElement('span');
+            span.className = 'ascii-cell' + (fg ? ' fg' : '');
+            span.textContent = base;
+            span.style.left = ox + 'px';
+            span.style.top  = oy + 'px';
+            frag.appendChild(span);
+            this.cells.push({ el: span, ox, oy, x: ox, y: oy, vx: 0, vy: 0, fg, base, sc: false });
+          }
+        }
+        this.el.appendChild(frag);
+        this.resume();
+      };
+
+      if (this._imgSrc) {
+        const img = new Image();
+        img.onload = () => doBuild(makePatternFromImage(cols, rows, img));
+        img.onerror = () => doBuild(makePattern(cols, rows, this._label));
+        img.src = this._imgSrc;
+      } else {
+        doBuild(makePattern(cols, rows, this._label));
+      }
+    }
+
+    _listen() {
+      const el = this.el;
+      const pos = (cx, cy) => { const r = el.getBoundingClientRect(); this.mx = cx - r.left; this.my = cy - r.top; };
+      el.addEventListener('mousemove',  e => pos(e.clientX, e.clientY), { passive: true });
+      el.addEventListener('mouseleave', () => { this.mx = -9999; this.my = -9999; });
+      el.addEventListener('touchmove',  e => { e.preventDefault(); pos(e.touches[0].clientX, e.touches[0].clientY); }, { passive: false });
+      el.addEventListener('touchend',   () => { this.mx = -9999; this.my = -9999; });
+      el.addEventListener('click', e => {
+        const r = el.getBoundingClientRect(), cx = e.clientX - r.left, cy = e.clientY - r.top;
+        for (let i = 0; i < this.cells.length; i++) {
+          const c = this.cells[i], dx = c.x - cx, dy = c.y - cy, d = Math.sqrt(dx*dx+dy*dy) || 1;
+          if (d < 200) { const f = (1 - d/200) * 16; c.vx += dx/d*f; c.vy += dy/d*f; }
+        }
+      });
+    }
+
+    _tick() {
+      const mx = this.mx, my = this.my, R2 = REPEL_R * REPEL_R;
+      for (let i = 0; i < this.cells.length; i++) {
+        const c = this.cells[i];
+
+        // Mouse repulsion
+        const dx = c.x - mx, dy = c.y - my, d2 = dx*dx + dy*dy;
+        if (d2 < R2) {
+          const d = Math.sqrt(d2) || 1;
+          const f = (1 - d/REPEL_R) * REPEL_F;
+          c.vx += dx / d * f;
+          c.vy += dy / d * f;
+        }
+
+        // Spring back to origin
+        c.vx += (c.ox - c.x) * SPRING;
+        c.vy += (c.oy - c.y) * SPRING;
+
+        // Damping
+        c.vx *= DAMP; c.vy *= DAMP;
+        c.x  += c.vx; c.y  += c.vy;
+
+        // Apply transform
+        const tx = c.x - c.ox, ty = c.y - c.oy;
+        c.el.style.transform = (Math.abs(tx) > 0.1 || Math.abs(ty) > 0.1)
+          ? 'translate(' + tx.toFixed(2) + 'px,' + ty.toFixed(2) + 'px)' : '';
+
+        // Scramble probability — boosted near cursor
+        const scBoost = d2 < 25600 ? (1 - Math.sqrt(d2) / 160) * 0.013 : 0;
+        if (!c.sc && Math.random() < BASE_SC + scBoost) {
+          c.sc = true;
+          c.el.textContent = pick(c.fg ? FG : MIX);
+          setTimeout(function(cell){ cell.el.textContent = cell.base; cell.sc = false; },
+            80 + Math.random() * 280, c);
+        }
+      }
+      this._raf = requestAnimationFrame(() => this._tick());
+    }
+
+    pause()  { if (this._raf) { cancelAnimationFrame(this._raf); this._raf = null; } }
+    resume() { if (!this._raf && this.cells.length) this._tick(); }
+
+    /* Public: swap to a new image URL at runtime */
+    loadImage(src) { this._imgSrc = src; this._build(); }
+  }
+
+  /* Public API */
+  window._initAscii = function (panelEl) {
+    const el = panelEl && panelEl.querySelector('[data-ascii]');
+    if (!el) return;
+    if (el._ascii) { el._ascii.resume(); return; }
+    requestAnimationFrame(function () { if (!el._ascii) el._ascii = new AsciiBlock(el); });
+  };
+  window._pauseAscii = function () {
+    document.querySelectorAll('[data-ascii]').forEach(function (el) { if (el._ascii) el._ascii.pause(); });
+  };
+})();
 </script>
 </body>
 </html>
