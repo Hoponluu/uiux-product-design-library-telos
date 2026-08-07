@@ -686,7 +686,7 @@ body.dark .course-desc { color: rgba(220,215,255,0.6); }
 .ascii-cell {
   position: absolute;
   font-family: 'Courier New', Courier, monospace;
-  font-size: 9px; line-height: 1; letter-spacing: 0.5px;
+  font-size: 6px; line-height: 1; letter-spacing: 0.3px;
   will-change: transform; pointer-events: none; white-space: pre;
   color: rgba(29,26,94,0.10);
 }
@@ -1847,7 +1847,7 @@ function injectConceptsJsonLd(concepts, categories) {
 (function () {
   'use strict';
 
-  const CW = 9, CH = 13;           // cell width / height px
+  const CW = 6.5, CH = 9;           // cell width / height px (2x character density vs. original 9x13)
   const REPEL_R = 95;               // mouse repulsion radius px
   const REPEL_F = 5.5;              // repulsion force strength
   const SPRING  = 0.095;            // spring constant (return to origin)
@@ -1859,6 +1859,35 @@ function injectConceptsJsonLd(concepts, categories) {
   const MIX = '▒░@#:.·+~?!-';      // scramble pool
 
   function pick(s) { return s[0 | (Math.random() * s.length)]; }
+
+  /* Re-center a boolean grid on its own bounding box, so the pattern sits
+     dead-center in the block on any container width (mobile included). */
+  function centerGrid(grid, rows, cols) {
+    let rMin = rows, rMax = -1, cMin = cols, cMax = -1;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        if (!grid[r][c]) continue;
+        if (r < rMin) rMin = r;
+        if (r > rMax) rMax = r;
+        if (c < cMin) cMin = c;
+        if (c > cMax) cMax = c;
+      }
+    }
+    if (rMax < 0) return grid; // nothing drawn
+    const rowShift = Math.round((rows - 1) / 2 - (rMin + rMax) / 2);
+    const colShift = Math.round((cols - 1) / 2 - (cMin + cMax) / 2);
+    if (!rowShift && !colShift) return grid;
+    const out = [];
+    for (let r = 0; r < rows; r++) out[r] = new Array(cols).fill(false);
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        if (!grid[r][c]) continue;
+        const nr = r + rowShift, nc = c + colShift;
+        if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) out[nr][nc] = true;
+      }
+    }
+    return out;
+  }
 
   /* Build a boolean grid (true = foreground) by rendering text to canvas */
   function makePattern(cols, rows, label) {
@@ -1888,7 +1917,7 @@ function injectConceptsJsonLd(concepts, categories) {
         out[r][c] = d[(py * cv.width + px) * 4 + 3] > 90; // alpha channel
       }
     }
-    return out;
+    return centerGrid(out, rows, cols);
   }
 
   /* Build a pattern from an Image element */
