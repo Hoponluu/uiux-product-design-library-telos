@@ -686,7 +686,7 @@ body.dark .course-desc { color: rgba(220,215,255,0.6); }
 .ascii-cell {
   position: absolute;
   font-family: 'Courier New', Courier, monospace;
-  font-size: 6px; line-height: 1; letter-spacing: 0.3px;
+  font-size: 9px; line-height: 1; letter-spacing: 0.5px;
   will-change: transform; pointer-events: none; white-space: pre;
   color: rgba(29,26,94,0.16);
 }
@@ -1847,7 +1847,7 @@ function injectConceptsJsonLd(concepts, categories) {
 (function () {
   'use strict';
 
-  const CW = 6.5, CH = 9;           // cell width / height px (2x character density vs. original 9x13)
+  const CW = 9, CH = 13;             // cell width / height px
   const REPEL_R = 130;              // mouse repulsion radius px
   const REPEL_F = 9;                // repulsion force strength
   const SPRING  = 0.095;            // spring constant (return to origin)
