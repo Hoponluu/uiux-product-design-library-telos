@@ -563,14 +563,14 @@ function updateLabels(){
     L.el.hidden = false; L.el.style.transform = `translate(${s.x|0}px,${s.y|0}px) translate(-50%,-100%)`;
   });
   const bTarget = near || null;
-  if (bTarget && $('#dialog').hidden){
+  if (bTarget && $('#dialog').hidden && $('#panel').hidden){
     const rp = bTarget.obj.root.position, s = project(new THREE.Vector3(rp.x, 1.62, rp.z));
     const html = `<small>${bTarget.role.title}</small>${bTarget.role.doing}<br><span style="color:var(--ink-faint)">Bấm <kbd>F</kbd> hoặc click để nói chuyện</span>`;
     if (bubble.dataset.k !== bTarget.id){ bubble.innerHTML = html; bubble.dataset.k = bTarget.id; }
     bubble.hidden = false; bubble.style.transform = `translate(${s.x|0}px,${s.y|0}px) translate(-50%,-100%)`;
   } else if (lockNear && $('#panel').hidden){
     const s = project(new THREE.Vector3(lockNear.doorPoint[0], 1.9, lockNear.doorPoint[1] + .3));
-    bubble.innerHTML = '<small>Phòng ban khác</small>Ở công ty nhỏ chưa có các vai trò này.<br><span style="color:var(--ink-faint)">Bấm <kbd>F</kbd> để xem bên trong</span>'; bubble.dataset.k = 'lock';
+    bubble.innerHTML = '<small>Phòng ban khác</small>Ở công ty product nhỏ chưa có các vai trò này.<br><span style="color:var(--ink-faint)">Bấm <kbd>F</kbd> để xem bên trong</span>'; bubble.dataset.k = 'lock';
     bubble.hidden = false; bubble.style.transform = `translate(${s.x|0}px,${s.y|0}px) translate(-50%,-100%)`;
   } else bubble.hidden = true;
 }
@@ -696,7 +696,7 @@ function questTick(dt){
 let lastRoom, introOff = false, introTimer = null; const introSeen = new Set();
 function roomAt(x, z){ return rooms.find(r => r.kind !== 'locked' && Math.abs(x - r.x) <= r.w/2 && Math.abs(z - r.z) <= r.d/2) || null; }
 function checkRoom(){
-  if (!$('#welcome').hidden || !player) return;
+  if (!$('#welcome').hidden || !player || (mode === 'quest' && small())) return;
   const r = roomAt(player.obj.root.position.x, player.obj.root.position.z);
   if (r === lastRoom) return; lastRoom = r;
   if (!r || introOff || !ROOM_INFO[r.id] || introSeen.has(scaleKey + r.id)) return;
@@ -705,8 +705,8 @@ function checkRoom(){
 }
 function showIntro(r){
   const n = new Set(r.members).size, el = $('#roomintro');
-  el.innerHTML = `<button class="close" aria-label="Đóng giới thiệu">×</button><p class="eyebrow">Bạn vừa vào · ${r.code}</p><h3>${r.name}</h3><p>${ROOM_INFO[r.id]}</p>
-    <div class="ri-foot"><span>${n ? n + ' vai trò trong phòng' : 'Khu vực chung'}</span></div>`;
+  el.innerHTML = `<button class="close" aria-label="Đóng giới thiệu">×</button><div class="sheet-body"><p class="eyebrow">Bạn vừa vào · ${r.code}</p><h3>${r.name}</h3><p>${ROOM_INFO[r.id]}</p>
+    <div class="ri-foot"><span>${n ? n + ' vai trò trong phòng' : 'Khu vực chung'}</span></div></div>`;
   el.hidden = false;
   el.querySelector('.close').onclick = hideIntro;
   clearTimeout(introTimer); introTimer = setTimeout(hideIntro, 12000);
@@ -719,26 +719,26 @@ const statusChip = s => s === 'pub' ? '<span class="chip pub">Đã có bài</spa
 function openPanel(c){
   hideIntro();
   if (c.roamer){ const sp = c.role.special;
-    $('#panel').innerHTML = `<button class="close" aria-label="Đóng">×</button>
+    $('#panel').innerHTML = `<button class="close" aria-label="Đóng">×</button><div class="sheet-body">
       <p class="eyebrow">Tác giả của game</p><h2>${c.role.title}</h2>
       <div class="chips"><span class="chip pub">${sp.tag}</span></div>
       <div class="sec"><p>${c.role.summary}</p></div>
       <div class="sec"><h4>Ổng có thể giúp gì cho bạn?</h4><p>${c.role.withDesigner}</p></div>
       <div class="sec"><h4>Nhiệm vụ hằng ngày</h4><p style="color:var(--ink-faint)">Sắp ra mắt. Ổng sẽ giao cho bạn một nhiệm vụ nhỏ mỗi ngày.</p></div>
-      <div class="row">${ctaButtons(sp.links)}</div>`;
+      <div class="row">${ctaButtons(sp.links)}</div></div>`;
     $('#panel').hidden = false; $('#panel .close').onclick = closePanel; return; }
   if (c.guest){ const gs = c.role.guest;
-    $('#panel').innerHTML = `<button class="close" aria-label="Đóng">×</button>
+    $('#panel').innerHTML = `<button class="close" aria-label="Đóng">×</button><div class="sheet-body">
       <p class="eyebrow">${c.room.name}</p><h2>${c.role.title}</h2>
       <div class="chips"><span class="chip draft">${gs.tag}</span></div>
       <div class="sec"><p>${c.role.summary}</p></div>
       <div class="sec"><h4>Đang làm</h4><p>${c.role.doing}</p></div>
       <div class="sec"><h4>Vì sao nên nói chuyện với User</h4><p>${c.role.withDesigner}</p></div>
       ${gs.links.length ? `<div class="sec"><h4>Bài nên đọc</h4></div>
-      <div class="row" style="margin-top:6px">${ctaButtons(gs.links)}</div>` : ''}`;
+      <div class="row" style="margin-top:6px">${ctaButtons(gs.links)}</div>` : ''}</div>`;
     $('#panel').hidden = false; $('#panel .close').onclick = closePanel; return; }
   const r = c.role, g = GROUPS[r.group], boss = reportName(c);
-  $('#panel').innerHTML = `<button class="close" aria-label="Đóng">×</button>
+  $('#panel').innerHTML = `<button class="close" aria-label="Đóng">×</button><div class="sheet-body">
     <p class="eyebrow">${c.room.code} · ${c.room.name}</p>
     <h2>${r.title}</h2>
     <div class="chips"><span class="chip"><i class="sw" style="background:${g.color}"></i>${g.name}</span>${statusChip(r.status)}</div>
@@ -746,16 +746,16 @@ function openPanel(c){
     <div class="sec"><h4>Đang làm</h4><p>${r.doing}</p></div>
     <div class="sec"><h4>Làm việc với bạn thế nào</h4><p>${r.withDesigner}</p></div>
     ${boss ? `<div class="sec"><h4>Báo cáo cho</h4><p>${boss}</p></div>` : ''}
-    <div class="row">${r.url ? `<a class="btn btn-primary" href="${r.url}" target="_blank" rel="noopener">Đọc bài đầy đủ</a>` : '<span class="btn btn-primary is-disabled">Bài viết sắp ra mắt</span>'}<button class="btn btn-ghost" id="p-close">Tiếp tục đi dạo</button></div>`;
+    <div class="row">${r.url ? `<a class="btn btn-primary" href="${r.url}" target="_blank" rel="noopener">Đọc bài đầy đủ</a>` : '<span class="btn btn-primary is-disabled">Bài viết sắp ra mắt</span>'}<button class="btn btn-ghost" id="p-close">Tiếp tục đi dạo</button></div></div>`;
   $('#panel').hidden = false;
   $('#panel .close').onclick = closePanel; $('#p-close').onclick = closePanel;
 }
 function openLocked(r){
   const items = LOCKED_ROLES.map(id => ROLES[id]).filter(Boolean).map(x => `<li style="display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:13px">${x.url ? `<a href="${x.url}" target="_blank" rel="noopener" style="color:var(--ink)">${x.title}</a>` : x.title}${statusChip(x.status)}</li>`).join('');
-  $('#panel').innerHTML = `<button class="close" aria-label="Đóng">×</button><p class="eyebrow">Cửa đóng</p><h2>Phòng ban khác</h2>
+  $('#panel').innerHTML = `<button class="close" aria-label="Đóng">×</button><div class="sheet-body"><p class="eyebrow">Cửa đóng</p><h2>Phòng ban khác</h2>
     <div class="sec"><p>Ở công ty product nhỏ, những vai trò này chưa có bàn riêng. Việc của họ thường do PM, designer hoặc dev kiêm nhiệm. Khi công ty lớn lên, từng vai trò sẽ có phòng riêng.</p></div>
     <ul style="list-style:none;padding:0;margin:14px 0 0;display:grid;gap:7px">${items}</ul>
-    <div class="row"><button class="btn btn-primary" id="go-large">Gặp họ ở tập đoàn product 100+ nhân sự</button></div>`;
+    <div class="row"><button class="btn btn-primary" id="go-large">Gặp họ ở tập đoàn product 100+ nhân sự</button></div></div>`;
   $('#panel').hidden = false; $('#panel .close').onclick = closePanel; $('#go-large').onclick = () => { closePanel(); setScale('large'); };
 }
 function closePanel(){ $('#panel').hidden = true; }
@@ -816,10 +816,10 @@ function showRewards(q){
 }
 function showSummary(){
   const all = [...new Set(Q.cards[scaleKey])].map(cardFor);
-  $('#modal').innerHTML = `<div class="card" role="dialog" aria-modal="true" aria-label="Tổng kết"><button class="close" aria-label="Đóng">×</button><p class="eyebrow">Tổng kết sprint</p><h2>Bạn đã hoàn thành ${qlist().length} quest</h2>
+  $('#modal').innerHTML = `<div class="card sheet" role="dialog" aria-modal="true" aria-label="Tổng kết"><button class="close" aria-label="Đóng">×</button><div class="sheet-body"><p class="eyebrow">Tổng kết sprint</p><h2>Bạn đã hoàn thành ${qlist().length} quest</h2>
     <p style="margin:0;color:var(--ink-soft)">Đã gặp ${met[scaleKey].size}/${$('#mett').textContent} vai trò và mở khoá ${all.length} thẻ kiến thức.${scaleKey === 'small' ? ' Thử tiếp ở tập đoàn product 100+ nhân sự để gặp Design Manager, UX Researcher và team Design System.' : ''}</p>
     <div class="rewards">${all.map(c => `<div class="reward"><span>${c.kind}</span><b>${c.title}</b>${c.url ? `<a href="${c.url}" target="_blank" rel="noopener">Đọc bài</a>` : '<span>Sắp ra mắt</span>'}</div>`).join('')}</div>
-    <div class="row">${scaleKey === 'small' ? '<button class="btn btn-primary" id="sum-large">Chơi ở tập đoàn 100+ nhân sự</button>' : ''}<a class="btn btn-ghost" href="https://academy.telos.vn/" target="_blank" rel="noopener">Khám phá khoá học TELOS</a></div></div>`;
+    <div class="row">${scaleKey === 'small' ? '<button class="btn btn-primary" id="sum-large">Chơi ở tập đoàn 100+ nhân sự</button>' : ''}<a class="btn btn-ghost" href="https://academy.telos.vn/" target="_blank" rel="noopener">Khám phá khoá học TELOS</a></div></div></div>`;
   $('#modal').hidden = false; $('#modal .close').onclick = () => $('#modal').hidden = true;
   const b = $('#sum-large'); if (b) b.onclick = () => { $('#modal').hidden = true; setScale('large'); };
 }
@@ -854,18 +854,19 @@ function setMode(m){
   const prev = mode; mode = m;
   $('#quest-fab').setAttribute('aria-pressed', m === 'quest');
   if (prev === 'quest' && m !== 'quest'){ clearMarkers(); hideSpot(); closeDialog(); sendHome(chars); clearTimeout(Q.timer); Q.phase = null; Q.prog = null; player.sitting = false; rooms.forEach(r => r.tv && (r.tv.mat.map = r.tv.idle)); }
-  if (m === 'quest' && prev !== 'quest'){ closePanel(); Q.summaryShown = false; startQuest(); }
+  if (m === 'quest' && prev !== 'quest'){ closePanel(); if (small()) hideIntro(); Q.summaryShown = false; startQuest(); }
   renderQuest(); updateFab();
 }
 function setScale(k){
   if (k === scaleKey && world) return;
-  $('#sc-small').setAttribute('aria-pressed', k === 'small'); $('#sc-large').setAttribute('aria-pressed', k === 'large');
+  $('#sc-small').setAttribute('aria-pressed', k === 'small'); $('#sc-large').setAttribute('aria-pressed', k === 'large'); $('#scale-select').value = k;
   closePanel(); closeDialog(); clearTimeout(Q.timer); Q.phase = null;
   buildWorld(k);
   if (mode === 'quest'){ Q.summaryShown = false; startQuest(); }
   renderQuest(); updateFab(); if (!$('#list').hidden) renderList();
 }
 $('#sc-small').onclick = () => setScale('small'); $('#sc-large').onclick = () => setScale('large');
+$('#scale-select').onchange = e => { if (SCALES[e.target.value]) setScale(e.target.value); else e.target.value = scaleKey; };
 // Nút "Nhiệm vụ" cạnh bản đồ: bật / tắt chế độ quest
 function updateFab(){
   const list = QUESTS[scaleKey] || [], i = Math.min(Q.idx[scaleKey], list.length), b = $('#qf-badge');
