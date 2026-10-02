@@ -179,7 +179,7 @@ body.dark #header-logo { filter: brightness(0) invert(1); }
   .tab-btn:hover { background: transparent; }
   .tab-btn.active { background: transparent; color: #241775; }
   .tb-icon { display: block; }
-  #tm-shell { top: 56px; bottom: 64px; }
+  #tm-shell { top: 56px; bottom: 64px; z-index: 300; } /* popup của game (bottom sheet) được phép đè lên bottom bar */
 }
 </style>
 </head>
@@ -289,7 +289,12 @@ body.dark #header-logo { filter: brightness(0) invert(1); }
         <span class="qf-label">Nhiệm vụ</span>
         <span class="qf-badge" id="qf-badge" hidden></span>
       </button>
+      <button id="map-btn" class="map-btn" aria-label="Mở bản đồ nhỏ">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M9 4 3 6.5v13L9 17l6 2.5 6-2.5v-13L15 6.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><path d="M9 4v13M15 6.5v13" stroke="currentColor" stroke-width="1.9"/></svg>
+        <span class="mb-met"><b id="map-metc">0</b>/<span id="map-mett">0</span></span>
+      </button>
       <div id="mini" class="card">
+        <div class="mini-head"><span>Bản đồ · chạm để đi tới</span><button id="mini-close" class="close" aria-label="Đóng bản đồ">×</button></div>
         <canvas id="minimap" width="180" height="130" aria-label="Bản đồ nhỏ"></canvas>
         <div class="met"><span>Đã gặp <b id="metc">0</b>/<b id="mett">0</b></span><span class="zoom"><button id="rotl" aria-label="Xoay trái (Q)" title="Xoay trái (Q)">↺</button><button id="rotr" aria-label="Xoay phải (E)" title="Xoay phải (E)">↻</button><button id="zin" aria-label="Phóng to">+</button><button id="zout" aria-label="Thu nhỏ">−</button></span></div>
       </div>

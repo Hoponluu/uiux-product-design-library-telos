@@ -260,9 +260,10 @@ function buildWorld(key){
   rooms.filter(r => r.kind === 'lounge').forEach(cornerLogo);
   lastRoom = undefined;
   player = chars.find(c => c.isPlayer);
-  $('#mett').textContent = new Set(chars.filter(c => !c.isPlayer && !c.roamer && !c.guest).map(c => c.role.id)).size;
+  $('#mett').textContent = $('#map-mett').textContent = new Set(chars.filter(c => !c.isPlayer && !c.roamer && !c.guest).map(c => c.role.id)).size;
   updateMet(); applyTheme();
-  placeCamera(player.obj.root.position, camY.overview ? camY.dist : 18);
+  // màn hình dọc (mobile) thấy ít theo chiều ngang, nên lùi camera ra xa hơn
+  placeCamera(player.obj.root.position, camY.overview ? camY.dist : Math.round(18 * Math.min(1.6, Math.max(1, .8 / camera.aspect))));
 }
 
 function buildRoom(r){
@@ -484,13 +485,25 @@ addEventListener('keydown', e => {
 });
 addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
 let drag = null;
-canvas.addEventListener('pointerdown', e => { drag = { x:e.clientX, y:e.clientY, lx:e.clientX, moved:false, button:e.button }; });
+// hai ngón tay: pinch để zoom (mobile)
+const touches = new Map(); let pinch = null;
+const touchGap = () => { const [a, b] = [...touches.values()]; return Math.hypot(a.x - b.x, a.y - b.y) || 1; };
+canvas.addEventListener('pointerdown', e => {
+  touches.set(e.pointerId, { x:e.clientX, y:e.clientY });
+  if (touches.size === 2){ drag = null; pinch = { gap:touchGap(), dist:camY.distT }; return; }
+  if (touches.size > 2) return;
+  drag = { x:e.clientX, y:e.clientY, lx:e.clientX, moved:false, button:e.button }; });
+const dropTouch = e => { touches.delete(e.pointerId); if (touches.size < 2) pinch = null; };
+addEventListener('pointercancel', e => { dropTouch(e); drag = null; });
 addEventListener('pointermove', e => {
+  if (touches.has(e.pointerId)) touches.set(e.pointerId, { x:e.clientX, y:e.clientY });
+  if (pinch && touches.size === 2){ camY.distT = Math.min(camY.overview ? 160 : 42, Math.max(8, pinch.dist * pinch.gap / touchGap())); return; }
   if (drag){ if (!drag.moved && Math.hypot(e.clientX-drag.x, e.clientY-drag.y) > 6){ drag.moved = true; canvas.style.cursor = 'grabbing'; }
     if (drag.moved){ camY.yaw -= (e.clientX - drag.lx)*.008; camY.yawT = camY.yaw; } drag.lx = e.clientX; }
   else if (e.target === canvas) hover(e);
 });
-addEventListener('pointerup', e => { if (drag && !drag.moved && drag.button === 0) click(e); if (drag && drag.moved) canvas.style.cursor = ''; drag = null; });
+addEventListener('pointerup', e => { const wasPinch = !!pinch; dropTouch(e); if (wasPinch){ drag = null; return; }
+  if (drag && !drag.moved && drag.button === 0){ if (sheetOpen()) closeSheets(); click(e); } if (drag && drag.moved) canvas.style.cursor = ''; drag = null; });
 $('#zin').onclick = () => dolly(.8);
 $('#zout').onclick = () => dolly(1.25);
 $('#rotl').onclick = () => rotateCam(-1);
@@ -569,12 +582,12 @@ function updateLabels(){
   const bTarget = near || null;
   if (bTarget && $('#dialog').hidden && $('#panel').hidden){
     const rp = bTarget.obj.root.position, s = project(new THREE.Vector3(rp.x, 1.62, rp.z));
-    const html = `<small>${bTarget.role.title}</small>${bTarget.role.doing}<br><span style="color:var(--ink-faint)">Bấm <kbd>F</kbd> hoặc click để nói chuyện</span>`;
+    const html = `<small>${bTarget.role.title}</small><span class="b-long">${bTarget.role.doing}<br></span><span class="b-key" style="color:var(--ink-faint)">Bấm <kbd>F</kbd> hoặc click để nói chuyện</span><span class="b-touch">Chạm để nói chuyện</span>`;
     if (bubble.dataset.k !== bTarget.id){ bubble.innerHTML = html; bubble.dataset.k = bTarget.id; }
     bubble.hidden = false; bubble.style.transform = `translate(${s.x|0}px,${s.y|0}px) translate(-50%,-100%)`;
   } else if (lockNear && $('#panel').hidden){
     const s = project(new THREE.Vector3(lockNear.doorPoint[0], 1.9, lockNear.doorPoint[1] + .3));
-    bubble.innerHTML = '<small>Phòng ban khác</small>Ở công ty product nhỏ chưa có các vai trò này.<br><span style="color:var(--ink-faint)">Bấm <kbd>F</kbd> để xem bên trong</span>'; bubble.dataset.k = 'lock';
+    bubble.innerHTML = '<small>Phòng ban khác</small><span class="b-long">Ở công ty product nhỏ chưa có các vai trò này.<br></span><span class="b-key" style="color:var(--ink-faint)">Bấm <kbd>F</kbd> để xem bên trong</span><span class="b-touch">Chạm cửa để xem bên trong</span>'; bubble.dataset.k = 'lock';
     bubble.hidden = false; bubble.style.transform = `translate(${s.x|0}px,${s.y|0}px) translate(-50%,-100%)`;
   } else bubble.hidden = true;
 }
@@ -592,7 +605,7 @@ function talk(c){
   if (mode === 'quest' && questTalk(c)) return;
   openPanel(c);
 }
-function updateMet(){ $('#metc').textContent = met[scaleKey].size; }
+function updateMet(){ $('#metc').textContent = $('#map-metc').textContent = met[scaleKey].size; }
 
 // ---------- office life ----------
 const CHAT_ICONS = ['•••','?','!','✓','+1','•••','✎','•••'];
@@ -704,24 +717,52 @@ function checkRoom(){
   const r = roomAt(player.obj.root.position.x, player.obj.root.position.z);
   if (r === lastRoom) return; lastRoom = r;
   if (!r || introOff || !ROOM_INFO[r.id] || introSeen.has(scaleKey + r.id)) return;
-  if (!$('#panel').hidden || !$('#modal').hidden || !$('#list').hidden) return;
+  if (!$('#panel').hidden || !$('#modal').hidden || !$('#list').hidden || sheetOpen()) return;
   introSeen.add(scaleKey + r.id); showIntro(r);
 }
 function showIntro(r){
   const n = new Set(r.members).size, el = $('#roomintro');
-  el.innerHTML = `<button class="close" aria-label="Đóng giới thiệu">×</button><div class="sheet-body"><p class="eyebrow">Bạn vừa vào · ${r.code}</p><h3>${r.name}</h3><p>${ROOM_INFO[r.id]}</p>
+  el.classList.remove('open');
+  el.innerHTML = `<button class="ri-compact" aria-label="Xem giới thiệu ${r.name}"><span class="ri-i" aria-hidden="true">i</span><span>Bạn vừa vào <b>${r.name}</b></span></button><button class="close" aria-label="Đóng giới thiệu">×</button><div class="sheet-body"><p class="eyebrow">Bạn vừa vào · ${r.code}</p><h3>${r.name}</h3><p>${ROOM_INFO[r.id]}</p>
     <div class="ri-foot"><span>${n ? n + ' vai trò trong phòng' : 'Khu vực chung'}</span></div></div>`;
   el.hidden = false;
   el.querySelector('.close').onclick = hideIntro;
-  clearTimeout(introTimer); introTimer = setTimeout(hideIntro, 12000);
+  el.querySelector('.ri-compact').onclick = () => { closeSheets('intro'); clearTimeout(introTimer); el.hidden = false; el.classList.add('open'); };
+  clearTimeout(introTimer); introTimer = setTimeout(hideIntro, isMobile() ? 6000 : 12000);
 }
-function hideIntro(){ $('#roomintro').hidden = true; clearTimeout(introTimer); }
+function hideIntro(){ const el = $('#roomintro'); el.hidden = true; el.classList.remove('open'); clearTimeout(introTimer); }
+
+// ---------- mobile: popups are bottom sheets, one at a time ----------
+// Desktop giữ nguyên cách cũ. Trên mobile mọi popup nằm ở chân màn hình, cao tối đa ~1/3,
+// mở cái này thì cái kia đóng, chạm ra ngoài thì đóng.
+const mqMobile = matchMedia('(max-width:760px)'), isMobile = () => mqMobile.matches;
+function sheetOpen(){
+  if (!isMobile()) return false;
+  return !$('#panel').hidden || !$('#dialog').hidden || !$('#welcome').hidden || !$('#modal').hidden
+    || ['#roomintro', '#mini', '#quest'].some(id => $(id).classList.contains('open'));
+}
+function closeSheets(except){
+  if (!isMobile()) return;
+  if (except !== 'panel') closePanel();
+  if (except !== 'dialog') closeDialog();
+  if (except !== 'intro') hideIntro();
+  if (except !== 'mini') $('#mini').classList.remove('open');
+  if (except !== 'quest') $('#quest').classList.remove('open');
+  if (except !== 'welcome' && !$('#welcome').hidden) $('#start').click();
+  if (except !== 'modal' && !$('#modal').hidden){ const n = $('#next-q'); if (n) n.click(); else $('#modal').hidden = true; }
+}
+const SHEET_SEL = '#panel:not([hidden]),#dialog:not([hidden]),#welcome:not([hidden]),#modal .card,#roomintro.open,#mini.open,#quest.open,#list,#nav-overlay';
+document.addEventListener('click', e => {
+  if (!isMobile() || e.target === canvas || !e.target.closest || e.target.closest(SHEET_SEL)) return;
+  if (sheetOpen()) closeSheets();
+}, true);
+mqMobile.addEventListener && mqMobile.addEventListener('change', () => ['#roomintro', '#mini', '#quest'].forEach(id => $(id).classList.remove('open')));
 
 // ---------- panel ----------
 const ctaButtons = links => links.map((b, i) => `<a class="btn ${(links.some(x => x.primary) ? b.primary : !i) ? 'btn-primary' : 'btn-ghost'}" href="${b.url}" target="_blank" rel="noopener">${b.label}</a>`).join('');
 const statusChip = s => s === 'pub' ? '<span class="chip pub">Đã có bài</span>' : s === 'draft' ? '<span class="chip draft">Bản nháp</span>' : '<span class="chip todo">Sắp ra mắt</span>';
 function openPanel(c){
-  hideIntro();
+  hideIntro(); closeSheets('panel');
   track('tm_character_open', { character_id: c.role.id, character_title: c.role.title, character_kind: c.roamer ? 'author' : c.guest ? 'guest' : c.isPlayer ? 'player' : 'role',
     has_article: !!c.role.url, room_id: c.room.id });
   if (c.roamer){ const sp = c.role.special;
@@ -757,7 +798,7 @@ function openPanel(c){
   $('#panel .close').onclick = closePanel; $('#p-close').onclick = closePanel;
 }
 function openLocked(r){
-  track('tm_locked_room_open');
+  track('tm_locked_room_open'); closeSheets('panel');
   const items = LOCKED_ROLES.map(id => ROLES[id]).filter(Boolean).map(x => `<li style="display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:13px">${x.url ? `<a href="${x.url}" target="_blank" rel="noopener" style="color:var(--ink)">${x.title}</a>` : x.title}${statusChip(x.status)}</li>`).join('');
   $('#panel').innerHTML = `<button class="close" aria-label="Đóng">×</button><div class="sheet-body"><p class="eyebrow">Cửa đóng</p><h2>Phòng ban khác</h2>
     <div class="sec"><p>Ở công ty product nhỏ, những vai trò này chưa có bàn riêng. Việc của họ thường do PM, designer hoặc dev kiêm nhiệm. Khi công ty lớn lên, từng vai trò sẽ có phòng riêng.</p></div>
@@ -822,6 +863,7 @@ function cardFor(name){ if (ROLES[name]){ const r = ROLES[name]; return { title:
 function showRewards(q){
   const list = qlist(), last = Q.idx[scaleKey] >= list.length - 1;
   const cards = q.rewards.map(cardFor).map(c => `<div class="reward"><span>${c.kind}</span><b>${c.title}</b>${c.url ? `<a href="${c.url}" target="_blank" rel="noopener">Đọc bài</a>` : '<span>Bài viết sắp ra mắt</span>'}</div>`).join('');
+  closeSheets('modal');
   $('#modal').innerHTML = `<div class="card" role="dialog" aria-modal="true" aria-label="Phần thưởng quest"><p class="eyebrow">Hoàn thành quest ${Q.idx[scaleKey]+1}/${list.length}</p><h2>${q.title}</h2>
     <p style="margin:0;color:var(--ink-soft)">Bạn mở khoá ${q.rewards.length} thẻ kiến thức. Đọc ngay hoặc để dành, thẻ sẽ nằm trong bộ sưu tập cuối game.</p>
     <div class="rewards">${cards}</div><div class="row"><button class="btn btn-primary" id="next-q">${last ? 'Xem tổng kết' : 'Quest tiếp theo'}</button></div></div>`;
@@ -834,6 +876,7 @@ function showSummary(){
   const all = [...new Set(Q.cards[scaleKey])].map(cardFor);
   if (Q.idx[scaleKey] >= qlist().length && !chainTracked.has(scaleKey)){ chainTracked.add(scaleKey);
     track('tm_quest_chain_complete', { quests: qlist().length, cards: all.length, met: met[scaleKey].size }); }
+  closeSheets('modal');
   $('#modal').innerHTML = `<div class="card sheet" role="dialog" aria-modal="true" aria-label="Tổng kết"><button class="close" aria-label="Đóng">×</button><div class="sheet-body"><p class="eyebrow">Tổng kết sprint</p><h2>Bạn đã hoàn thành ${qlist().length} quest</h2>
     <p style="margin:0;color:var(--ink-soft)">Đã gặp ${met[scaleKey].size}/${$('#mett').textContent} vai trò và mở khoá ${all.length} thẻ kiến thức.${scaleKey === 'small' ? ' Thử tiếp ở tập đoàn product 100+ nhân sự để gặp Design Manager, UX Researcher và team Design System.' : scaleKey === 'agency' ? ' Bạn vừa đi hết một dự án ở agency. Thử so với cách làm việc ở công ty sản phẩm xem khác gì nhé.' : ''}</p>
     <div class="rewards">${all.map(c => `<div class="reward"><span>${c.kind}</span><b>${c.title}</b>${c.url ? `<a href="${c.url}" target="_blank" rel="noopener">Đọc bài</a>` : '<span>Sắp ra mắt</span>'}</div>`).join('')}</div>
@@ -845,7 +888,9 @@ function renderQuest(){
   const el = $('#quest'); updateFab(); if (mode !== 'quest'){ el.hidden = true; return; }
   const list = qlist(), i = Q.idx[scaleKey], q = list[i];
   const prog = list.map((_,k) => `<i class="${k < i ? 'done' : k === i ? 'now' : ''}"></i>`).join('');
-  if (!q){ el.innerHTML = `<p class="eyebrow">Hoàn thành</p><h3>Bạn đã xong mọi quest</h3><p>Mở lại tổng kết để xem các thẻ kiến thức.</p><div class="qprog">${prog}</div><div class="row" style="margin-top:12px"><button class="btn btn-primary" id="q-sum">Xem tổng kết</button><button class="btn btn-ghost" id="q-reset">Chơi lại</button></div>`;
+  const go = ['offer', 'step', 'return'].includes(Q.phase) && !Q.prog ? '<button class="q-go" aria-label="Tự đi tới chỗ cần tới">Đi tới</button>' : '';
+  const pill = (n, text) => `<div class="q-pill"><button class="q-compact" aria-label="Xem chi tiết nhiệm vụ"><span class="qc-n">${n}</span><span class="qc-t">${text}</span><span class="qc-more" aria-hidden="true">›</span></button>${go}</div><button class="close q-close" aria-label="Thu nhỏ nhiệm vụ">×</button>`;
+  if (!q){ el.innerHTML = pill('✓', 'Đã xong mọi quest · xem tổng kết') + `<div class="q-full"><p class="eyebrow">Hoàn thành</p><h3>Bạn đã xong mọi quest</h3><p>Mở lại tổng kết để xem các thẻ kiến thức.</p><div class="qprog">${prog}</div><div class="row" style="margin-top:12px"><button class="btn btn-primary" id="q-sum">Xem tổng kết</button><button class="btn btn-ghost" id="q-reset">Chơi lại</button></div></div>`;
     el.hidden = false; $('#q-sum').onclick = showSummary; $('#q-reset').onclick = () => { Q.idx[scaleKey] = 0; Q.cards[scaleKey] = []; startQuest(); }; if (Q.phase === 'finished' && !Q.summaryShown){ Q.summaryShown = true; showSummary(); } return; }
   const room = roomOf(q.room), gname = Q.giver ? Q.giver.role.title : '';
   let obj = '';
@@ -855,11 +900,23 @@ function renderQuest(){
     if (s.type) obj += Q.prog ? `<div class="qbar"><i></i></div>` : `<br><span class="objhint">${s.type === 'work' ? 'Đi tới vòng tròn hồng ở chỗ ngồi của bạn' : 'Đi tới vòng tròn hồng cạnh TV'}</span>`; }
   else if (Q.phase === 'return') obj = `Quay lại báo cáo với ${gname}`;
   else obj = 'Chuẩn bị quest tiếp theo…';
-  el.innerHTML = `<p class="eyebrow">Quest ${i+1}/${list.length}</p><h3>${q.title}</h3><div class="objective">${obj}</div><div class="qprog">${prog}</div>`;
+  const plain = obj.replace(/<div class="qbar">.*$/, ' · đang làm…').replace(/<br>.*$/, '').replace(/<[^>]+>/g, '');
+  el.innerHTML = pill(`${i+1}/${list.length}`, plain) + `<div class="q-full"><p class="eyebrow">Quest ${i+1}/${list.length}</p><h3>${q.title}</h3><div class="objective">${obj}</div><div class="qprog">${prog}</div></div>`;
   el.hidden = false;
 }
+// "Đi tới": tự đi tới người / vòng tròn hồng của bước hiện tại (mobile, khi đích nằm ngoài màn hình)
+function goToQuestTarget(){
+  if (spot && spot.ring.visible) return walkTo(player, spot.ring.position.x, spot.ring.position.z);
+  const c = chars.find(x => x.markerKind && !x.isPlayer); if (!c) return;
+  const p = c.obj.root.position; walkTo(player, p.x, p.z, () => talk(c), 1.3);
+}
+$('#quest').addEventListener('click', e => {
+  if (e.target.closest('.q-go')){ $('#quest').classList.remove('open'); goToQuestTarget(); }
+  else if (e.target.closest('.q-compact')){ closeSheets('quest'); $('#quest').classList.add('open'); }
+  else if (e.target.closest('.q-close')) $('#quest').classList.remove('open');
+});
 function dialog(c, text, cta, onOk){
-  hideIntro();
+  hideIntro(); closeSheets('dialog');
   const d = $('#dialog');
   d.innerHTML = `<div class="who">${c.role.title} · ${c.room.name}</div><p>${text}</p><div class="row"><button class="btn btn-primary">${cta}</button></div>`;
   d.hidden = false; closePanel();
@@ -968,7 +1025,10 @@ function drawMini(){
   const p = player.obj.root.position; mx.beginPath(); mx.arc(X(p.x), Z(p.z), 4, 0, 7); mx.fillStyle = '#E92F7C'; mx.fill(); mx.strokeStyle = '#fff'; mx.lineWidth = 1.5; mx.stroke();
 }
 mm.addEventListener('click', e => { const r = mm.getBoundingClientRect(), W = mm.width, H = mm.height, bw = bounds.x1-bounds.x0, bd = bounds.z1-bounds.z0, s = Math.min(W/bw, H/bd);
-  const x = bounds.x0 + ((e.clientX-r.left)*(W/r.width) - (W-bw*s)/2)/s, z = bounds.z0 + ((e.clientY-r.top)*(H/r.height) - (H-bd*s)/2)/s; walkTo(player, x, z); });
+  const x = bounds.x0 + ((e.clientX-r.left)*(W/r.width) - (W-bw*s)/2)/s, z = bounds.z0 + ((e.clientY-r.top)*(H/r.height) - (H-bd*s)/2)/s; walkTo(player, x, z);
+  if (isMobile()) $('#mini').classList.remove('open'); });
+$('#map-btn').onclick = () => { closeSheets('mini'); $('#mini').classList.add('open'); };
+$('#mini-close').onclick = () => $('#mini').classList.remove('open');
 
 // ---------- boot ----------
 const DEBUG = location.hash === '#debug' && /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? Object.assign(document.createElement('div'), { id:'dbg' }) : null; if (DEBUG) $('#app').appendChild(DEBUG);

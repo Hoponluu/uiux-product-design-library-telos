@@ -139,7 +139,6 @@
 .ri-off{border:0;background:transparent;color:var(--accent);font-weight:600;font-size:12px;cursor:pointer;padding:2px 0;text-decoration:underline;text-underline-offset:3px;}
 @keyframes ri-in{from{opacity:0;transform:translateY(6px);}}
 @media (prefers-reduced-motion: reduce){#roomintro{animation:none;}}
-@media (max-width:760px){#roomintro{bottom:160px;right:16px;width:auto;max-height:150px;}}
 #welcome{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:440px;max-width:calc(100% - 32px);padding:22px 24px;pointer-events:auto;z-index:8;}
 #welcome h1{font-family:var(--font-display);font-size:24px;line-height:1.2;margin:8px 0 8px;text-wrap:balance;}
 #welcome p{margin:0 0 8px;color:var(--ink-soft);line-height:1.6;}
@@ -171,8 +170,6 @@
   .seg button{padding:6px 10px;font-size:12px;}
   #hint{display:none;}
   #mini canvas{width:120px;height:90px;}
-  #quest{top:64px;left:12px;right:12px;width:auto;max-width:none;box-sizing:border-box;}
-  #panel{top:auto;bottom:12px;right:12px;left:12px;width:auto;max-width:none;max-height:min(58%,440px);}
 }
 
 /* scale switch: "Outsource agency" coming soon */
@@ -266,7 +263,6 @@
   #modal .card{padding:18px;}
   #modal .card.sheet{padding:0;}
   #modal .card.sheet > .sheet-body{padding:18px;}
-  #dialog{bottom:12px;max-height:50%;overflow:auto;padding:14px 16px;}
   #dialog p{font-size:14px;}
 }
 
@@ -277,3 +273,90 @@
 @keyframes tm-spin{to{transform:rotate(360deg);}}
 @media (prefers-reduced-motion: reduce){#tm-loading i{animation:none;}}
 
+
+/* ── mobile HUD: thu gọn mặc định, popup là bottom sheet ───────────────── */
+.q-pill,.q-close,.map-btn,.mini-head,.ri-compact,.b-touch{display:none;}
+
+@media (max-width:760px){
+  /* bong bóng cạnh nhân vật: chỉ tên + gợi ý chạm */
+  .bubble .b-long,.bubble .b-key{display:none;}
+  .bubble .b-touch{display:inline;color:var(--ink-faint);}
+  .bubble{max-width:170px;padding:5px 9px;}
+
+  /* thanh nhiệm vụ: một dòng nhỏ dưới topbar */
+  #quest{top:58px;left:12px;right:12px;width:auto;max-width:none;padding:0;border-radius:999px;background:var(--surface);}
+  #quest .q-full{display:none;}
+  #quest .q-pill{display:flex;align-items:center;gap:6px;padding-right:5px;}
+  .q-go{flex:none;border:0;border-radius:999px;background:var(--indigo-deep);color:#fff;font:700 12px/1 var(--font-body);padding:8px 12px;cursor:pointer;}
+  #quest .q-compact{display:flex;flex:1;min-width:0;align-items:center;gap:8px;min-height:38px;padding:5px 4px 5px 5px;border:0;background:transparent;color:var(--ink);cursor:pointer;text-align:left;font:500 12.5px/1.3 var(--font-body);}
+  .qc-n{flex:none;font:700 11px/1 var(--font-body);color:#fff;background:var(--accent);border-radius:999px;padding:6px 8px;font-variant-numeric:tabular-nums;}
+  .qc-t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .qc-more{flex:none;color:var(--ink-faint);font-size:18px;line-height:1;}
+
+  /* giới thiệu phòng: toast nhỏ góc trái dưới, chạm để đọc */
+  #roomintro{left:12px;right:auto;bottom:12px;top:auto;width:auto;max-width:calc(100% - 160px);padding:0;border-radius:999px;}
+  #roomintro > .close,#roomintro > .sheet-body{display:none;}
+  #roomintro .ri-compact{display:flex;align-items:center;gap:8px;max-width:100%;padding:7px 12px 7px 7px;border:0;background:transparent;color:var(--ink);font:500 12px/1.3 var(--font-body);cursor:pointer;text-align:left;}
+  #roomintro .ri-compact span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .ri-i{flex:none;display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font:700 12px/1 var(--font-display);}
+
+  /* dock: nút Nhiệm vụ + nút bản đồ, cùng cỡ nhỏ */
+  .dock{right:12px;bottom:12px;gap:8px;align-items:flex-end;}
+  #mini{display:none;}
+  .map-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;width:56px;height:60px;padding:0;border:1px solid var(--line);border-radius:var(--radius-m);background:var(--surface);color:var(--ink);box-shadow:var(--shadow);cursor:pointer;}
+  .mb-met{font:600 11px/1 var(--font-body);color:var(--ink-soft);font-variant-numeric:tabular-nums;}
+  .mb-met b{color:var(--ink);}
+  .quest-fab{width:56px;height:60px;gap:2px;border-radius:var(--radius-m);}
+  .quest-fab .qf-icon{width:28px;height:28px;border-radius:9px;background:transparent;}
+  .quest-fab .qf-icon svg{width:24px;height:24px;}
+  .quest-fab .qf-label{font-size:10.5px;}
+  .quest-fab .qf-badge{top:-7px;right:-7px;min-width:20px;height:20px;font-size:10.5px;line-height:20px;padding:0 5px;}
+
+  /* mọi popup: bottom sheet, cao tối đa ~1/3 màn hình, cuộn bên trong */
+  #panel,#dialog,#welcome,#modal .card,#roomintro.open,#mini.open,#quest.open{
+    position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;max-width:none;transform:none;
+    max-height:36vh;max-height:36svh;margin:0;box-sizing:border-box;
+    border-radius:18px 18px 0 0;border-bottom:0;z-index:30;
+    box-shadow:0 -14px 34px -14px rgba(18,10,43,.42);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    animation:sheet-up .22s ease-out;
+  }
+  #welcome,#modal .card:not(.sheet),#dialog{overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
+  #welcome{padding:18px 18px 0;}
+  #welcome h1{font-size:19px;}
+  #welcome p{font-size:13.5px;line-height:1.55;}
+  #dialog{padding:14px 16px calc(14px + env(safe-area-inset-bottom,0px));}
+  #dialog p{font-size:14px;}
+  #panel > .sheet-body{padding:16px 16px 0;}
+  #panel h2{font-size:18px;}
+  /* nút hành động luôn thấy, nội dung cuộn phía trên */
+  #panel .row,#welcome .row,#modal .card .row{position:sticky;bottom:0;margin:12px -16px 0;padding:10px 16px 14px;background:var(--surface);border-top:1px solid var(--line);}
+  #welcome .row{margin:12px -18px 0;padding:10px 18px 14px;}
+  #modal .card:not(.sheet){padding:18px 18px 0;}
+  #modal .card:not(.sheet) .row{margin:12px -18px 0;padding:10px 18px 14px;}
+  #modal .card.sheet > .sheet-body{padding:18px 18px 0;}
+  #modal .card.sheet .row{margin:12px -18px 0;padding:10px 18px 14px;}
+  #modal{background:transparent;padding:0;pointer-events:none;display:block;}
+  #modal[hidden]{display:none;}
+  #modal .card{pointer-events:auto;}
+  .rewards{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+
+  #roomintro.open{padding:0;border-radius:18px 18px 0 0;}
+  #roomintro.open .ri-compact{display:none;}
+  #roomintro.open > .close,#roomintro.open > .sheet-body{display:block;}
+  #roomintro.open > .sheet-body{padding:16px 16px 18px;}
+
+  #quest.open{padding:0;border-radius:18px 18px 0 0;background:var(--surface);}
+  #quest.open .q-pill{display:none;}
+  #quest.open .q-close{display:block;z-index:2;background:var(--surface);}
+  #quest.open .q-full{display:block;overflow:auto;padding:16px 16px 18px;max-height:inherit;box-sizing:border-box;}
+  #quest.open .q-full .eyebrow{padding-right:34px;}
+
+  #mini.open{display:flex;flex-direction:column;align-items:stretch;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));}
+  #mini.open .mini-head{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--ink-faint);margin-bottom:8px;min-height:24px;}
+  #mini.open .mini-head .close{position:static;}
+  #mini.open canvas{width:auto;height:calc(36svh - 100px);max-height:calc(36vh - 100px);max-width:100%;aspect-ratio:180/130;margin:0 auto;}
+  #mini.open .zoom button{width:34px;height:30px;}
+}
+@keyframes sheet-up{from{transform:translateY(24px);opacity:.4;}}
+@media (prefers-reduced-motion: reduce){#panel,#dialog,#welcome,#modal .card,#roomintro.open,#mini.open,#quest.open{animation:none;}}
