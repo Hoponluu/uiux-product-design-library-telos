@@ -1,7 +1,8 @@
 // ================= ENGINE =================
 // Team Map engine (Three.js r128). Không chứa dữ liệu: nhận dữ liệu từ team-map.loader.js qua startTeamMap(data).
 window.startTeamMap = function(D){
-const { GROUPS, ROLES, TERMS, SCALES, LOCKED_ROLES, QUESTS, ROOM_INFO, TV_ROOMS, SMALL_REPORTS, SCREEN_KIND, PLAYER_ID, AUTHOR_ID, GUEST_ID } = D;
+const { GROUPS, ROLES, TERMS, SCALES, LOCKED_ROLES, QUESTS, ROOM_INFO, TV_ROOMS, SCALE_REPORTS, DOTTED, SCREEN_KIND, PLAYER_ID, AUTHOR_ID, GUEST_ID } = D;
+const SCALE_KEYS = Object.keys(SCALES), perScale = f => Object.fromEntries(SCALE_KEYS.map(k => [k, f()]));
 const $ = s => document.querySelector(s);
 const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const isDark = () => { const t = document.documentElement.getAttribute('data-theme'); if (t) return t === 'dark'; return matchMedia('(prefers-color-scheme: dark)').matches; };
@@ -144,7 +145,8 @@ const PROPS = {
 
 // ---------- mascot character ----------
 function makeChar(role, isPlayer){
-  const bodyM = role.dark ? DARK_BODY : BODY, outM = role.dark ? DARK_OUTLINE : OUTLINE;
+  const bodyM = role.bodyColor ? new THREE.MeshToonMaterial({ color:role.bodyColor }) : role.dark ? DARK_BODY : BODY;
+  const outM = role.outlineColor ? new THREE.MeshBasicMaterial({ color:role.outlineColor, side:THREE.BackSide }) : role.dark ? DARK_OUTLINE : OUTLINE;
   const legM = role.outfit ? mat(role.outfit.legs) : bodyM, footM = role.outfit ? mat(role.outfit.feet) : bodyM;
   const root = new THREE.Group(); const inner = new THREE.Group(); root.add(inner);
   const R = .5, cy = .98;
@@ -174,7 +176,7 @@ function setFace(o, eye, mouth){ o.eye.material.map = FACE[eye]; o.mouth.materia
 let world = null, chars = [], player = null, rooms = [], grid = null, scaleKey = 'small', mode = 'explore';
 let bounds = { x0:0, x1:0, z0:0, z1:0 };
 const labels = []; // {el, pos:Vector3, kind}
-const met = { small:new Set(), large:new Set() };
+const met = perScale(() => new Set());
 
 function lerpHex(a, b, t){ const A = new THREE.Color(a), B = new THREE.Color(b); return A.lerp(B, t); }
 let floorMesh = null; const roomFloors = [];
@@ -437,7 +439,7 @@ function addChar(roleId, room, x, z, rot){
   const [fx,fz] = nearestFree(x,z);
   const c = { idx:chars.length, id: roleId + '@' + room.id, role, room, isPlayer, obj, seat:{ x:fx, z:fz, rot }, path:[], speed: isPlayer ? 4.6 : 3.6, phase:Math.random()*6, seed:Math.random()*6, faceT:0, onArrive:null, walking:false };
   chars.push(c);
-  c.roamer = !!role.special; c.guest = !!role.guest;
+  c.roamer = !!role.special; c.guest = !!role.guest; c.fixed = !!(room.fixed && room.fixed.includes(roleId)); // fixed: ngồi yên, không đi dạo / tập hợp
   c.label = addLabel(isPlayer ? `Bạn · ${role.title}` : c.roamer ? `${role.title}${role.special.tag ? ' · ' + role.special.tag.split(' · ')[0] : ''}` : c.guest ? `${role.title} · Người dùng` : role.title, 'name-lbl' + (isPlayer ? ' me' : c.roamer ? ' vip' : ''), new THREE.Vector3(), { inst:c });
   c.marker = addLabel('', 'qm', new THREE.Vector3(), { inst:c, marker:true }); c.marker.el.hidden = true;
   c.chatEl = addLabel('', 'chat', new THREE.Vector3(), { inst:c, chat:true }); c.chatEl.el.hidden = true;
@@ -583,7 +585,7 @@ function interact(){
 function faceEach(a, b){ const pa = a.obj.root.position, pb = b.obj.root.position; a.heading = Math.atan2(pb.x-pa.x, pb.z-pa.z); b.heading = Math.atan2(pa.x-pb.x, pa.z-pb.z); }
 function talk(c){
   if (c.sitting){ const pa = player.obj.root.position, pb = c.obj.root.position; player.heading = Math.atan2(pb.x-pa.x, pb.z-pa.z); } else faceEach(player, c);
-  if (!c.busy && !c.guest){ if (c.ai && c.ai.conv) endConv(c.ai.conv, c); c.path = []; c.onArrive = null; c.ai = { s:'pause', t:5 }; } setFace(c.obj, 'happy', 'mSmile'); c.faceT = 3; setFace(player.obj, 'look', 'mO'); player.faceT = 2;
+  if (!c.busy && !c.guest && !c.fixed){ if (c.ai && c.ai.conv) endConv(c.ai.conv, c); c.path = []; c.onArrive = null; c.ai = { s:'pause', t:5 }; } setFace(c.obj, 'happy', 'mSmile'); c.faceT = 3; setFace(player.obj, 'look', 'mO'); player.faceT = 2;
   if (!c.roamer && !c.guest){ met[scaleKey].add(c.role.id); updateMet(); }
   if (mode === 'quest' && questTalk(c)) return;
   openPanel(c);
@@ -606,7 +608,7 @@ function startChat(a, b){
 }
 function nextRoam(c){
   const rs = rooms.filter(r => r.kind !== 'locked'), r = rs[Math.floor(Math.random()*rs.length)];
-  const cands = chars.filter(o => !o.isPlayer && !o.roamer && !o.busy && o.room === r && o.ai && o.ai.s === 'sit');
+  const cands = chars.filter(o => !o.isPlayer && !o.roamer && !o.fixed && !o.busy && o.room === r && o.ai && o.ai.s === 'sit');
   if (cands.length && Math.random() < .75){ const b = cands[Math.floor(Math.random()*cands.length)];
     const [x, z] = nearestFree(b.seat.x + Math.cos(b.seat.rot)*1.15, b.seat.z - Math.sin(b.seat.rot)*1.15);
     c.ai = { s:'go' }; walkTo(c, x, z, () => { if (b.busy || !b.ai || b.ai.s !== 'sit'){ c.ai = { s:'idle', t:1 }; return; }
@@ -628,7 +630,7 @@ function roam(c, dt){
     if (v.t <= 0){ v.done = true; v.b.ai = { s:'sit', t: 4 + Math.random()*6 }; c.ai = { s:'idle', t:.6 }; } }
 }
 function think(c, dt){
-  if (c.guest) return;
+  if (c.guest || c.fixed) return;
   if (c.roamer && c.ai) return roam(c, dt);
   if (c.isPlayer || c.busy || !c.ai) return;
   const a = c.ai;
@@ -636,7 +638,7 @@ function think(c, dt){
     a.t -= dt; if (a.t > 0) return;
     if (a.s === 'pause'){ if (c.sitting) c.ai = { s:'sit', t: 4 + Math.random()*6 }; else goHome(c); return; }
     const roll = Math.random();
-    if (roll < .45){ const mates = chars.filter(o => o !== c && !o.isPlayer && !o.busy && o.room === c.room && o.ai && o.ai.s === 'sit');
+    if (roll < .45){ const mates = chars.filter(o => o !== c && !o.isPlayer && !o.fixed && !o.busy && o.room === c.room && o.ai && o.ai.s === 'sit');
       if (mates.length && startChat(c, mates[Math.floor(Math.random()*mates.length)])) return; }
     if (roll < .75){ const p = randomSpot(c.room); if (p){ c.sitting = false; c.ai = { s:'wander' }; walkTo(c, p[0], p[1], () => { if (c.ai && c.ai.s === 'wander'){ c.ai = { s:'pause', t: 2 + Math.random()*3 }; c.heading = Math.random()*6.28; } }); return; } }
     a.t = 4 + Math.random()*8;
@@ -680,7 +682,7 @@ function questTick(dt){
       Q.prog = { kind:s.type, t:0, dur:s.secs || 5 }; hideSpot();
       if (s.type === 'work'){ player.sitting = true; player.obj.root.position.set(player.seat.x, 0, player.seat.z); player.heading = player.seat.rot; if (player.screen) player.screen.material.map = screenTex('figma'); }
       else { const r = roomOf(q.room); player.heading = Math.atan2(r.x - pp.x, r.z + 2 - pp.z); if (r.tv) r.tv.mat.map = slideTex(q.title, 'Trình bày bởi UI/UX Designer');
-        Q.people.forEach(c => { const pc = c.obj.root.position; c.heading = Math.atan2(pp.x - pc.x, pp.z - pc.z); setFace(c.obj, 'look', 'mO'); c.faceT = s.secs || 5; }); setFace(player.obj, 'happy', 'mSmile'); player.faceT = s.secs || 5; }
+        [...new Set([...Q.people, ...chars.filter(c => c.fixed && c.room === r)])].forEach(c => { const pc = c.obj.root.position; c.heading = Math.atan2(pp.x - pc.x, pp.z - pc.z); setFace(c.obj, 'look', 'mO'); c.faceT = s.secs || 5; }); setFace(player.obj, 'happy', 'mSmile'); player.faceT = s.secs || 5; }
       renderQuest();
     }
     return;
@@ -759,16 +761,18 @@ function openLocked(r){
   $('#panel').hidden = false; $('#panel .close').onclick = closePanel; $('#go-large').onclick = () => { closePanel(); setScale('large'); };
 }
 function closePanel(){ $('#panel').hidden = true; }
+// báo cáo cho ai ở quy mô hiện tại: bảng riêng của quy mô (nếu có) rồi mới tới reports_to
+function bossOf(id){ const sr = SCALE_REPORTS[scaleKey]; return sr && sr[id] !== undefined ? sr[id] : (ROLES[id] ? ROLES[id].reportsTo : null); }
 function reportTarget(c){
-  let id = (scaleKey === 'small' && SMALL_REPORTS[c.role.id] !== undefined) ? SMALL_REPORTS[c.role.id] : c.role.reportsTo; let guard = 0;
-  while (id && guard++ < 6){ const t = inst(id + '@' + c.room.id) && chars.find(x => x.id === id + '@' + c.room.id) || inst(id); if (t && t !== c) return t; id = ROLES[id] && ROLES[id].reportsTo; }
+  let id = bossOf(c.role.id), guard = 0;
+  while (id && guard++ < 6){ const t = inst(id + '@' + c.room.id) && chars.find(x => x.id === id + '@' + c.room.id) || inst(id); if (t && t !== c) return t; id = bossOf(id); }
   return null;
 }
-function reportName(c){ const t = reportTarget(c); return t ? `${t.role.title}${t.room !== c.room ? ` (${t.room.name})` : ''}` : (c.role.reportsTo && ROLES[c.role.reportsTo] ? ROLES[c.role.reportsTo].title : ''); }
+function reportName(c){ const t = reportTarget(c); return t ? `${t.role.title}${t.room !== c.room ? ` (${t.room.name})` : ''}` : (bossOf(c.role.id) && ROLES[bossOf(c.role.id)] ? ROLES[bossOf(c.role.id)].title : ''); }
 
 
 // ---------- quest mode ----------
-const Q = { idx:{ small:0, large:0 }, phase:null, step:0, people:[], cards:{ small:[], large:[] } };
+const Q = { idx:perScale(() => 0), phase:null, step:0, people:[], cards:perScale(() => []) };
 function qlist(){ return QUESTS[scaleKey]; }
 function clearMarkers(){ chars.forEach(c => { c.markerKind = null; c.marker.el.hidden = true; }); }
 function setMarker(c, kind){ c.markerKind = kind; c.marker.el.innerHTML = `<div class="qmark ${kind === '?' ? 'turn' : kind === '◆' ? 'step' : ''}">${kind}</div>`; }
@@ -780,15 +784,19 @@ function startQuest(){
   const q = list[i], room = roomOf(q.room);
   const giver = inst(q.giver), people = [giver, ...q.gather.map(inst)].filter(Boolean);
   Q.people = people; Q.phase = 'gather'; Q.step = 0; Q.giver = giver; Q.prog = null; hideSpot();
-  people.forEach(c => { if (c.ai && c.ai.conv) endConv(c.ai.conv, c); c.busy = true; c.sitting = false; c.ai = { s:'quest' }; });
-  const spots = room.gather(people.length);
+  // nhân vật ngồi cố định (vd Client) ở yên tại ghế, chỉ những người còn lại đi tới điểm tập hợp
+  const movers = people.filter(c => !c.fixed);
+  people.forEach(c => { if (c.ai && c.ai.conv) endConv(c.ai.conv, c); c.busy = true; if (!c.fixed){ c.sitting = false; c.ai = { s:'quest' }; } });
+  const spots = room.gather(movers.length);
+  const ready = () => { if (Q.phase !== 'gather') return; Q.phase = 'offer'; people.forEach(p => { if (p !== giver && !p.fixed) faceEach(p, giver); }); setMarker(giver, '!'); renderQuest(); };
   let arrived = 0;
-  people.forEach((c, k) => { const [sx, sz] = nearestFree(spots[k][0], spots[k][1]);
-    walkTo(c, sx, sz, () => { arrived++; if (arrived === people.length && Q.phase === 'gather'){ Q.phase = 'offer'; people.forEach(p => faceEach(p, giver)); setMarker(giver, '!'); renderQuest(); } }); });
+  movers.forEach((c, k) => { const [sx, sz] = nearestFree(spots[k][0], spots[k][1]);
+    walkTo(c, sx, sz, () => { arrived++; if (arrived === movers.length) ready(); }); });
   renderQuest();
-  clearTimeout(Q.timer); Q.timer = setTimeout(() => { if (Q.phase === 'gather'){ people.forEach((c,k) => { const [sx,sz] = nearestFree(spots[k][0], spots[k][1]); c.path = []; c.obj.root.position.set(sx,0,sz); }); Q.phase = 'offer'; setMarker(giver,'!'); renderQuest(); } }, 12000);
+  if (!movers.length) ready();
+  clearTimeout(Q.timer); Q.timer = setTimeout(() => { if (Q.phase === 'gather'){ movers.forEach((c,k) => { const [sx,sz] = nearestFree(spots[k][0], spots[k][1]); c.path = []; c.obj.root.position.set(sx,0,sz); }); ready(); } }, 12000);
 }
-function sendHome(list){ list.forEach(c => { if (c.isPlayer || !c.busy) return; goHome(c, () => { c.busy = false; }); }); }
+function sendHome(list){ list.forEach(c => { if (c.isPlayer || !c.busy) return; if (c.fixed){ c.busy = false; c.heading = c.seat.rot; return; } goHome(c, () => { c.busy = false; }); }); }
 function questTalk(c){
   const q = qlist()[Q.idx[scaleKey]]; if (!q) return false;
   if (c === Q.giver && Q.phase === 'offer'){
@@ -817,9 +825,9 @@ function showRewards(q){
 function showSummary(){
   const all = [...new Set(Q.cards[scaleKey])].map(cardFor);
   $('#modal').innerHTML = `<div class="card sheet" role="dialog" aria-modal="true" aria-label="Tổng kết"><button class="close" aria-label="Đóng">×</button><div class="sheet-body"><p class="eyebrow">Tổng kết sprint</p><h2>Bạn đã hoàn thành ${qlist().length} quest</h2>
-    <p style="margin:0;color:var(--ink-soft)">Đã gặp ${met[scaleKey].size}/${$('#mett').textContent} vai trò và mở khoá ${all.length} thẻ kiến thức.${scaleKey === 'small' ? ' Thử tiếp ở tập đoàn product 100+ nhân sự để gặp Design Manager, UX Researcher và team Design System.' : ''}</p>
+    <p style="margin:0;color:var(--ink-soft)">Đã gặp ${met[scaleKey].size}/${$('#mett').textContent} vai trò và mở khoá ${all.length} thẻ kiến thức.${scaleKey === 'small' ? ' Thử tiếp ở tập đoàn product 100+ nhân sự để gặp Design Manager, UX Researcher và team Design System.' : scaleKey === 'agency' ? ' Bạn vừa đi hết một dự án ở agency. Thử so với cách làm việc ở công ty sản phẩm xem khác gì nhé.' : ''}</p>
     <div class="rewards">${all.map(c => `<div class="reward"><span>${c.kind}</span><b>${c.title}</b>${c.url ? `<a href="${c.url}" target="_blank" rel="noopener">Đọc bài</a>` : '<span>Sắp ra mắt</span>'}</div>`).join('')}</div>
-    <div class="row">${scaleKey === 'small' ? '<button class="btn btn-primary" id="sum-large">Chơi ở tập đoàn 100+ nhân sự</button>' : ''}<a class="btn btn-ghost" href="https://academy.telos.vn/" target="_blank" rel="noopener">Khám phá khoá học TELOS</a></div></div></div>`;
+    <div class="row">${scaleKey === 'small' ? '<button class="btn btn-primary" id="sum-large">Chơi ở tập đoàn 100+ nhân sự</button>' : scaleKey === 'agency' && SCALES.large ? '<button class="btn btn-primary" id="sum-large">So với tập đoàn product 100+ nhân sự</button>' : ''}<a class="btn btn-ghost" href="https://academy.telos.vn/" target="_blank" rel="noopener">Khám phá khoá học TELOS</a></div></div></div>`;
   $('#modal').hidden = false; $('#modal .close').onclick = () => $('#modal').hidden = true;
   const b = $('#sum-large'); if (b) b.onclick = () => { $('#modal').hidden = true; setScale('large'); };
 }
@@ -859,13 +867,16 @@ function setMode(m){
 }
 function setScale(k){
   if (k === scaleKey && world) return;
-  $('#sc-small').setAttribute('aria-pressed', k === 'small'); $('#sc-large').setAttribute('aria-pressed', k === 'large'); $('#scale-select').value = k;
+  ['small','large','agency'].forEach(x => $('#sc-' + x).setAttribute('aria-pressed', k === x)); $('#scale-select').value = k;
   closePanel(); closeDialog(); clearTimeout(Q.timer); Q.phase = null;
   buildWorld(k);
   if (mode === 'quest'){ Q.summaryShown = false; startQuest(); }
   renderQuest(); updateFab(); if (!$('#list').hidden) renderList();
 }
-$('#sc-small').onclick = () => setScale('small'); $('#sc-large').onclick = () => setScale('large');
+['small','large','agency'].forEach(k => { const b = $('#sc-' + k), o = $(`#scale-select option[value="${k}"]`);
+  if (SCALES[k]){ b.onclick = () => setScale(k); return; }
+  b.classList.add('soon'); b.setAttribute('aria-disabled', 'true'); b.title = 'Sắp ra mắt'; b.insertAdjacentHTML('beforeend', ' <span class="soon-chip">Sắp ra mắt</span>');
+  o.disabled = true; o.textContent += ' · Sắp ra mắt'; });
 $('#scale-select').onchange = e => { if (SCALES[e.target.value]) setScale(e.target.value); else e.target.value = scaleKey; };
 // Nút "Nhiệm vụ" cạnh bản đồ: bật / tắt chế độ quest
 function updateFab(){
@@ -884,20 +895,20 @@ let listTab = 'rooms'; const treeGroups = new Set(Object.keys(GROUPS));
 const roleLink = x => x.url ? `<a href="${x.url}" target="_blank" rel="noopener">${x.title}</a>` : `<span>${x.title}</span>`;
 function reportTree(){
   // vai trò có mặt ở quy mô hiện tại (bỏ tác giả, khách) + các phòng họ ngồi
-  const here = new Map();
+  const here = new Map(), dot = DOTTED && DOTTED[scaleKey];
   chars.forEach(c => { if (c.roamer || c.guest) return; const e = here.get(c.role.id) || { role:c.role, rooms:new Set(), squad:false };
-    e.rooms.add(c.room.name); if (scaleKey === 'large' ? ['R02','R03','R04'].includes(c.room.id) : c.room.id === 'P2') e.squad = true; here.set(c.role.id, e); });
-  const parentOf = id => { let p = scaleKey === 'small' && SMALL_REPORTS[id] !== undefined ? SMALL_REPORTS[id] : ROLES[id].reportsTo, guard = 0;
-    while (p && !here.has(p) && guard++ < 8) p = ROLES[p] ? ROLES[p].reportsTo : null; return p && p !== id && here.has(p) ? p : null; };
+    e.rooms.add(c.room.name); if (dot && dot.rooms.includes(c.room.id)) e.squad = true; here.set(c.role.id, e); });
+  const parentOf = id => { let p = bossOf(id), guard = 0;
+    while (p && !here.has(p) && guard++ < 8) p = bossOf(p); return p && p !== id && here.has(p) ? p : null; };
   const kids = {}; const roots = [];
   here.forEach((e, id) => { const p = parentOf(id); (p ? (kids[p] = kids[p] || []) : roots).push(id); });
   const byTitle = (a, b) => ROLES[a].title.localeCompare(ROLES[b].title, 'vi');
   const node = id => { const e = here.get(id), x = e.role, g = GROUPS[x.group], me = id === PLAYER_ID, ch = (kids[id] || []).sort(byTitle);
     const dim = !treeGroups.has(x.group) ? ' dim' : '';
     const label = `<span class="tnode${me ? ' me' : ''}${dim}"><i class="sw" style="background:${g.color}"></i><b>${me ? `Bạn · ${x.title}` : roleLink(x)}</b>
-      <small>${[...e.rooms].join(' · ')}</small>${e.squad && !['product-manager','growth-pm'].includes(id) ? '<em class="dotted" title="Đặt ưu tiên công việc: PM của squad (dotted line)">┄ ưu tiên từ PM</em>' : ''}${me ? '' : statusChip(x.status)}</span>`;
+      <small>${[...e.rooms].join(' · ')}</small>${e.squad && ![dot.target, ...(dot.also || [])].includes(id) && parentOf(id) !== dot.target ? `<em class="dotted" title="${dot.title}">┄ ${dot.label}</em>` : ''}${me ? '' : statusChip(x.status)}</span>`;
     return ch.length ? `<li><details open><summary>${label}<span class="tcount">${ch.length}</span></summary><ul>${ch.map(node).join('')}</ul></details></li>` : `<li>${label}</li>`; };
-  return `<div class="tree-head"><div class="tree-legend"><span><i class="ln"></i>Báo cáo chuyên môn (solid line)</span><span><em class="dotted">┄ ưu tiên từ PM</em> Nhận ưu tiên công việc từ PM squad (dotted line)</span></div>
+  return `<div class="tree-head"><div class="tree-legend"><span><i class="ln"></i>Báo cáo chuyên môn (solid line)</span>${dot ? `<span><em class="dotted">┄ ${dot.label}</em> ${scaleKey === 'agency' ? 'Nhận việc theo dự án từ Project Manager (dotted line)' : 'Nhận ưu tiên công việc từ PM squad (dotted line)'}</span>` : ''}</div>
       <div class="tree-tools"><div class="gfilter">${Object.entries(GROUPS).map(([k, g]) => `<button data-g="${k}" aria-pressed="${treeGroups.has(k)}"><i class="sw" style="background:${g.color}"></i>${g.name}</button>`).join('')}</div>
       <button class="btn btn-ghost tree-all" data-open="1">Mở hết</button><button class="btn btn-ghost tree-all" data-open="0">Thu gọn</button></div></div>
     <ul class="tree">${roots.sort(byTitle).map(node).join('')}</ul>`;
@@ -946,7 +957,7 @@ if (window.ResizeObserver) new ResizeObserver(resize).observe($('#app'));
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
 new MutationObserver(applyTheme).observe(document.documentElement, { attributes:true, attributeFilter:['data-theme'] });
 resize();
-Promise.race([document.fonts ? document.fonts.ready : Promise.resolve(), new Promise(r => setTimeout(r, 1500))]).then(() => { buildWorld('small'); renderQuest(); loop(); });
+Promise.race([document.fonts ? document.fonts.ready : Promise.resolve(), new Promise(r => setTimeout(r, 1500))]).then(() => { buildWorld(SCALES.small ? 'small' : SCALE_KEYS[0]); renderQuest(); loop(); });
 function loop(){
   const dt = Math.min(.05, clock.getDelta()); t += dt; frame++;
   chars.forEach(c => { think(c, dt); stepChar(c, dt); });

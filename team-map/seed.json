@@ -1,5 +1,5 @@
 {
- "version": 2,
+ "version": 3,
  "groups": {
   "design": {
    "name": "Design",
@@ -47,7 +47,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "cpo",
@@ -69,7 +70,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "cto",
@@ -91,7 +93,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "head-of-design",
@@ -114,7 +117,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "head-of-data",
@@ -136,7 +140,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "head-of-eng",
@@ -158,7 +163,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "product-manager",
@@ -180,7 +186,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "product-owner",
@@ -202,7 +209,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "growth-pm",
@@ -224,7 +232,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "data-pm",
@@ -246,7 +255,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "ui-ux-designer",
@@ -269,7 +279,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": "design-director"
   },
   {
    "id": "product-designer",
@@ -291,7 +302,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "ui-designer",
@@ -313,7 +325,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "ux-designer",
@@ -335,7 +348,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "intern",
@@ -357,7 +371,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": "ui-ux-designer"
   },
   {
    "id": "ds-designer",
@@ -379,7 +394,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "ux-design-engineer",
@@ -401,7 +417,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "design-manager",
@@ -424,7 +441,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "ux-researcher",
@@ -447,7 +465,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "ux-writer",
@@ -469,7 +488,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "motion-designer",
@@ -491,7 +511,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "tech-lead",
@@ -513,7 +534,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": "ceo"
   },
   {
    "id": "frontend-developer",
@@ -535,7 +557,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": "tech-lead"
   },
   {
    "id": "backend-developer",
@@ -557,7 +580,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": "tech-lead"
   },
   {
    "id": "fullstack-developer",
@@ -579,7 +603,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "mobile-developer",
@@ -601,7 +626,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "qa-engineer",
@@ -623,7 +649,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": "tech-lead"
   },
   {
    "id": "software-architect",
@@ -645,7 +672,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "devops",
@@ -667,7 +695,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "data-analyst",
@@ -689,7 +718,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "bi-analyst",
@@ -711,7 +741,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "data-scientist",
@@ -733,7 +764,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "data-engineer",
@@ -755,7 +787,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "scrum-master",
@@ -777,7 +810,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "delivery-manager",
@@ -799,7 +833,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "project-manager",
@@ -821,7 +856,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": "ceo"
   },
   {
    "id": "growth-manager",
@@ -843,7 +879,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "performance-marketer",
@@ -865,7 +902,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "brand-manager",
@@ -887,7 +925,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "content-marketer",
@@ -909,7 +948,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "crm-manager",
@@ -931,7 +971,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "seo-specialist",
@@ -953,7 +994,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "csm",
@@ -975,7 +1017,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "customer-support",
@@ -997,7 +1040,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "account-manager",
@@ -1019,7 +1063,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": "ceo"
   },
   {
    "id": "business-analyst",
@@ -1041,7 +1086,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": "project-manager"
   },
   {
    "id": "stakeholder",
@@ -1063,7 +1109,8 @@
    },
    "cta": null,
    "tag": null,
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "nhan-luu",
@@ -1101,7 +1148,8 @@
     }
    ],
    "tag": "Academic Director · TELOS Academy",
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
   },
   {
    "id": "user",
@@ -1134,7 +1182,132 @@
     }
    ],
    "tag": "Người dùng thật",
-   "is_active": true
+   "is_active": true,
+   "reports_to_agency": null
+  },
+  {
+   "id": "client",
+   "title": "Client",
+   "kind": "role",
+   "group": "business",
+   "term_search": null,
+   "article_url": null,
+   "summary": "Khách hàng thuê agency làm sản phẩm. Họ trả tiền, đặt mục tiêu và là người quyết định cuối cùng, nhưng họ không phải người dùng của sản phẩm.",
+   "doing": "Đang ngồi chờ buổi họp, tranh thủ trả lời tin nhắn công việc.",
+   "with_designer": "Bạn trình bày thiết kế cho họ và nghe phản hồi. Mọi yêu cầu mới của họ phải đi qua Account Manager và Project Manager.",
+   "props": [
+    "briefcase"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null,
+    "body_color": "#FFC53D",
+    "outline_color": "#8A5D00"
+   },
+   "tag": "Khách hàng của agency",
+   "cta": null,
+   "reports_to_agency": null,
+   "is_active": true,
+   "reports_to": null,
+   "reports_to_small": null
+  },
+  {
+   "id": "design-director",
+   "title": "Design Director",
+   "kind": "role",
+   "group": "design",
+   "term_search": null,
+   "article_url": null,
+   "summary": "Người chịu trách nhiệm về chất lượng thiết kế của cả agency. Mọi bản thiết kế phải qua Design Director trước khi gửi khách.",
+   "doing": "Đang xem lại concept của ba dự án khác nhau.",
+   "with_designer": "Quản lý chuyên môn trực tiếp của bạn. Duyệt thiết kế, góp ý và quyết định bản nào đủ tốt để gửi khách.",
+   "props": [
+    "glasses",
+    "pointer"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "tag": null,
+   "cta": null,
+   "reports_to_agency": "ceo",
+   "is_active": true,
+   "reports_to": null,
+   "reports_to_small": null
+  },
+  {
+   "id": "graphic-designer",
+   "title": "Graphic Designer",
+   "kind": "role",
+   "group": "design",
+   "term_search": "Graphic Designer",
+   "article_url": null,
+   "summary": "Designer làm nhận diện thương hiệu, banner, hình minh hoạ và ấn phẩm truyền thông.",
+   "doing": "Đang chỉnh bộ banner cho chiến dịch khai trương của khách.",
+   "with_designer": "Cho bạn biết màu, font và hình ảnh thương hiệu của khách để giao diện không lệch nhận diện.",
+   "props": [
+    "palette"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "tag": null,
+   "cta": null,
+   "reports_to_agency": "design-director",
+   "is_active": true,
+   "reports_to": null,
+   "reports_to_small": null
+  },
+  {
+   "id": "sales",
+   "title": "Sales / Business Developer",
+   "kind": "role",
+   "group": "business",
+   "term_search": null,
+   "article_url": null,
+   "summary": "Người đi tìm khách hàng và mang dự án về cho agency.",
+   "doing": "Đang chuẩn bị slide cho buổi gặp khách chiều nay.",
+   "with_designer": "Hay nhờ bạn dựng nhanh một bản demo để khách dễ hình dung trước khi ký hợp đồng.",
+   "props": [
+    "megaphone"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "tag": null,
+   "cta": null,
+   "reports_to_agency": "ceo",
+   "is_active": true,
+   "reports_to": null,
+   "reports_to_small": null
+  },
+  {
+   "id": "freelancer",
+   "title": "Freelancer",
+   "kind": "role",
+   "group": "design",
+   "term_search": "Freelancer",
+   "article_url": "https://academy.telos.vn/cach-lam-freelance-thiet-ke-giao-dien/",
+   "summary": "Designer làm việc độc lập, được agency thuê theo từng dự án khi team thiếu người.",
+   "doing": "Đang làm bộ icon cho một dự án cần gấp trong tuần này.",
+   "with_designer": "Làm cùng bạn trong vài tuần rồi rời đi. Bạn cần bàn giao file gọn gàng để họ vào việc nhanh.",
+   "props": [
+    "laptop",
+    "backpack"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "tag": null,
+   "cta": null,
+   "reports_to_agency": "design-director",
+   "is_active": true,
+   "reports_to": null,
+   "reports_to_small": null
   }
  ],
  "rooms": [
@@ -1456,6 +1629,114 @@
     ],
     "tv_offset": null
    }
+  },
+  {
+   "id": "A1",
+   "code": "Team 1",
+   "name": "Design team",
+   "sort_order": 0,
+   "intro": "Ở agency bạn làm nhiều dự án cùng lúc, mỗi dự án một ngành khác nhau. Học nhanh và rộng, nhưng ít khi theo một sản phẩm đủ lâu để thấy kết quả. Người duyệt thiết kế của bạn là Design Director.",
+   "layout": {
+    "kind": "pod",
+    "x": -13,
+    "z": -6,
+    "w": 11,
+    "d": 9,
+    "floor": "#F9D3E3",
+    "doors": null,
+    "tv_offset": null
+   },
+   "scale": "agency"
+  },
+  {
+   "id": "A2",
+   "code": "Team 2",
+   "name": "Dev team",
+   "sort_order": 1,
+   "intro": "Một dev ở đây có thể chạy 2–3 dự án cùng lúc và thường không dự các buổi họp với khách. File thiết kế của bạn phải tự nói được mọi thứ.",
+   "layout": {
+    "kind": "pod",
+    "x": 0,
+    "z": -6,
+    "w": 11,
+    "d": 9,
+    "floor": "#CDEFF8",
+    "doors": null,
+    "tv_offset": null
+   },
+   "scale": "agency"
+  },
+  {
+   "id": "A3",
+   "code": "Team 3",
+   "name": "Account & Project",
+   "sort_order": 2,
+   "intro": "Mọi yêu cầu của khách hàng đi qua đây. Account Manager giữ quan hệ, Project Manager giữ phạm vi, tiến độ và ngân sách. Đừng tự hứa gì với khách khi chưa hỏi Project Manager.",
+   "layout": {
+    "kind": "pod",
+    "x": 13,
+    "z": -6,
+    "w": 11,
+    "d": 9,
+    "floor": "#FFDCC4",
+    "doors": null,
+    "tv_offset": null
+   },
+   "scale": "agency"
+  },
+  {
+   "id": "A4",
+   "code": "Họp",
+   "name": "Phòng họp khách hàng",
+   "sort_order": 3,
+   "intro": "Nơi trình bày concept và nghe phản hồi của khách. Thiết kế tốt mà trình bày không rõ thì vẫn bị bác: ở agency, kỹ năng thuyết trình quan trọng ngang kỹ năng vẽ.",
+   "layout": {
+    "kind": "meeting",
+    "x": -13,
+    "z": 7,
+    "w": 11,
+    "d": 9,
+    "floor": "#FFEAB8",
+    "doors": null,
+    "tv_offset": -3.4
+   },
+   "scale": "agency"
+  },
+  {
+   "id": "A5",
+   "code": "Chung",
+   "name": "Pantry",
+   "sort_order": 4,
+   "intro": "Khu chung để nghỉ và gặp gỡ. Người dùng được mời tới dùng thử sản phẩm của khách cũng ngồi chờ ở đây.",
+   "layout": {
+    "kind": "lounge",
+    "x": 0,
+    "z": 7,
+    "w": 9,
+    "d": 7,
+    "floor": "#E6DFF6",
+    "doors": null,
+    "tv_offset": null
+   },
+   "scale": "agency"
+  },
+  {
+   "id": "A6",
+   "code": "Team 4",
+   "name": "Sales",
+   "sort_order": 5,
+   "intro": "Nơi mang dự án về cho công ty. Designer hay được nhờ dựng nhanh một bản demo để Sales đi thuyết phục khách ký hợp đồng.",
+   "layout": {
+    "kind": "pod",
+    "x": 13,
+    "z": 7,
+    "w": 11,
+    "d": 9,
+    "floor": "#DCD6F7",
+    "doors": null,
+    "tv_offset": null
+   },
+   "scale": "agency"
   }
  ],
  "placements": [
@@ -1464,490 +1745,696 @@
    "character_id": "product-manager",
    "scale": "small",
    "room_id": "P1",
-   "seat_order": 0
+   "seat_order": 0,
+   "fixed": false
   },
   {
    "id": "ui-ux-designer@P1",
    "character_id": "ui-ux-designer",
    "scale": "small",
    "room_id": "P1",
-   "seat_order": 1
+   "seat_order": 1,
+   "fixed": false
   },
   {
    "id": "intern@P1",
    "character_id": "intern",
    "scale": "small",
    "room_id": "P1",
-   "seat_order": 2
+   "seat_order": 2,
+   "fixed": false
   },
   {
    "id": "tech-lead@P2",
    "character_id": "tech-lead",
    "scale": "small",
    "room_id": "P2",
-   "seat_order": 0
+   "seat_order": 0,
+   "fixed": false
   },
   {
    "id": "frontend-developer@P2",
    "character_id": "frontend-developer",
    "scale": "small",
    "room_id": "P2",
-   "seat_order": 1
+   "seat_order": 1,
+   "fixed": false
   },
   {
    "id": "backend-developer@P2",
    "character_id": "backend-developer",
    "scale": "small",
    "room_id": "P2",
-   "seat_order": 2
+   "seat_order": 2,
+   "fixed": false
   },
   {
    "id": "mobile-developer@P2",
    "character_id": "mobile-developer",
    "scale": "small",
    "room_id": "P2",
-   "seat_order": 3
+   "seat_order": 3,
+   "fixed": false
   },
   {
    "id": "qa-engineer@P2",
    "character_id": "qa-engineer",
    "scale": "small",
    "room_id": "P2",
-   "seat_order": 4
+   "seat_order": 4,
+   "fixed": false
   },
   {
    "id": "ceo@P3",
    "character_id": "ceo",
    "scale": "small",
    "room_id": "P3",
-   "seat_order": 0
+   "seat_order": 0,
+   "fixed": false
   },
   {
    "id": "growth-manager@P3",
    "character_id": "growth-manager",
    "scale": "small",
    "room_id": "P3",
-   "seat_order": 1
+   "seat_order": 1,
+   "fixed": false
   },
   {
    "id": "account-manager@P3",
    "character_id": "account-manager",
    "scale": "small",
    "room_id": "P3",
-   "seat_order": 2
+   "seat_order": 2,
+   "fixed": false
   },
   {
    "id": "customer-support@P3",
    "character_id": "customer-support",
    "scale": "small",
    "room_id": "P3",
-   "seat_order": 3
+   "seat_order": 3,
+   "fixed": false
   },
   {
    "id": "business-analyst@P3",
    "character_id": "business-analyst",
    "scale": "small",
    "room_id": "P3",
-   "seat_order": 4
+   "seat_order": 4,
+   "fixed": false
   },
   {
    "id": "ceo@R01",
    "character_id": "ceo",
    "scale": "large",
    "room_id": "R01",
-   "seat_order": 0
+   "seat_order": 0,
+   "fixed": false
   },
   {
    "id": "cpo@R01",
    "character_id": "cpo",
    "scale": "large",
    "room_id": "R01",
-   "seat_order": 1
+   "seat_order": 1,
+   "fixed": false
   },
   {
    "id": "cto@R01",
    "character_id": "cto",
    "scale": "large",
    "room_id": "R01",
-   "seat_order": 2
+   "seat_order": 2,
+   "fixed": false
   },
   {
    "id": "head-of-design@R01",
    "character_id": "head-of-design",
    "scale": "large",
    "room_id": "R01",
-   "seat_order": 3
+   "seat_order": 3,
+   "fixed": false
   },
   {
    "id": "head-of-data@R01",
    "character_id": "head-of-data",
    "scale": "large",
    "room_id": "R01",
-   "seat_order": 4
+   "seat_order": 4,
+   "fixed": false
   },
   {
    "id": "head-of-eng@R01",
    "character_id": "head-of-eng",
    "scale": "large",
    "room_id": "R01",
-   "seat_order": 5
+   "seat_order": 5,
+   "fixed": false
   },
   {
    "id": "data-pm@R07",
    "character_id": "data-pm",
    "scale": "large",
    "room_id": "R07",
-   "seat_order": 0
+   "seat_order": 0,
+   "fixed": false
   },
   {
    "id": "data-analyst@R07",
    "character_id": "data-analyst",
    "scale": "large",
    "room_id": "R07",
-   "seat_order": 1
+   "seat_order": 1,
+   "fixed": false
   },
   {
    "id": "bi-analyst@R07",
    "character_id": "bi-analyst",
    "scale": "large",
    "room_id": "R07",
-   "seat_order": 2
+   "seat_order": 2,
+   "fixed": false
   },
   {
    "id": "data-scientist@R07",
    "character_id": "data-scientist",
    "scale": "large",
    "room_id": "R07",
-   "seat_order": 3
+   "seat_order": 3,
+   "fixed": false
   },
   {
    "id": "data-engineer@R07",
    "character_id": "data-engineer",
    "scale": "large",
    "room_id": "R07",
-   "seat_order": 4
+   "seat_order": 4,
+   "fixed": false
   },
   {
    "id": "stakeholder@R08",
    "character_id": "stakeholder",
    "scale": "large",
    "room_id": "R08",
-   "seat_order": 0
+   "seat_order": 0,
+   "fixed": false
   },
   {
    "id": "growth-pm@R02",
    "character_id": "growth-pm",
    "scale": "large",
    "room_id": "R02",
-   "seat_order": 0
+   "seat_order": 0,
+   "fixed": false
   },
   {
    "id": "product-designer@R02",
    "character_id": "product-designer",
    "scale": "large",
    "room_id": "R02",
-   "seat_order": 1
+   "seat_order": 1,
+   "fixed": false
   },
   {
    "id": "tech-lead@R02",
    "character_id": "tech-lead",
    "scale": "large",
    "room_id": "R02",
-   "seat_order": 2
+   "seat_order": 2,
+   "fixed": false
   },
   {
    "id": "fullstack-developer@R02",
    "character_id": "fullstack-developer",
    "scale": "large",
    "room_id": "R02",
-   "seat_order": 3
+   "seat_order": 3,
+   "fixed": false
   },
   {
    "id": "qa-engineer@R02",
    "character_id": "qa-engineer",
    "scale": "large",
    "room_id": "R02",
-   "seat_order": 4
+   "seat_order": 4,
+   "fixed": false
   },
   {
    "id": "product-owner@R02",
    "character_id": "product-owner",
    "scale": "large",
    "room_id": "R02",
-   "seat_order": 5
+   "seat_order": 5,
+   "fixed": false
   },
   {
    "id": "product-manager@R03",
    "character_id": "product-manager",
    "scale": "large",
    "room_id": "R03",
-   "seat_order": 0
+   "seat_order": 0,
+   "fixed": false
   },
   {
    "id": "ui-ux-designer@R03",
    "character_id": "ui-ux-designer",
    "scale": "large",
    "room_id": "R03",
-   "seat_order": 1
+   "seat_order": 1,
+   "fixed": false
   },
   {
    "id": "ui-designer@R03",
    "character_id": "ui-designer",
    "scale": "large",
    "room_id": "R03",
-   "seat_order": 2
+   "seat_order": 2,
+   "fixed": false
   },
   {
    "id": "intern@R03",
    "character_id": "intern",
    "scale": "large",
    "room_id": "R03",
-   "seat_order": 3
+   "seat_order": 3,
+   "fixed": false
   },
   {
    "id": "tech-lead@R03",
    "character_id": "tech-lead",
    "scale": "large",
    "room_id": "R03",
-   "seat_order": 4
+   "seat_order": 4,
+   "fixed": false
   },
   {
    "id": "frontend-developer@R03",
    "character_id": "frontend-developer",
    "scale": "large",
    "room_id": "R03",
-   "seat_order": 5
+   "seat_order": 5,
+   "fixed": false
   },
   {
    "id": "mobile-developer@R03",
    "character_id": "mobile-developer",
    "scale": "large",
    "room_id": "R03",
-   "seat_order": 6
+   "seat_order": 6,
+   "fixed": false
   },
   {
    "id": "backend-developer@R03",
    "character_id": "backend-developer",
    "scale": "large",
    "room_id": "R03",
-   "seat_order": 7
+   "seat_order": 7,
+   "fixed": false
   },
   {
    "id": "qa-engineer@R03",
    "character_id": "qa-engineer",
    "scale": "large",
    "room_id": "R03",
-   "seat_order": 8
+   "seat_order": 8,
+   "fixed": false
   },
   {
    "id": "product-manager@R04",
    "character_id": "product-manager",
    "scale": "large",
    "room_id": "R04",
-   "seat_order": 0
+   "seat_order": 0,
+   "fixed": false
   },
   {
    "id": "ux-designer@R04",
    "character_id": "ux-designer",
    "scale": "large",
    "room_id": "R04",
-   "seat_order": 1
+   "seat_order": 1,
+   "fixed": false
   },
   {
    "id": "tech-lead@R04",
    "character_id": "tech-lead",
    "scale": "large",
    "room_id": "R04",
-   "seat_order": 2
+   "seat_order": 2,
+   "fixed": false
   },
   {
    "id": "backend-developer@R04",
    "character_id": "backend-developer",
    "scale": "large",
    "room_id": "R04",
-   "seat_order": 3
+   "seat_order": 3,
+   "fixed": false
   },
   {
    "id": "frontend-developer@R04",
    "character_id": "frontend-developer",
    "scale": "large",
    "room_id": "R04",
-   "seat_order": 4
+   "seat_order": 4,
+   "fixed": false
   },
   {
    "id": "software-architect@R05",
    "character_id": "software-architect",
    "scale": "large",
    "room_id": "R05",
-   "seat_order": 0
+   "seat_order": 0,
+   "fixed": false
   },
   {
    "id": "devops@R05",
    "character_id": "devops",
    "scale": "large",
    "room_id": "R05",
-   "seat_order": 1
+   "seat_order": 1,
+   "fixed": false
   },
   {
    "id": "ds-designer@R05",
    "character_id": "ds-designer",
    "scale": "large",
    "room_id": "R05",
-   "seat_order": 2
+   "seat_order": 2,
+   "fixed": false
   },
   {
    "id": "ux-design-engineer@R05",
    "character_id": "ux-design-engineer",
    "scale": "large",
    "room_id": "R05",
-   "seat_order": 3
+   "seat_order": 3,
+   "fixed": false
   },
   {
    "id": "design-manager@R06",
    "character_id": "design-manager",
    "scale": "large",
    "room_id": "R06",
-   "seat_order": 0
+   "seat_order": 0,
+   "fixed": false
   },
   {
    "id": "ux-researcher@R06",
    "character_id": "ux-researcher",
    "scale": "large",
    "room_id": "R06",
-   "seat_order": 1
+   "seat_order": 1,
+   "fixed": false
   },
   {
    "id": "ux-writer@R06",
    "character_id": "ux-writer",
    "scale": "large",
    "room_id": "R06",
-   "seat_order": 2
+   "seat_order": 2,
+   "fixed": false
   },
   {
    "id": "motion-designer@R06",
    "character_id": "motion-designer",
    "scale": "large",
    "room_id": "R06",
-   "seat_order": 3
+   "seat_order": 3,
+   "fixed": false
   },
   {
    "id": "scrum-master@R09",
    "character_id": "scrum-master",
    "scale": "large",
    "room_id": "R09",
-   "seat_order": 0
+   "seat_order": 0,
+   "fixed": false
   },
   {
    "id": "delivery-manager@R09",
    "character_id": "delivery-manager",
    "scale": "large",
    "room_id": "R09",
-   "seat_order": 1
+   "seat_order": 1,
+   "fixed": false
   },
   {
    "id": "project-manager@R09",
    "character_id": "project-manager",
    "scale": "large",
    "room_id": "R09",
-   "seat_order": 2
+   "seat_order": 2,
+   "fixed": false
   },
   {
    "id": "growth-manager@R10",
    "character_id": "growth-manager",
    "scale": "large",
    "room_id": "R10",
-   "seat_order": 0
+   "seat_order": 0,
+   "fixed": false
   },
   {
    "id": "performance-marketer@R10",
    "character_id": "performance-marketer",
    "scale": "large",
    "room_id": "R10",
-   "seat_order": 1
+   "seat_order": 1,
+   "fixed": false
   },
   {
    "id": "brand-manager@R10",
    "character_id": "brand-manager",
    "scale": "large",
    "room_id": "R10",
-   "seat_order": 2
+   "seat_order": 2,
+   "fixed": false
   },
   {
    "id": "content-marketer@R10",
    "character_id": "content-marketer",
    "scale": "large",
    "room_id": "R10",
-   "seat_order": 3
+   "seat_order": 3,
+   "fixed": false
   },
   {
    "id": "crm-manager@R10",
    "character_id": "crm-manager",
    "scale": "large",
    "room_id": "R10",
-   "seat_order": 4
+   "seat_order": 4,
+   "fixed": false
   },
   {
    "id": "seo-specialist@R10",
    "character_id": "seo-specialist",
    "scale": "large",
    "room_id": "R10",
-   "seat_order": 5
+   "seat_order": 5,
+   "fixed": false
   },
   {
    "id": "csm@R10",
    "character_id": "csm",
    "scale": "large",
    "room_id": "R10",
-   "seat_order": 6
+   "seat_order": 6,
+   "fixed": false
   },
   {
    "id": "customer-support@R10",
    "character_id": "customer-support",
    "scale": "large",
    "room_id": "R10",
-   "seat_order": 7
+   "seat_order": 7,
+   "fixed": false
   },
   {
    "id": "account-manager@R10",
    "character_id": "account-manager",
    "scale": "large",
    "room_id": "R10",
-   "seat_order": 8
+   "seat_order": 8,
+   "fixed": false
   },
   {
    "id": "business-analyst@R10",
    "character_id": "business-analyst",
    "scale": "large",
    "room_id": "R10",
-   "seat_order": 9
+   "seat_order": 9,
+   "fixed": false
   },
   {
    "id": "user@P5",
    "character_id": "user",
    "scale": "small",
    "room_id": "P5",
-   "seat_order": 0
+   "seat_order": 0,
+   "fixed": true
   },
   {
    "id": "nhan-luu@P5",
    "character_id": "nhan-luu",
    "scale": "small",
    "room_id": "P5",
-   "seat_order": null
+   "seat_order": null,
+   "fixed": false
   },
   {
    "id": "user@R11",
    "character_id": "user",
    "scale": "large",
    "room_id": "R11",
-   "seat_order": 0
+   "seat_order": 0,
+   "fixed": true
   },
   {
    "id": "nhan-luu@R11",
    "character_id": "nhan-luu",
    "scale": "large",
    "room_id": "R11",
-   "seat_order": null
+   "seat_order": null,
+   "fixed": false
+  },
+  {
+   "id": "design-director@A1",
+   "character_id": "design-director",
+   "scale": "agency",
+   "room_id": "A1",
+   "seat_order": 0,
+   "fixed": false
+  },
+  {
+   "id": "ui-ux-designer@A1",
+   "character_id": "ui-ux-designer",
+   "scale": "agency",
+   "room_id": "A1",
+   "seat_order": 1,
+   "fixed": false
+  },
+  {
+   "id": "graphic-designer@A1",
+   "character_id": "graphic-designer",
+   "scale": "agency",
+   "room_id": "A1",
+   "seat_order": 2,
+   "fixed": false
+  },
+  {
+   "id": "intern@A1",
+   "character_id": "intern",
+   "scale": "agency",
+   "room_id": "A1",
+   "seat_order": 3,
+   "fixed": false
+  },
+  {
+   "id": "freelancer@A1",
+   "character_id": "freelancer",
+   "scale": "agency",
+   "room_id": "A1",
+   "seat_order": 4,
+   "fixed": false
+  },
+  {
+   "id": "tech-lead@A2",
+   "character_id": "tech-lead",
+   "scale": "agency",
+   "room_id": "A2",
+   "seat_order": 0,
+   "fixed": false
+  },
+  {
+   "id": "frontend-developer@A2",
+   "character_id": "frontend-developer",
+   "scale": "agency",
+   "room_id": "A2",
+   "seat_order": 1,
+   "fixed": false
+  },
+  {
+   "id": "backend-developer@A2",
+   "character_id": "backend-developer",
+   "scale": "agency",
+   "room_id": "A2",
+   "seat_order": 2,
+   "fixed": false
+  },
+  {
+   "id": "qa-engineer@A2",
+   "character_id": "qa-engineer",
+   "scale": "agency",
+   "room_id": "A2",
+   "seat_order": 3,
+   "fixed": false
+  },
+  {
+   "id": "account-manager@A3",
+   "character_id": "account-manager",
+   "scale": "agency",
+   "room_id": "A3",
+   "seat_order": 0,
+   "fixed": false
+  },
+  {
+   "id": "project-manager@A3",
+   "character_id": "project-manager",
+   "scale": "agency",
+   "room_id": "A3",
+   "seat_order": 1,
+   "fixed": false
+  },
+  {
+   "id": "business-analyst@A3",
+   "character_id": "business-analyst",
+   "scale": "agency",
+   "room_id": "A3",
+   "seat_order": 2,
+   "fixed": false
+  },
+  {
+   "id": "client@A4",
+   "character_id": "client",
+   "scale": "agency",
+   "room_id": "A4",
+   "seat_order": 0,
+   "fixed": true
+  },
+  {
+   "id": "sales@A6",
+   "character_id": "sales",
+   "scale": "agency",
+   "room_id": "A6",
+   "seat_order": 0,
+   "fixed": false
+  },
+  {
+   "id": "ceo@A6",
+   "character_id": "ceo",
+   "scale": "agency",
+   "room_id": "A6",
+   "seat_order": 1,
+   "fixed": false
+  },
+  {
+   "id": "user@A5",
+   "character_id": "user",
+   "scale": "agency",
+   "room_id": "A5",
+   "seat_order": 0,
+   "fixed": true
+  },
+  {
+   "id": "nhan-luu@A5",
+   "character_id": "nhan-luu",
+   "scale": "agency",
+   "room_id": "A5",
+   "seat_order": null,
+   "fixed": false
   }
  ],
  "quests": [
@@ -2316,6 +2803,232 @@
    ],
    "is_active": true,
    "daily_date": null
+  },
+  {
+   "id": "agency-01",
+   "type": "main",
+   "scale": "agency",
+   "sort_order": 1,
+   "title": "Làm demo để chốt hợp đồng",
+   "room_id": "A6",
+   "giver": "sales@A6",
+   "gather": [
+    "ceo@A6"
+   ],
+   "offer_text": "Chiều nay mình đi gặp một chuỗi phòng gym, họ muốn làm app đặt lịch tập. Bạn dựng giúp mình một màn hình demo nhé. Không cần hoàn chỉnh, miễn là khách hình dung được.",
+   "done_text": "Chốt được rồi! Khách ký hợp đồng 8 tuần. Tuần sau kickoff, bạn vào dự án này nhé.",
+   "rewards": [
+    {
+     "type": "term",
+     "name": "Mockup",
+     "url": "https://academy.telos.vn/mockup-la-gi-huong-dan-toan-tap-cho-nguoi-moi/"
+    },
+    {
+     "type": "term",
+     "name": "Portfolio",
+     "url": "https://academy.telos.vn/product-designer-portfolio-gom-gi/"
+    }
+   ],
+   "is_active": true,
+   "daily_date": null
+  },
+  {
+   "id": "agency-02",
+   "type": "main",
+   "scale": "agency",
+   "sort_order": 2,
+   "title": "Kickoff và nhận brief",
+   "room_id": "A4",
+   "giver": "account-manager@A3",
+   "gather": [
+    "project-manager@A3"
+   ],
+   "offer_text": "Hôm nay kickoff với khách. Bạn đừng vội nói về giao diện. Hãy hỏi xem họ muốn đạt điều gì và hội viên của họ là ai.",
+   "done_text": "Hỏi hay lắm. Biết mục tiêu của khách rồi thì sau này mình có cơ sở để từ chối những yêu cầu lạc đề.",
+   "rewards": [
+    {
+     "type": "character",
+     "id": "stakeholder"
+    },
+    {
+     "type": "term",
+     "name": "Problem Statement",
+     "url": "https://academy.telos.vn/problem-statement-cach-xac-dinh-cho-nguoi-moi-hoc-ui-ux/"
+    }
+   ],
+   "is_active": true,
+   "daily_date": null
+  },
+  {
+   "id": "agency-03",
+   "type": "main",
+   "scale": "agency",
+   "sort_order": 3,
+   "title": "Chốt phạm vi dự án",
+   "room_id": "A3",
+   "giver": "project-manager@A3",
+   "gather": [
+    "business-analyst@A3"
+   ],
+   "offer_text": "Hợp đồng là 8 tuần với ngân sách cố định. Bạn hỏi BA danh sách màn hình, rồi sang hỏi Tech Lead xem làm kịp không.",
+   "done_text": "Vậy giai đoạn 1 là 9 màn hình, chưa có thanh toán. Mình ghi rõ vào biên bản để sau này không ai tranh cãi.",
+   "rewards": [
+    {
+     "type": "character",
+     "id": "business-analyst"
+    },
+    {
+     "type": "term",
+     "name": "MVP",
+     "url": "https://academy.telos.vn/mo-hinh-mvp-trong-hoc-ui-ux-hoc-cach-hoan-thanh/"
+    },
+    {
+     "type": "term",
+     "name": "Feasibility",
+     "url": "https://academy.telos.vn/feasibility-la-gi-product-design/"
+    }
+   ],
+   "is_active": true,
+   "daily_date": null
+  },
+  {
+   "id": "agency-04",
+   "type": "main",
+   "scale": "agency",
+   "sort_order": 4,
+   "title": "Duyệt nội bộ",
+   "room_id": "A1",
+   "giver": "design-director@A1",
+   "gather": [
+    "graphic-designer@A1"
+   ],
+   "offer_text": "Trước khi gửi khách, mọi thứ phải qua mình. Bạn làm concept cho luồng đặt lịch rồi mang lại đây.",
+   "done_text": "Luồng 3 bước rõ ràng. Sửa lại độ tương phản chữ trên nền cam rồi gửi khách được. Nhớ nhé: khách chỉ nên thấy bản đã duyệt nội bộ.",
+   "rewards": [
+    {
+     "type": "term",
+     "name": "Wireframe",
+     "url": "https://academy.telos.vn/wireframe-khung-xuong-cua-thiet-ke/"
+    },
+    {
+     "type": "term",
+     "name": "Heuristic Evaluation",
+     "url": "https://academy.telos.vn/phuong-phap-heuristic-evaluation/"
+    }
+   ],
+   "is_active": true,
+   "daily_date": null
+  },
+  {
+   "id": "agency-05",
+   "type": "main",
+   "scale": "agency",
+   "sort_order": 5,
+   "title": "Trình bày cho khách hàng",
+   "room_id": "A4",
+   "giver": "account-manager@A3",
+   "gather": [
+    "design-director@A1",
+    "project-manager@A3"
+   ],
+   "offer_text": "Khách tới rồi. Bạn trình bày concept nhé. Nhớ bắt đầu từ mục tiêu của họ, đừng bắt đầu từ màu sắc.",
+   "done_text": "Khách thích luồng chính là thắng lớn rồi. Mấy thứ khách đòi thêm thì đừng gật ngay, để mình và PM xem lại hợp đồng đã.",
+   "rewards": [
+    {
+     "type": "term",
+     "name": "Prototype",
+     "url": "https://academy.telos.vn/prototype-la-gi-video-huong-dan/"
+    },
+    {
+     "type": "term",
+     "name": "Desirability",
+     "url": "https://academy.telos.vn/desirability-la-gi/"
+    }
+   ],
+   "is_active": true,
+   "daily_date": null
+  },
+  {
+   "id": "agency-06",
+   "type": "main",
+   "scale": "agency",
+   "sort_order": 6,
+   "title": "Khách hàng đổi ý",
+   "room_id": "A4",
+   "giver": "client@A4",
+   "gather": [],
+   "offer_text": "À em ơi, tiện thể làm luôn cho anh phần bán gói tập online với tích điểm đổi quà nhé. Chắc thêm vài màn hình thôi mà.",
+   "done_text": "Ừ, anh hiểu rồi. Vậy cứ làm xong giai đoạn 1 đã, phần kia bên em báo giá sau nhé.",
+   "rewards": [
+    {
+     "type": "term",
+     "name": "Viability",
+     "url": "https://academy.telos.vn/viability-la-gi-product-design/"
+    },
+    {
+     "type": "term",
+     "name": "Agile",
+     "url": "https://academy.telos.vn/waterfall-va-agile-la-gi/"
+    }
+   ],
+   "is_active": true,
+   "daily_date": null
+  },
+  {
+   "id": "agency-07",
+   "type": "main",
+   "scale": "agency",
+   "sort_order": 7,
+   "title": "Thuyết phục bằng người dùng",
+   "room_id": "A3",
+   "giver": "project-manager@A3",
+   "gather": [
+    "account-manager@A3"
+   ],
+   "offer_text": "Khách vẫn muốn nhồi banner lên trang chủ. Cãi bằng ý kiến cá nhân thì mình thua. Bạn ra Pantry cho một hội viên dùng thử rồi mang kết quả về.",
+   "done_text": "Thấy chưa, khách không nghe designer nhưng nghe người dùng của họ. Lần sau cứ test trước khi tranh luận.",
+   "rewards": [
+    {
+     "type": "term",
+     "name": "Usability Testing",
+     "url": "https://academy.telos.vn/usability-testing-la-gi-ux-design/"
+    },
+    {
+     "type": "term",
+     "name": "User Persona",
+     "url": "https://academy.telos.vn/user-persona-la-gi-cach-tao-ra-1-user-persona/"
+    }
+   ],
+   "is_active": true,
+   "daily_date": null
+  },
+  {
+   "id": "agency-08",
+   "type": "main",
+   "scale": "agency",
+   "sort_order": 8,
+   "title": "Handoff và nghiệm thu",
+   "room_id": "A2",
+   "giver": "tech-lead@A2",
+   "gather": [
+    "frontend-developer@A2",
+    "qa-engineer@A2"
+   ],
+   "offer_text": "Dev bên mình đang chạy 3 dự án cùng lúc, không ai nhớ hết các buổi họp đâu. File của bạn phải tự nói được mọi thứ.",
+   "done_text": "Dự án đầu tiên của bạn ở agency xong rồi. Tuần sau có dự án mới, ngành khác hẳn. Quen dần đi nhé!",
+   "rewards": [
+    {
+     "type": "character",
+     "id": "frontend-developer"
+    },
+    {
+     "type": "term",
+     "name": "Design System",
+     "url": "https://academy.telos.vn/design-system-la-gi/"
+    }
+   ],
+   "is_active": true,
+   "daily_date": null
   }
  ],
  "quest_steps": [
@@ -2547,6 +3260,176 @@
    "target": "csm@R10",
    "task_text": "Nghe phản hồi từ Customer Success",
    "line_text": "Khách hàng sẽ rất thích. Họ hỏi chuyện này mỗi tuần.",
+   "secs": null
+  },
+  {
+   "id": "agency-01-s1",
+   "quest_id": "agency-01",
+   "sort_order": 1,
+   "type": "work",
+   "target": null,
+   "task_text": "Về máy dựng nhanh mockup màn hình đặt lịch",
+   "line_text": "Nhìn được đó! Có hình thật thì khách dễ hình dung hơn hẳn slide toàn chữ.",
+   "secs": 5
+  },
+  {
+   "id": "agency-01-s2",
+   "quest_id": "agency-01",
+   "sort_order": 2,
+   "type": "talk",
+   "target": "ceo@A6",
+   "task_text": "Hỏi Founder nên nhấn điểm gì khi gặp khách",
+   "line_text": "Đừng khoe nhiều tính năng. Cho họ thấy hội viên đặt được lịch trong 3 bước là đủ.",
+   "secs": null
+  },
+  {
+   "id": "agency-02-s1",
+   "quest_id": "agency-02",
+   "sort_order": 1,
+   "type": "talk",
+   "target": "client@A4",
+   "task_text": "Hỏi Client mục tiêu của dự án",
+   "line_text": "Bên anh có 12 phòng tập. Hội viên toàn gọi điện đặt lịch nên lễ tân quá tải. Anh muốn sau 3 tháng, 70% lượt đặt lịch đi qua app.",
+   "secs": null
+  },
+  {
+   "id": "agency-02-s2",
+   "quest_id": "agency-02",
+   "sort_order": 2,
+   "type": "talk",
+   "target": "project-manager@A3",
+   "task_text": "Chốt lại ghi chú với Project Manager",
+   "line_text": "Mình ghi nhận: mục tiêu là giảm cuộc gọi đặt lịch. Mọi màn hình sau này phải phục vụ điều đó.",
+   "secs": null
+  },
+  {
+   "id": "agency-03-s1",
+   "quest_id": "agency-03",
+   "sort_order": 1,
+   "type": "talk",
+   "target": "business-analyst@A3",
+   "task_text": "Hỏi Business Analyst danh sách màn hình",
+   "line_text": "Khách liệt kê 24 màn hình. Nhưng để hội viên đặt được lịch thì chỉ cần 9 màn hình là chạy được.",
+   "secs": null
+  },
+  {
+   "id": "agency-03-s2",
+   "quest_id": "agency-03",
+   "sort_order": 2,
+   "type": "talk",
+   "target": "tech-lead@A2",
+   "task_text": "Sang Dev team hỏi Tech Lead cái nào làm kịp",
+   "line_text": "9 màn hình thì kịp 8 tuần. Riêng thanh toán online nên để giai đoạn 2, tích hợp cổng thanh toán mất ít nhất 3 tuần.",
+   "secs": null
+  },
+  {
+   "id": "agency-04-s1",
+   "quest_id": "agency-04",
+   "sort_order": 1,
+   "type": "work",
+   "target": null,
+   "task_text": "Về máy làm concept luồng đặt lịch",
+   "line_text": "Xong concept rồi à? Trước khi mình xem, bạn hỏi Graphic Designer về nhận diện của khách đã.",
+   "secs": 5
+  },
+  {
+   "id": "agency-04-s2",
+   "quest_id": "agency-04",
+   "sort_order": 2,
+   "type": "talk",
+   "target": "graphic-designer@A1",
+   "task_text": "Hỏi Graphic Designer về màu thương hiệu của khách",
+   "line_text": "Logo khách màu cam đậm. Bạn chỉ dùng cam cho nút chính thôi, đừng phủ cả màn hình, chói lắm.",
+   "secs": null
+  },
+  {
+   "id": "agency-05-s1",
+   "quest_id": "agency-05",
+   "sort_order": 1,
+   "type": "present",
+   "target": null,
+   "task_text": "Trình bày concept trên TV phòng họp",
+   "line_text": "Bạn vừa trình bày xong. Khách gật gù, nhưng có vẻ còn muốn nói gì đó.",
+   "secs": 6
+  },
+  {
+   "id": "agency-05-s2",
+   "quest_id": "agency-05",
+   "sort_order": 2,
+   "type": "talk",
+   "target": "client@A4",
+   "task_text": "Nghe phản hồi của Client",
+   "line_text": "Luồng đặt lịch thì anh thích. Nhưng trang chủ trống quá. Em thêm banner khuyến mãi, tin tức, rồi bảng xếp hạng hội viên nữa nhé.",
+   "secs": null
+  },
+  {
+   "id": "agency-06-s1",
+   "quest_id": "agency-06",
+   "sort_order": 1,
+   "type": "talk",
+   "target": "project-manager@A3",
+   "task_text": "Đừng nhận lời vội. Về hỏi Project Manager",
+   "line_text": "Hai phần đó nằm ngoài hợp đồng, cộng lại khoảng 4 tuần nữa. Mình sẽ báo giá bổ sung. Khách đồng ý thì mới làm.",
+   "secs": null
+  },
+  {
+   "id": "agency-06-s2",
+   "quest_id": "agency-06",
+   "sort_order": 2,
+   "type": "talk",
+   "target": "account-manager@A3",
+   "task_text": "Nhờ Account Manager nói lại với khách",
+   "line_text": "Để mình nói. Bạn cứ giữ thái độ vui vẻ: đừng từ chối thẳng, mà cũng đừng hứa.",
+   "secs": null
+  },
+  {
+   "id": "agency-07-s1",
+   "quest_id": "agency-07",
+   "sort_order": 1,
+   "type": "talk",
+   "target": "user@A5",
+   "task_text": "Ra Pantry nhờ User dùng thử trang chủ",
+   "line_text": "Mình mở app là muốn đặt lịch ngay. Mấy cái banner này che mất nút, mình tưởng quảng cáo nên lướt qua luôn.",
+   "secs": null
+  },
+  {
+   "id": "agency-07-s2",
+   "quest_id": "agency-07",
+   "sort_order": 2,
+   "type": "talk",
+   "target": "client@A4",
+   "task_text": "Mang kết quả cho Client xem",
+   "line_text": "Hội viên nói vậy thật à? Thôi được, banner cho xuống dưới, nút đặt lịch để trên cùng.",
+   "secs": null
+  },
+  {
+   "id": "agency-08-s1",
+   "quest_id": "agency-08",
+   "sort_order": 1,
+   "type": "work",
+   "target": null,
+   "task_text": "Về máy chuẩn bị spec và prototype",
+   "line_text": "Spec đủ các trạng thái rồi. Giờ bạn giải thích cho Frontend nhé.",
+   "secs": 5
+  },
+  {
+   "id": "agency-08-s2",
+   "quest_id": "agency-08",
+   "sort_order": 2,
+   "type": "talk",
+   "target": "frontend-developer@A2",
+   "task_text": "Giải thích spec cho Frontend Developer",
+   "line_text": "Rõ rồi. Mình dùng lại bộ component của dự án trước, chỉ đổi màu theo thương hiệu khách.",
+   "secs": null
+  },
+  {
+   "id": "agency-08-s3",
+   "quest_id": "agency-08",
+   "sort_order": 3,
+   "type": "talk",
+   "target": "client@A4",
+   "task_text": "Mời Client nghiệm thu sản phẩm",
+   "line_text": "App chạy đúng như bản thiết kế. Anh ký nghiệm thu. Giai đoạn 2 anh làm tiếp với bên em.",
    "secs": null
   }
  ],

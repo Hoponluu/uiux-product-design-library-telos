@@ -9,6 +9,9 @@
 --   2. Trigger kiểm tra ràng buộc + tự cập nhật tham chiếu khi đổi phòng
 --   3. RLS: anon chỉ đọc, admin mới được ghi
 --   4. RPC: lưu nhân vật, lưu nhiệm vụ, đổi phòng, import Excel (mỗi hàm là một transaction)
+--
+-- Đã chạy bản trước? Chạy lại toàn bộ file này là đủ: mục 1.6 tự nâng cấp bảng cũ
+-- (thêm quy mô "agency", cột reports_to_agency, cờ fixed cho vị trí ngồi).
 -- ════════════════════════════════════════════════════════
 
 
@@ -51,7 +54,7 @@ create policy "admin write concepts"   on concepts   for all to authenticated us
 -- 1.1 Phòng ban (chỉ nội dung; hình học nằm trong team-map/team-map.layout.js)
 create table if not exists tm_rooms (
   id         text primary key,
-  scale      text not null check (scale in ('small','large')),
+  scale      text not null check (scale in ('small','large','agency')),
   code       text not null default '',
   name       text not null,
   intro      text,
@@ -95,7 +98,7 @@ end $$;
 create table if not exists tm_placements (
   id           text primary key,
   character_id text not null references tm_characters(id) on delete cascade,
-  scale        text not null check (scale in ('small','large')),
+  scale        text not null check (scale in ('small','large','agency')),
   room_id      text not null references tm_rooms(id),
   seat_order   int,
   unique (character_id, room_id),
@@ -106,7 +109,7 @@ create table if not exists tm_placements (
 create table if not exists tm_quests (
   id         text primary key,
   type       text not null default 'main' check (type in ('main','daily')),
-  scale      text not null check (scale in ('small','large')),
+  scale      text not null check (scale in ('small','large','agency')),
   sort_order int  not null default 0,
   title      text not null,
   room_id    text not null references tm_rooms(id),
@@ -134,6 +137,24 @@ create table if not exists tm_quest_steps (
 create index if not exists tm_quest_steps_quest on tm_quest_steps (quest_id, sort_order);
 
 
+-- 1.6 Nâng cấp cho DB đã chạy bản trước: quy mô Agency / Outsource
+do $$
+declare t text; c text;
+begin
+  foreach t in array array['tm_rooms','tm_placements','tm_quests'] loop
+    for c in select conname from pg_constraint
+             where conrelid = t::regclass and contype = 'c' and pg_get_constraintdef(oid) like '%scale%' loop
+      execute format('alter table %I drop constraint %I', t, c);
+    end loop;
+    execute format('alter table %I add constraint %I check (scale in (''small'',''large'',''agency''))', t, t || '_scale_check');
+  end loop;
+end $$;
+-- báo cáo cho ai ở quy mô agency (giống reports_to_small)
+alter table tm_characters add column if not exists reports_to_agency text references tm_characters(id) on delete set null;
+-- nhân vật ngồi cố định (không đi dạo, không tới điểm tập hợp), vd Client ở phòng họp
+alter table tm_placements add column if not exists fixed boolean not null default false;
+
+
 -- ════════════════════════════════════════════════════════
 -- 2. TRIGGER
 -- ════════════════════════════════════════════════════════
@@ -151,7 +172,7 @@ create trigger tm_quests_touch before update on tm_quests for each row execute f
 
 -- 2.2 Phòng có TV (khớp TV trong team-map.layout.js) — bước "present" chỉ hợp lệ ở các phòng này
 create or replace function tm_tv_rooms() returns text[] language sql immutable as $$
-  select array['P4','R01','R06','R08'];
+  select array['P4','R01','R06','R08','A4'];
 $$;
 
 -- 2.3 Vị trí: scale luôn lấy theo phòng
@@ -298,7 +319,7 @@ begin
 end $$;
 
 -- 4.2 Lưu nhân vật + các vị trí của nhân vật trong một transaction.
--- p = { "character": {...đủ cột...}, "placements": [ { "id": <mã cũ|null>, "room_id": "...", "seat_order": n } ] }
+-- p = { "character": {...đủ cột...}, "placements": [ { "id": <mã cũ|null>, "room_id": "...", "seat_order": n, "fixed": bool } ] }
 create or replace function tm_save_character(p jsonb) returns jsonb language plpgsql as $$
 declare
   c   tm_characters := jsonb_populate_record(null::tm_characters, p -> 'character');
@@ -308,15 +329,15 @@ declare
 begin
   perform tm_require_admin();
   insert into tm_characters (id, title, kind, "group", term_id, article_url, summary, doing, with_designer,
-                             reports_to, reports_to_small, props, appearance, tag, cta, is_active)
+                             reports_to, reports_to_small, reports_to_agency, props, appearance, tag, cta, is_active)
   values (c.id, c.title, coalesce(c.kind,'role'), c."group", c.term_id, c.article_url, c.summary, c.doing, c.with_designer,
-          c.reports_to, c.reports_to_small, coalesce(c.props,'[]'::jsonb),
+          c.reports_to, c.reports_to_small, c.reports_to_agency, coalesce(c.props,'[]'::jsonb),
           coalesce(c.appearance,'{"dark":false,"outfit":null}'::jsonb), c.tag, c.cta, coalesce(c.is_active, true))
   on conflict (id) do update set
     title = excluded.title, kind = excluded.kind, "group" = excluded."group", term_id = excluded.term_id,
     article_url = excluded.article_url, summary = excluded.summary, doing = excluded.doing,
     with_designer = excluded.with_designer, reports_to = excluded.reports_to,
-    reports_to_small = excluded.reports_to_small, props = excluded.props, appearance = excluded.appearance,
+    reports_to_small = excluded.reports_to_small, reports_to_agency = excluded.reports_to_agency, props = excluded.props, appearance = excluded.appearance,
     tag = excluded.tag, cta = excluded.cta, is_active = excluded.is_active;
 
   if p ? 'placements' then
@@ -327,11 +348,12 @@ begin
     for pl in select * from jsonb_array_elements(p -> 'placements') loop
       new_id := c.id || '@' || (pl ->> 'room_id');
       if pl ->> 'id' is not null then
-        update tm_placements set id = new_id, room_id = pl ->> 'room_id', seat_order = (pl ->> 'seat_order')::int
+        update tm_placements set id = new_id, room_id = pl ->> 'room_id', seat_order = (pl ->> 'seat_order')::int,
+               fixed = coalesce((pl ->> 'fixed')::boolean, false)
         where id = pl ->> 'id';
       else
-        insert into tm_placements (id, character_id, scale, room_id, seat_order)
-        values (new_id, c.id, 'small', pl ->> 'room_id', (pl ->> 'seat_order')::int);
+        insert into tm_placements (id, character_id, scale, room_id, seat_order, fixed)
+        values (new_id, c.id, 'small', pl ->> 'room_id', (pl ->> 'seat_order')::int, coalesce((pl ->> 'fixed')::boolean, false));
       end if;
     end loop;
   end if;
@@ -409,6 +431,11 @@ begin
       with_designer    = case when r ? 'with_designer'    then r ->> 'with_designer'    else with_designer end,
       reports_to       = case when r ? 'reports_to'       then r ->> 'reports_to'       else reports_to end,
       reports_to_small = case when r ? 'reports_to_small' then r ->> 'reports_to_small' else reports_to_small end,
+      reports_to_agency = case when r ? 'reports_to_agency' then r ->> 'reports_to_agency' else reports_to_agency end,
+      -- appearance_patch: chỉ đổi màu thân / viền, giữ các khoá khác (dark, outfit)
+      appearance       = case when r ? 'appearance_patch'
+                              then (appearance - 'body_color' - 'outline_color') || jsonb_strip_nulls(r -> 'appearance_patch')
+                              else appearance end,
       props            = case when r ? 'props'            then coalesce(r -> 'props','[]'::jsonb) else props end,
       tag              = case when r ? 'tag'              then r ->> 'tag'              else tag end,
       cta              = case when r ? 'cta'              then nullif(r -> 'cta','null'::jsonb) else cta end,
@@ -418,9 +445,11 @@ begin
   n := n || jsonb_build_object('characters', jsonb_array_length(coalesce(p -> 'characters','[]'::jsonb)));
 
   for r in select * from jsonb_array_elements(coalesce(p -> 'placements','[]'::jsonb)) loop
-    insert into tm_placements (id, character_id, scale, room_id, seat_order)
-    values (r ->> 'character_id' || '@' || (r ->> 'room_id'), r ->> 'character_id', 'small', r ->> 'room_id', (r ->> 'seat_order')::int)
-    on conflict (id) do update set seat_order = excluded.seat_order;
+    insert into tm_placements (id, character_id, scale, room_id, seat_order, fixed)
+    values (r ->> 'character_id' || '@' || (r ->> 'room_id'), r ->> 'character_id', 'small', r ->> 'room_id', (r ->> 'seat_order')::int,
+            coalesce((r ->> 'fixed')::boolean, false))
+    on conflict (id) do update set seat_order = excluded.seat_order,
+      fixed = case when r ? 'fixed' then excluded.fixed else tm_placements.fixed end;
   end loop;
   n := n || jsonb_build_object('placements', jsonb_array_length(coalesce(p -> 'placements','[]'::jsonb)));
 
