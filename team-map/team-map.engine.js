@@ -503,7 +503,7 @@ addEventListener('pointermove', e => {
   else if (e.target === canvas) hover(e);
 });
 addEventListener('pointerup', e => { const wasPinch = !!pinch; dropTouch(e); if (wasPinch){ drag = null; return; }
-  if (drag && !drag.moved && drag.button === 0){ if (sheetOpen()) closeSheets(); click(e); } if (drag && drag.moved) canvas.style.cursor = ''; drag = null; });
+  if (drag && !drag.moved && drag.button === 0){ if (!$('#reader').hidden) closeReader(); else if (sheetOpen()) closeSheets(); click(e); } if (drag && drag.moved) canvas.style.cursor = ''; drag = null; });
 $('#zin').onclick = () => dolly(.8);
 $('#zout').onclick = () => dolly(1.25);
 $('#rotl').onclick = () => rotateCam(-1);
@@ -605,7 +605,7 @@ function talk(c){
   if (mode === 'quest' && questTalk(c)) return;
   openPanel(c);
 }
-function updateMet(){ $('#metc').textContent = $('#map-metc').textContent = met[scaleKey].size; }
+function updateMet(){ $('#metc').textContent = $('#map-metc').textContent = met[scaleKey].size; saveProgress(); }
 
 // ---------- office life ----------
 const CHAT_ICONS = ['•••','?','!','✓','+1','•••','✎','•••'];
@@ -738,12 +738,13 @@ function hideIntro(){ const el = $('#roomintro'); el.hidden = true; el.classList
 const mqMobile = matchMedia('(max-width:760px)'), isMobile = () => mqMobile.matches;
 function sheetOpen(){
   if (!isMobile()) return false;
-  return !$('#panel').hidden || !$('#dialog').hidden || !$('#welcome').hidden || !$('#modal').hidden
+  return !$('#panel').hidden || !$('#dialog').hidden || !$('#welcome').hidden || !$('#modal').hidden || !$('#reader').hidden
     || ['#roomintro', '#mini', '#quest'].some(id => $(id).classList.contains('open'));
 }
 function closeSheets(except){
   if (!isMobile()) return;
   if (except !== 'panel') closePanel();
+  if (except !== 'reader') closeReader();
   if (except !== 'dialog') closeDialog();
   if (except !== 'intro') hideIntro();
   if (except !== 'mini') $('#mini').classList.remove('open');
@@ -751,9 +752,11 @@ function closeSheets(except){
   if (except !== 'welcome' && !$('#welcome').hidden) $('#start').click();
   if (except !== 'modal' && !$('#modal').hidden){ const n = $('#next-q'); if (n) n.click(); else $('#modal').hidden = true; }
 }
-const SHEET_SEL = '#panel:not([hidden]),#dialog:not([hidden]),#welcome:not([hidden]),#modal .card,#roomintro.open,#mini.open,#quest.open,#list,#nav-overlay';
+const SHEET_SEL = '#reader:not([hidden]),#panel:not([hidden]),#dialog:not([hidden]),#welcome:not([hidden]),#modal .card,#roomintro.open,#mini.open,#quest.open,#list,#nav-overlay';
 document.addEventListener('click', e => {
-  if (!isMobile() || e.target === canvas || !e.target.closest || e.target.closest(SHEET_SEL)) return;
+  if (!isMobile() || e.target === canvas || !e.target.closest) return;
+  if (!$('#reader').hidden){ if (!e.target.closest('#reader')) closeReader(); return; }
+  if (e.target.closest(SHEET_SEL)) return;
   if (sheetOpen()) closeSheets();
 }, true);
 mqMobile.addEventListener && mqMobile.addEventListener('change', () => ['#roomintro', '#mini', '#quest'].forEach(id => $(id).classList.remove('open')));
@@ -868,7 +871,8 @@ function showRewards(q){
     <p style="margin:0;color:var(--ink-soft)">Bạn mở khoá ${q.rewards.length} thẻ kiến thức. Đọc ngay hoặc để dành, thẻ sẽ nằm trong bộ sưu tập cuối game.</p>
     <div class="rewards">${cards}</div><div class="row"><button class="btn btn-primary" id="next-q">${last ? 'Xem tổng kết' : 'Quest tiếp theo'}</button></div></div>`;
   $('#modal').hidden = false;
-  $('#next-q').onclick = () => { $('#modal').hidden = true; sendHome(Q.people); Q.idx[scaleKey]++; Q.phase = 'between'; renderQuest(); setTimeout(() => mode === 'quest' && startQuest(), 1400); };
+  saveProgress();
+  $('#next-q').onclick = () => { $('#modal').hidden = true; sendHome(Q.people); Q.idx[scaleKey]++; Q.phase = 'between'; saveProgress(); renderQuest(); setTimeout(() => mode === 'quest' && startQuest(), 1400); };
   $('#next-q').focus();
 }
 const chainTracked = new Set();
@@ -891,7 +895,7 @@ function renderQuest(){
   const go = ['offer', 'step', 'return'].includes(Q.phase) && !Q.prog ? '<button class="q-go" aria-label="Tự đi tới chỗ cần tới">Đi tới</button>' : '';
   const pill = (n, text) => `<div class="q-pill"><button class="q-compact" aria-label="Xem chi tiết nhiệm vụ"><span class="qc-n">${n}</span><span class="qc-t">${text}</span><span class="qc-more" aria-hidden="true">›</span></button>${go}</div><button class="close q-close" aria-label="Thu nhỏ nhiệm vụ">×</button>`;
   if (!q){ el.innerHTML = pill('✓', 'Đã xong mọi quest · xem tổng kết') + `<div class="q-full"><p class="eyebrow">Hoàn thành</p><h3>Bạn đã xong mọi quest</h3><p>Mở lại tổng kết để xem các thẻ kiến thức.</p><div class="qprog">${prog}</div><div class="row" style="margin-top:12px"><button class="btn btn-primary" id="q-sum">Xem tổng kết</button><button class="btn btn-ghost" id="q-reset">Chơi lại</button></div></div>`;
-    el.hidden = false; $('#q-sum').onclick = showSummary; $('#q-reset').onclick = () => { Q.idx[scaleKey] = 0; Q.cards[scaleKey] = []; startQuest(); }; if (Q.phase === 'finished' && !Q.summaryShown){ Q.summaryShown = true; showSummary(); } return; }
+    el.hidden = false; $('#q-sum').onclick = showSummary; $('#q-reset').onclick = () => { Q.idx[scaleKey] = 0; Q.cards[scaleKey] = []; saveProgress(); startQuest(); }; if (Q.phase === 'finished' && !Q.summaryShown){ Q.summaryShown = true; showSummary(); } return; }
   const room = roomOf(q.room), gname = Q.giver ? Q.giver.role.title : '';
   let obj = '';
   if (Q.phase === 'gather') obj = `Mọi người đang tập hợp ở ${room.name}…`;
@@ -931,7 +935,7 @@ function setMode(m){
   if (prev === 'quest' && m !== 'quest'){ clearMarkers(); hideSpot(); closeDialog(); sendHome(chars); clearTimeout(Q.timer); Q.phase = null; Q.prog = null; player.sitting = false; rooms.forEach(r => r.tv && (r.tv.mat.map = r.tv.idle)); }
   if (m !== prev && (m === 'quest' || prev === 'quest')) track('tm_quest_mode', { state: m === 'quest' ? 'on' : 'off' });
   if (m === 'quest' && prev !== 'quest'){ closePanel(); if (small()) hideIntro(); Q.summaryShown = false; startQuest(); }
-  renderQuest(); updateFab();
+  renderQuest(); updateFab(); saveProgress();
 }
 function setScale(k){
   if (k === scaleKey && world) return;
@@ -940,7 +944,7 @@ function setScale(k){
   closePanel(); closeDialog(); clearTimeout(Q.timer); Q.phase = null;
   buildWorld(k);
   if (mode === 'quest'){ Q.summaryShown = false; startQuest(); }
-  renderQuest(); updateFab(); if (!$('#list').hidden) renderList();
+  renderQuest(); updateFab(); if (!$('#list').hidden) renderList(); saveProgress();
 }
 ['small','large','agency'].forEach(k => { const b = $('#sc-' + k), o = $(`#scale-select option[value="${k}"]`);
   if (SCALES[k]){ b.onclick = () => setScale(k); return; }
@@ -955,7 +959,7 @@ function updateFab(){
 }
 $('#quest-fab').onclick = () => { $('#welcome').hidden = true; setMode(mode === 'quest' ? 'explore' : 'quest'); };
 updateFab();
-$('#start').onclick = () => { $('#welcome').hidden = true; track('tm_start', { start_action: 'explore' }); canvas.focus(); };
+$('#start').onclick = () => { $('#welcome').hidden = true; track('tm_start', { start_action: 'explore' }); saveProgress(); canvas.focus(); };
 $('#start-quest').onclick = () => { $('#welcome').hidden = true; track('tm_start', { start_action: 'quest' }); setMode('quest'); };
 
 // ---------- list view (SEO / screen readers) ----------
@@ -1002,8 +1006,12 @@ $('#btn-list').onclick = () => { renderList(); $('#list').hidden = false; track(
 
 // Bấm đọc bài (link ra academy.telos.vn…) và bấm vào vai trò chưa có bài — để biết nên viết bài nào trước
 $('#app').addEventListener('click', e => {
-  const where = el => el.closest('#panel') ? 'panel' : el.closest('#modal') ? 'reward' : el.closest('#list') ? (listTab === 'report' ? 'tree' : 'list') : 'other';
+  const where = el => el.closest('#reader') ? 'preview' : el.closest('#panel') ? 'panel' : el.closest('#modal') ? 'reward' : el.closest('#list') ? (listTab === 'report' ? 'tree' : 'list') : 'other';
   const a = e.target.closest('a[href]');
+  if (a && isMobile() && isAcademy(a) && !a.closest('#reader')){
+    e.preventDefault(); const src = where(a);
+    track('tm_article_preview', { link_url: a.href, link_text: a.textContent.trim().slice(0, 100), click_source: src });
+    return openReader(a, src); }
   if (a && /^https?:/.test(a.href)) return track('tm_article_click', { link_url: a.href, link_text: a.textContent.trim().slice(0, 100), click_source: where(a) });
   const off = e.target.closest('.is-disabled');
   if (off && off.closest('#panel')){ const h = $('#panel h2'); track('tm_article_missing', { character_title: h ? h.textContent : '' }); }
@@ -1030,6 +1038,95 @@ mm.addEventListener('click', e => { const r = mm.getBoundingClientRect(), W = mm
 $('#map-btn').onclick = () => { closeSheets('mini'); $('#mini').classList.add('open'); };
 $('#mini-close').onclick = () => $('#mini').classList.remove('open');
 
+// ---------- lưu tiến độ (localStorage của trình duyệt) ----------
+// Chỉ lưu sau khi người chơi đã bấm bắt đầu. Rời game giữa một quest thì khi quay lại chơi lại từ đầu quest đó.
+const SAVE_KEY = 'tm-progress-v1', SAVE_MAX_AGE = 30 * 864e5;
+function saveProgress(){
+  if (!player || !$('#welcome').hidden) return;
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify({ v:1, t:Date.now(), scale:scaleKey, mode, idx:Q.idx, cards:Q.cards,
+    met:Object.fromEntries(Object.entries(met).map(([k, set]) => [k, [...set]])), intro:[...introSeen] })); } catch (e) {}
+}
+function loadProgress(){
+  try { const d = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
+    return d && d.v === 1 && Date.now() - d.t < SAVE_MAX_AGE ? d : null; } catch (e) { return null; }
+}
+function resumeFrom(d){
+  SCALE_KEYS.forEach(k => {
+    const list = QUESTS[k] || [];
+    Q.idx[k] = Math.max(0, Math.min(list.length, (d.idx && +d.idx[k]) || 0));
+    Q.cards[k] = Array.isArray(d.cards && d.cards[k]) ? d.cards[k].filter(x => typeof x === 'string') : [];
+    met[k] = new Set(((d.met && d.met[k]) || []).filter(id => ROLES[id]));
+  });
+  (d.intro || []).forEach(x => introSeen.add(x));
+  $('#welcome').hidden = true; updateMet();
+  if (d.mode === 'quest' && (QUESTS[scaleKey] || []).length){
+    mode = 'quest'; $('#quest-fab').setAttribute('aria-pressed', 'true');
+    Q.summaryShown = true; startQuest();
+  }
+  renderQuest(); updateFab();
+  const list = QUESTS[scaleKey] || [], i = Q.idx[scaleKey];
+  const where = mode === 'quest' ? (i >= list.length ? 'đã xong mọi quest' : `quest ${i + 1}/${list.length}`) : `đã gặp ${met[scaleKey].size}/${$('#mett').textContent} người`;
+  const el = $('#resume');
+  el.innerHTML = `<span>Tiếp tục từ lần trước · ${where}</span><button class="ri-off" id="resume-reset">Chơi lại từ đầu</button>`;
+  el.hidden = false;
+  const timer = setTimeout(() => el.hidden = true, 9000);
+  $('#resume-reset').onclick = () => { clearTimeout(timer); el.hidden = true; resetProgress(); };
+}
+function resetProgress(){
+  try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
+  SCALE_KEYS.forEach(k => { Q.idx[k] = 0; Q.cards[k] = []; met[k].clear(); }); introSeen.clear(); chainTracked.clear();
+  updateMet();
+  if (mode === 'quest'){ Q.summaryShown = false; startQuest(); } else renderQuest();
+  updateFab(); saveProgress();
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveProgress(); });
+addEventListener('pagehide', saveProgress);
+
+// ---------- xem trước bài viết (mobile) ----------
+// Trên mobile, bấm link bài của academy.telos.vn sẽ mở phần xem trước trong sheet (lấy qua WordPress REST API),
+// người học muốn đọc kỹ mới sang trang TELOS Academy. Desktop vẫn mở tab mới như cũ.
+const ACADEMY = 'https://academy.telos.vn', previewCache = new Map();
+const isAcademy = a => { try { const u = new URL(a.href); return u.origin === ACADEMY && u.pathname.length > 1; } catch (e) { return false; } };
+const plainText = html => { const b = new DOMParser().parseFromString(html || '', 'text/html').body; b.querySelectorAll('script,style,noscript').forEach(x => x.remove()); return b.textContent.replace(/\s+/g, ' ').trim(); };
+const escapeHtml = t => String(t).replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[ch]);
+async function fetchPreview(url){
+  if (previewCache.has(url)) return previewCache.get(url);
+  const slug = new URL(url).pathname.split('/').filter(Boolean).pop();
+  const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 7000);
+  const q = `?slug=${encodeURIComponent(slug)}&_embed=wp:featuredmedia&_fields=title,excerpt,_links,_embedded`;
+  try {
+    for (const type of ['posts', 'pages']){
+      const r = await fetch(`${ACADEMY}/wp-json/wp/v2/${type}${q}`, { signal:ctl.signal }); if (!r.ok) continue;
+      const [p] = await r.json(); if (!p) continue;
+      const m = p._embedded && p._embedded['wp:featuredmedia'] && p._embedded['wp:featuredmedia'][0], sz = m && m.media_details && m.media_details.sizes;
+      const img = (sz && (sz.medium || sz.thumbnail || {}).source_url) || (m && m.source_url) || '';
+      const out = { title:plainText(p.title && p.title.rendered), excerpt:plainText(p.excerpt && p.excerpt.rendered), img: /^https:\/\//.test(img) ? img : '' };
+      previewCache.set(url, out); return out;
+    }
+  } catch (e) {} finally { clearTimeout(timer); }
+  return null;
+}
+function openReader(a, source){
+  const url = a.href, label = a.textContent.trim(), el = $('#reader');
+  const out = new URL(url); out.searchParams.set('utm_source', 'uiux-library'); out.searchParams.set('utm_medium', 'product-map'); out.searchParams.set('utm_content', source);
+  const shell = body => `<button class="close" aria-label="Đóng">×</button><div class="sheet-body"><p class="eyebrow">Bài viết · TELOS Academy</p>${body}
+    <div class="row"><a class="btn btn-primary" href="${escapeHtml(out.href)}" target="_blank" rel="noopener">Đọc tiếp trên TELOS Academy</a><p class="rd-note">Tiến độ game đã được lưu. Đọc xong quay lại đây để chơi tiếp.</p></div></div>`;
+  // mở từ sheet phần thưởng / tổng kết thì chồng lên trên, đóng xem trước sẽ quay lại đó
+  if (!a.closest('#modal')) closeSheets('reader');
+  el.dataset.url = url;
+  el.innerHTML = shell(`<div class="rd-head"><div class="rd-img sk"></div><h3>${escapeHtml(label)}</h3></div><p class="rd-ex sk-line"></p><p class="rd-ex sk-line short"></p>`);
+  el.hidden = false; el.querySelector('.close').onclick = closeReader;
+  saveProgress();
+  fetchPreview(url).then(p => {
+    if (el.hidden || el.dataset.url !== url) return;
+    el.innerHTML = shell(p
+      ? `<div class="rd-head">${p.img ? `<img class="rd-img" src="${escapeHtml(p.img)}" alt="" loading="lazy">` : ''}<h3>${escapeHtml(p.title || label)}</h3></div><p class="rd-ex">${escapeHtml(p.excerpt)}</p>`
+      : `<div class="rd-head"><h3>${escapeHtml(label)}</h3></div><p class="rd-ex" style="color:var(--ink-faint)">Chưa tải được phần xem trước. Bạn vẫn có thể mở bài đầy đủ.</p>`);
+    el.querySelector('.close').onclick = closeReader;
+  });
+}
+function closeReader(){ $('#reader').hidden = true; }
+
 // ---------- boot ----------
 const DEBUG = location.hash === '#debug' && /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? Object.assign(document.createElement('div'), { id:'dbg' }) : null; if (DEBUG) $('#app').appendChild(DEBUG);
 function resize(){ const app = $('#app'), r = app.getBoundingClientRect(), w = Math.round(r.width) || innerWidth, h = Math.round(r.height) || innerHeight; if (w === resize.w && h === resize.h) return; resize.w = w; resize.h = h; renderer.setSize(w, h, false); camera.aspect = w/h; camera.updateProjectionMatrix(); }
@@ -1038,7 +1135,12 @@ if (window.ResizeObserver) new ResizeObserver(resize).observe($('#app'));
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
 new MutationObserver(applyTheme).observe(document.documentElement, { attributes:true, attributeFilter:['data-theme'] });
 resize();
-Promise.race([document.fonts ? document.fonts.ready : Promise.resolve(), new Promise(r => setTimeout(r, 1500))]).then(() => { buildWorld(SCALES.small ? 'small' : SCALE_KEYS[0]); renderQuest(); loop(); });
+Promise.race([document.fonts ? document.fonts.ready : Promise.resolve(), new Promise(r => setTimeout(r, 1500))]).then(() => {
+  const saved = loadProgress();
+  buildWorld(saved && SCALES[saved.scale] ? saved.scale : SCALES.small ? 'small' : SCALE_KEYS[0]);
+  ['small','large','agency'].forEach(x => $('#sc-' + x).setAttribute('aria-pressed', scaleKey === x)); $('#scale-select').value = scaleKey;
+  if (saved) resumeFrom(saved); else renderQuest();
+  loop(); });
 function loop(){
   const dt = Math.min(.05, clock.getDelta()); t += dt; frame++;
   chars.forEach(c => { think(c, dt); stepChar(c, dt); });
