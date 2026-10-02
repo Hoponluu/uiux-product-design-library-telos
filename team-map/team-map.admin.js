@@ -28,6 +28,23 @@
   const termOf = id => id == null || id === '' ? null : allConcepts.find(t => String(t.id) === String(id));
   const termMap = () => Object.fromEntries(allConcepts.map(t => [String(t.id), t]));
   const resolvedUrl = c => TeamMapLoader.resolveUrl(c, termMap());
+  // Bản tiếng Anh (/en/team-map): cột i18n = { en: { <tên cột>: "..." } }. Ô trống = trang EN dùng tiếng Việt.
+  const enOf = row => (row && row.i18n && row.i18n.en) || {};
+  const EN_PH = 'Chưa dịch: trang tiếng Anh sẽ hiện bản tiếng Việt';
+  function withEn(i18n, fields){
+    const out = { ...(i18n || {}) }, en = {};
+    Object.entries(fields).forEach(([k, v]) => {
+      if (Array.isArray(v)){ const a = v.map(x => String(x || '').trim()); if (a.some(Boolean)) en[k] = a; }
+      else if (v != null && String(v).trim()) en[k] = String(v).trim();
+    });
+    if (Object.keys(en).length) out.en = en; else delete out.en;
+    return out;
+  }
+  const enBadge = (row, keys) => { const e = enOf(row), n = keys.filter(k => e[k]).length;
+    return n === keys.length ? '<span class="badge badge-pub" title="Đã có bản tiếng Anh">EN</span>' : n ? '<span class="badge badge-draft" title="Bản tiếng Anh chưa đủ">EN một phần</span>' : '<span class="badge badge-sub" title="Chưa có bản tiếng Anh">Chưa có EN</span>'; };
+  const enInput = (name, label, value, rows) => `<div class="form-group"><label>${label}</label>${rows
+    ? `<textarea class="form-control" name="${name}" rows="${rows}" placeholder="${EN_PH}">${esc(value || '')}</textarea>`
+    : `<input class="form-control" name="${name}" value="${esc(value || '')}" placeholder="${EN_PH}"/>`}</div>`;
   const roomsOf = scale => S.rooms.filter(r => r.scale === scale).sort((a, b) => a.sort_order - b.sort_order);
   const plsOf = scale => S.pls.filter(p => p.scale === scale);
   const roomKind = id => (LAYOUT[id] || {}).kind;
@@ -203,7 +220,7 @@
       <div class="table-wrap"><table><thead><tr><th>Chức danh</th><th>Nhóm</th><th>Loại</th><th>Thuật ngữ</th><th>Phòng (nhỏ)</th><th>Phòng (lớn)</th><th>Phòng (agency)</th><th>Bài viết</th><th>Hiển thị</th><th></th></tr></thead>
       <tbody>${rows.map(c => { const t = termOf(c.term_id), url = resolvedUrl(c);
         return `<tr>
-          <td><div class="td-name">${esc(c.title)}</div><div class="td-slug">${esc(c.id)}</div></td>
+          <td><div class="td-name">${esc(c.title)} ${enBadge(c, ['summary','doing','with_designer'])}</div><div class="td-slug">${esc(c.id)}</div></td>
           <td class="tm-nowrap"><span class="tm-dot" style="background:${(GROUPS[c.group] || {}).color || '#999'}"></span>${esc((GROUPS[c.group] || {}).name || c.group)}</td>
           <td><span class="badge ${c.kind === 'role' ? 'badge-sub' : 'badge-vai-tro'}">${KINDS[c.kind] || c.kind}</span></td>
           <td class="td-desc">${t ? esc(t.name) : '<span class="no-url">—</span>'}</td>
@@ -234,7 +251,7 @@
     const F = S.form = { kind:'char', isNew:!c, orig:c,
       pls: Object.fromEntries(SCALE_KEYS.map(k => [k, S.pls.filter(p => c && p.character_id === c.id && p.scale === k)
              .map(p => ({ orig:p.id, room_id:p.room_id, seat_order:p.seat_order, fixed:!!p.fixed }))])),
-      cta: (c && c.cta || []).map(b => ({ label:b.label || '', url:b.url || '', primary:!!b.primary })),
+      cta: (c && c.cta || []).map((b, i) => ({ label:b.label || '', label_en:(enOf(c).cta || [])[i] || '', url:b.url || '', primary:!!b.primary })),
       props: new Set(c ? c.props || [] : []) };
     SCALE_KEYS.forEach(k => { if (!F.pls[k].length) F.pls[k].push({ orig:null, room_id:'', seat_order:null, fixed:false }); });
     const t = c ? termOf(c.term_id) : null;
@@ -288,9 +305,20 @@
 
       <div class="tm-special" ${c && ['author','guest'].includes(c.kind) ? '' : 'hidden'}>
         <div class="tm-section">Tác giả / khách</div>
-        <div class="form-group"><label>Nhãn phụ</label><input class="form-control" name="tag" value="${esc(c ? c.tag : '')}" placeholder="VD: Academic Director · TELOS Academy"/></div>
+        <div class="form-row">
+          <div class="form-group"><label>Nhãn phụ</label><input class="form-control" name="tag" value="${esc(c ? c.tag : '')}" placeholder="VD: Academic Director · TELOS Academy"/></div>
+          ${enInput('en_tag', 'Nhãn phụ (tiếng Anh)', enOf(c).tag)}
+        </div>
         <div class="form-group"><label>Các nút trong bảng thông tin</label><div data-cta></div><button type="button" class="tm-link" data-act="cta-add">+ Thêm nút</button></div>
       </div>
+
+      <details class="tm-en" open><summary class="tm-section">Tiếng Anh · trang /en/team-map</summary>
+        <p class="tm-note">Ô nào để trống thì trang tiếng Anh hiện bản tiếng Việt. Bài viết vẫn là bài tiếng Việt.</p>
+        ${enInput('en_title', 'Chức danh (tiếng Anh)', enOf(c).title)}
+        ${enInput('en_summary', 'Họ là ai (tiếng Anh)', enOf(c).summary, 2)}
+        ${enInput('en_doing', 'Đang làm (tiếng Anh)', enOf(c).doing, 2)}
+        ${enInput('en_with_designer', 'Làm việc với bạn thế nào (tiếng Anh)', enOf(c).with_designer, 2)}
+      </details>
 
       <div class="tm-section">Vị trí</div>
       <div data-pls></div>
@@ -313,6 +341,7 @@
     const box = formRoot().querySelector('[data-cta]'); if (!box) return;
     box.innerHTML = S.form.cta.map((b, i) => `<div class="tm-row">
       <input class="form-control" data-cta-f="label" data-i="${i}" value="${esc(b.label)}" placeholder="Nhãn"/>
+      <input class="form-control" data-cta-f="label_en" data-i="${i}" value="${esc(b.label_en || '')}" placeholder="Nhãn tiếng Anh"/>
       <input class="form-control" data-cta-f="url" data-i="${i}" value="${esc(b.url)}" placeholder="https://..."/>
       <label class="tm-check"><input type="checkbox" data-cta-f="primary" data-i="${i}"${b.primary ? ' checked' : ''}/> Nút chính</label>
       <button type="button" class="btn-del" data-act="cta-del" data-i="${i}">Xoá</button></div>`).join('') || '<div class="form-hint">Chưa có nút</div>';
@@ -372,8 +401,8 @@
     if (kind === 'player'){
       SCALE_KEYS.forEach(k => { if (roomsOf(k).length && F.pls[k].filter(p => p.room_id).length !== 1) err(`[data-pl-f="room_id"][data-scale="${k}"]`, `Nhân vật chính cần đúng 1 chỗ ở ${SCALE_NAME[k].toLowerCase()}`); });
     }
-    const cta = F.cta.filter(b => b.label || b.url);
-    cta.forEach((b, i) => { if (!/^https?:\/\//.test(b.url)) err(`[data-cta-f="url"][data-i="${F.cta.indexOf(b)}"]`, 'Nhập URL đầy đủ (https://...)'); });
+    const ctaRows = F.cta.filter(b => b.label || b.url), cta = ctaRows.map(b => ({ label:b.label, url:b.url, primary:!!b.primary }));
+    ctaRows.forEach(b => { if (!/^https?:\/\//.test(b.url)) err(`[data-cta-f="url"][data-i="${F.cta.indexOf(b)}"]`, 'Nhập URL đầy đủ (https://...)'); });
     if (fv('article_url') && !/^https?:\/\//.test(fv('article_url'))) err('[name="article_url"]', 'Nhập URL đầy đủ (https://...)');
     if (bad) return toast('Kiểm tra lại các ô đánh dấu đỏ', true);
     const termId = root.querySelector('[data-combo-v="term"]').value;
@@ -386,6 +415,9 @@
       tag: ['author','guest'].includes(kind) ? (fv('tag') || null) : (F.orig ? F.orig.tag : null),
       cta: ['author','guest'].includes(kind) ? (cta.length ? cta : null) : (F.orig ? F.orig.cta : null),
       is_active: fv('is_active') };
+    const special = ['author','guest'].includes(kind);
+    character.i18n = withEn(F.orig && F.orig.i18n, { title:fv('en_title'), summary:fv('en_summary'), doing:fv('en_doing'), with_designer:fv('en_with_designer'),
+      tag: special ? fv('en_tag') : enOf(F.orig).tag, cta: special ? ctaRows.map(b => b.label_en || '') : enOf(F.orig).cta });
     const btn = root.querySelector('[data-act="char-save"]'); btn.disabled = true; btn.textContent = 'Đang lưu...';
     try {
       await sbRpc('tm_save_character', { p: { character, placements: pls.map(p => ({ id:p.orig, room_id:p.room_id, seat_order: p.seat_order === '' || p.seat_order == null ? null : +p.seat_order, fixed:!!p.fixed })) } });
@@ -403,7 +435,7 @@
       ${roomsOf(scale).map(r => { const n = S.pls.filter(p => p.room_id === r.id).length; return `<tr>
         <td><div class="td-name">${esc(r.code || '—')}</div><div class="td-slug">${esc(r.id)}</div></td><td>${esc(r.name)}</td>
         <td><span class="badge badge-sub">${esc(roomKind(r.id) || '?')}</span>${TV_ROOMS.includes(r.id) ? ' <span class="badge badge-sub">TV</span>' : ''}</td>
-        <td>${n}</td><td>${r.intro ? '<span class="badge badge-pub">Có</span>' : '<span class="badge badge-draft">Chưa có</span>'}</td>
+        <td>${n}</td><td>${r.intro ? '<span class="badge badge-pub">Có</span>' : '<span class="badge badge-draft">Chưa có</span>'} ${enBadge(r, r.intro ? ['name','intro'] : ['name'])}</td>
         <td class="td-actions"><button class="btn-edit" data-act="room-edit" data-id="${esc(r.id)}">Sửa</button></td></tr>`; }).join('')}</tbody></table></div>`;
     body().innerHTML = `<div class="toolbar"><h2>Phòng ban</h2></div>
       <p class="tm-note">Bố cục phòng (vị trí, kích thước, cửa, TV) cố định trong code nên không thêm/xoá phòng ở đây. Sửa được mã, tên, đoạn giới thiệu và thứ tự ghế.</p>
@@ -421,6 +453,10 @@
       <div class="form-group"><label>Tên phòng *</label><input class="form-control" name="name" value="${esc(r.name)}"/></div>
       <div class="form-group"><label>Đoạn giới thiệu</label><textarea class="form-control" name="intro" rows="4" placeholder="2–3 câu: phòng này làm gì, designer ghé đây khi nào">${esc(r.intro || '')}</textarea>
         <div class="form-hint">Hiện khi người chơi bước vào phòng. Để trống thì không hiện thẻ.</div></div>
+      <details class="tm-en" open><summary class="tm-section">Tiếng Anh · trang /en/team-map</summary>
+        <div class="form-row">${enInput('en_code', 'Mã hiển thị (tiếng Anh)', enOf(r).code)}${enInput('en_name', 'Tên phòng (tiếng Anh)', enOf(r).name)}</div>
+        ${enInput('en_intro', 'Đoạn giới thiệu (tiếng Anh)', enOf(r).intro, 3)}
+      </details>
       <div class="form-group"><label>Nhân vật trong phòng · kéo thả để đổi thứ tự ghế</label>
         ${seated.length ? `<ul class="tm-sortlist" data-sort="seats">${seated.map(p => { const c = charOf(p.character_id); return `<li draggable="true" data-id="${esc(p.id)}"><span class="tm-handle">⋮⋮</span>${esc(c ? c.title : p.character_id)}<span class="td-slug">${esc(p.id)}</span></li>`; }).join('')}</ul>`
           : '<div class="form-hint">Chưa có ai ngồi ở phòng này</div>'}</div>`,
@@ -433,7 +469,8 @@
     if (!fv('name')) return setErr(root, '[name="name"]', 'Nhập tên phòng');
     const btn = root.querySelector('[data-act="room-save"]'); btn.disabled = true;
     try {
-      await sbUpdate('tm_rooms', F.id, { code: fv('code'), name: fv('name'), intro: fv('intro') || null, sort_order: parseInt(fv('sort_order')) || 0 });
+      await sbUpdate('tm_rooms', F.id, { code: fv('code'), name: fv('name'), intro: fv('intro') || null, sort_order: parseInt(fv('sort_order')) || 0,
+        i18n: withEn(roomOf(F.id).i18n, { code:fv('en_code'), name:fv('en_name'), intro:fv('en_intro') }) });
       if (F.order.join() !== F.origOrder) await sbRpc('tm_reorder', { p_table:'tm_placements', p: F.order.map((id, i) => ({ id, sort:i })) });
       toast('Đã lưu phòng'); closeModal(); await reload();
     } catch(e) { toast('Lỗi: ' + e.message, true); }
@@ -453,7 +490,7 @@
       ${f.qType === 'daily' ? '<p class="tm-note">Nhiệm vụ daily chỉ được lưu để chuẩn bị dữ liệu. Game chưa chạy daily.</p>' : '<p class="tm-note">Kéo ⋮⋮ để đổi thứ tự trong chuỗi quest. Nhiệm vụ đang tắt không xuất hiện trong game.</p>'}
       <ul class="tm-qlist" data-sort="quests">${list.map((q, i) => `<li draggable="true" data-id="${esc(q.id)}" class="${q.is_active ? '' : 'off'}">
         <span class="tm-handle">⋮⋮</span><span class="tm-qn">${i + 1}</span>
-        <div class="tm-qmain"><div class="td-name">${esc(q.title)} ${q.is_active ? '' : '<span class="badge badge-draft">Đang tắt</span>'}</div>
+        <div class="tm-qmain"><div class="td-name">${esc(q.title)} ${q.is_active ? '' : '<span class="badge badge-draft">Đang tắt</span>'} ${enBadge(q, ['title','offer_text','done_text'])}</div>
           <div class="td-slug">${esc(q.id)} · ${esc((roomOf(q.room_id) || {}).name || q.room_id)} · giao bởi ${esc(q.giver ? plLabel(q.giver) : '—')} · ${stepsN(q.id)} bước${q.daily_date ? ' · ' + esc(q.daily_date) : ''}</div>
           <div class="tm-rewards">${(q.rewards || []).map(r => `<span class="badge ${r.type === 'term' && r.term_id == null ? 'badge-draft' : 'badge-vai-tro'}" title="${r.type === 'term' && r.term_id == null ? 'Chưa gắn thuật ngữ trong thư viện' : ''}">${esc(rewardLabel(r))}</span>`).join(' ')}</div></div>
         <div class="td-actions"><button class="btn-edit" data-act="quest-edit" data-id="${esc(q.id)}">Sửa</button><button class="btn-edit" data-act="quest-dup" data-id="${esc(q.id)}">Nhân bản</button><button class="btn-del" data-act="quest-del" data-id="${esc(q.id)}">Xoá</button></div>
@@ -477,7 +514,8 @@
     const scale = src ? src.scale : S.f.qScale, type = src ? src.type : S.f.qType;
     const q = src ? JSON.parse(JSON.stringify(src)) : { scale, type, title:'', room_id:'', giver:'', gather:[], offer_text:'', done_text:'', rewards:[], is_active:true, daily_date:null };
     if (isNew){ q.id = newQuestId(q.scale, q.type); q.sort_order = Math.max(0, ...S.quests.filter(x => x.scale === q.scale && x.type === q.type).map(x => x.sort_order)) + 1; if (dup) q.title += ' (bản sao)'; }
-    const steps = src ? S.steps.filter(s => s.quest_id === src.id).sort((a, b) => a.sort_order - b.sort_order).map(s => ({ ...s })) : [];
+    const steps = src ? S.steps.filter(s => s.quest_id === src.id).sort((a, b) => a.sort_order - b.sort_order).map(s => ({ ...s, en_task_text:enOf(s).task_text || '', en_line_text:enOf(s).line_text || '' })) : [];
+    Object.assign(q, { en_title:enOf(q).title || '', en_offer_text:enOf(q).offer_text || '', en_done_text:enOf(q).done_text || '' });
     S.form = { kind:'quest', isNew, q, steps };
     openModal(isNew ? (dup ? 'Nhân bản nhiệm vụ' : 'Thêm nhiệm vụ') : `Sửa nhiệm vụ · ${q.id}`, '<div data-quest></div>',
       `<button class="btn-cancel" data-act="close">Huỷ</button><button class="btn-save" data-act="quest-save">Lưu</button>`);
@@ -506,6 +544,12 @@
         ${(q.gather || []).filter(g => !pls.some(p => p.id === g)).map(g => `<div class="tm-warn">Mã vị trí không còn: <code>${esc(g)}</code> (sẽ bị bỏ khi lưu)</div>`).join('')}</div>
       <div class="form-group"><label>Lời thoại khi nhận việc</label><textarea class="form-control" data-q="offer_text" rows="2">${esc(q.offer_text || '')}</textarea></div>
       <div class="form-group"><label>Lời thoại khi trả việc</label><textarea class="form-control" data-q="done_text" rows="2">${esc(q.done_text || '')}</textarea></div>
+      <details class="tm-en" open><summary class="tm-section">Tiếng Anh · trang /en/team-map</summary>
+        <div class="form-group"><label>Tên nhiệm vụ (tiếng Anh)</label><input class="form-control" data-q="en_title" value="${esc(q.en_title)}" placeholder="${EN_PH}"/></div>
+        <div class="form-group"><label>Lời thoại khi nhận việc (tiếng Anh)</label><textarea class="form-control" data-q="en_offer_text" rows="2" placeholder="${EN_PH}">${esc(q.en_offer_text)}</textarea></div>
+        <div class="form-group"><label>Lời thoại khi trả việc (tiếng Anh)</label><textarea class="form-control" data-q="en_done_text" rows="2" placeholder="${EN_PH}">${esc(q.en_done_text)}</textarea></div>
+        <p class="tm-note">Bản tiếng Anh của từng bước nằm trong mục "Tiếng Anh" của bước đó.</p>
+      </details>
 
       <div class="tm-section">Các bước</div>
       <ul class="tm-steps" data-sort="steps">${steps.map((s, i) => `<li draggable="true" data-id="${i}">
@@ -516,6 +560,10 @@
           <button type="button" class="btn-del" data-act="step-del" data-i="${i}">Xoá</button></div>
         <div class="form-group"><input class="form-control" data-s="task_text" data-i="${i}" value="${esc(s.task_text || '')}" placeholder="Dòng mục tiêu trên thẻ quest *"/></div>
         <div class="form-group"><textarea class="form-control" data-s="line_text" data-i="${i}" rows="2" placeholder="${s.type === 'talk' ? 'Lời của người cần gặp sau khi nói chuyện' : 'Lời của người giao việc khi xong bước'}">${esc(s.line_text || '')}</textarea></div>
+        <details class="tm-en tm-en-step" open><summary>Tiếng Anh${s.en_task_text ? '' : ' · chưa dịch'}</summary>
+          <div class="form-group"><input class="form-control" data-s="en_task_text" data-i="${i}" value="${esc(s.en_task_text || '')}" placeholder="Dòng mục tiêu (tiếng Anh)"/></div>
+          <div class="form-group"><textarea class="form-control" data-s="en_line_text" data-i="${i}" rows="2" placeholder="Lời thoại (tiếng Anh)">${esc(s.en_line_text || '')}</textarea></div>
+        </details>
       </li>`).join('')}</ul>
       <button type="button" class="tm-link" data-act="step-add">+ Thêm bước</button>
 
@@ -555,9 +603,11 @@
     if (bad) return toast('Kiểm tra lại các ô đánh dấu đỏ', true);
     const quest = { id:q.id, type:q.type, scale:q.scale, sort_order:q.sort_order, title:q.title.trim(), room_id:q.room_id, giver:q.giver,
       gather:(q.gather || []).filter(g => pids.has(g) && g !== q.giver), offer_text:q.offer_text || null, done_text:q.done_text || null,
-      rewards, is_active:!!q.is_active, daily_date: q.type === 'daily' ? (q.daily_date || null) : null };
+      rewards, is_active:!!q.is_active, daily_date: q.type === 'daily' ? (q.daily_date || null) : null,
+      i18n: withEn(q.i18n, { title:q.en_title, offer_text:q.en_offer_text, done_text:q.en_done_text }) };
     const payload = steps.map((s, i) => ({ id:`${q.id}-s${i + 1}`, sort_order:i + 1, type:s.type, target: s.type === 'talk' ? s.target : null,
-      task_text:s.task_text.trim(), line_text:(s.line_text || '').trim() || null, secs: s.type === 'talk' ? null : (s.secs === '' || s.secs == null ? 5 : +s.secs) }));
+      task_text:s.task_text.trim(), line_text:(s.line_text || '').trim() || null, secs: s.type === 'talk' ? null : (s.secs === '' || s.secs == null ? 5 : +s.secs),
+      i18n: withEn(s.i18n, { task_text:s.en_task_text, line_text:s.en_line_text }) }));
     const btn = root.querySelector('[data-act="quest-save"]'); btn.disabled = true; btn.textContent = 'Đang lưu...';
     try {
       await sbRpc('tm_save_quest', { p: { quest, steps: payload } });
@@ -584,6 +634,13 @@
   const splitList = v => String(v || '').split(/[;\n]/).map(x => x.trim()).filter(Boolean);
   const rewardToCell = r => r.type === 'character' ? `character:${r.id}` : r.term_id != null ? `term:${r.term_id}` : `link:${r.name || ''}|${r.url || ''}`;
 
+  // Cột tiếng Anh: khoá en_<cột>, giá trị lưu ở i18n.en.<cột>. Import gửi i18n_en chỉ gồm các cột có trong file.
+  const enCols = list => list.map(([k, label, w]) => ['en_' + k, label + ' (EN)', w, { wrap:1 }]);
+  const enCells = (row, keys) => Object.fromEntries(keys.map(k => ['en_' + k, enOf(row)[k] || '']));
+  const enFrom = (v, has, keys, o) => { const p = {}; keys.forEach(k => { if (has('en_' + k)) p[k] = v['en_' + k] || null; });
+    if (Object.keys(p).length) o.i18n_en = Object.assign(o.i18n_en || {}, p); return o; };
+  const EN_CHAR = ['title','summary','doing','with_designer','tag'], EN_ROOM = ['code','name','intro'], EN_QUEST = ['title','offer_text','done_text'], EN_STEP = ['task_text','line_text'];
+
   const SHEETS = [
     { name:'Nhan vat', key:'characters', title:'Nhân vật', required:['id','title','kind','group'],
       cols:[['id','id',18],['title','Chức danh',26],['kind','Loại',10,{ list:Object.keys(KINDS) }],['group','Nhóm',13,{ list:GROUP_KEYS }],
@@ -591,13 +648,16 @@
         ['summary','Họ là ai',50,{ wrap:1 }],['doing','Đang làm',40,{ wrap:1 }],['with_designer','Làm việc với bạn',50,{ wrap:1 }],
         ['reports_to','Báo cáo cho',18],['reports_to_small','Báo cáo cho (nhỏ)',18],['reports_to_agency','Báo cáo cho (agency)',18],['props','Đồ nghề',26],
         ['body_color','Màu thân',11],['outline_color','Màu viền',11],['tag','Nhãn phụ',26],
-        ['cta1_label','Nút 1 nhãn',16],['cta1_url','Nút 1 URL',36],['cta2_label','Nút 2 nhãn',16],['cta2_url','Nút 2 URL',36],['is_active','Hiển thị',10,{ list:[YES, NO] }]],
+        ['cta1_label','Nút 1 nhãn',16],['cta1_url','Nút 1 URL',36],['cta2_label','Nút 2 nhãn',16],['cta2_url','Nút 2 URL',36],['is_active','Hiển thị',10,{ list:[YES, NO] }],
+        ...enCols([['title','Chức danh',26],['summary','Họ là ai',50],['doing','Đang làm',40],['with_designer','Làm việc với bạn',50],['tag','Nhãn phụ',26]]),
+        ['en_cta1_label','Nút 1 nhãn (EN)',16],['en_cta2_label','Nút 2 nhãn (EN)',16]],
       rows:() => S.chars.slice().sort((a, b) => a.id.localeCompare(b.id)),
       toCells:c => { const t = termOf(c.term_id), b = c.cta || [];
         return { id:c.id, title:c.title, kind:c.kind, group:c.group, term_id:c.term_id ?? '', _term_name:t ? t.name : '', article_url:c.article_url, _resolved_url:resolvedUrl(c) || '',
           summary:c.summary, doing:c.doing, with_designer:c.with_designer, reports_to:c.reports_to, reports_to_small:c.reports_to_small, reports_to_agency:c.reports_to_agency, props:joinList(c.props),
           body_color:(c.appearance || {}).body_color || '', outline_color:(c.appearance || {}).outline_color || '', tag:c.tag,
-          cta1_label:b[0] ? b[0].label : '', cta1_url:b[0] ? b[0].url : '', cta2_label:b[1] ? b[1].label : '', cta2_url:b[1] ? b[1].url : '', is_active:c.is_active ? YES : NO }; },
+          cta1_label:b[0] ? b[0].label : '', cta1_url:b[0] ? b[0].url : '', cta2_label:b[1] ? b[1].label : '', cta2_url:b[1] ? b[1].url : '', is_active:c.is_active ? YES : NO,
+          ...enCells(c, EN_CHAR), en_cta1_label:(enOf(c).cta || [])[0] || '', en_cta2_label:(enOf(c).cta || [])[1] || '' }; },
       fromCells:(v, has) => { const o = { id:v.id };
         ['title','kind','group','article_url','summary','doing','with_designer','reports_to','reports_to_small','reports_to_agency','tag'].forEach(k => { if (has(k)) o[k] = v[k] || null; });
         if (has('body_color') || has('outline_color')){ const cur = (charOf(v.id) || {}).appearance || {};
@@ -608,6 +668,9 @@
         if (has('cta1_label') || has('cta1_url') || has('cta2_label') || has('cta2_url')){
           const b = [[v.cta1_label, v.cta1_url], [v.cta2_label, v.cta2_url]].filter(([l, u]) => l || u).map(([l, u], i) => ({ label:l || u, url:u || '', primary:i === 0 }));
           o.cta = b.length ? b : null; }
+        enFrom(v, has, EN_CHAR, o);
+        if (has('en_cta1_label') || has('en_cta2_label')){ const l = [v.en_cta1_label || '', v.en_cta2_label || ''];
+          o.i18n_en = Object.assign(o.i18n_en || {}, { cta: l.some(Boolean) ? l : null }); }
         return o; } },
     { name:'Vi tri', key:'placements', title:'Vị trí', required:['character_id','room_id'],
       cols:[['id','id',28],['character_id','Nhân vật (id)',20],['_title','Chức danh',26],['_scale','Quy mô',10],['room_id','Phòng (id)',11],['_room_name','Tên phòng',24],['seat_order','Thứ tự ghế',11],['fixed','Cố định',10,{ list:[YES, NO] }]],
@@ -617,19 +680,21 @@
         if (has('seat_order')) o.seat_order = v.seat_order === '' ? null : Number(v.seat_order);
         if (has('fixed')) o.fixed = v.fixed === YES; return o; } },
     { name:'Phong ban', key:'rooms', title:'Phòng ban', required:['id'],
-      cols:[['id','id',8],['_scale','Quy mô',10],['code','Mã',12],['name','Tên',28],['intro','Giới thiệu',70,{ wrap:1 }],['sort_order','Thứ tự',9]],
+      cols:[['id','id',8],['_scale','Quy mô',10],['code','Mã',12],['name','Tên',28],['intro','Giới thiệu',70,{ wrap:1 }],['sort_order','Thứ tự',9],
+        ...enCols([['code','Mã',12],['name','Tên',28],['intro','Giới thiệu',70]])],
       rows:() => S.rooms.slice().sort((a, b) => a.scale.localeCompare(b.scale) * -1 || a.sort_order - b.sort_order),
-      toCells:r => ({ id:r.id, _scale:r.scale, code:r.code, name:r.name, intro:r.intro, sort_order:r.sort_order }),
+      toCells:r => ({ id:r.id, _scale:r.scale, code:r.code, name:r.name, intro:r.intro, sort_order:r.sort_order, ...enCells(r, EN_ROOM) }),
       fromCells:(v, has) => { const o = { id:v.id };
         ['code','name','intro'].forEach(k => { if (has(k)) o[k] = v[k] || (k === 'code' ? '' : null); });
-        if (has('sort_order')) o.sort_order = v.sort_order === '' ? 0 : Number(v.sort_order); return o; } },
+        if (has('sort_order')) o.sort_order = v.sort_order === '' ? 0 : Number(v.sort_order); return enFrom(v, has, EN_ROOM, o); } },
     { name:'Nhiem vu', key:'quests', title:'Nhiệm vụ', required:['id','scale','title','room_id'],
       cols:[['id','id',14],['type','Loại',9,{ list:Object.keys(QTYPES) }],['scale','Quy mô',9,{ list:SCALE_KEYS }],['sort_order','Thứ tự',8],['title','Tên',28],['room_id','Phòng tập hợp (id)',12],
         ['giver','Người giao (mã vị trí)',26],['gather','Người tham gia',44,{ wrap:1 }],['offer_text','Lời nhận việc',50,{ wrap:1 }],['done_text','Lời trả việc',50,{ wrap:1 }],
-        ['rewards','Thẻ thưởng',44,{ wrap:1 }],['daily_date','Ngày (daily)',13],['is_active','Hiển thị',10,{ list:[YES, NO] }]],
+        ['rewards','Thẻ thưởng',44,{ wrap:1 }],['daily_date','Ngày (daily)',13],['is_active','Hiển thị',10,{ list:[YES, NO] }],
+        ...enCols([['title','Tên',28],['offer_text','Lời nhận việc',50],['done_text','Lời trả việc',50]])],
       rows:() => S.quests.slice().sort((a, b) => a.scale.localeCompare(b.scale) * -1 || a.type.localeCompare(b.type) || a.sort_order - b.sort_order),
       toCells:q => ({ id:q.id, type:q.type, scale:q.scale, sort_order:q.sort_order, title:q.title, room_id:q.room_id, giver:q.giver, gather:joinList(q.gather),
-        offer_text:q.offer_text, done_text:q.done_text, rewards:(q.rewards || []).map(rewardToCell).join(SEP), daily_date:q.daily_date || '', is_active:q.is_active ? YES : NO }),
+        offer_text:q.offer_text, done_text:q.done_text, rewards:(q.rewards || []).map(rewardToCell).join(SEP), daily_date:q.daily_date || '', is_active:q.is_active ? YES : NO, ...enCells(q, EN_QUEST) }),
       fromCells:(v, has) => { const o = { id:v.id };
         ['type','scale','title','room_id','giver','offer_text','done_text'].forEach(k => { if (has(k)) o[k] = v[k] || null; });
         if (has('sort_order')) o.sort_order = v.sort_order === '' ? 0 : Number(v.sort_order);
@@ -641,17 +706,18 @@
           const [name, url] = m[2].split('|'); return { type:'term', name:(name || '').trim(), url:(url || '').trim() || null }; });
         if (has('daily_date')) o.daily_date = v.daily_date || null;
         if (has('is_active')) o.is_active = v.is_active !== NO;
-        return o; } },
+        return enFrom(v, has, EN_QUEST, o); } },
     { name:'Buoc nhiem vu', key:'steps', title:'Bước nhiệm vụ', required:['id','quest_id','type','task_text'],
       cols:[['id','id',16],['quest_id','Nhiệm vụ (id)',14],['_quest_title','Tên nhiệm vụ',26],['sort_order','Thứ tự',8],['type','Loại bước',10,{ list:Object.keys(STEP_TYPES) }],
-        ['target','Người cần gặp (mã vị trí)',26],['task_text','Mục tiêu',44,{ wrap:1 }],['line_text','Lời thoại',56,{ wrap:1 }],['secs','Số giây',9]],
+        ['target','Người cần gặp (mã vị trí)',26],['task_text','Mục tiêu',44,{ wrap:1 }],['line_text','Lời thoại',56,{ wrap:1 }],['secs','Số giây',9],
+        ...enCols([['task_text','Mục tiêu',44],['line_text','Lời thoại',56]])],
       rows:() => S.steps.slice().sort((a, b) => a.quest_id.localeCompare(b.quest_id) || a.sort_order - b.sort_order),
       toCells:s => ({ id:s.id, quest_id:s.quest_id, _quest_title:(byId(S.quests, s.quest_id) || {}).title || '', sort_order:s.sort_order, type:s.type, target:s.target,
-        task_text:s.task_text, line_text:s.line_text, secs:s.secs ?? '' }),
+        task_text:s.task_text, line_text:s.line_text, secs:s.secs ?? '', ...enCells(s, EN_STEP) }),
       fromCells:(v, has) => { const o = { id:v.id };
         ['quest_id','type','target','task_text','line_text'].forEach(k => { if (has(k)) o[k] = v[k] || null; });
         if (has('sort_order')) o.sort_order = v.sort_order === '' ? 0 : Number(v.sort_order);
-        if (has('secs')) o.secs = v.secs === '' ? null : Number(v.secs); return o; } },
+        if (has('secs')) o.secs = v.secs === '' ? null : Number(v.secs); return enFrom(v, has, EN_STEP, o); } },
   ];
 
   function loadExcelJS(){
@@ -693,6 +759,7 @@
       ['Cách sửa', 'Sửa trực tiếp các ô trong từng sheet rồi vào Admin → Team Map → Import / Export → Chọn file. Hệ thống sẽ hiện màn xem trước trước khi ghi.'],
       ['Dòng 1 / dòng 2', 'Dòng 1 là tiêu đề tiếng Việt. Dòng 2 là khoá kỹ thuật (chữ xám): KHÔNG sửa dòng này. Import đọc cột theo dòng 2 nên đổi thứ tự cột không sao.'],
       ['Cột nền xám (chỉ đọc)', 'Chỉ để bạn đọc cho dễ hiểu (tên thuật ngữ, link đang dùng, tên phòng…). Import bỏ qua các cột này.'],
+      ['Cột (EN)', 'Bản tiếng Anh cho trang /en/team-map, nằm ở cuối mỗi sheet. Ô trống = trang tiếng Anh hiện bản tiếng Việt. Xoá chữ trong ô EN rồi import = bỏ bản dịch đó.'],
       ['Thêm / cập nhật', 'Dòng có id trùng với dữ liệu hiện có → cập nhật. Dòng có id mới → thêm mới. Dòng không có trong file → giữ nguyên. Import KHÔNG BAO GIỜ xoá.'],
       ['Nhiều giá trị trong 1 ô', `Đồ nghề, người tham gia, thẻ thưởng: ngăn bằng "${SEP}" (chấm phẩy + dấu cách).`],
       ['Hiển thị', `Ghi "${YES}" hoặc "${NO}".`],
@@ -969,7 +1036,7 @@
       case 'quest-dup': return openQuest(id, true);
       case 'quest-del': return deleteQuest(id);
       case 'quest-save': return saveQuest();
-      case 'step-add': F.steps.push({ type:'talk', target:'', task_text:'', line_text:'', secs:null }); return renderQuestForm();
+      case 'step-add': F.steps.push({ type:'talk', target:'', task_text:'', line_text:'', secs:null, en_task_text:'', en_line_text:'' }); return renderQuestForm();
       case 'step-del': F.steps.splice(i, 1); return renderQuestForm();
       case 'reward-add': F.q.rewards.push({ type:'term', term_id:null }); return renderQuestForm();
       case 'reward-del': F.q.rewards.splice(i, 1); return renderQuestForm();
@@ -999,7 +1066,7 @@
     if (t.dataset.ctaF){ const b = F.cta[+t.dataset.i]; if (t.dataset.ctaF === 'primary') b.primary = t.checked; else b[t.dataset.ctaF] = t.value.trim(); return; }
     if (t.dataset.plF === 'seat_order'){ F.pls[t.dataset.scale][+t.dataset.i].seat_order = t.value; return; }
     if (t.dataset.q && !['scale','type','room_id','is_active'].includes(t.dataset.q)){ F.q[t.dataset.q] = t.value; return; }
-    if (t.dataset.s && ['task_text','line_text','secs'].includes(t.dataset.s)){ F.steps[+t.dataset.i][t.dataset.s] = t.value; return; }
+    if (t.dataset.s && ['task_text','line_text','secs','en_task_text','en_line_text'].includes(t.dataset.s)){ F.steps[+t.dataset.i][t.dataset.s] = t.value; return; }
   }
   function onFocus(e){ const t = e.target; if (t.dataset && t.dataset.comboQ) onInput(e); }
 

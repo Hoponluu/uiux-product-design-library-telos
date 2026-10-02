@@ -90,13 +90,33 @@ Menu là dãy tab `#tab-pill` trong `TELOS_Knowledge_Graph.html` (Graph view, A-
 - **Lưu tiến độ:** `localStorage['tm-progress-v1']` trên trình duyệt của người chơi (quy mô, chế độ, nhiệm vụ đã xong, người đã gặp, thẻ kiến thức). Không lưu dữ liệu cá nhân, không gửi lên server, hết hạn sau 30 ngày. Rời game giữa một nhiệm vụ thì quay lại chơi lại từ đầu nhiệm vụ đó. Có nút "Chơi lại từ đầu".
 - **Xem trước bài (mobile):** link tới `academy.telos.vn` mở sheet xem trước (tiêu đề, ảnh, đoạn mở đầu) lấy từ WordPress REST API (`/wp-json/wp/v2/posts?slug=…`, thử `pages` nếu không thấy). academy.telos.vn chặn iframe (`X-Frame-Options: SAMEORIGIN`) nhưng REST API cho phép đọc từ domain này. Nếu đổi cấu hình CORS / tắt REST API trên academy thì sheet vẫn hiện nút mở bài đầy đủ.
 
-## 12. Các bước triển khai
+## 12. Bản tiếng Anh (/en/team-map)
+
+- **Đường dẫn:** `/en/team-map` (file `en/team-map.html`, rewrite trong `vercel.json`). Nút **EN / VI** ở góc phải thanh trên cùng chuyển qua lại; tiến độ chơi dùng chung giữa hai bản. Có `hreflang` + sitemap cho cả hai.
+- **Nội dung** (nhân vật, phòng, nhiệm vụ, bước): cột `i18n` (jsonb) trên `tm_characters`, `tm_rooms`, `tm_quests`, `tm_quest_steps`, dạng `{"en": {"<tên cột>": "..."}}`. Ô nào chưa dịch thì trang EN hiện tiếng Việt.
+  - nhân vật: `title`, `summary`, `doing`, `with_designer`, `tag`, `cta` (mảng nhãn nút, cùng thứ tự với `cta`)
+  - phòng: `code`, `name`, `intro` · nhiệm vụ: `title`, `offer_text`, `done_text` · bước: `task_text`, `line_text`
+- **Bản dịch gốc** nằm ở `team-map/i18n-en.json`. `scripts/gen_team_map_seed.py` ghép nó vào `seed.json` và sinh `supabase_team_map_en.sql` (chỉ ghi phần tiếng Anh, không đụng tiếng Việt).
+- **CMS:** mỗi form có khối "Tiếng Anh · trang /en/team-map"; danh sách có huy hiệu EN / EN một phần / Chưa có EN. File Excel có các cột `(EN)` ở cuối mỗi sheet; xoá chữ trong ô EN rồi import = bỏ bản dịch đó.
+- **Chữ giao diện** (nút, hướng dẫn, thông báo) nằm trong code: `L('tiếng Việt', 'English')` trong `team-map.engine.js` và `team-map.layout.js`. Chữ cố định trong HTML (meta, lời chào, nhãn nút): `scripts/build_team_map_en.py` sinh `en/team-map.html` từ `team-map.html`. **Sửa `team-map.html` xong phải chạy lại script này**; script báo lỗi nếu một chuỗi cần dịch đã đổi.
+- **Bài viết** vẫn là bài tiếng Việt trên academy.telos.vn; nút ghi rõ "(Vietnamese)".
+- **Thuật ngữ** trên thẻ thưởng lấy tên từ bảng `concepts` của thư viện (đa số đã là tiếng Anh: Agile, MVP, Wireframe…).
+- GA: mọi sự kiện Team Map có thêm `tm_lang` (`vi` / `en`).
+
+### Bật bản tiếng Anh trên DB đang chạy
+1. SQL Editor: chạy lại `supabase_team_map.sql` (thêm cột `i18n`, cập nhật các hàm lưu / import).
+2. Chạy `supabase_team_map_en.sql`. Bảng kết quả cuối cho biết bao nhiêu dòng đã có tiếng Anh.
+3. Deploy. Mở `/en/team-map`.
+
+Lưu ý: bản dịch dựa trên nội dung seed gốc. Nếu đã sửa nội dung tiếng Việt trong CMS sau khi seed, nên xem lại bản tiếng Anh của các dòng đó trong CMS.
+
+## 13. Các bước triển khai
 
 1. Supabase → SQL Editor: chạy `supabase_team_map.sql`.
 2. Authentication → Users → **Add user** (email + mật khẩu) cho admin. Sau đó chạy:
    `insert into admin_users (email) values ('email-cua-ban@...');`
 3. Authentication → Sign In / Providers: tắt **Allow new users to sign up**.
-4. Chạy `supabase_team_map_seed.sql` (đầy đủ mọi quy mô, gồm cả agency). Kết quả cuối là bảng báo cáo: nhân vật nào đã gắn thuật ngữ, thẻ thưởng nào chưa khớp.
+4. Chạy `supabase_team_map_seed.sql` (đầy đủ mọi quy mô, gồm cả agency và bản tiếng Anh). Kết quả cuối là bảng báo cáo: nhân vật nào đã gắn thuật ngữ, thẻ thưởng nào chưa khớp.
 5. Deploy. Đăng nhập `/adminCMS` bằng email + mật khẩu vừa tạo.
 6. **Bỏ hẳn service_role key cũ** (key này đã nằm công khai trong lịch sử git nên phải coi như đã lộ):
    1. Supabase → **Settings → API Keys** → lấy **publishable key** (`sb_publishable_...`).
@@ -105,4 +125,4 @@ Menu là dãy tab `#tab-pill` trong `TELOS_Knowledge_Graph.html` (Graph view, A-
 
 Mọi trang đọc URL + key từ một chỗ duy nhất là `supabase.config.js`. File này chỉ chứa key công khai, không bao giờ đặt secret key vào đây.
 
-Sửa `team-map/seed.json` → chạy `python3 scripts/gen_team_map_seed.py` để sinh lại cả hai file seed. **Chạy lại seed sẽ ghi đè nội dung đã sửa trong CMS.**
+Sửa `team-map/seed.json` hoặc `team-map/i18n-en.json` → chạy `python3 scripts/gen_team_map_seed.py` để sinh lại các file seed. **Chạy lại seed sẽ ghi đè nội dung đã sửa trong CMS.**
