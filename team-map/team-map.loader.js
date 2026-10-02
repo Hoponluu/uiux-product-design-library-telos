@@ -3,15 +3,14 @@
 // (GROUPS, ROLES, TERMS, SCALES, LOCKED_ROLES, QUESTS, ROOM_INFO, TV_ROOMS, SMALL_REPORTS…).
 // Tải lỗi / dữ liệu rỗng / dữ liệu không dựng được → dùng team-map/seed.json đóng gói kèm.
 (function(){
-  const SB_URL  = 'https://vvpqhsglgtfwjklvlvuh.supabase.co';
-  const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2cHFoc2dsZ3Rmd2prbHZsdnVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwMjkyMDQsImV4cCI6MjA5NzYwNTIwNH0.tpa9hfNxcdN_Fu67NLSdMGUbUUrvCGX9v4jDqqyC4JA';
+  const SB_URL = window.SB_CONFIG.url;
   const SEED_URL = '/team-map/seed.json';
   const TIMEOUT = 5000;
 
   async function get(path){
     const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), TIMEOUT);
     try {
-      const r = await fetch(`${SB_URL}/rest/v1/${path}`, { headers:{ apikey:SB_ANON, Authorization:'Bearer ' + SB_ANON }, signal:ctl.signal });
+      const r = await fetch(`${SB_URL}/rest/v1/${path}`, { headers:window.SB_CONFIG.headers(), signal:ctl.signal });
       if (!r.ok) throw new Error(`${path.split('?')[0]}: HTTP ${r.status}`);
       return r.json();
     } finally { clearTimeout(timer); }
