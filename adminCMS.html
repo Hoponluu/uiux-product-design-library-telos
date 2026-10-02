@@ -50,6 +50,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans
 .nav-btn:hover { color: rgba(0,0,0,0.75); }
 .nav-btn.active { background: rgba(0,0,0,0.07); color: #111; font-weight: 500; }
 #topbar .spacer { flex: 1; }
+.topbar-user { font-size: 12px; color: rgba(0,0,0,0.35); margin-right: 4px; }
 .btn-logout { font-size: 12px; color: rgba(0,0,0,0.35); background: none; border: none; cursor: pointer; padding: 6px 10px; border-radius: 6px; font-family: inherit; }
 .btn-logout:hover { color: rgba(0,0,0,0.65); background: rgba(0,0,0,0.05); }
 
@@ -175,6 +176,86 @@ select.form-control { cursor: pointer; }
   font-size: 12px; font-family: monospace; color: rgba(0,0,0,0.65);
   line-height: 1.7; margin-bottom: 20px; white-space: pre-wrap; word-break: break-all;
 }
+/* ── TEAM MAP ── */
+.tm-subtabs { display: flex; align-items: center; gap: 4px; margin-bottom: 22px; border-bottom: 1px solid rgba(0,0,0,0.08); }
+.tm-sub { background: none; border: none; border-bottom: 2px solid transparent; padding: 10px 14px; font-family: inherit; font-size: 13px; color: rgba(0,0,0,0.5); cursor: pointer; margin-bottom: -1px; }
+.tm-sub:hover { color: #111; }
+.tm-sub.active { color: #241775; border-bottom-color: #241775; font-weight: 600; }
+.tm-sub-note { margin-left: auto; font-size: 11px; color: rgba(0,0,0,0.35); }
+.tm-count { font-size: 13px; font-weight: 400; color: rgba(0,0,0,0.35); }
+.tm-filters { display: flex; gap: 10px; align-items: center; margin: -8px 0 16px; flex-wrap: wrap; }
+.tm-filters .form-control, .tm-w-auto { width: auto; padding: 7px 10px; font-size: 13px; }
+.tm-check { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: rgba(0,0,0,0.6); cursor: pointer; }
+.tm-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 7px; vertical-align: middle; }
+.tm-toggle { width: 34px; height: 20px; border-radius: 20px; border: none; background: rgba(0,0,0,0.15); position: relative; cursor: pointer; transition: background 0.15s; }
+.tm-toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: #fff; transition: left 0.15s; }
+.tm-toggle.on { background: #1A7A42; }
+.tm-toggle.on::after { left: 17px; }
+.tm-note { font-size: 12px; color: rgba(0,0,0,0.45); margin: -8px 0 16px; line-height: 1.6; }
+.tm-h3 { font-size: 13px; font-weight: 700; margin: 22px 0 10px; color: rgba(0,0,0,0.6); text-transform: uppercase; letter-spacing: 0.04em; }
+.modal.tm-wide { width: 760px; }
+.tm-section { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #241775; border-top: 1px solid rgba(0,0,0,0.07); padding-top: 14px; margin-top: 4px; }
+.tm-row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
+.tm-row .form-control { flex: 1; min-width: 0; }
+.tm-row .tm-num, .tm-num { flex: 0 0 84px; width: 84px; }
+.tm-inline { display: flex; gap: 12px; align-items: center; margin-top: 6px; flex-wrap: wrap; }
+.tm-link { background: none; border: none; color: #241775; font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer; padding: 2px 0; text-align: left; }
+.tm-link:hover { text-decoration: underline; }
+.tm-newterm[hidden], .tm-special[hidden] { display: none; }
+#tm-body .badge, .tm-nowrap { white-space: nowrap; }
+.tm-row .tm-w-auto { flex: 0 0 150px; }
+.tm-row .tm-combo { flex: 1; min-width: 0; }
+.form-group label.tm-chip, .form-group label.tm-check { text-transform: none; letter-spacing: 0; font-weight: 400; font-size: 12px; color: rgba(0,0,0,0.65); }
+.form-group label.tm-chip:has(input:checked) { color: #1D1A5E; font-weight: 600; }
+.tm-special { display: flex; flex-direction: column; gap: 16px; }
+.tm-block { display: flex; margin-top: 10px; }
+.tm-newterm { background: #F7F6FC; border: 1px solid rgba(36,23,117,0.15); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+.tm-chipgrid { display: flex; flex-wrap: wrap; gap: 6px; }
+.tm-chip { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; padding: 4px 9px; border: 1px solid rgba(0,0,0,0.12); border-radius: 20px; cursor: pointer; user-select: none; }
+.tm-chip:has(input:checked) { background: #ECEBF8; border-color: rgba(36,23,117,0.35); color: #1D1A5E; }
+.tm-gather { max-height: 190px; overflow: auto; padding: 2px; }
+.tm-err { color: #EF4A81; font-size: 11px; margin-top: 3px; }
+.form-control.invalid { border-color: #EF4A81; background: #FFF6F9; }
+.tm-warn { font-size: 12px; line-height: 1.5; background: #FFF8E0; color: #6B5200; border: 1px solid #F0DC9A; border-radius: 8px; padding: 8px 10px; margin: 4px 0 8px; }
+.tm-ok { font-size: 13px; line-height: 1.7; background: #E0F7EA; color: #1A5A35; border-radius: 10px; padding: 12px 16px; margin-top: 18px; }
+.tm-warn code, .tm-impline code { font-size: 11px; background: rgba(0,0,0,0.05); padding: 1px 4px; border-radius: 4px; }
+.tm-combo { position: relative; }
+.tm-combo-list { position: absolute; left: 0; right: 0; top: calc(100% + 4px); background: #fff; border: 1px solid rgba(0,0,0,0.12); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); max-height: 240px; overflow: auto; z-index: 10; }
+.tm-combo-item { padding: 8px 12px; cursor: pointer; display: flex; justify-content: space-between; gap: 10px; font-size: 13px; }
+.tm-combo-item span { color: rgba(0,0,0,0.4); font-size: 11px; white-space: nowrap; }
+.tm-combo-item:hover { background: #F3F2FA; }
+.tm-combo-empty { padding: 10px 12px; font-size: 12px; color: rgba(0,0,0,0.4); }
+.tm-sortlist, .tm-qlist, .tm-steps { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.tm-sortlist li { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: #fff; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; font-size: 13px; cursor: grab; }
+.tm-sortlist li .td-slug { margin-left: auto; }
+.tm-handle { color: rgba(0,0,0,0.3); cursor: grab; font-size: 12px; letter-spacing: -2px; user-select: none; }
+li.dragging { opacity: 0.45; }
+.tm-qlist li { display: flex; align-items: center; gap: 12px; background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 12px 14px; }
+.tm-qlist li.off { opacity: 0.6; }
+.tm-qn { font-size: 12px; font-weight: 700; color: #241775; min-width: 18px; }
+.tm-qmain { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.tm-rewards { display: flex; gap: 4px; flex-wrap: wrap; }
+.tm-steps li { border: 1px solid rgba(0,0,0,0.1); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 6px; background: #FCFCFE; }
+.tm-iogrid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.tm-iogrid .export-card { max-width: none; }
+.tm-file { display: inline-block; }
+.tm-impgrid { display: flex; flex-direction: column; gap: 8px; }
+.tm-impcard { background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 10px; padding: 12px 16px; }
+.tm-impcard summary { cursor: pointer; display: flex; gap: 14px; align-items: baseline; font-size: 13px; }
+.tm-impcard summary span { color: rgba(0,0,0,0.5); font-size: 12px; }
+.tm-impline { font-size: 12px; padding: 8px 0; border-top: 1px solid rgba(0,0,0,0.05); }
+.tm-impline ul { margin: 4px 0 0 18px; color: rgba(0,0,0,0.6); }
+.tm-impline del { color: #C4245E; } .tm-impline ins { color: #1A7A42; text-decoration: none; }
+.tm-bad { color: #EF4A81 !important; font-weight: 600; }
+.tm-errtable { width: 100%; margin-top: 8px; font-size: 12px; background: #fff; border-radius: 6px; }
+.tm-errtable th, .tm-errtable td { padding: 5px 8px; text-transform: none; letter-spacing: 0; }
+.tm-confirm { z-index: 650; }
+.tm-confirm .modal { width: 440px; }
+.tm-confirm-msg { font-size: 14px; line-height: 1.6; color: rgba(0,0,0,0.7); }
+.btn-save.tm-danger { background: #EF4A81; }
+.btn-save.tm-danger:hover { background: #D93A70; }
+.btn-add:disabled { background: rgba(0,0,0,0.15); cursor: not-allowed; }
+@media (max-width: 760px) { .tm-iogrid { grid-template-columns: 1fr; } .form-row { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
@@ -184,10 +265,11 @@ select.form-control { cursor: pointer; }
   <div class="auth-box">
     <div class="auth-logo">TELOS Academy</div>
     <h2>Admin CMS</h2>
-    <p>Nhập mật khẩu để truy cập</p>
-    <input class="auth-input" type="password" id="auth-input" placeholder="Mật khẩu..." onkeydown="if(event.key==='Enter')doLogin()"/>
+    <p>Đăng nhập bằng tài khoản admin (Supabase Auth)</p>
+    <input class="auth-input" type="email" id="auth-email" placeholder="Email" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('auth-input').focus()"/>
+    <input class="auth-input" type="password" id="auth-input" placeholder="Mật khẩu" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/>
     <div class="auth-error" id="auth-error"></div>
-    <button class="btn-primary" onclick="doLogin()">Đăng nhập</button>
+    <button class="btn-primary" id="auth-btn" onclick="doLogin()">Đăng nhập</button>
   </div>
 </div>
 
@@ -198,7 +280,9 @@ select.form-control { cursor: pointer; }
     <button class="nav-btn active" onclick="switchPanel('concepts',this)">Khái niệm</button>
     <button class="nav-btn" onclick="switchPanel('categories',this)">Category</button>
     <button class="nav-btn" onclick="switchPanel('export',this)">Export MD</button>
+    <button class="nav-btn" onclick="switchPanel('teammap',this)">Team Map</button>
     <div class="spacer"></div>
+    <span class="topbar-user" id="topbar-user"></span>
     <button class="btn-logout" onclick="doLogout()">Đăng xuất</button>
   </div>
   <div id="main">
@@ -261,6 +345,9 @@ select.form-control { cursor: pointer; }
         <button class="btn-add" onclick="downloadMD()">⬇ Tải file .md</button>
       </div>
     </div>
+
+    <!-- TEAM MAP PANEL (nội dung do team-map/team-map.admin.js dựng) -->
+    <div class="panel" id="panel-teammap"></div>
 
   </div>
 </div>
@@ -367,81 +454,142 @@ select.form-control { cursor: pointer; }
 
 <script>
 // ════════════════════════════════════════════════════════
-// CONFIG — service_role for write access (admin only)
+// CONFIG — chỉ anon key ở client. Quyền ghi do RLS quyết định:
+// người đăng nhập (Supabase Auth) phải có email trong bảng admin_users (xem supabase_team_map.sql).
 // ════════════════════════════════════════════════════════
-const SB_URL     = 'https://vvpqhsglgtfwjklvlvuh.supabase.co';
-const SB_SERVICE = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2cHFoc2dsZ3Rmd2prbHZsdnVoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MjAyOTIwNCwiZXhwIjoyMDk3NjA1MjA0fQ.KDA7R8BcJ6WNwvxzwyUczUnlt-pX1Mk0HLB_d2l7Wq8';
-
-// Password hash (SHA-256 of your password)
-// Default password: telos@admin — change by replacing this hash
-const PASSWORD_HASH = 'f2bc4fa40900575dcf945a9e6887484899584d958a6355e1ef759d86f704007f';
+const SB_URL  = 'https://vvpqhsglgtfwjklvlvuh.supabase.co';
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2cHFoc2dsZ3Rmd2prbHZsdnVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwMjkyMDQsImV4cCI6MjA5NzYwNTIwNH0.tpa9hfNxcdN_Fu67NLSdMGUbUUrvCGX9v4jDqqyC4JA';
+const SESSION_KEY = 'telos-admin-session';
 
 // ════════════════════════════════════════════════════════
-// AUTH
+// AUTH — Supabase Auth (email + mật khẩu)
 // ════════════════════════════════════════════════════════
-async function sha256(str) {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+let session = null;
+try { session = JSON.parse(sessionStorage.getItem(SESSION_KEY)); } catch(e) {}
+
+function saveSession(s) {
+  session = s;
+  try { s ? sessionStorage.setItem(SESSION_KEY, JSON.stringify(s)) : sessionStorage.removeItem(SESSION_KEY); } catch(e) {}
+}
+
+async function authToken(grant, body) {
+  const r = await fetch(`${SB_URL}/auth/v1/token?grant_type=${grant}`, {
+    method: 'POST', headers: { apikey: SB_ANON, 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+  });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.error_description || d.msg || d.message || ('HTTP ' + r.status));
+  return { access_token: d.access_token, refresh_token: d.refresh_token,
+           expires_at: d.expires_at || Math.floor(Date.now() / 1000) + (d.expires_in || 3600),
+           email: d.user ? d.user.email : (session && session.email) };
+}
+
+// Access token còn hạn (tự refresh trước khi hết hạn 60 giây)
+async function accessToken() {
+  if (!session) { sessionExpired(); throw new Error('Chưa đăng nhập'); }
+  if (session.expires_at - 60 < Date.now() / 1000) {
+    try { saveSession(await authToken('refresh_token', { refresh_token: session.refresh_token })); }
+    catch(e) { sessionExpired(); throw new Error('Phiên đăng nhập đã hết hạn'); }
+  }
+  return session.access_token;
+}
+
+function showApp() {
+  document.getElementById('auth-screen').classList.add('hidden');
+  document.getElementById('app').classList.add('visible');
+  document.getElementById('topbar-user').textContent = session.email || '';
+  loadAll();
+}
+
+function sessionExpired() {
+  saveSession(null);
+  document.getElementById('app').classList.remove('visible');
+  document.getElementById('auth-screen').classList.remove('hidden');
+  document.getElementById('auth-error').textContent = 'Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại';
 }
 
 async function doLogin() {
-  const val = document.getElementById('auth-input').value;
-  if (!val) return;
-  const hash = await sha256(val);
-  if (hash === PASSWORD_HASH) {
-    sessionStorage.setItem('telos-admin', '1');
-    document.getElementById('auth-screen').classList.add('hidden');
-    document.getElementById('app').classList.add('visible');
-    loadAll();
-  } else {
-    document.getElementById('auth-error').textContent = 'Mật khẩu không đúng';
+  const email = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-input').value;
+  const err = document.getElementById('auth-error'), btn = document.getElementById('auth-btn');
+  if (!email || !password) { err.textContent = 'Nhập email và mật khẩu'; return; }
+  btn.disabled = true; btn.textContent = 'Đang đăng nhập...'; err.textContent = '';
+  try {
+    saveSession(await authToken('password', { email, password }));
+    if (await sbRpc('is_admin', {}) !== true) {
+      await doLogout(true);
+      err.textContent = 'Tài khoản này chưa có quyền admin (chưa có trong bảng admin_users)';
+      return;
+    }
     document.getElementById('auth-input').value = '';
+    showApp();
+  } catch(e) {
+    saveSession(null);
+    err.textContent = /invalid login credentials/i.test(e.message) ? 'Email hoặc mật khẩu không đúng' : 'Lỗi đăng nhập: ' + e.message;
+  } finally {
+    btn.disabled = false; btn.textContent = 'Đăng nhập';
   }
 }
 
-function doLogout() {
-  sessionStorage.removeItem('telos-admin');
-  location.reload();
+async function doLogout(silent) {
+  if (session) {
+    fetch(`${SB_URL}/auth/v1/logout`, { method: 'POST', headers: { apikey: SB_ANON, Authorization: 'Bearer ' + session.access_token } }).catch(() => {});
+  }
+  saveSession(null);
+  if (!silent) location.reload();
 }
 
-// Auto-login if session exists
+// Tự đăng nhập lại nếu còn phiên trong tab này
 window.addEventListener('DOMContentLoaded', () => {
-  if (sessionStorage.getItem('telos-admin')) {
-    document.getElementById('auth-screen').classList.add('hidden');
-    document.getElementById('app').classList.add('visible');
-    loadAll();
-  }
-  document.getElementById('auth-input').focus();
+  if (session) showApp();
+  else document.getElementById('auth-email').focus();
 });
 
 // ════════════════════════════════════════════════════════
 // SUPABASE HELPERS
 // ════════════════════════════════════════════════════════
-const H = () => ({
-  'apikey': SB_SERVICE,
-  'Authorization': 'Bearer ' + SB_SERVICE,
+const H = async (prefer = 'return=representation') => ({
+  'apikey': SB_ANON,
+  'Authorization': 'Bearer ' + await accessToken(),
   'Content-Type': 'application/json',
-  'Prefer': 'return=representation',
+  'Prefer': prefer,
 });
 
+async function sbFail(r) {
+  if (r.status === 401) sessionExpired();
+  const t = await r.text();
+  let msg = t;
+  try { const j = JSON.parse(t); msg = j.message || j.msg || t; if (j.code === '42501') msg = 'Không có quyền ghi: ' + msg; } catch(e) {}
+  throw new Error(msg);
+}
+
 async function sbGet(table, params = '') {
-  const r = await fetch(`${SB_URL}/rest/v1/${table}?${params}`, { headers: H() });
-  if (!r.ok) throw new Error(await r.text());
+  const r = await fetch(`${SB_URL}/rest/v1/${table}?${params}`, { headers: await H() });
+  if (!r.ok) await sbFail(r);
   return r.json();
 }
 async function sbInsert(table, data) {
-  const r = await fetch(`${SB_URL}/rest/v1/${table}`, { method: 'POST', headers: H(), body: JSON.stringify(data) });
-  if (!r.ok) throw new Error(await r.text());
+  const r = await fetch(`${SB_URL}/rest/v1/${table}`, { method: 'POST', headers: await H(), body: JSON.stringify(data) });
+  if (!r.ok) await sbFail(r);
   return r.json();
 }
 async function sbUpdate(table, id, data) {
-  const r = await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${id}`, { method: 'PATCH', headers: H(), body: JSON.stringify(data) });
-  if (!r.ok) throw new Error(await r.text());
-  return r.json();
+  const r = await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${encodeURIComponent(id)}`, { method: 'PATCH', headers: await H(), body: JSON.stringify(data) });
+  if (!r.ok) await sbFail(r);
+  const rows = await r.json();
+  if (!rows.length) throw new Error('Không có quyền ghi hoặc bản ghi không tồn tại');
+  return rows;
 }
 async function sbDelete(table, id) {
-  const r = await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${id}`, { method: 'DELETE', headers: H() });
-  if (!r.ok) throw new Error(await r.text());
+  const r = await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${encodeURIComponent(id)}`, { method: 'DELETE', headers: await H() });
+  if (!r.ok) await sbFail(r);
+  const rows = await r.json();
+  if (!rows.length) throw new Error('Không có quyền xoá hoặc bản ghi không tồn tại');
+}
+async function sbRpc(fn, args) {
+  const r = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, { method: 'POST', headers: await H(), body: JSON.stringify(args) });
+  if (!r.ok) await sbFail(r);
+  const t = await r.text();
+  return t ? JSON.parse(t) : null;
 }
 
 // ════════════════════════════════════════════════════════
@@ -472,6 +620,7 @@ function switchPanel(id, btn) {
   document.getElementById('panel-' + id).classList.add('active');
   btn.classList.add('active');
   if (id === 'export') buildExportPreview();
+  if (id === 'teammap') TMAdmin.open();
 }
 
 // ════════════════════════════════════════════════════════
@@ -795,5 +944,8 @@ document.getElementById('cat-modal').addEventListener('click', function(e) {
   if (e.target === this) closeCatModal();
 });
 </script>
+<script src="/team-map/team-map.layout.js"></script>
+<script src="/team-map/team-map.loader.js"></script>
+<script src="/team-map/team-map.admin.js"></script>
 </body>
 </html>

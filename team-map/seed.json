@@ -1,0 +1,2561 @@
+{
+ "version": 2,
+ "groups": {
+  "design": {
+   "name": "Design",
+   "color": "#E92F7C"
+  },
+  "product": {
+   "name": "Product",
+   "color": "#FFC53D"
+  },
+  "engineering": {
+   "name": "Engineering",
+   "color": "#35C6E8"
+  },
+  "data": {
+   "name": "Data",
+   "color": "#2FBF8F"
+  },
+  "delivery": {
+   "name": "Delivery",
+   "color": "#FF8A3D"
+  },
+  "business": {
+   "name": "Business",
+   "color": "#8B7FE0"
+  }
+ },
+ "characters": [
+  {
+   "id": "ceo",
+   "title": "Chief Executive Officer",
+   "group": "business",
+   "kind": "role",
+   "article_url": null,
+   "summary": "Người chịu trách nhiệm cao nhất về tầm nhìn và kết quả kinh doanh của công ty.",
+   "doing": "Đang xem lại OKR quý này với ban lãnh đạo.",
+   "with_designer": "Ít làm việc trực tiếp với designer, nhưng mục tiêu công ty do CEO đặt ra quyết định bạn thiết kế cho điều gì.",
+   "reports_to": null,
+   "reports_to_small": null,
+   "props": [
+    "briefcase"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "cpo",
+   "title": "Chief Product Officer",
+   "group": "product",
+   "kind": "role",
+   "article_url": null,
+   "summary": "Chịu trách nhiệm chiến lược sản phẩm và quản lý đội ngũ Product Manager.",
+   "doing": "Đang chốt roadmap cho hai quý tới.",
+   "with_designer": "Duyệt các hướng sản phẩm lớn. Bạn sẽ trình bày với CPO ở các buổi review chiến lược.",
+   "reports_to": "ceo",
+   "reports_to_small": null,
+   "props": [
+    "flag"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "cto",
+   "title": "Chief Technology Officer",
+   "group": "engineering",
+   "kind": "role",
+   "article_url": null,
+   "summary": "Chịu trách nhiệm công nghệ, kiến trúc hệ thống và đội ngũ kỹ sư.",
+   "doing": "Đang rà soát chi phí hạ tầng tháng này.",
+   "with_designer": "Quyết định các giới hạn kỹ thuật, ảnh hưởng tới những gì designer có thể đề xuất.",
+   "reports_to": "ceo",
+   "reports_to_small": null,
+   "props": [
+    "laptop"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "head-of-design",
+   "title": "Head of Design",
+   "group": "design",
+   "kind": "role",
+   "article_url": null,
+   "summary": "Lãnh đạo toàn bộ chapter Design: tuyển dụng, chất lượng thiết kế và lộ trình phát triển của designer.",
+   "doing": "Đang xây khung năng lực cho các cấp designer.",
+   "with_designer": "Quản lý chuyên môn cao nhất của bạn (solid line). Bạn gặp ở các buổi all-hands của Design.",
+   "reports_to": "cpo",
+   "reports_to_small": null,
+   "props": [
+    "glasses",
+    "pointer"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "head-of-data",
+   "title": "Head of Data",
+   "group": "data",
+   "kind": "role",
+   "article_url": null,
+   "summary": "Lãnh đạo đội Data & Analytics và chuẩn hoá cách công ty đo lường.",
+   "doing": "Đang chuẩn hoá bộ chỉ số North Star.",
+   "with_designer": "Cung cấp số liệu để đánh giá một thiết kế có hiệu quả hay không.",
+   "reports_to": "cpo",
+   "reports_to_small": null,
+   "props": [
+    "chart"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "head-of-eng",
+   "title": "Head of Engineering",
+   "group": "engineering",
+   "kind": "role",
+   "article_url": null,
+   "summary": "Quản lý các Engineering Manager, QA Lead và chất lượng kỹ thuật chung.",
+   "doing": "Đang sắp xếp nhân sự cho squad mới.",
+   "with_designer": "Ít làm trực tiếp, nhưng quyết định tốc độ và cách các dev làm việc với bạn.",
+   "reports_to": "cto",
+   "reports_to_small": null,
+   "props": [
+    "headset"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "product-manager",
+   "title": "Product Manager",
+   "group": "product",
+   "kind": "role",
+   "article_url": "https://academy.telos.vn/product-manager-pm-la-gi-product-team/",
+   "summary": "Người chịu trách nhiệm về định hướng và kết quả sản phẩm: cần làm gì, tại sao, và theo thứ tự nào.",
+   "doing": "Đang viết user story cho luồng onboarding.",
+   "with_designer": "Đặt ưu tiên công việc cho bạn mỗi sprint (dotted line). Là người bạn trao đổi nhiều nhất mỗi ngày.",
+   "reports_to": "cpo",
+   "reports_to_small": "ceo",
+   "props": [
+    "clipboard"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "product-owner",
+   "title": "Product Owner",
+   "group": "product",
+   "kind": "role",
+   "article_url": "https://academy.telos.vn/product-owner-po-la-gi/",
+   "summary": "Vai trò Scrum quản lý product backlog và quyết định ưu tiên cho từng sprint.",
+   "doing": "Đang sắp xếp backlog cho sprint sau.",
+   "with_designer": "Làm rõ tiêu chí chấp nhận (acceptance criteria) cho từng thiết kế của bạn.",
+   "reports_to": "cpo",
+   "reports_to_small": null,
+   "props": [
+    "cards"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "growth-pm",
+   "title": "Growth Product Manager",
+   "group": "product",
+   "kind": "role",
+   "article_url": null,
+   "summary": "PM tập trung vào chỉ số tăng trưởng: kích hoạt, giữ chân, giới thiệu.",
+   "doing": "Đang đọc kết quả A/B test màn hình đăng ký.",
+   "with_designer": "Cùng bạn thiết kế thí nghiệm và đọc kết quả A/B test.",
+   "reports_to": "cpo",
+   "reports_to_small": null,
+   "props": [
+    "chart"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "data-pm",
+   "title": "Data Product Manager",
+   "group": "product",
+   "kind": "role",
+   "article_url": null,
+   "summary": "PM cho các sản phẩm dữ liệu nội bộ như dashboard và hệ thống tracking.",
+   "doing": "Đang định nghĩa event tracking cho tính năng mới.",
+   "with_designer": "Giúp bạn gắn tracking đúng để đo hiệu quả thiết kế.",
+   "reports_to": "cpo",
+   "reports_to_small": null,
+   "props": [
+    "clipboard"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "ui-ux-designer",
+   "title": "UI/UX Designer",
+   "group": "design",
+   "kind": "player",
+   "article_url": "https://academy.telos.vn/cong-viec-cua-ui-ux-designer/",
+   "summary": "Vai trò thiết kế giao diện và trải nghiệm người dùng: kết hợp tư duy UX và kỹ năng UI.",
+   "doing": "Đây là bạn. Bạn đang thiết kế luồng onboarding mới.",
+   "with_designer": "Ngồi trong squad, nhận ưu tiên từ PM, báo cáo chuyên môn cho Design Manager.",
+   "reports_to": "design-manager",
+   "reports_to_small": "product-manager",
+   "props": [
+    "cap",
+    "tablet"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "product-designer",
+   "title": "Product Designer",
+   "group": "design",
+   "kind": "role",
+   "article_url": "https://academy.telos.vn/product-designer-la-gi-va-3-tu-duy/",
+   "summary": "Vai trò thiết kế toàn diện, từ research, UX đến UI, gắn liền với mục tiêu sản phẩm.",
+   "doing": "Đang vẽ user flow cho tính năng mời bạn bè.",
+   "with_designer": "Đồng nghiệp cùng chapter. Hai bạn hay gặp nhau ở buổi Design Critique.",
+   "reports_to": "design-manager",
+   "reports_to_small": null,
+   "props": [
+    "tablet"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "ui-designer",
+   "title": "UI Designer",
+   "group": "design",
+   "kind": "role",
+   "article_url": null,
+   "summary": "Tập trung vào giao diện: bố cục, màu sắc, chữ và component.",
+   "doing": "Đang hoàn thiện màn hình hồ sơ theo Design System.",
+   "with_designer": "Cùng chapter. Hay trao đổi với bạn về cách dùng component cho đúng.",
+   "reports_to": "design-manager",
+   "reports_to_small": null,
+   "props": [
+    "palette"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "ux-designer",
+   "title": "UX Designer",
+   "group": "design",
+   "kind": "role",
+   "article_url": null,
+   "summary": "Tập trung vào trải nghiệm: luồng, cấu trúc thông tin và tương tác.",
+   "doing": "Đang vẽ lại luồng thanh toán còn 3 bước.",
+   "with_designer": "Cùng chapter. Hay cùng bạn review user flow trước khi lên UI.",
+   "reports_to": "design-manager",
+   "reports_to_small": null,
+   "props": [
+    "pencil"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "intern",
+   "title": "Intern UI/UX",
+   "group": "design",
+   "kind": "role",
+   "article_url": "https://academy.telos.vn/intern-ui-ux-nhung-cam-nang-khi-di-thuc-tap/",
+   "summary": "Thực tập sinh UI/UX, học bằng cách làm cùng designer chính.",
+   "doing": "Đang tập vẽ wireframe theo hướng dẫn của bạn.",
+   "with_designer": "Bạn là người hướng dẫn trực tiếp. Intern hỏi bạn mọi thứ, từ file Figma đến cách họp.",
+   "reports_to": "ui-ux-designer",
+   "reports_to_small": null,
+   "props": [
+    "backpack"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "ds-designer",
+   "title": "Design System Designer",
+   "group": "design",
+   "kind": "role",
+   "article_url": "https://academy.telos.vn/design-system-designer-la-ai-product-design/",
+   "summary": "Xây và duy trì Design System: component library, token và guideline cho toàn sản phẩm.",
+   "doing": "Đang thêm biến thể mới cho component Button.",
+   "with_designer": "Hỏi họ trước khi vẽ một component mới. Có thể nó đã tồn tại.",
+   "reports_to": "head-of-design",
+   "reports_to_small": null,
+   "props": [
+    "palette"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "ux-design-engineer",
+   "title": "UX Design Engineer",
+   "group": "design",
+   "kind": "role",
+   "article_url": "https://academy.telos.vn/ux-design-engineer-la-gi/",
+   "summary": "Kết hợp tư duy UX, thiết kế và code để tự triển khai trải nghiệm chất lượng cao.",
+   "doing": "Đang chuyển token màu từ Figma sang CSS.",
+   "with_designer": "Cầu nối giữa file Figma của bạn và code thật.",
+   "reports_to": "head-of-design",
+   "reports_to_small": null,
+   "props": [
+    "laptop"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "design-manager",
+   "title": "Design Manager",
+   "group": "design",
+   "kind": "role",
+   "article_url": null,
+   "summary": "Quản lý trực tiếp các designer: review chất lượng, 1-on-1, phát triển nghề.",
+   "doing": "Đang chuẩn bị buổi Design Critique chiều nay.",
+   "with_designer": "Quản lý chuyên môn trực tiếp của bạn (solid line). Gặp 1-on-1 hai tuần một lần.",
+   "reports_to": "head-of-design",
+   "reports_to_small": null,
+   "props": [
+    "glasses",
+    "pointer"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "ux-researcher",
+   "title": "UX Researcher",
+   "group": "design",
+   "kind": "role",
+   "article_url": null,
+   "summary": "Lên kế hoạch và thực hiện nghiên cứu người dùng.",
+   "doing": "Đang viết kịch bản cho buổi Usability Test.",
+   "with_designer": "Giúp bạn kiểm chứng thiết kế với người dùng thật trước khi build.",
+   "reports_to": "head-of-design",
+   "reports_to_small": null,
+   "props": [
+    "monocle",
+    "clipboard"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "ux-writer",
+   "title": "UX Writer & Content Designer",
+   "group": "design",
+   "kind": "role",
+   "article_url": null,
+   "summary": "Viết chữ trong giao diện: nút, thông báo, hướng dẫn, trạng thái lỗi.",
+   "doing": "Đang viết lại thông báo lỗi đăng nhập.",
+   "with_designer": "Cùng bạn hoàn thiện câu chữ trên từng màn hình.",
+   "reports_to": "head-of-design",
+   "reports_to_small": null,
+   "props": [
+    "pencil"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "motion-designer",
+   "title": "Motion Designer",
+   "group": "design",
+   "kind": "role",
+   "article_url": "https://academy.telos.vn/motion-designer-la-ai-product-design/",
+   "summary": "Tạo chuyển động và animation trong sản phẩm, từ micro-interaction đến transition.",
+   "doing": "Đang làm animation chuyển cảnh cho onboarding.",
+   "with_designer": "Biến các tương tác bạn thiết kế thành chuyển động mượt.",
+   "reports_to": "head-of-design",
+   "reports_to_small": null,
+   "props": [
+    "play"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "tech-lead",
+   "title": "Tech Lead",
+   "group": "engineering",
+   "kind": "role",
+   "article_url": null,
+   "summary": "Kỹ sư dẫn dắt kỹ thuật trong squad, chịu trách nhiệm giải pháp và chất lượng code.",
+   "doing": "Đang ước lượng effort cho story mới.",
+   "with_designer": "Cùng bạn và PM tạo thành product trio. Trả lời câu hỏi: làm được không, tốn bao lâu.",
+   "reports_to": "head-of-eng",
+   "reports_to_small": "ceo",
+   "props": [
+    "headset"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "frontend-developer",
+   "title": "Frontend Developer",
+   "group": "engineering",
+   "kind": "role",
+   "article_url": "https://academy.telos.vn/frontend-developer-la-ai-product/",
+   "summary": "Developer phụ trách giao diện người dùng, người biến file Figma thành sản phẩm chạy trên trình duyệt.",
+   "doing": "Đang dựng component Card theo file Figma của bạn.",
+   "with_designer": "Nhận handoff từ bạn. Sẽ hỏi về spacing, trạng thái và responsive.",
+   "reports_to": "head-of-eng",
+   "reports_to_small": "tech-lead",
+   "props": [
+    "laptop"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "backend-developer",
+   "title": "Backend Developer",
+   "group": "engineering",
+   "kind": "role",
+   "article_url": "https://academy.telos.vn/backend-developer-la-ai-product/",
+   "summary": "Developer phụ trách logic, dữ liệu và API phía server.",
+   "doing": "Đang viết API lưu tiến độ onboarding.",
+   "with_designer": "Cho bạn biết dữ liệu nào có sẵn và hệ thống phản hồi nhanh tới đâu.",
+   "reports_to": "head-of-eng",
+   "reports_to_small": "tech-lead",
+   "props": [
+    "database"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "fullstack-developer",
+   "title": "Full-stack Developer",
+   "group": "engineering",
+   "kind": "role",
+   "article_url": "https://academy.telos.vn/full-stack-developer-la-ai-product/",
+   "summary": "Developer làm cả Frontend lẫn Backend, linh hoạt cho team cần tốc độ.",
+   "doing": "Đang làm landing page SEO từ đầu đến cuối.",
+   "with_designer": "Hay cùng bạn thử nhanh một ý tưởng trong vài ngày.",
+   "reports_to": "head-of-eng",
+   "reports_to_small": null,
+   "props": [
+    "laptop"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "mobile-developer",
+   "title": "Mobile Developer",
+   "group": "engineering",
+   "kind": "role",
+   "article_url": null,
+   "summary": "Developer làm ứng dụng iOS và Android.",
+   "doing": "Đang sửa lỗi cử chỉ vuốt trên Android.",
+   "with_designer": "Hỏi bạn về khác biệt pattern giữa iOS và Android.",
+   "reports_to": "head-of-eng",
+   "reports_to_small": "tech-lead",
+   "props": [
+    "phone"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "qa-engineer",
+   "title": "QA Engineer",
+   "group": "engineering",
+   "kind": "role",
+   "article_url": null,
+   "summary": "Kỹ sư kiểm thử, đảm bảo sản phẩm chạy đúng trước khi ra mắt.",
+   "doing": "Đang viết test case cho luồng thanh toán.",
+   "with_designer": "So bản build với thiết kế của bạn và báo lại khi có chỗ lệch.",
+   "reports_to": "head-of-eng",
+   "reports_to_small": "tech-lead",
+   "props": [
+    "magnifier"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "software-architect",
+   "title": "Software Architect",
+   "group": "engineering",
+   "kind": "role",
+   "article_url": null,
+   "summary": "Người thiết kế kiến trúc tổng thể của hệ thống.",
+   "doing": "Đang vẽ sơ đồ tách dịch vụ thanh toán.",
+   "with_designer": "Ít làm trực tiếp, nhưng quyết định của họ ảnh hưởng tốc độ và giới hạn tính năng.",
+   "reports_to": "cto",
+   "reports_to_small": null,
+   "props": [
+    "scroll"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "devops",
+   "title": "DevOps & Platform Engineer",
+   "group": "engineering",
+   "kind": "role",
+   "article_url": null,
+   "summary": "Xây hạ tầng và pipeline deploy, giữ hệ thống chạy ổn định.",
+   "doing": "Đang theo dõi bản deploy chiều nay.",
+   "with_designer": "Khi sản phẩm chậm hay sập, họ là người xử lý đầu tiên.",
+   "reports_to": "cto",
+   "reports_to_small": null,
+   "props": [
+    "gear"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "data-analyst",
+   "title": "Data Analyst",
+   "group": "data",
+   "kind": "role",
+   "article_url": null,
+   "summary": "Phân tích dữ liệu để trả lời câu hỏi về sản phẩm và kinh doanh.",
+   "doing": "Đang dựng funnel đăng ký của tuần này.",
+   "with_designer": "Cho bạn biết người dùng rời đi ở bước nào của luồng.",
+   "reports_to": "head-of-data",
+   "reports_to_small": null,
+   "props": [
+    "chart"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "bi-analyst",
+   "title": "Business Intelligence Analyst",
+   "group": "data",
+   "kind": "role",
+   "article_url": null,
+   "summary": "Xây dashboard và báo cáo định kỳ cho các phòng ban.",
+   "doing": "Đang cập nhật dashboard doanh thu.",
+   "with_designer": "Dashboard của họ là nơi bạn tìm số liệu nhanh nhất.",
+   "reports_to": "head-of-data",
+   "reports_to_small": null,
+   "props": [
+    "pie"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "data-scientist",
+   "title": "Data Scientist",
+   "group": "data",
+   "kind": "role",
+   "article_url": null,
+   "summary": "Xây mô hình dự đoán và gợi ý từ dữ liệu.",
+   "doing": "Đang huấn luyện mô hình gợi ý khoá học.",
+   "with_designer": "Cùng bạn thiết kế cách hiển thị gợi ý do AI tạo ra.",
+   "reports_to": "head-of-data",
+   "reports_to_small": null,
+   "props": [
+    "flask"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "data-engineer",
+   "title": "Data Engineer",
+   "group": "data",
+   "kind": "role",
+   "article_url": null,
+   "summary": "Xây đường ống dữ liệu để các nhóm khác dùng được dữ liệu.",
+   "doing": "Đang sửa pipeline đồng bộ dữ liệu đêm qua.",
+   "with_designer": "Ít làm trực tiếp, nhưng tracking bạn đề xuất cần họ để chạy.",
+   "reports_to": "head-of-data",
+   "reports_to_small": null,
+   "props": [
+    "database"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "scrum-master",
+   "title": "Scrum Master",
+   "group": "delivery",
+   "kind": "role",
+   "article_url": null,
+   "summary": "Giữ nhịp Scrum: điều phối các buổi họp và gỡ vướng mắc cho team.",
+   "doing": "Đang chuẩn bị buổi Retro cuối sprint.",
+   "with_designer": "Giúp bạn gỡ những việc đang bị chặn trong sprint.",
+   "reports_to": "delivery-manager",
+   "reports_to_small": null,
+   "props": [
+    "timer"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "delivery-manager",
+   "title": "Delivery Manager",
+   "group": "delivery",
+   "kind": "role",
+   "article_url": null,
+   "summary": "Đảm bảo các team giao sản phẩm đúng hạn và phối hợp tốt với nhau.",
+   "doing": "Đang cập nhật kế hoạch phát hành.",
+   "with_designer": "Cho bạn biết hạn chót thật sự của một tính năng.",
+   "reports_to": "cto",
+   "reports_to_small": null,
+   "props": [
+    "calendar"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "project-manager",
+   "title": "Project Manager",
+   "group": "delivery",
+   "kind": "role",
+   "article_url": null,
+   "summary": "Quản lý dự án theo phạm vi, thời gian và nguồn lực.",
+   "doing": "Đang theo dõi tiến độ dự án tích hợp đối tác.",
+   "with_designer": "Cần bạn ước lượng thời gian thiết kế cho từng hạng mục.",
+   "reports_to": "delivery-manager",
+   "reports_to_small": null,
+   "props": [
+    "calendar"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "growth-manager",
+   "title": "Growth Manager",
+   "group": "business",
+   "kind": "role",
+   "article_url": null,
+   "summary": "Phụ trách tăng trưởng người dùng qua nhiều kênh marketing.",
+   "doing": "Đang lên chiến dịch giới thiệu bạn bè.",
+   "with_designer": "Cần bạn thiết kế landing page và luồng mời bạn bè.",
+   "reports_to": "ceo",
+   "reports_to_small": "ceo",
+   "props": [
+    "megaphone"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "performance-marketer",
+   "title": "Performance Marketing Manager",
+   "group": "business",
+   "kind": "role",
+   "article_url": null,
+   "summary": "Chạy quảng cáo trả phí và tối ưu chi phí trên mỗi người dùng.",
+   "doing": "Đang so sánh 3 mẫu banner quảng cáo.",
+   "with_designer": "Hay nhờ bạn làm biến thể banner và trang đích.",
+   "reports_to": "growth-manager",
+   "reports_to_small": null,
+   "props": [
+    "megaphone"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "brand-manager",
+   "title": "Brand Manager",
+   "group": "business",
+   "kind": "role",
+   "article_url": null,
+   "summary": "Giữ gìn hình ảnh và giọng nói của thương hiệu.",
+   "doing": "Đang duyệt bộ nhận diện cho chiến dịch mới.",
+   "with_designer": "Bạn cần tuân theo guideline thương hiệu họ đặt ra.",
+   "reports_to": "ceo",
+   "reports_to_small": null,
+   "props": [
+    "flag"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "content-marketer",
+   "title": "Content Marketer",
+   "group": "business",
+   "kind": "role",
+   "article_url": null,
+   "summary": "Viết nội dung cho blog, mạng xã hội và email.",
+   "doing": "Đang viết bài blog ra mắt tính năng.",
+   "with_designer": "Cần ảnh minh hoạ tính năng từ bạn.",
+   "reports_to": "growth-manager",
+   "reports_to_small": null,
+   "props": [
+    "pencil"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "crm-manager",
+   "title": "CRM Manager",
+   "group": "business",
+   "kind": "role",
+   "article_url": null,
+   "summary": "Quản lý email, thông báo và chương trình giữ chân khách hàng.",
+   "doing": "Đang thiết lập chuỗi email chào mừng.",
+   "with_designer": "Cùng bạn thiết kế email và thông báo trong app.",
+   "reports_to": "growth-manager",
+   "reports_to_small": null,
+   "props": [
+    "cards"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "seo-specialist",
+   "title": "SEO Specialist",
+   "group": "business",
+   "kind": "role",
+   "article_url": null,
+   "summary": "Tối ưu website để xuất hiện tốt trên Google.",
+   "doing": "Đang kiểm tra tốc độ tải trang.",
+   "with_designer": "Góp ý cấu trúc trang và tiêu đề khi bạn làm landing page.",
+   "reports_to": "growth-manager",
+   "reports_to_small": null,
+   "props": [
+    "magnifier"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "csm",
+   "title": "Customer Success Manager",
+   "group": "business",
+   "kind": "role",
+   "article_url": null,
+   "summary": "Giúp khách hàng dùng sản phẩm thành công và gia hạn.",
+   "doing": "Đang gọi cho khách hàng sắp hết hạn.",
+   "with_designer": "Mang về phản hồi thật từ khách hàng cho bạn.",
+   "reports_to": "ceo",
+   "reports_to_small": null,
+   "props": [
+    "headset"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "customer-support",
+   "title": "Customer Support",
+   "group": "business",
+   "kind": "role",
+   "article_url": null,
+   "summary": "Trả lời câu hỏi và xử lý sự cố của khách hàng.",
+   "doing": "Đang trả lời 12 ticket về quên mật khẩu.",
+   "with_designer": "Nguồn insight quý: lỗi nào người dùng hỏi nhiều nhất.",
+   "reports_to": "csm",
+   "reports_to_small": "ceo",
+   "props": [
+    "headset"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "account-manager",
+   "title": "Account Manager",
+   "group": "business",
+   "kind": "role",
+   "article_url": null,
+   "summary": "Quản lý quan hệ và hợp đồng với khách hàng lớn.",
+   "doing": "Đang chuẩn bị buổi demo cho khách hàng doanh nghiệp.",
+   "with_designer": "Cần bạn làm bản demo đẹp cho khách hàng lớn.",
+   "reports_to": "ceo",
+   "reports_to_small": "ceo",
+   "props": [
+    "briefcase"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "business-analyst",
+   "title": "Business Analyst",
+   "group": "business",
+   "kind": "role",
+   "article_url": "https://academy.telos.vn/business-analyst-ba-la-gi-product-team/",
+   "summary": "Phân tích yêu cầu kinh doanh và dịch chúng thành đặc tả cho design và engineering.",
+   "doing": "Đang viết đặc tả yêu cầu cho tính năng hoá đơn.",
+   "with_designer": "Dịch yêu cầu kinh doanh thành đặc tả để bạn thiết kế.",
+   "reports_to": "cpo",
+   "reports_to_small": "ceo",
+   "props": [
+    "clipboard"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "stakeholder",
+   "title": "Stakeholder",
+   "group": "business",
+   "kind": "role",
+   "article_url": "https://academy.telos.vn/stakeholder-la-ai-product/",
+   "summary": "Những người có lợi ích liên quan tới sản phẩm, có thể ảnh hưởng hoặc bị ảnh hưởng bởi quyết định thiết kế.",
+   "doing": "Đang chờ buổi Sprint Review để xem demo.",
+   "with_designer": "Bạn cần thuyết phục họ bằng lý do, dữ liệu và bản demo rõ ràng.",
+   "reports_to": null,
+   "reports_to_small": null,
+   "props": [
+    "briefcase"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": null
+   },
+   "cta": null,
+   "tag": null,
+   "is_active": true
+  },
+  {
+   "id": "nhan-luu",
+   "title": "Nhân Lưu",
+   "group": "design",
+   "kind": "author",
+   "article_url": null,
+   "summary": "Cha nội này là Academic Director tại TELOS Academy và là tác giả của trò chơi này. Ổng đi khắp các phòng để kể chuyện cười không vui làm giảm năng suất làm việc của mọi người.",
+   "doing": "Đang đi một vòng văn phòng, hỏi thăm từng team.",
+   "with_designer": "Ổng có thể chỉ cho bạn lộ trình học UI/UX và hướng phát triển trong lĩnh vực này.",
+   "reports_to": null,
+   "reports_to_small": null,
+   "props": [
+    "blazer",
+    "glasses",
+    "necklace",
+    "laptopCarry"
+   ],
+   "appearance": {
+    "dark": false,
+    "outfit": {
+     "legs": "#C9BA95",
+     "feet": "#B48D5C"
+    }
+   },
+   "cta": [
+    {
+     "label": "Nhận quà",
+     "url": "https://nhanluu.com/contact/",
+     "primary": true
+    },
+    {
+     "label": "Tìm hiểu thêm",
+     "url": "https://nhanluu.com"
+    }
+   ],
+   "tag": "Academic Director · TELOS Academy",
+   "is_active": true
+  },
+  {
+   "id": "user",
+   "title": "User",
+   "group": "business",
+   "kind": "guest",
+   "article_url": null,
+   "summary": "Người dùng thật của sản phẩm. Bạn ấy không quan tâm team làm việc ra sao, chỉ quan tâm sản phẩm có dễ dùng hay không.",
+   "doing": "Đang ngồi bấm điện thoại, lướt thử ứng dụng.",
+   "with_designer": "Hỏi và quan sát người dùng thật là cách nhanh nhất để biết thiết kế của bạn có dùng được không.",
+   "reports_to": null,
+   "reports_to_small": null,
+   "props": [
+    "phoneUse"
+   ],
+   "appearance": {
+    "dark": true,
+    "outfit": null
+   },
+   "cta": [
+    {
+     "label": "Usability Testing",
+     "url": "https://academy.telos.vn/usability-testing-la-gi-ux-design/",
+     "primary": true
+    },
+    {
+     "label": "Learnability",
+     "url": "https://academy.telos.vn/learnability-la-gi-ux-design/",
+     "primary": false
+    }
+   ],
+   "tag": "Người dùng thật",
+   "is_active": true
+  }
+ ],
+ "rooms": [
+  {
+   "id": "P1",
+   "scale": "small",
+   "code": "Team 1",
+   "name": "Product team",
+   "intro": "Đây là chỗ của bạn. Product Manager quyết định làm gì và theo thứ tự nào, bạn thiết kế, Intern học cùng bạn. Ở công ty nhỏ, designer thường kiêm luôn research và viết nội dung giao diện.",
+   "sort_order": 0,
+   "layout": {
+    "kind": "pod",
+    "x": -13,
+    "z": -6,
+    "w": 11,
+    "d": 9,
+    "floor": "#F9D3E3",
+    "doors": null,
+    "tv_offset": null
+   }
+  },
+  {
+   "id": "P2",
+   "scale": "small",
+   "code": "Team 2",
+   "name": "Dev team",
+   "intro": "Tech Lead, Frontend, Backend, Mobile và QA biến thiết kế thành sản phẩm chạy được. Bạn sẽ sang đây để handoff, trả lời câu hỏi và review bản build.",
+   "sort_order": 1,
+   "layout": {
+    "kind": "pod",
+    "x": 0,
+    "z": -6,
+    "w": 11,
+    "d": 9,
+    "floor": "#CDEFF8",
+    "doors": null,
+    "tv_offset": null
+   }
+  },
+  {
+   "id": "P3",
+   "scale": "small",
+   "code": "Team 3",
+   "name": "Business team",
+   "intro": "CEO, Marketing, Sales, Customer Support và Business Analyst. Nơi đặt mục tiêu kinh doanh và nghe tiếng nói khách hàng, nguồn insight quý cho thiết kế.",
+   "sort_order": 2,
+   "layout": {
+    "kind": "pod",
+    "x": 13,
+    "z": -6,
+    "w": 11,
+    "d": 9,
+    "floor": "#DCD6F7",
+    "doors": null,
+    "tv_offset": null
+   }
+  },
+  {
+   "id": "P4",
+   "scale": "small",
+   "code": "Họp",
+   "name": "Phòng họp",
+   "intro": "Phòng dùng cho Sprint Planning, demo cuối sprint và các buổi họp cả công ty. TV để trình bày thiết kế.",
+   "sort_order": 3,
+   "layout": {
+    "kind": "meeting",
+    "x": -13,
+    "z": 7,
+    "w": 11,
+    "d": 9,
+    "floor": "#FFEAB8",
+    "doors": null,
+    "tv_offset": -3.4
+   }
+  },
+  {
+   "id": "P5",
+   "scale": "small",
+   "code": "Chung",
+   "name": "Pantry",
+   "intro": "Khu chung để nghỉ, gặp gỡ ngẫu nhiên và sinh hoạt guild. Nhiều ý tưởng hay bắt đầu từ một cuộc nói chuyện ở đây.",
+   "sort_order": 4,
+   "layout": {
+    "kind": "lounge",
+    "x": 0,
+    "z": 7,
+    "w": 9,
+    "d": 7,
+    "floor": "#E6DFF6",
+    "doors": null,
+    "tv_offset": null
+   }
+  },
+  {
+   "id": "P6",
+   "scale": "small",
+   "code": "Đóng",
+   "name": "Phòng ban khác",
+   "intro": null,
+   "sort_order": 5,
+   "layout": {
+    "kind": "locked",
+    "x": 13,
+    "z": 7,
+    "w": 11,
+    "d": 9,
+    "floor": "#D8D2E4",
+    "doors": null,
+    "tv_offset": null
+   }
+  },
+  {
+   "id": "R01",
+   "scale": "large",
+   "code": "R01",
+   "name": "Leadership",
+   "intro": "CEO, CPO, CTO và các Head. Đặt chiến lược và OKR cho cả công ty. Head of Design là quản lý chuyên môn cao nhất của bạn.",
+   "sort_order": 0,
+   "layout": {
+    "kind": "meeting",
+    "x": -14,
+    "z": -12,
+    "w": 11,
+    "d": 9,
+    "floor": "#DCD6F7",
+    "doors": null,
+    "tv_offset": -3.4
+   }
+  },
+  {
+   "id": "R07",
+   "scale": "large",
+   "code": "R07",
+   "name": "Data & Analytics",
+   "intro": "Data Analyst, BI Analyst, Data Scientist và Data Engineer. Ghé đây khi cần số liệu funnel hay kết quả A/B test.",
+   "sort_order": 1,
+   "layout": {
+    "kind": "pod",
+    "x": 0,
+    "z": -12,
+    "w": 11,
+    "d": 9,
+    "floor": "#CBEEDF",
+    "doors": null,
+    "tv_offset": null
+   }
+  },
+  {
+   "id": "R08",
+   "scale": "large",
+   "code": "R08",
+   "name": "Phòng họp",
+   "intro": "Sprint Planning và Sprint Review diễn ra ở đây. Stakeholder thường tới dự buổi demo.",
+   "sort_order": 2,
+   "layout": {
+    "kind": "meeting",
+    "x": 14,
+    "z": -12,
+    "w": 11,
+    "d": 9,
+    "floor": "#FFEAB8",
+    "doors": null,
+    "tv_offset": -3.4
+   }
+  },
+  {
+   "id": "R02",
+   "scale": "large",
+   "code": "R02",
+   "name": "Tribe Growth",
+   "intro": "Các squad lo onboarding, kích hoạt và giới thiệu bạn bè. Designer ở đây làm việc nhiều với A/B test và số liệu tăng trưởng.",
+   "sort_order": 3,
+   "layout": {
+    "kind": "pod",
+    "x": -14,
+    "z": 0,
+    "w": 11,
+    "d": 9,
+    "floor": "#F9D3E3",
+    "doors": null,
+    "tv_offset": null
+   }
+  },
+  {
+   "id": "R03",
+   "scale": "large",
+   "code": "R03",
+   "name": "Core Experience",
+   "intro": "Squad của bạn: PM, designer, Tech Lead, dev và QA ngồi chung một bàn. Đây là nơi bạn làm việc hằng ngày.",
+   "sort_order": 4,
+   "layout": {
+    "kind": "pod",
+    "x": 0,
+    "z": 0,
+    "w": 11,
+    "d": 9,
+    "floor": "#F9D3E3",
+    "doors": null,
+    "tv_offset": null
+   }
+  },
+  {
+   "id": "R04",
+   "scale": "large",
+   "code": "R04",
+   "name": "Monetization",
+   "intro": "Squad lo thanh toán và gói dịch vụ. Designer ở đây làm việc sát với các ràng buộc về giá và pháp lý.",
+   "sort_order": 5,
+   "layout": {
+    "kind": "pod",
+    "x": 14,
+    "z": 0,
+    "w": 11,
+    "d": 9,
+    "floor": "#F9D3E3",
+    "doors": null,
+    "tv_offset": null
+   }
+  },
+  {
+   "id": "R05",
+   "scale": "large",
+   "code": "R05",
+   "name": "Platform",
+   "intro": "DevOps, Software Architect và team Design System. Hỏi team Design System trước khi vẽ một component mới.",
+   "sort_order": 6,
+   "layout": {
+    "kind": "pod",
+    "x": -14,
+    "z": 12,
+    "w": 11,
+    "d": 9,
+    "floor": "#CDEFF8",
+    "doors": null,
+    "tv_offset": null
+   }
+  },
+  {
+   "id": "R06",
+   "scale": "large",
+   "code": "R06",
+   "name": "Design Studio",
+   "intro": "Ngôi nhà chuyên môn của designer: Design Manager, UX Researcher, UX Writer, Motion Designer. Buổi Design Critique diễn ra hằng tuần ở đây.",
+   "sort_order": 7,
+   "layout": {
+    "kind": "pod",
+    "x": 0,
+    "z": 12,
+    "w": 11,
+    "d": 9,
+    "floor": "#F7C9DD",
+    "doors": null,
+    "tv_offset": -3.4
+   }
+  },
+  {
+   "id": "R09",
+   "scale": "large",
+   "code": "R09",
+   "name": "Delivery Hub",
+   "intro": "Scrum Master, Delivery Manager và Project Manager giữ nhịp sprint và hạn chót phát hành.",
+   "sort_order": 8,
+   "layout": {
+    "kind": "pod",
+    "x": 14,
+    "z": 12,
+    "w": 11,
+    "d": 9,
+    "floor": "#FFDCC4",
+    "doors": null,
+    "tv_offset": null
+   }
+  },
+  {
+   "id": "R11",
+   "scale": "large",
+   "code": "Chung",
+   "name": "Pantry",
+   "intro": "Khu chung để nghỉ, gặp gỡ ngẫu nhiên và sinh hoạt guild. Người dùng được mời tới phỏng vấn cũng hay ngồi chờ ở đây.",
+   "sort_order": 9,
+   "layout": {
+    "kind": "lounge",
+    "x": -27,
+    "z": 0,
+    "w": 9,
+    "d": 7,
+    "floor": "#E6DFF6",
+    "doors": null,
+    "tv_offset": null
+   }
+  },
+  {
+   "id": "R10",
+   "scale": "large",
+   "code": "R10",
+   "name": "Hàng xóm · ngoài vách kính",
+   "intro": "Marketing, Customer Success, Sales và Business Analyst ngồi ngoài vách kính. Họ là những stakeholder bạn làm việc cùng thường xuyên.",
+   "sort_order": 10,
+   "layout": {
+    "kind": "glass",
+    "x": 29,
+    "z": 0,
+    "w": 9,
+    "d": 33,
+    "floor": "#DEF3F8",
+    "doors": [
+     {
+      "side": "w",
+      "off": -12
+     },
+     {
+      "side": "w",
+      "off": 0
+     },
+     {
+      "side": "w",
+      "off": 12
+     }
+    ],
+    "tv_offset": null
+   }
+  }
+ ],
+ "placements": [
+  {
+   "id": "product-manager@P1",
+   "character_id": "product-manager",
+   "scale": "small",
+   "room_id": "P1",
+   "seat_order": 0
+  },
+  {
+   "id": "ui-ux-designer@P1",
+   "character_id": "ui-ux-designer",
+   "scale": "small",
+   "room_id": "P1",
+   "seat_order": 1
+  },
+  {
+   "id": "intern@P1",
+   "character_id": "intern",
+   "scale": "small",
+   "room_id": "P1",
+   "seat_order": 2
+  },
+  {
+   "id": "tech-lead@P2",
+   "character_id": "tech-lead",
+   "scale": "small",
+   "room_id": "P2",
+   "seat_order": 0
+  },
+  {
+   "id": "frontend-developer@P2",
+   "character_id": "frontend-developer",
+   "scale": "small",
+   "room_id": "P2",
+   "seat_order": 1
+  },
+  {
+   "id": "backend-developer@P2",
+   "character_id": "backend-developer",
+   "scale": "small",
+   "room_id": "P2",
+   "seat_order": 2
+  },
+  {
+   "id": "mobile-developer@P2",
+   "character_id": "mobile-developer",
+   "scale": "small",
+   "room_id": "P2",
+   "seat_order": 3
+  },
+  {
+   "id": "qa-engineer@P2",
+   "character_id": "qa-engineer",
+   "scale": "small",
+   "room_id": "P2",
+   "seat_order": 4
+  },
+  {
+   "id": "ceo@P3",
+   "character_id": "ceo",
+   "scale": "small",
+   "room_id": "P3",
+   "seat_order": 0
+  },
+  {
+   "id": "growth-manager@P3",
+   "character_id": "growth-manager",
+   "scale": "small",
+   "room_id": "P3",
+   "seat_order": 1
+  },
+  {
+   "id": "account-manager@P3",
+   "character_id": "account-manager",
+   "scale": "small",
+   "room_id": "P3",
+   "seat_order": 2
+  },
+  {
+   "id": "customer-support@P3",
+   "character_id": "customer-support",
+   "scale": "small",
+   "room_id": "P3",
+   "seat_order": 3
+  },
+  {
+   "id": "business-analyst@P3",
+   "character_id": "business-analyst",
+   "scale": "small",
+   "room_id": "P3",
+   "seat_order": 4
+  },
+  {
+   "id": "ceo@R01",
+   "character_id": "ceo",
+   "scale": "large",
+   "room_id": "R01",
+   "seat_order": 0
+  },
+  {
+   "id": "cpo@R01",
+   "character_id": "cpo",
+   "scale": "large",
+   "room_id": "R01",
+   "seat_order": 1
+  },
+  {
+   "id": "cto@R01",
+   "character_id": "cto",
+   "scale": "large",
+   "room_id": "R01",
+   "seat_order": 2
+  },
+  {
+   "id": "head-of-design@R01",
+   "character_id": "head-of-design",
+   "scale": "large",
+   "room_id": "R01",
+   "seat_order": 3
+  },
+  {
+   "id": "head-of-data@R01",
+   "character_id": "head-of-data",
+   "scale": "large",
+   "room_id": "R01",
+   "seat_order": 4
+  },
+  {
+   "id": "head-of-eng@R01",
+   "character_id": "head-of-eng",
+   "scale": "large",
+   "room_id": "R01",
+   "seat_order": 5
+  },
+  {
+   "id": "data-pm@R07",
+   "character_id": "data-pm",
+   "scale": "large",
+   "room_id": "R07",
+   "seat_order": 0
+  },
+  {
+   "id": "data-analyst@R07",
+   "character_id": "data-analyst",
+   "scale": "large",
+   "room_id": "R07",
+   "seat_order": 1
+  },
+  {
+   "id": "bi-analyst@R07",
+   "character_id": "bi-analyst",
+   "scale": "large",
+   "room_id": "R07",
+   "seat_order": 2
+  },
+  {
+   "id": "data-scientist@R07",
+   "character_id": "data-scientist",
+   "scale": "large",
+   "room_id": "R07",
+   "seat_order": 3
+  },
+  {
+   "id": "data-engineer@R07",
+   "character_id": "data-engineer",
+   "scale": "large",
+   "room_id": "R07",
+   "seat_order": 4
+  },
+  {
+   "id": "stakeholder@R08",
+   "character_id": "stakeholder",
+   "scale": "large",
+   "room_id": "R08",
+   "seat_order": 0
+  },
+  {
+   "id": "growth-pm@R02",
+   "character_id": "growth-pm",
+   "scale": "large",
+   "room_id": "R02",
+   "seat_order": 0
+  },
+  {
+   "id": "product-designer@R02",
+   "character_id": "product-designer",
+   "scale": "large",
+   "room_id": "R02",
+   "seat_order": 1
+  },
+  {
+   "id": "tech-lead@R02",
+   "character_id": "tech-lead",
+   "scale": "large",
+   "room_id": "R02",
+   "seat_order": 2
+  },
+  {
+   "id": "fullstack-developer@R02",
+   "character_id": "fullstack-developer",
+   "scale": "large",
+   "room_id": "R02",
+   "seat_order": 3
+  },
+  {
+   "id": "qa-engineer@R02",
+   "character_id": "qa-engineer",
+   "scale": "large",
+   "room_id": "R02",
+   "seat_order": 4
+  },
+  {
+   "id": "product-owner@R02",
+   "character_id": "product-owner",
+   "scale": "large",
+   "room_id": "R02",
+   "seat_order": 5
+  },
+  {
+   "id": "product-manager@R03",
+   "character_id": "product-manager",
+   "scale": "large",
+   "room_id": "R03",
+   "seat_order": 0
+  },
+  {
+   "id": "ui-ux-designer@R03",
+   "character_id": "ui-ux-designer",
+   "scale": "large",
+   "room_id": "R03",
+   "seat_order": 1
+  },
+  {
+   "id": "ui-designer@R03",
+   "character_id": "ui-designer",
+   "scale": "large",
+   "room_id": "R03",
+   "seat_order": 2
+  },
+  {
+   "id": "intern@R03",
+   "character_id": "intern",
+   "scale": "large",
+   "room_id": "R03",
+   "seat_order": 3
+  },
+  {
+   "id": "tech-lead@R03",
+   "character_id": "tech-lead",
+   "scale": "large",
+   "room_id": "R03",
+   "seat_order": 4
+  },
+  {
+   "id": "frontend-developer@R03",
+   "character_id": "frontend-developer",
+   "scale": "large",
+   "room_id": "R03",
+   "seat_order": 5
+  },
+  {
+   "id": "mobile-developer@R03",
+   "character_id": "mobile-developer",
+   "scale": "large",
+   "room_id": "R03",
+   "seat_order": 6
+  },
+  {
+   "id": "backend-developer@R03",
+   "character_id": "backend-developer",
+   "scale": "large",
+   "room_id": "R03",
+   "seat_order": 7
+  },
+  {
+   "id": "qa-engineer@R03",
+   "character_id": "qa-engineer",
+   "scale": "large",
+   "room_id": "R03",
+   "seat_order": 8
+  },
+  {
+   "id": "product-manager@R04",
+   "character_id": "product-manager",
+   "scale": "large",
+   "room_id": "R04",
+   "seat_order": 0
+  },
+  {
+   "id": "ux-designer@R04",
+   "character_id": "ux-designer",
+   "scale": "large",
+   "room_id": "R04",
+   "seat_order": 1
+  },
+  {
+   "id": "tech-lead@R04",
+   "character_id": "tech-lead",
+   "scale": "large",
+   "room_id": "R04",
+   "seat_order": 2
+  },
+  {
+   "id": "backend-developer@R04",
+   "character_id": "backend-developer",
+   "scale": "large",
+   "room_id": "R04",
+   "seat_order": 3
+  },
+  {
+   "id": "frontend-developer@R04",
+   "character_id": "frontend-developer",
+   "scale": "large",
+   "room_id": "R04",
+   "seat_order": 4
+  },
+  {
+   "id": "software-architect@R05",
+   "character_id": "software-architect",
+   "scale": "large",
+   "room_id": "R05",
+   "seat_order": 0
+  },
+  {
+   "id": "devops@R05",
+   "character_id": "devops",
+   "scale": "large",
+   "room_id": "R05",
+   "seat_order": 1
+  },
+  {
+   "id": "ds-designer@R05",
+   "character_id": "ds-designer",
+   "scale": "large",
+   "room_id": "R05",
+   "seat_order": 2
+  },
+  {
+   "id": "ux-design-engineer@R05",
+   "character_id": "ux-design-engineer",
+   "scale": "large",
+   "room_id": "R05",
+   "seat_order": 3
+  },
+  {
+   "id": "design-manager@R06",
+   "character_id": "design-manager",
+   "scale": "large",
+   "room_id": "R06",
+   "seat_order": 0
+  },
+  {
+   "id": "ux-researcher@R06",
+   "character_id": "ux-researcher",
+   "scale": "large",
+   "room_id": "R06",
+   "seat_order": 1
+  },
+  {
+   "id": "ux-writer@R06",
+   "character_id": "ux-writer",
+   "scale": "large",
+   "room_id": "R06",
+   "seat_order": 2
+  },
+  {
+   "id": "motion-designer@R06",
+   "character_id": "motion-designer",
+   "scale": "large",
+   "room_id": "R06",
+   "seat_order": 3
+  },
+  {
+   "id": "scrum-master@R09",
+   "character_id": "scrum-master",
+   "scale": "large",
+   "room_id": "R09",
+   "seat_order": 0
+  },
+  {
+   "id": "delivery-manager@R09",
+   "character_id": "delivery-manager",
+   "scale": "large",
+   "room_id": "R09",
+   "seat_order": 1
+  },
+  {
+   "id": "project-manager@R09",
+   "character_id": "project-manager",
+   "scale": "large",
+   "room_id": "R09",
+   "seat_order": 2
+  },
+  {
+   "id": "growth-manager@R10",
+   "character_id": "growth-manager",
+   "scale": "large",
+   "room_id": "R10",
+   "seat_order": 0
+  },
+  {
+   "id": "performance-marketer@R10",
+   "character_id": "performance-marketer",
+   "scale": "large",
+   "room_id": "R10",
+   "seat_order": 1
+  },
+  {
+   "id": "brand-manager@R10",
+   "character_id": "brand-manager",
+   "scale": "large",
+   "room_id": "R10",
+   "seat_order": 2
+  },
+  {
+   "id": "content-marketer@R10",
+   "character_id": "content-marketer",
+   "scale": "large",
+   "room_id": "R10",
+   "seat_order": 3
+  },
+  {
+   "id": "crm-manager@R10",
+   "character_id": "crm-manager",
+   "scale": "large",
+   "room_id": "R10",
+   "seat_order": 4
+  },
+  {
+   "id": "seo-specialist@R10",
+   "character_id": "seo-specialist",
+   "scale": "large",
+   "room_id": "R10",
+   "seat_order": 5
+  },
+  {
+   "id": "csm@R10",
+   "character_id": "csm",
+   "scale": "large",
+   "room_id": "R10",
+   "seat_order": 6
+  },
+  {
+   "id": "customer-support@R10",
+   "character_id": "customer-support",
+   "scale": "large",
+   "room_id": "R10",
+   "seat_order": 7
+  },
+  {
+   "id": "account-manager@R10",
+   "character_id": "account-manager",
+   "scale": "large",
+   "room_id": "R10",
+   "seat_order": 8
+  },
+  {
+   "id": "business-analyst@R10",
+   "character_id": "business-analyst",
+   "scale": "large",
+   "room_id": "R10",
+   "seat_order": 9
+  },
+  {
+   "id": "user@P5",
+   "character_id": "user",
+   "scale": "small",
+   "room_id": "P5",
+   "seat_order": 0
+  },
+  {
+   "id": "nhan-luu@P5",
+   "character_id": "nhan-luu",
+   "scale": "small",
+   "room_id": "P5",
+   "seat_order": null
+  },
+  {
+   "id": "user@R11",
+   "character_id": "user",
+   "scale": "large",
+   "room_id": "R11",
+   "seat_order": 0
+  },
+  {
+   "id": "nhan-luu@R11",
+   "character_id": "nhan-luu",
+   "scale": "large",
+   "room_id": "R11",
+   "seat_order": null
+  }
+ ],
+ "quests": [
+  {
+   "id": "small-01",
+   "scale": "small",
+   "type": "main",
+   "sort_order": 1,
+   "title": "Nhận việc đầu sprint",
+   "room_id": "P4",
+   "giver": "product-manager@P1",
+   "gather": [
+    "tech-lead@P2",
+    "frontend-developer@P2"
+   ],
+   "offer_text": "Chào bạn! Sprint này mình làm lại luồng onboarding. Trước khi vẽ, bạn hỏi Tech Lead xem phần nào khó làm nhé.",
+   "done_text": "Tuyệt, wireframe rõ ràng. Bước ảnh đại diện để sprint sau.",
+   "rewards": [
+    {
+     "type": "character",
+     "id": "product-manager"
+    },
+    {
+     "type": "term",
+     "name": "Agile",
+     "url": "https://academy.telos.vn/waterfall-va-agile-la-gi/"
+    }
+   ],
+   "is_active": true,
+   "daily_date": null
+  },
+  {
+   "id": "small-02",
+   "scale": "small",
+   "type": "main",
+   "sort_order": 2,
+   "title": "Hiểu mục tiêu kinh doanh",
+   "room_id": "P3",
+   "giver": "ceo@P3",
+   "gather": [
+    "business-analyst@P3"
+   ],
+   "offer_text": "Quý này công ty cần tăng 20% người dùng trả phí. Bạn hỏi BA xem onboarding liên quan thế nào.",
+   "done_text": "Đúng rồi. Thiết kế nào giúp người dùng thấy giá trị sớm là thiết kế tốt.",
+   "rewards": [
+    {
+     "type": "character",
+     "id": "business-analyst"
+    },
+    {
+     "type": "term",
+     "name": "Viability",
+     "url": "https://academy.telos.vn/viability-la-gi-product-design/"
+    }
+   ],
+   "is_active": true,
+   "daily_date": null
+  },
+  {
+   "id": "small-03",
+   "scale": "small",
+   "type": "main",
+   "sort_order": 3,
+   "title": "Nghe tiếng nói khách hàng",
+   "room_id": "P3",
+   "giver": "customer-support@P3",
+   "gather": [
+    "account-manager@P3"
+   ],
+   "offer_text": "Mình nhận rất nhiều câu hỏi về bước đăng ký. Bạn sang hỏi Account Manager thêm góc nhìn khách lớn nhé.",
+   "done_text": "Bạn ghi lại hai insight này vào persona nhé. Cảm ơn bạn đã lắng nghe!",
+   "rewards": [
+    {
+     "type": "term",
+     "name": "User Persona",
+     "url": "https://academy.telos.vn/user-persona-la-gi-cach-tao-ra-1-user-persona/"
+    },
+    {
+     "type": "term",
+     "name": "Empathy Map",
+     "url": "https://academy.telos.vn/huong-dan-nguoi-moi-ve-empathy-map-la-gi/"
+    }
+   ],
+   "is_active": true,
+   "daily_date": null
+  },
+  {
+   "id": "small-04",
+   "scale": "small",
+   "type": "main",
+   "sort_order": 4,
+   "title": "Handoff cho Dev team",
+   "room_id": "P2",
+   "giver": "frontend-developer@P2",
+   "gather": [
+    "qa-engineer@P2",
+    "mobile-developer@P2"
+   ],
+   "offer_text": "File Figma xong rồi hả? Trước khi code, bạn giải thích các trạng thái lỗi cho QA giúp mình.",
+   "done_text": "Cảm ơn bạn. Có prototype bấm thử được nên mình hiểu luồng nhanh hơn nhiều.",
+   "rewards": [
+    {
+     "type": "character",
+     "id": "frontend-developer"
+    },
+    {
+     "type": "term",
+     "name": "Prototype",
+     "url": "https://academy.telos.vn/prototype-la-gi-video-huong-dan/"
+    }
+   ],
+   "is_active": true,
+   "daily_date": null
+  },
+  {
+   "id": "small-05",
+   "scale": "small",
+   "type": "main",
+   "sort_order": 5,
+   "title": "Demo cuối sprint",
+   "room_id": "P4",
+   "giver": "product-manager@P1",
+   "gather": [
+    "ceo@P3",
+    "growth-manager@P3",
+    "tech-lead@P2",
+    "customer-support@P3"
+   ],
+   "offer_text": "Đến giờ demo rồi! Cả công ty đang ở phòng họp. Bạn trình bày rồi hỏi ý kiến CEO nhé.",
+   "done_text": "Sprint đầu tiên của bạn hoàn thành rồi. Chào mừng tới team!",
+   "rewards": [
+    {
+     "type": "character",
+     "id": "stakeholder"
+    },
+    {
+     "type": "term",
+     "name": "Desirability",
+     "url": "https://academy.telos.vn/desirability-la-gi/"
+    }
+   ],
+   "is_active": true,
+   "daily_date": null
+  },
+  {
+   "id": "large-01",
+   "scale": "large",
+   "type": "main",
+   "sort_order": 1,
+   "title": "Sprint Planning",
+   "room_id": "R08",
+   "giver": "product-manager@R03",
+   "gather": [
+    "tech-lead@R03",
+    "frontend-developer@R03",
+    "qa-engineer@R03"
+   ],
+   "offer_text": "Sprint này squad Core làm lại luồng onboarding. Bạn hỏi Tech Lead ước lượng effort cho phần thiết kế mới nhé.",
+   "done_text": "Ok, mình chốt story này vào sprint. Nhớ ghé team Design System nhé.",
+   "rewards": [
+    {
+     "type": "character",
+     "id": "product-manager"
+    },
+    {
+     "type": "term",
+     "name": "Agile",
+     "url": "https://academy.telos.vn/waterfall-va-agile-la-gi/"
+    }
+   ],
+   "is_active": true,
+   "daily_date": null
+  },
+  {
+   "id": "large-02",
+   "scale": "large",
+   "type": "main",
+   "sort_order": 2,
+   "title": "Discovery cùng số liệu",
+   "room_id": "R03",
+   "giver": "tech-lead@R03",
+   "gather": [
+    "product-manager@R03"
+   ],
+   "offer_text": "Trước khi vẽ, mình cần biết người dùng rơi ở bước nào. Bạn sang Data & Analytics xin số liệu funnel nhé.",
+   "done_text": "42% là con số lớn. Vấn đề rõ rồi, giờ mới tới giải pháp.",
+   "rewards": [
+    {
+     "type": "term",
+     "name": "Problem Statement",
+     "url": "https://academy.telos.vn/problem-statement-cach-xac-dinh-cho-nguoi-moi-hoc-ui-ux/"
+    },
+    {
+     "type": "term",
+     "name": "Customer Journey Map",
+     "url": "https://academy.telos.vn/customer-journey-map-hanh-trinh-khach-hang/"
+    }
+   ],
+   "is_active": true,
+   "daily_date": null
+  },
+  {
+   "id": "large-03",
+   "scale": "large",
+   "type": "main",
+   "sort_order": 3,
+   "title": "Kiểm tra component",
+   "room_id": "R05",
+   "giver": "ds-designer@R05",
+   "gather": [
+    "ux-design-engineer@R05"
+   ],
+   "offer_text": "Bạn định vẽ thẻ chọn sở thích mới à? Hỏi UX Design Engineer xem component Chip đã có những gì đã.",
+   "done_text": "Vậy mình thêm một biến thể thay vì làm component mới. Cảm ơn bạn đã hỏi trước!",
+   "rewards": [
+    {
+     "type": "character",
+     "id": "ds-designer"
+    },
+    {
+     "type": "term",
+     "name": "Design System",
+     "url": "https://academy.telos.vn/design-system-la-gi/"
+    }
+   ],
+   "is_active": true,
+   "daily_date": null
+  },
+  {
+   "id": "large-04",
+   "scale": "large",
+   "type": "main",
+   "sort_order": 4,
+   "title": "Design Critique",
+   "room_id": "R06",
+   "giver": "design-manager@R06",
+   "gather": [
+    "product-designer@R02",
+    "ui-designer@R03",
+    "ux-designer@R04"
+   ],
+   "offer_text": "Chiều nay đến lượt bạn trình bày wireframe. Lấy góp ý từ Product Designer và UX Designer nhé.",
+   "done_text": "Hai góp ý rất tốt. Critique là để thiết kế tốt hơn, không phải để chấm điểm bạn.",
+   "rewards": [
+    {
+     "type": "term",
+     "name": "Heuristic Evaluation",
+     "url": "https://academy.telos.vn/phuong-phap-heuristic-evaluation/"
+    },
+    {
+     "type": "term",
+     "name": "Wireframe",
+     "url": "https://academy.telos.vn/wireframe-khung-xuong-cua-thiet-ke/"
+    }
+   ],
+   "is_active": true,
+   "daily_date": null
+  },
+  {
+   "id": "large-05",
+   "scale": "large",
+   "type": "main",
+   "sort_order": 5,
+   "title": "Usability Test",
+   "room_id": "R11",
+   "giver": "ux-researcher@R06",
+   "gather": [
+    "product-manager@R03"
+   ],
+   "offer_text": "Mình mời được một người dùng thật, bạn ấy đang ngồi ở Pantry. Bạn cùng mình hỏi bạn ấy thử luồng onboarding nhé.",
+   "done_text": "Một vấn đề thật, từ người dùng thật. Bạn sửa độ tương phản nút đó trước khi handoff nhé.",
+   "rewards": [
+    {
+     "type": "term",
+     "name": "Usability Testing",
+     "url": "https://academy.telos.vn/usability-testing-la-gi-ux-design/"
+    },
+    {
+     "type": "term",
+     "name": "Usability",
+     "url": "https://academy.telos.vn/usability-la-gi-ux-design/"
+    }
+   ],
+   "is_active": true,
+   "daily_date": null
+  },
+  {
+   "id": "large-06",
+   "scale": "large",
+   "type": "main",
+   "sort_order": 6,
+   "title": "Handoff",
+   "room_id": "R03",
+   "giver": "frontend-developer@R03",
+   "gather": [
+    "qa-engineer@R03",
+    "mobile-developer@R03"
+   ],
+   "offer_text": "File xong chưa? Bạn giải thích trạng thái lỗi và trạng thái tải cho QA giúp mình.",
+   "done_text": "Có prototype bấm thử nên cả team hiểu luồng rất nhanh. Cảm ơn bạn!",
+   "rewards": [
+    {
+     "type": "character",
+     "id": "frontend-developer"
+    },
+    {
+     "type": "term",
+     "name": "Prototype",
+     "url": "https://academy.telos.vn/prototype-la-gi-video-huong-dan/"
+    }
+   ],
+   "is_active": true,
+   "daily_date": null
+  },
+  {
+   "id": "large-07",
+   "scale": "large",
+   "type": "main",
+   "sort_order": 7,
+   "title": "Sprint Review",
+   "room_id": "R08",
+   "giver": "product-manager@R03",
+   "gather": [
+    "growth-manager@R10",
+    "csm@R10",
+    "stakeholder@R08",
+    "tech-lead@R03"
+   ],
+   "offer_text": "Đến giờ demo rồi. Marketing và Customer Success đều tới. Bạn nghe phản hồi từ hai bên nhé.",
+   "done_text": "Hai ý này mình đưa vào backlog sprint sau. Demo của bạn rất thuyết phục.",
+   "rewards": [
+    {
+     "type": "character",
+     "id": "stakeholder"
+    },
+    {
+     "type": "term",
+     "name": "Desirability",
+     "url": "https://academy.telos.vn/desirability-la-gi/"
+    }
+   ],
+   "is_active": true,
+   "daily_date": null
+  },
+  {
+   "id": "large-08",
+   "scale": "large",
+   "type": "main",
+   "sort_order": 8,
+   "title": "1-on-1 cuối sprint",
+   "room_id": "R06",
+   "giver": "design-manager@R06",
+   "gather": [],
+   "offer_text": "Sprint vừa rồi bạn đã làm việc với gần như mọi phòng ban. Mình nói chuyện về mục tiêu phát triển của bạn nhé.",
+   "done_text": "Mục tiêu quý tới: tự dẫn một buổi Critique và bắt đầu làm portfolio từ dự án này.",
+   "rewards": [
+    {
+     "type": "character",
+     "id": "product-designer"
+    },
+    {
+     "type": "term",
+     "name": "Portfolio",
+     "url": "https://academy.telos.vn/product-designer-portfolio-gom-gi/"
+    }
+   ],
+   "is_active": true,
+   "daily_date": null
+  }
+ ],
+ "quest_steps": [
+  {
+   "id": "small-01-s1",
+   "quest_id": "small-01",
+   "sort_order": 1,
+   "type": "talk",
+   "target": "tech-lead@P2",
+   "task_text": "Hỏi Tech Lead phần nào của onboarding khó làm",
+   "line_text": "Bước tải ảnh đại diện hơi nặng. Nếu bỏ được, team làm nhanh hơn 3 ngày.",
+   "secs": null
+  },
+  {
+   "id": "small-01-s2",
+   "quest_id": "small-01",
+   "sort_order": 2,
+   "type": "work",
+   "target": null,
+   "task_text": "Về chỗ ngồi, vẽ wireframe onboarding",
+   "line_text": "Wireframe gọn hơn nhiều khi bỏ bước ảnh đại diện. Gửi mình xem nhé!",
+   "secs": 5
+  },
+  {
+   "id": "small-02-s1",
+   "quest_id": "small-02",
+   "sort_order": 1,
+   "type": "talk",
+   "target": "business-analyst@P3",
+   "task_text": "Hỏi Business Analyst về yêu cầu kinh doanh",
+   "line_text": "Người dùng thấy giá trị trong 3 phút đầu thì tỷ lệ nâng cấp cao gấp đôi. Onboarding phải dẫn tới đó.",
+   "secs": null
+  },
+  {
+   "id": "small-03-s1",
+   "quest_id": "small-03",
+   "sort_order": 1,
+   "type": "talk",
+   "target": "account-manager@P3",
+   "task_text": "Hỏi Account Manager khách hàng than phiền gì",
+   "line_text": "Khách doanh nghiệp muốn mời cả nhóm ngay khi đăng ký. Hiện phải làm sau, rất rối.",
+   "secs": null
+  },
+  {
+   "id": "small-03-s2",
+   "quest_id": "small-03",
+   "sort_order": 2,
+   "type": "talk",
+   "target": "user@P5",
+   "task_text": "Ra Pantry hỏi trực tiếp một người dùng",
+   "line_text": "Mình đăng ký xong mà không biết bấm vào đâu tiếp. Phải mò một lúc mới thấy.",
+   "secs": null
+  },
+  {
+   "id": "small-04-s1",
+   "quest_id": "small-04",
+   "sort_order": 1,
+   "type": "work",
+   "target": null,
+   "task_text": "Về máy hoàn thiện file Figma và prototype",
+   "line_text": "File xong rồi đó. Giờ bạn giải thích các trạng thái cho QA nhé.",
+   "secs": 5
+  },
+  {
+   "id": "small-04-s2",
+   "quest_id": "small-04",
+   "sort_order": 2,
+   "type": "talk",
+   "target": "qa-engineer@P2",
+   "task_text": "Giải thích các trạng thái lỗi cho QA",
+   "line_text": "Rõ rồi. Mình sẽ viết test case cho cả trạng thái mất mạng nữa.",
+   "secs": null
+  },
+  {
+   "id": "small-05-s1",
+   "quest_id": "small-05",
+   "sort_order": 1,
+   "type": "present",
+   "target": null,
+   "task_text": "Trình bày onboarding mới trên TV phòng họp",
+   "line_text": "Cả phòng vỗ tay. CEO giơ tay muốn góp ý.",
+   "secs": 6
+  },
+  {
+   "id": "small-05-s2",
+   "quest_id": "small-05",
+   "sort_order": 2,
+   "type": "talk",
+   "target": "ceo@P3",
+   "task_text": "Hỏi ý kiến CEO",
+   "line_text": "Rất rõ ràng. Mình thích việc người dùng thấy kết quả ngay ở bước 2. Ra mắt thôi!",
+   "secs": null
+  },
+  {
+   "id": "large-01-s1",
+   "quest_id": "large-01",
+   "sort_order": 1,
+   "type": "talk",
+   "target": "tech-lead@R03",
+   "task_text": "Hỏi Tech Lead ước lượng effort",
+   "line_text": "Khoảng 8 điểm. Nếu dùng lại component có sẵn trong Design System thì còn 5.",
+   "secs": null
+  },
+  {
+   "id": "large-01-s2",
+   "quest_id": "large-01",
+   "sort_order": 2,
+   "type": "work",
+   "target": null,
+   "task_text": "Về chỗ ngồi, phác wireframe đầu tiên",
+   "line_text": "Bản phác đầu tiên đã có. Story này vào sprint được rồi.",
+   "secs": 5
+  },
+  {
+   "id": "large-02-s1",
+   "quest_id": "large-02",
+   "sort_order": 1,
+   "type": "talk",
+   "target": "data-analyst@R07",
+   "task_text": "Sang Data & Analytics xin số liệu funnel",
+   "line_text": "Đây: 42% người dùng bỏ đi ở bước chọn sở thích. Đó là chỗ đáng sửa nhất.",
+   "secs": null
+  },
+  {
+   "id": "large-03-s1",
+   "quest_id": "large-03",
+   "sort_order": 1,
+   "type": "talk",
+   "target": "ux-design-engineer@R05",
+   "task_text": "Hỏi UX Design Engineer về component Chip",
+   "line_text": "Chip có sẵn 3 trạng thái và đã có code. Bạn chỉ cần thêm trạng thái \"đã chọn\" có icon.",
+   "secs": null
+  },
+  {
+   "id": "large-04-s1",
+   "quest_id": "large-04",
+   "sort_order": 1,
+   "type": "present",
+   "target": null,
+   "task_text": "Trình bày wireframe trên màn hình Critique",
+   "line_text": "Mọi người đã xem xong. Giờ đi lấy góp ý từng người nhé.",
+   "secs": 5
+  },
+  {
+   "id": "large-04-s2",
+   "quest_id": "large-04",
+   "sort_order": 2,
+   "type": "talk",
+   "target": "product-designer@R02",
+   "task_text": "Lấy góp ý từ Product Designer",
+   "line_text": "Bước 2 có hai nút chính cạnh nhau, người dùng sẽ phân vân. Giữ một nút chính thôi.",
+   "secs": null
+  },
+  {
+   "id": "large-04-s3",
+   "quest_id": "large-04",
+   "sort_order": 3,
+   "type": "talk",
+   "target": "ux-designer@R04",
+   "task_text": "Lấy góp ý từ UX Designer",
+   "line_text": "Nên cho phép bỏ qua bước chọn sở thích. Đừng ép người dùng.",
+   "secs": null
+  },
+  {
+   "id": "large-05-s1",
+   "quest_id": "large-05",
+   "sort_order": 1,
+   "type": "talk",
+   "target": "user@R11",
+   "task_text": "Nhờ User thử luồng onboarding và quan sát",
+   "line_text": "Ủa, muốn bỏ qua bước này thì bấm ở đâu? À… cái chữ mờ mờ này hả. Mình tưởng nó bị khoá.",
+   "secs": null
+  },
+  {
+   "id": "large-05-s2",
+   "quest_id": "large-05",
+   "sort_order": 2,
+   "type": "talk",
+   "target": "product-manager@R03",
+   "task_text": "Chốt vấn đề vừa thấy với PM",
+   "line_text": "Bạn thấy không? Người dùng không nhận ra nút \"Bỏ qua\" vì nó quá mờ.",
+   "secs": null
+  },
+  {
+   "id": "large-06-s1",
+   "quest_id": "large-06",
+   "sort_order": 1,
+   "type": "work",
+   "target": null,
+   "task_text": "Về máy chuẩn bị spec và prototype",
+   "line_text": "Spec có đủ trạng thái lỗi và trạng thái tải. Giải thích cho QA nhé.",
+   "secs": 5
+  },
+  {
+   "id": "large-06-s2",
+   "quest_id": "large-06",
+   "sort_order": 2,
+   "type": "talk",
+   "target": "qa-engineer@R03",
+   "task_text": "Giải thích các trạng thái cho QA",
+   "line_text": "Rõ rồi. Mình sẽ test thêm trường hợp mạng yếu và màn hình nhỏ.",
+   "secs": null
+  },
+  {
+   "id": "large-07-s1",
+   "quest_id": "large-07",
+   "sort_order": 1,
+   "type": "present",
+   "target": null,
+   "task_text": "Demo onboarding trên TV phòng họp",
+   "line_text": "Demo rất mượt. Marketing và Customer Success đều có ý kiến.",
+   "secs": 6
+  },
+  {
+   "id": "large-07-s2",
+   "quest_id": "large-07",
+   "sort_order": 2,
+   "type": "talk",
+   "target": "growth-manager@R10",
+   "task_text": "Nghe phản hồi từ Growth Manager",
+   "line_text": "Mình muốn thêm bước mời bạn bè ngay cuối onboarding. Có làm được không?",
+   "secs": null
+  },
+  {
+   "id": "large-07-s3",
+   "quest_id": "large-07",
+   "sort_order": 3,
+   "type": "talk",
+   "target": "csm@R10",
+   "task_text": "Nghe phản hồi từ Customer Success",
+   "line_text": "Khách hàng sẽ rất thích. Họ hỏi chuyện này mỗi tuần.",
+   "secs": null
+  }
+ ],
+ "screen_kind_by_group": {
+  "design": "figma",
+  "engineering": "code",
+  "data": "chart",
+  "product": "board",
+  "delivery": "board",
+  "business": "chart"
+ }
+}

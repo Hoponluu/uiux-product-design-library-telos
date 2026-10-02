@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Product Team Map: designer ngồi ở đâu, làm việc với ai | TELOS Academy</title>
+<meta name="description" content="Mô hình 3D văn phòng Product & Tech: UI/UX Designer ngồi ở đâu, làm việc hằng ngày với ai và báo cáo cho ai. Đi một vòng, gặp từng vai trò, chơi quest một sprint của designer.">
+<meta name="author" content="Nhân Lưu — TELOS Academy">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://uiux-library.nhanluu.com/team-map">
+<link rel="icon" type="image/png" href="/Fav.png">
+<link rel="apple-touch-icon" href="/Fav.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://uiux-library.nhanluu.com/team-map">
+<meta property="og:title" content="Product Team Map: designer ngồi ở đâu, làm việc với ai">
+<meta property="og:description" content="Mô hình 3D văn phòng Product & Tech dành cho UI/UX Designer mới đi làm.">
+<meta property="og:image" content="https://uiux-library.nhanluu.com/Thumb.png">
+<meta property="og:locale" content="vi_VN">
+<meta property="og:site_name" content="TELOS Academy">
+
+<!-- ── Google Analytics ──────────────────────────────────── -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PFSCQRQZM6"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-PFSCQRQZM6');
+</script>
+
+<!-- Theme trước khi vẽ: dùng chung khoá 'telos-theme' với trang chủ -->
+<script>
+  try { if (localStorage.getItem('telos-theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark'); } catch(e) {}
+</script>
+
+<link rel="preconnect" href="https://vvpqhsglgtfwjklvlvuh.supabase.co">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Oswald:wght@500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/team-map/team-map.css">
+<style>
+/* ── SITE SHELL: header dùng chung với trang chủ, game lấp đầy phần còn lại ── */
+html, body { height: 100%; margin: 0; }
+body { background: #F5F5F5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif; overflow: hidden; }
+:where(#tabs, #tab-pill, #nav-overlay), :where(#tabs, #tab-pill, #nav-overlay) * { box-sizing: border-box; margin: 0; padding: 0; }
+#tm-shell { position: fixed; top: 80px; left: 0; right: 0; bottom: 0; }
+a.tab-btn { text-decoration: none; }
+
+/* ── HEADER ─────────────────────────────────────────────── */
+#tabs {
+  position: fixed; top: 0; left: 0; right: 0; height: 80px;
+  background: rgba(245,245,245,0.97); backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px; z-index: 200; gap: 16px;
+}
+
+/* Logo */
+#header-logo {
+  width: 34px; height: 40px; flex-shrink: 0; cursor: pointer;
+  transition: opacity 0.2s, filter 0.2s; display: block;
+}
+#header-logo:hover { opacity: 0.6; }
+
+/* Pill tab selector — fixed, centered in header */
+#tab-pill {
+  position: fixed; top: 12px; left: 50%; transform: translateX(-50%); z-index: 201;
+  background: #f5f5f5; border: 1px solid #d4d4d4; border-radius: 160px;
+  display: flex; align-items: center; padding: 8px 10px; gap: 2px;
+  width: fit-content;
+}
+.tab-btn {
+  background: transparent; border: none; cursor: pointer;
+  color: #262626; font-size: 14px; font-weight: 500; padding: 10px 22px;
+  border-radius: 160px; transition: background 0.18s, color 0.18s;
+  font-family: inherit; white-space: nowrap; flex-shrink: 0; line-height: 1.4;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+}
+.tab-btn:hover { background: rgba(0,0,0,0.05); }
+.tab-btn.active { background: #241775; color: #fafafa; }
+.tb-icon { display: none; font-size: 20px; line-height: 1; }
+.tb-label { display: block; }
+
+/* Menu icon (3-element: square · rounded-square · arrow) */
+#menu-btn {
+  width: 40px; height: 40px; flex-shrink: 0;
+  position: relative; cursor: pointer; background: none; border: none; padding: 0;
+}
+.mdot {
+  position: absolute; top: 50%; background: #282935;
+  transform: translateY(-50%); transition: background 0.2s;
+}
+.mdot-c { left: 50%; width: 10px; height: 10px; border-radius: 6px; transform: translate(-50%,-50%); }
+.mdot-l { left: calc(50% - 14px); width: 10px; height: 10px; border-radius: 1px; transform: translate(-50%,-50%); }
+.mdot-r { left: calc(50% + 14px); width: 0; height: 0;
+  background: none; border-left: 5px solid transparent; border-right: 5px solid transparent;
+  border-top: 7px solid #282935; transform: translate(-50%,-50%); border-radius: 1px; transition: border-top-color 0.2s;
+}
+
+/* ── NAV OVERLAY (nhanluu.com style) ─────────────────────── */
+#nav-overlay {
+  position: fixed; inset: 0; z-index: 600;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+#nav-overlay.open { opacity: 1; pointer-events: all; }
+#nav-backdrop {
+  position: absolute; inset: 0; background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(3px);
+}
+#nav-panel {
+  position: absolute; right: 0; top: 0; bottom: 0; width: min(440px,100vw);
+  background: linear-gradient(90deg, rgba(33,33,33,0.05), #1a1a1a 70%);
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 64px 52px; gap: 0;
+  transform: translateX(100%);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+#nav-overlay.open #nav-panel { transform: translateX(0); }
+#nav-close {
+  position: absolute; top: 24px; right: 24px;
+  width: 48px; height: 48px; background: none; border: none;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.nav-x-line {
+  position: absolute; width: 22px; height: 2px; background: #fff; border-radius: 2px;
+  transition: transform 0.3s, opacity 0.3s;
+}
+.nav-x-line:nth-child(1) { transform: rotate(45deg); }
+.nav-x-line:nth-child(2) { transform: rotate(-45deg); }
+.nav-divider { width: 40px; height: 1px; background: rgba(255,255,255,0.12); margin-bottom: 40px; }
+.nav-link {
+  display: block; color: #c4c4c4; text-decoration: none;
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-size: clamp(28px,5vw,42px); font-weight: 900;
+  letter-spacing: 0.04em; line-height: 1.1;
+  margin-bottom: 32px;
+  transform: translateX(0); opacity: 0.7;
+  transition: transform 0.25s ease, opacity 0.25s ease, color 0.25s ease;
+}
+.nav-link:hover { transform: translateX(-16px); opacity: 1; color: #fff; }
+.nav-dark-toggle {
+  margin-top: 48px; display: flex; align-items: center; gap: 12px;
+  color: rgba(255,255,255,0.35); font-size: 13px; cursor: pointer;
+  background: none; border: none; font-family: inherit; padding: 0;
+  transition: color 0.2s;
+}
+.nav-dark-toggle:hover { color: rgba(255,255,255,0.7); }
+.nav-dark-icon { font-size: 18px; }
+
+/* ── DARK MODE (header) ── */
+body.dark { background: #090B1E; }
+body.dark #tabs { background: rgba(9,11,30,0.97); border-color: rgba(255,255,255,0.07); }
+body.dark #tab-pill { background: rgba(30,28,60,0.97); border-color: rgba(255,255,255,0.1); }
+body.dark .tab-btn { color: rgba(255,255,255,0.5); }
+body.dark .tab-btn:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); }
+body.dark .tab-btn.active { background: #241775; color: #fafafa; }
+body.dark .mdot { background: rgba(255,255,255,0.7); }
+body.dark .mdot-r { background: none; border-top-color: rgba(255,255,255,0.7); }
+body.dark #header-logo svg path { fill: #fafafa; }
+body.dark #header-logo { filter: brightness(0) invert(1); }
+
+/* ── MOBILE BOTTOM BAR ── */
+@media (max-width: 640px) {
+  #tabs { height: 56px; }
+  #tab-pill {
+    top: auto; bottom: 0; left: 0; right: 0; transform: none;
+    height: 64px; width: 100%; border-radius: 0;
+    background: rgba(245,245,245,0.97); backdrop-filter: blur(12px);
+    border: none; border-top: 1px solid rgba(0,0,0,0.08);
+    padding: 0; gap: 0; justify-content: space-around;
+  }
+  .tab-btn { flex: 1; padding: 8px 4px; border-radius: 0; font-size: 10px; font-weight: 500; gap: 3px; }
+  .tab-btn:hover { background: transparent; }
+  .tab-btn.active { background: transparent; color: #241775; }
+  .tb-icon { display: block; }
+  #tm-shell { top: 56px; bottom: 64px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="tabs">
+  <!-- Logo (TELOS N-mark SVG) -->
+  <a id="header-logo" href="https://nhanluu.com" target="_blank" rel="noopener" title="nhanluu.com" aria-label="Nhân Lưu">
+    <svg fill="none" preserveAspectRatio="xMidYMid meet" viewBox="0 0 59.2927 68" style="width:100%;height:100%;">
+      <path d="M6.01217 51.8294C5.42909 51.8294 4.97559 51.4134 4.97559 50.8785V34.5363C4.97559 34.0014 5.42909 33.5855 6.01217 33.5855C6.59525 33.5855 7.04876 34.0014 7.04876 34.5363V50.8191C7.04876 51.4134 6.59525 51.8294 6.01217 51.8294Z" fill="#282935"/>
+      <path d="M4.59018 60.2257L0.749669 63.9689C0.0181436 64.7176 0.566789 65.9269 1.60312 65.9269H10.3814C11.4787 65.9269 12.0274 64.66 11.2349 63.9689L7.27244 60.2257C6.54092 59.5346 5.32171 59.5346 4.59018 60.2257Z" fill="#282935"/>
+      <path d="M18.2095 2.48779H5.27699C3.47812 2.48779 1.56488 3.00049 0.733673 4.5942C-0.386691 6.74233 -0.247232 9.44754 1.31306 11.4884L42.7211 65.4923C44.8629 68.2938 48.9086 68.8303 51.7048 66.6845C52.5377 66.0288 53.0732 65.0155 53.0732 63.9425V46.9546C53.0732 46.1797 52.8352 45.4644 52.3592 44.8683L20.9462 3.85875C20.2918 3.02426 19.2804 2.48779 18.2095 2.48779Z" fill="#282935"/>
+      <path d="M43.0069 14.9041C44.6607 16.3014 46.9256 17 49.8017 17C52.8934 17 55.2302 16.2237 56.8121 14.6712C58.4658 13.1963 59.2927 11.1005 59.2927 8.38357C59.2927 5.58905 58.5018 3.49315 56.9199 2.09589C55.3381 0.698633 53.0732 0 50.1252 0C47.0334 0 44.6607 0.737447 43.0069 2.21233C41.4251 3.76484 40.6342 5.89954 40.6342 8.61644C40.6342 11.411 41.4251 13.5069 43.0069 14.9041Z" fill="#282935"/>
+    </svg>
+  </a>
+
+  <!-- Menu icon → nhanluu.com overlay -->
+  <button id="menu-btn" onclick="openNav()" aria-label="Menu" title="Menu">
+    <span class="mdot mdot-l"></span>
+    <span class="mdot mdot-c"></span>
+    <span class="mdot mdot-r"></span>
+  </button>
+</div>
+
+<!-- TAB PILL -->
+<nav id="tab-pill" aria-label="Công cụ trong thư viện">
+  <a class="tab-btn" href="/">
+    <span class="tb-icon">🗺</span><span class="tb-label">Graph view</span>
+  </a>
+  <a class="tab-btn" href="/?tab=glossary">
+    <span class="tb-icon">🔤</span><span class="tb-label">A-Z</span>
+  </a>
+  <a class="tab-btn" href="/?tab=flashcard">
+    <span class="tb-icon">🃏</span><span class="tb-label">Flashcard Quiz</span>
+  </a>
+  <a class="tab-btn" href="/?tab=challenge">
+    <span class="tb-icon">🎲</span><span class="tb-label">UI Challenge</span>
+  </a>
+  <a class="tab-btn active" href="/team-map" aria-current="page">
+    <span class="tb-icon">🏢</span><span class="tb-label">Team Map</span>
+  </a>
+  <a class="tab-btn" href="/?tab=about">
+    <span class="tb-icon">ℹ️</span><span class="tb-label">Về dự án</span>
+  </a>
+</nav>
+
+<!-- NAV OVERLAY (nhanluu.com style) -->
+<div id="nav-overlay" role="dialog" aria-modal="true" aria-label="Navigation">
+  <div id="nav-backdrop" onclick="closeNav()"></div>
+  <nav id="nav-panel">
+    <button id="nav-close" onclick="closeNav()" aria-label="Đóng menu">
+      <span class="nav-x-line"></span>
+      <span class="nav-x-line"></span>
+    </button>
+    <div class="nav-divider"></div>
+    <a class="nav-link" href="https://nhanluu.com/about-me/" target="_blank" rel="noopener">ABOUT ME</a>
+    <a class="nav-link" href="https://nhanluu.com/portfolio/" target="_blank" rel="noopener">PORTFOLIO</a>
+    <a class="nav-link" href="https://nhanluu.com/blog/" target="_blank" rel="noopener">BLOG</a>
+    <a class="nav-link" href="https://nhanluu.com/contact/" target="_blank" rel="noopener">CONTACT</a>
+    <button class="nav-dark-toggle" onclick="toggleMode()">
+      <span class="nav-dark-icon" id="nav-mode-icon">🌙</span>
+      <span id="nav-mode-label">Chế độ tối</span>
+    </button>
+  </nav>
+</div>
+
+<!-- TEAM MAP -->
+<main id="tm-shell">
+  <h1 hidden>Product Team Map: UI/UX Designer ngồi ở đâu, làm việc với ai, báo cáo cho ai</h1>
+  <div id="app">
+    <div id="tm-loading" role="status"><div><i></i>Đang dựng văn phòng…</div></div>
+    <canvas id="stage" aria-label="Mô hình 3D văn phòng Product & Tech" role="img"></canvas>
+    <div id="overlay"></div>
+
+    <div class="topbar">
+      <div class="brand"><div class="brand-dot" aria-hidden="true"></div><b>Product Team Map</b><span>TELOS Academy</span></div>
+      <div class="seg" role="group" aria-label="Quy mô công ty">
+        <span class="seg-label">Quy mô</span>
+        <button id="sc-small" aria-pressed="true">Công ty nhỏ</button>
+        <button id="sc-large" aria-pressed="false">Vài trăm người</button>
+      </div>
+      <div class="seg modes" role="group" aria-label="Chế độ xem">
+        <span class="seg-label">Chế độ</span>
+        <button id="m-explore" aria-pressed="true">Khám phá</button>
+        <button id="m-report" aria-pressed="false">Báo cáo cho ai</button>
+        <button id="m-quest" aria-pressed="false">Quest</button>
+      </div>
+      <div class="spacer"></div>
+      <button class="icon-btn" id="btn-list">Xem dạng danh sách</button>
+    </div>
+
+    <div id="quest" class="card" hidden></div>
+    <div id="legend" class="card" hidden>
+      <p class="eyebrow">Báo cáo cho ai</p>
+      <div class="lines">
+        <div><span class="ln"></span>Báo cáo chuyên môn (solid line)</div>
+        <div><span class="ln dot"></span>Nhận ưu tiên từ PM squad (dotted line)</div>
+      </div>
+      <div class="gfilter" id="gfilter"></div>
+    </div>
+    <aside id="panel" class="card" hidden aria-live="polite"></aside>
+    <div id="dialog" class="card" hidden aria-live="polite"></div>
+
+    <div id="hint" class="card">
+      <span><kbd>W A S D</kbd> / <kbd>↑ ↓ ← →</kbd> đi</span>
+      <span>Click sàn để tới</span>
+      <span><kbd>F</kbd> nói chuyện</span>
+      <span>Kéo chuột hoặc <kbd>Q</kbd> <kbd>E</kbd> để xoay</span><span>Cuộn để zoom</span>
+    </div>
+    <div id="mini" class="card">
+      <canvas id="minimap" width="180" height="130" aria-label="Bản đồ nhỏ"></canvas>
+      <div class="met"><span>Đã gặp <b id="metc">0</b>/<b id="mett">0</b></span><span class="zoom"><button id="rotl" aria-label="Xoay trái (Q)" title="Xoay trái (Q)">↺</button><button id="rotr" aria-label="Xoay phải (E)" title="Xoay phải (E)">↻</button><button id="zin" aria-label="Phóng to">+</button><button id="zout" aria-label="Thu nhỏ">−</button></span></div>
+    </div>
+
+    <div id="roomintro" class="card" role="status" aria-live="polite" hidden></div>
+    <div id="welcome" class="card">
+      <p class="eyebrow">Ngày đầu đi làm</p>
+      <h1>Bạn là UI/UX Designer mới của công ty</h1>
+      <p>Đi một vòng văn phòng, gặp từng người để biết họ đang làm gì và làm việc với bạn ra sao. Bấm vào ai cũng có bài viết chi tiết về vai trò đó.</p>
+      <p>Bắt đầu với <b>công ty nhỏ</b> (3 team). Khi đã quen, chuyển sang <b>công ty vài trăm người</b> hoặc thử chế độ <b>Quest</b>.</p>
+      <div class="row"><button class="btn btn-primary" id="start">Vào văn phòng</button><button class="btn btn-ghost" id="start-quest">Chơi Quest luôn</button></div>
+    </div>
+
+    <div id="modal" hidden></div>
+    <div id="list" hidden></div>
+  </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="/team-map/team-map.layout.js"></script>
+<script src="/team-map/team-map.loader.js"></script>
+<script src="/team-map/team-map.engine.js"></script>
+<script>
+// ── Header: menu nhanluu.com + chế độ tối (giống trang chủ) ──
+function setModeUI(dark) {
+  document.body.classList.toggle('dark', dark);
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  document.getElementById('nav-mode-icon').textContent = dark ? '☀️' : '🌙';
+  document.getElementById('nav-mode-label').textContent = dark ? 'Chế độ sáng' : 'Chế độ tối';
+}
+function toggleMode() {
+  const dark = !document.body.classList.contains('dark');
+  setModeUI(dark);
+  try { localStorage.setItem('telos-theme', dark ? 'dark' : 'light'); } catch(e) {}
+}
+function openNav() { document.getElementById('nav-overlay').classList.add('open'); }
+function closeNav() { document.getElementById('nav-overlay').classList.remove('open'); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeNav(); });
+setModeUI(document.documentElement.getAttribute('data-theme') === 'dark');
+
+// ── Boot: tải dữ liệu (Supabase → seed.json dự phòng) rồi khởi động engine ──
+TeamMapLoader.load().then(data => {
+  startTeamMap(data);
+  const ld = document.getElementById('tm-loading');
+  ld.classList.add('done'); setTimeout(() => ld.remove(), 400);
+}).catch(err => {
+  console.error('[Team Map]', err);
+  document.querySelector('#tm-loading div').textContent = 'Không tải được Team Map. Vui lòng tải lại trang.';
+});
+</script>
+</body>
+</html>
