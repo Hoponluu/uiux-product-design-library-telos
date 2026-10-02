@@ -1064,13 +1064,13 @@ body.dark .ascii-cell.fg { color: rgba(255,255,255,0.82); }
   </div>
 </div>
 
+<script src="/supabase.config.js"></script>
 <script src="https://unpkg.com/3d-force-graph@1.73.4/dist/3d-force-graph.min.js"></script>
 <script>
 // ════════════════════════════════════════════════════════
 // CONFIG
 // ════════════════════════════════════════════════════════
-const SUPABASE_URL  = 'https://vvpqhsglgtfwjklvlvuh.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2cHFoc2dsZ3Rmd2prbHZsdnVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwMjkyMDQsImV4cCI6MjA5NzYwNTIwNH0.tpa9hfNxcdN_Fu67NLSdMGUbUUrvCGX9v4jDqqyC4JA';
+const SUPABASE_URL = window.SB_CONFIG.url;
 
 // ════════════════════════════════════════════════════════
 // COLORS
@@ -1106,7 +1106,7 @@ function nodeColor(d) {
 // FETCH FROM SUPABASE
 // ════════════════════════════════════════════════════════
 async function fetchData() {
-  const h = { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON };
+  const h = window.SB_CONFIG.headers();
   const [catRes, conRes] = await Promise.all([
     fetch(`${SUPABASE_URL}/rest/v1/categories?select=*&order=sort_order`, { headers: h }),
     fetch(`${SUPABASE_URL}/rest/v1/concepts?select=*&is_published=eq.true&order=name`, { headers: h }),

@@ -77,7 +77,12 @@ Menu là dãy tab `#tab-pill` trong `TELOS_Knowledge_Graph.html` (Graph view, A-
    `insert into admin_users (email) values ('email-cua-ban@...');`
 3. Authentication → Sign In / Providers: tắt **Allow new users to sign up**.
 4. Chạy `supabase_team_map_seed.sql`. Kết quả cuối là bảng báo cáo: nhân vật nào đã gắn thuật ngữ, thẻ thưởng nào chưa khớp.
-5. **Đổi service_role key** (Settings → API → JWT Keys / API Keys). Key cũ đã nằm công khai trong lịch sử git nên phải coi như đã lộ.
-6. Deploy. Đăng nhập `/adminCMS` bằng email + mật khẩu vừa tạo.
+5. Deploy. Đăng nhập `/adminCMS` bằng email + mật khẩu vừa tạo.
+6. **Bỏ hẳn service_role key cũ** (key này đã nằm công khai trong lịch sử git nên phải coi như đã lộ):
+   1. Supabase → **Settings → API Keys** → lấy **publishable key** (`sb_publishable_...`).
+   2. Dán vào `supabase.config.js` (dòng `key:`), deploy, rồi thử trang chủ, `/team-map` và đăng nhập admin.
+   3. Quay lại **Settings → API Keys** → **tắt (deactivate) legacy API keys**. Thao tác này tắt cùng lúc anon và service_role cũ, và bật lại được nếu cần.
+
+Mọi trang đọc URL + key từ một chỗ duy nhất là `supabase.config.js`. File này chỉ chứa key công khai, không bao giờ đặt secret key vào đây.
 
 Sửa `team-map/seed.json` → chạy `python3 scripts/gen_team_map_seed.py` để sinh lại file seed. **Chạy lại seed sẽ ghi đè nội dung đã sửa trong CMS.**
