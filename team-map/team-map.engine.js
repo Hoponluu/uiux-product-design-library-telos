@@ -552,10 +552,10 @@ function updateLabels(){
     let pos = L.pos, show = true;
     if (L.inst){ const c = L.inst, rp = c.obj.root.position;
       if (L.marker){ show = !!c.markerKind && mode === 'quest'; pos = new THREE.Vector3(rp.x, 1.72, rp.z); }
-      else if (L.chat){ const a = c.ai; show = mode !== 'report' && a && a.s === 'chat' && a.conv.speaker === c; pos = new THREE.Vector3(rp.x, 2.05, rp.z);
+      else if (L.chat){ const a = c.ai; show = a && a.s === 'chat' && a.conv.speaker === c; pos = new THREE.Vector3(rp.x, 2.05, rp.z);
         if (show && L.el.dataset.k !== a.conv.icon){ L.el.dataset.k = a.conv.icon; L.el.innerHTML = a.conv.icon === '•••' ? '<span class="dots"><i></i><i></i><i></i></span>' : a.conv.icon; } }
       else { pos = new THREE.Vector3(rp.x, 1.62, rp.z); const d = rp.distanceTo(pp);
-        show = c.isPlayer || c === hovered || (mode !== 'report' && d < 6.5 && c !== near) || (mode === 'report' && (scaleKey === 'small' || camera.position.distanceTo(controls.target) < 30));
+        show = c.isPlayer || c === hovered || (d < 6.5 && c !== near);
         if (mode === 'quest' && c.markerKind) show = false; if (c.ai && c.ai.s === 'chat' && c.ai.conv.speaker === c && d > 3) show = false; } }
     else if (L.spotL){ show = mode === 'quest' && spot && spot.ring.visible; if (show) pos = new THREE.Vector3(spot.ring.position.x, 1.1, spot.ring.position.z); }
     if (!show){ if (!L.el.hidden) L.el.hidden = true; return; }
@@ -563,7 +563,7 @@ function updateLabels(){
     L.el.hidden = false; L.el.style.transform = `translate(${s.x|0}px,${s.y|0}px) translate(-50%,-100%)`;
   });
   const bTarget = near || null;
-  if (bTarget && mode !== 'report' && $('#dialog').hidden){
+  if (bTarget && $('#dialog').hidden){
     const rp = bTarget.obj.root.position, s = project(new THREE.Vector3(rp.x, 1.62, rp.z));
     const html = `<small>${bTarget.role.title}</small>${bTarget.role.doing}<br><span style="color:var(--ink-faint)">Bấm <kbd>F</kbd> hoặc click để nói chuyện</span>`;
     if (bubble.dataset.k !== bTarget.id){ bubble.innerHTML = html; bubble.dataset.k = bTarget.id; }
@@ -617,7 +617,6 @@ function nextRoam(c){
   c.ai = { s:'go' }; walkTo(c, p[0], p[1], () => { c.ai = { s:'idle', t: 1.5 + Math.random()*2.5 }; });
 }
 function roam(c, dt){
-  if (mode === 'report'){ c.path = []; return; }
   const a = c.ai;
   if (a.s === 'idle' || a.s === 'pause'){ a.t -= dt; if (a.t <= 0) nextRoam(c); }
   else if (a.s === 'go' && !c.path.length){ c.ai = { s:'idle', t:1 }; }
@@ -631,7 +630,7 @@ function roam(c, dt){
 function think(c, dt){
   if (c.guest) return;
   if (c.roamer && c.ai) return roam(c, dt);
-  if (c.isPlayer || c.busy || mode === 'report' || !c.ai) return;
+  if (c.isPlayer || c.busy || !c.ai) return;
   const a = c.ai;
   if (a.s === 'sit' || a.s === 'pause'){
     a.t -= dt; if (a.t > 0) return;
@@ -697,7 +696,7 @@ function questTick(dt){
 let lastRoom, introOff = false, introTimer = null; const introSeen = new Set();
 function roomAt(x, z){ return rooms.find(r => r.kind !== 'locked' && Math.abs(x - r.x) <= r.w/2 && Math.abs(z - r.z) <= r.d/2) || null; }
 function checkRoom(){
-  if (!$('#welcome').hidden || !player || mode === 'report') return;
+  if (!$('#welcome').hidden || !player) return;
   const r = roomAt(player.obj.root.position.x, player.obj.root.position.z);
   if (r === lastRoom) return; lastRoom = r;
   if (!r || introOff || !ROOM_INFO[r.id] || introSeen.has(scaleKey + r.id)) return;
@@ -754,9 +753,9 @@ function openPanel(c){
 function openLocked(r){
   const items = LOCKED_ROLES.map(id => ROLES[id]).filter(Boolean).map(x => `<li style="display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:13px">${x.url ? `<a href="${x.url}" target="_blank" rel="noopener" style="color:var(--ink)">${x.title}</a>` : x.title}${statusChip(x.status)}</li>`).join('');
   $('#panel').innerHTML = `<button class="close" aria-label="Đóng">×</button><p class="eyebrow">Cửa đóng</p><h2>Phòng ban khác</h2>
-    <div class="sec"><p>Ở công ty nhỏ, những vai trò này chưa có bàn riêng. Việc của họ thường do PM, designer hoặc dev kiêm nhiệm. Khi công ty lớn lên, từng vai trò sẽ có phòng riêng.</p></div>
+    <div class="sec"><p>Ở công ty product nhỏ, những vai trò này chưa có bàn riêng. Việc của họ thường do PM, designer hoặc dev kiêm nhiệm. Khi công ty lớn lên, từng vai trò sẽ có phòng riêng.</p></div>
     <ul style="list-style:none;padding:0;margin:14px 0 0;display:grid;gap:7px">${items}</ul>
-    <div class="row"><button class="btn btn-primary" id="go-large">Gặp họ ở công ty vài trăm người</button></div>`;
+    <div class="row"><button class="btn btn-primary" id="go-large">Gặp họ ở tập đoàn product 100+ nhân sự</button></div>`;
   $('#panel').hidden = false; $('#panel .close').onclick = closePanel; $('#go-large').onclick = () => { closePanel(); setScale('large'); };
 }
 function closePanel(){ $('#panel').hidden = true; }
@@ -767,28 +766,6 @@ function reportTarget(c){
 }
 function reportName(c){ const t = reportTarget(c); return t ? `${t.role.title}${t.room !== c.room ? ` (${t.room.name})` : ''}` : (c.role.reportsTo && ROLES[c.role.reportsTo] ? ROLES[c.role.reportsTo].title : ''); }
 
-// ---------- report mode ----------
-let reportGroup = null; const activeGroups = new Set(Object.keys(GROUPS));
-function buildReport(){
-  if (reportGroup) world.remove(reportGroup); reportGroup = new THREE.Group(); world.add(reportGroup);
-  chars.forEach(c => {
-    if (!activeGroups.has(c.role.group)) return;
-    const a = c.obj.root.position;
-    const tg = reportTarget(c);
-    if (tg){ const b = tg.obj.root.position; const mid = new THREE.Vector3((a.x+b.x)/2, 3.2 + a.distanceTo(b)*.06, (a.z+b.z)/2);
-      const curve = new THREE.QuadraticBezierCurve3(new THREE.Vector3(a.x,1.7,a.z), mid, new THREE.Vector3(b.x,1.7,b.z));
-      const geo = new THREE.BufferGeometry().setFromPoints(curve.getPoints(24));
-      reportGroup.add(new THREE.Line(geo, new THREE.LineBasicMaterial({ color: GROUPS[c.role.group].color, transparent:true, opacity:.75 }))); }
-    const tribe = scaleKey === 'large' ? ['R02','R03','R04'].includes(c.room.id) : c.room.id === 'P2';
-    if (tribe){ const pm = chars.find(x => x.room === c.room && ['product-manager','growth-pm'].includes(x.role.id)) || (scaleKey === 'small' ? inst('product-manager') : null);
-      if (pm && pm !== c && pm !== tg){ const b = pm.obj.root.position; const geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(a.x,1.5,a.z), new THREE.Vector3(b.x,1.5,b.z)]);
-        const l = new THREE.Line(geo, new THREE.LineDashedMaterial({ color:'#E92F7C', dashSize:.25, gapSize:.18 })); l.computeLineDistances(); reportGroup.add(l); } }
-  });
-}
-function renderFilter(){
-  $('#gfilter').innerHTML = Object.entries(GROUPS).map(([k,g]) => `<button data-g="${k}" aria-pressed="${activeGroups.has(k)}"><i class="sw" style="background:${g.color}"></i>${g.name}</button>`).join('');
-  $('#gfilter').querySelectorAll('button').forEach(b => b.onclick = () => { const k = b.dataset.g; activeGroups.has(k) ? activeGroups.delete(k) : activeGroups.add(k); renderFilter(); buildReport(); });
-}
 
 // ---------- quest mode ----------
 const Q = { idx:{ small:0, large:0 }, phase:null, step:0, people:[], cards:{ small:[], large:[] } };
@@ -840,14 +817,14 @@ function showRewards(q){
 function showSummary(){
   const all = [...new Set(Q.cards[scaleKey])].map(cardFor);
   $('#modal').innerHTML = `<div class="card" role="dialog" aria-modal="true" aria-label="Tổng kết"><button class="close" aria-label="Đóng">×</button><p class="eyebrow">Tổng kết sprint</p><h2>Bạn đã hoàn thành ${qlist().length} quest</h2>
-    <p style="margin:0;color:var(--ink-soft)">Đã gặp ${met[scaleKey].size}/${$('#mett').textContent} vai trò và mở khoá ${all.length} thẻ kiến thức.${scaleKey === 'small' ? ' Thử tiếp ở công ty vài trăm người để gặp Design Manager, UX Researcher và team Design System.' : ''}</p>
+    <p style="margin:0;color:var(--ink-soft)">Đã gặp ${met[scaleKey].size}/${$('#mett').textContent} vai trò và mở khoá ${all.length} thẻ kiến thức.${scaleKey === 'small' ? ' Thử tiếp ở tập đoàn product 100+ nhân sự để gặp Design Manager, UX Researcher và team Design System.' : ''}</p>
     <div class="rewards">${all.map(c => `<div class="reward"><span>${c.kind}</span><b>${c.title}</b>${c.url ? `<a href="${c.url}" target="_blank" rel="noopener">Đọc bài</a>` : '<span>Sắp ra mắt</span>'}</div>`).join('')}</div>
-    <div class="row">${scaleKey === 'small' ? '<button class="btn btn-primary" id="sum-large">Chơi ở công ty lớn</button>' : ''}<a class="btn btn-ghost" href="https://academy.telos.vn/" target="_blank" rel="noopener">Khám phá khoá học TELOS</a></div></div>`;
+    <div class="row">${scaleKey === 'small' ? '<button class="btn btn-primary" id="sum-large">Chơi ở tập đoàn 100+ nhân sự</button>' : ''}<a class="btn btn-ghost" href="https://academy.telos.vn/" target="_blank" rel="noopener">Khám phá khoá học TELOS</a></div></div>`;
   $('#modal').hidden = false; $('#modal .close').onclick = () => $('#modal').hidden = true;
   const b = $('#sum-large'); if (b) b.onclick = () => { $('#modal').hidden = true; setScale('large'); };
 }
 function renderQuest(){
-  const el = $('#quest'); if (mode !== 'quest'){ el.hidden = true; return; }
+  const el = $('#quest'); updateFab(); if (mode !== 'quest'){ el.hidden = true; return; }
   const list = qlist(), i = Q.idx[scaleKey], q = list[i];
   const prog = list.map((_,k) => `<i class="${k < i ? 'done' : k === i ? 'now' : ''}"></i>`).join('');
   if (!q){ el.innerHTML = `<p class="eyebrow">Hoàn thành</p><h3>Bạn đã xong mọi quest</h3><p>Mở lại tổng kết để xem các thẻ kiến thức.</p><div class="qprog">${prog}</div><div class="row" style="margin-top:12px"><button class="btn btn-primary" id="q-sum">Xem tổng kết</button><button class="btn btn-ghost" id="q-reset">Chơi lại</button></div>`;
@@ -873,41 +850,72 @@ function dialog(c, text, cta, onOk){
 function closeDialog(){ $('#dialog').hidden = true; }
 
 // ---------- modes & scale ----------
-function overview(){ camY.overview = true; camY.distT = (bounds.x1-bounds.x0) * (innerWidth < innerHeight ? 1.7 : 1.05); }
 function setMode(m){
   const prev = mode; mode = m;
-  ['explore','report','quest'].forEach(k => $('#m-'+k).setAttribute('aria-pressed', k === m));
-  $('#legend').hidden = m !== 'report';
-  if (reportGroup){ world.remove(reportGroup); reportGroup = null; }
-  if (m === 'report'){ chars.forEach(c => { if (!c.isPlayer && !c.busy && !c.roamer){ if (c.ai && c.ai.conv) c.ai.conv.done = true; sitDown(c); } else if (c.roamer){ c.path = []; c.ai = { s:'idle', t:2 }; } }); renderFilter(); buildReport(); closeDialog(); overview(); }
-  if (prev === 'report' && m !== 'report'){ camY.overview = false; camY.distT = 18; }
+  $('#quest-fab').setAttribute('aria-pressed', m === 'quest');
   if (prev === 'quest' && m !== 'quest'){ clearMarkers(); hideSpot(); closeDialog(); sendHome(chars); clearTimeout(Q.timer); Q.phase = null; Q.prog = null; player.sitting = false; rooms.forEach(r => r.tv && (r.tv.mat.map = r.tv.idle)); }
   if (m === 'quest' && prev !== 'quest'){ closePanel(); Q.summaryShown = false; startQuest(); }
-  renderQuest();
+  renderQuest(); updateFab();
 }
 function setScale(k){
   if (k === scaleKey && world) return;
   $('#sc-small').setAttribute('aria-pressed', k === 'small'); $('#sc-large').setAttribute('aria-pressed', k === 'large');
   closePanel(); closeDialog(); clearTimeout(Q.timer); Q.phase = null;
   buildWorld(k);
-  if (mode === 'report'){ renderFilter(); buildReport(); overview(); }
   if (mode === 'quest'){ Q.summaryShown = false; startQuest(); }
-  renderQuest(); if (!$('#list').hidden) renderList();
+  renderQuest(); updateFab(); if (!$('#list').hidden) renderList();
 }
 $('#sc-small').onclick = () => setScale('small'); $('#sc-large').onclick = () => setScale('large');
-$('#m-explore').onclick = () => setMode('explore'); $('#m-report').onclick = () => setMode('report'); $('#m-quest').onclick = () => setMode('quest');
+// Nút "Nhiệm vụ" cạnh bản đồ: bật / tắt chế độ quest
+function updateFab(){
+  const list = QUESTS[scaleKey] || [], i = Math.min(Q.idx[scaleKey], list.length), b = $('#qf-badge');
+  b.textContent = mode === 'quest' ? `${i}/${list.length}` : list.length; b.hidden = !list.length;
+  $('#quest-fab').title = mode === 'quest' ? 'Đang làm nhiệm vụ · bấm để quay lại khám phá' : `${list.length} nhiệm vụ đang chờ bạn`;
+}
+$('#quest-fab').onclick = () => { $('#welcome').hidden = true; setMode(mode === 'quest' ? 'explore' : 'quest'); };
+updateFab();
 $('#start').onclick = () => { $('#welcome').hidden = true; canvas.focus(); };
 $('#start-quest').onclick = () => { $('#welcome').hidden = true; setMode('quest'); };
 
 // ---------- list view (SEO / screen readers) ----------
+// Hai cách xem: theo phòng ban, và "Báo cáo cho ai" dạng cây thư mục 2D (thay cho chế độ đường nối 3D cũ).
+let listTab = 'rooms'; const treeGroups = new Set(Object.keys(GROUPS));
+const roleLink = x => x.url ? `<a href="${x.url}" target="_blank" rel="noopener">${x.title}</a>` : `<span>${x.title}</span>`;
+function reportTree(){
+  // vai trò có mặt ở quy mô hiện tại (bỏ tác giả, khách) + các phòng họ ngồi
+  const here = new Map();
+  chars.forEach(c => { if (c.roamer || c.guest) return; const e = here.get(c.role.id) || { role:c.role, rooms:new Set(), squad:false };
+    e.rooms.add(c.room.name); if (scaleKey === 'large' ? ['R02','R03','R04'].includes(c.room.id) : c.room.id === 'P2') e.squad = true; here.set(c.role.id, e); });
+  const parentOf = id => { let p = scaleKey === 'small' && SMALL_REPORTS[id] !== undefined ? SMALL_REPORTS[id] : ROLES[id].reportsTo, guard = 0;
+    while (p && !here.has(p) && guard++ < 8) p = ROLES[p] ? ROLES[p].reportsTo : null; return p && p !== id && here.has(p) ? p : null; };
+  const kids = {}; const roots = [];
+  here.forEach((e, id) => { const p = parentOf(id); (p ? (kids[p] = kids[p] || []) : roots).push(id); });
+  const byTitle = (a, b) => ROLES[a].title.localeCompare(ROLES[b].title, 'vi');
+  const node = id => { const e = here.get(id), x = e.role, g = GROUPS[x.group], me = id === PLAYER_ID, ch = (kids[id] || []).sort(byTitle);
+    const dim = !treeGroups.has(x.group) ? ' dim' : '';
+    const label = `<span class="tnode${me ? ' me' : ''}${dim}"><i class="sw" style="background:${g.color}"></i><b>${me ? `Bạn · ${x.title}` : roleLink(x)}</b>
+      <small>${[...e.rooms].join(' · ')}</small>${e.squad && !['product-manager','growth-pm'].includes(id) ? '<em class="dotted" title="Đặt ưu tiên công việc: PM của squad (dotted line)">┄ ưu tiên từ PM</em>' : ''}${me ? '' : statusChip(x.status)}</span>`;
+    return ch.length ? `<li><details open><summary>${label}<span class="tcount">${ch.length}</span></summary><ul>${ch.map(node).join('')}</ul></details></li>` : `<li>${label}</li>`; };
+  return `<div class="tree-head"><div class="tree-legend"><span><i class="ln"></i>Báo cáo chuyên môn (solid line)</span><span><em class="dotted">┄ ưu tiên từ PM</em> Nhận ưu tiên công việc từ PM squad (dotted line)</span></div>
+      <div class="tree-tools"><div class="gfilter">${Object.entries(GROUPS).map(([k, g]) => `<button data-g="${k}" aria-pressed="${treeGroups.has(k)}"><i class="sw" style="background:${g.color}"></i>${g.name}</button>`).join('')}</div>
+      <button class="btn btn-ghost tree-all" data-open="1">Mở hết</button><button class="btn btn-ghost tree-all" data-open="0">Thu gọn</button></div></div>
+    <ul class="tree">${roots.sort(byTitle).map(node).join('')}</ul>`;
+}
 function renderList(){
   const sc = SCALES[scaleKey];
   const roomCards = sc.rooms.filter(r => r.kind !== 'lounge').map(r => {
     const ids = r.kind === 'locked' ? LOCKED_ROLES : [...new Set(r.members)];
-    return `<section class="card room"><p class="eyebrow">${r.code}</p><h3>${r.name}</h3><ul>${ids.filter(id => ROLES[id]).map(id => { const x = ROLES[id]; return `<li>${x.url ? `<a href="${x.url}" target="_blank" rel="noopener">${x.title}</a>` : `<span>${x.title}</span>`}${statusChip(x.status)}</li>`; }).join('') || '<li><span style="color:var(--ink-faint)">Phòng dùng chung cho các buổi họp</span></li>'}</ul></section>`; }).join('');
-  $('#list').innerHTML = `<button class="btn btn-ghost close-list" id="list-close">Quay lại mô hình 3D</button><div class="inner"><p class="eyebrow">${sc.name}</p><h1>Ai ngồi ở đâu trong team sản phẩm</h1>
-    <p class="lead">Danh sách các phòng và vai trò trong mô hình. Mỗi vai trò dẫn tới bài viết chi tiết trong thư viện thuật ngữ của TELOS Academy.</p><div class="grid">${roomCards}</div></div>`;
+    return `<section class="card room"><p class="eyebrow">${r.code}</p><h3>${r.name}</h3><ul>${ids.filter(id => ROLES[id]).map(id => { const x = ROLES[id]; return `<li>${roleLink(x)}${statusChip(x.status)}</li>`; }).join('') || '<li><span style="color:var(--ink-faint)">Phòng dùng chung cho các buổi họp</span></li>'}</ul></section>`; }).join('');
+  const tabs = [['rooms','Theo phòng ban'],['report','Báo cáo cho ai']];
+  $('#list').innerHTML = `<button class="btn btn-ghost close-list" id="list-close">Quay lại mô hình 3D</button><div class="inner"><p class="eyebrow">${sc.name}</p>
+    <h1>${listTab === 'report' ? 'Ai báo cáo cho ai trong team sản phẩm' : 'Ai ngồi ở đâu trong team sản phẩm'}</h1>
+    <p class="lead">${listTab === 'report' ? 'Đường báo cáo chuyên môn (solid line) khác với người đặt ưu tiên công việc hằng ngày (dotted line). Mỗi nhánh là một người quản lý và những người báo cáo cho họ.' : 'Danh sách các phòng và vai trò trong mô hình. Mỗi vai trò dẫn tới bài viết chi tiết trong thư viện thuật ngữ của TELOS Academy.'}</p>
+    <div class="seg list-tabs" role="tablist">${tabs.map(([k, t]) => `<button role="tab" data-tab="${k}" aria-pressed="${listTab === k}" aria-selected="${listTab === k}">${t}</button>`).join('')}</div>
+    ${listTab === 'report' ? reportTree() : `<div class="grid">${roomCards}</div>`}</div>`;
   $('#list-close').onclick = () => { $('#list').hidden = true; };
+  $('#list').querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { listTab = b.dataset.tab; renderList(); });
+  $('#list').querySelectorAll('.gfilter button').forEach(b => b.onclick = () => { const k = b.dataset.g; treeGroups.has(k) ? treeGroups.delete(k) : treeGroups.add(k); renderList(); });
+  $('#list').querySelectorAll('.tree-all').forEach(b => b.onclick = () => $('#list').querySelectorAll('.tree details').forEach(d => d.open = b.dataset.open === '1'));
 }
 $('#btn-list').onclick = () => { renderList(); $('#list').hidden = false; $('#list-close').focus(); };
 

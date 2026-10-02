@@ -251,28 +251,15 @@ body.dark #header-logo { filter: brightness(0) invert(1); }
     <div class="topbar">
       <div class="seg" role="group" aria-label="Quy mô công ty">
         <span class="seg-label">Quy mô</span>
-        <button id="sc-small" aria-pressed="true">Công ty nhỏ</button>
-        <button id="sc-large" aria-pressed="false">Vài trăm người</button>
-      </div>
-      <div class="seg modes" role="group" aria-label="Chế độ xem">
-        <span class="seg-label">Chế độ</span>
-        <button id="m-explore" aria-pressed="true">Khám phá</button>
-        <button id="m-report" aria-pressed="false">Báo cáo cho ai</button>
-        <button id="m-quest" aria-pressed="false">Quest</button>
+        <button id="sc-small" aria-pressed="true">Công ty product nhỏ</button>
+        <button id="sc-large" aria-pressed="false">Tập đoàn product 100+ nhân sự</button>
+        <button id="sc-agency" class="soon" aria-disabled="true" title="Outsource agency · sắp ra mắt">Outsource agency <span class="soon-chip">Sắp ra mắt</span></button>
       </div>
       <div class="spacer"></div>
       <button class="icon-btn" id="btn-list">Xem dạng danh sách</button>
     </div>
 
     <div id="quest" class="card" hidden></div>
-    <div id="legend" class="card" hidden>
-      <p class="eyebrow">Báo cáo cho ai</p>
-      <div class="lines">
-        <div><span class="ln"></span>Báo cáo chuyên môn (solid line)</div>
-        <div><span class="ln dot"></span>Nhận ưu tiên từ PM squad (dotted line)</div>
-      </div>
-      <div class="gfilter" id="gfilter"></div>
-    </div>
     <aside id="panel" class="card" hidden aria-live="polite"></aside>
     <div id="dialog" class="card" hidden aria-live="polite"></div>
 
@@ -282,9 +269,16 @@ body.dark #header-logo { filter: brightness(0) invert(1); }
       <span><kbd>F</kbd> nói chuyện</span>
       <span>Kéo chuột hoặc <kbd>Q</kbd> <kbd>E</kbd> để xoay</span><span>Cuộn để zoom</span>
     </div>
-    <div id="mini" class="card">
-      <canvas id="minimap" width="180" height="130" aria-label="Bản đồ nhỏ"></canvas>
-      <div class="met"><span>Đã gặp <b id="metc">0</b>/<b id="mett">0</b></span><span class="zoom"><button id="rotl" aria-label="Xoay trái (Q)" title="Xoay trái (Q)">↺</button><button id="rotr" aria-label="Xoay phải (E)" title="Xoay phải (E)">↻</button><button id="zin" aria-label="Phóng to">+</button><button id="zout" aria-label="Thu nhỏ">−</button></span></div>
+    <div class="dock">
+      <button id="quest-fab" class="quest-fab" aria-pressed="false" aria-label="Nhiệm vụ">
+        <span class="qf-icon" aria-hidden="true"><svg viewBox="0 0 32 32" width="30" height="30"><path d="M9 4h13a3 3 0 0 1 3 3v17a4 4 0 0 1-4 4H9a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3z" fill="#fff"/><path d="M6 24a3 3 0 0 0 3 3h12a4 4 0 0 1-4-4v-1H9a3 3 0 0 0-3 2z" fill="#FFC53D"/><path d="M11 10h9M11 14.5h9M11 19h5" stroke="#C81F68" stroke-width="2.2" stroke-linecap="round"/><circle cx="24.5" cy="7.5" r="4.5" fill="#FFC53D" stroke="#fff" stroke-width="1.5"/><path d="M24.5 5.3v2.6M24.5 9.6v.1" stroke="#1C1033" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+        <span class="qf-label">Nhiệm vụ</span>
+        <span class="qf-badge" id="qf-badge" hidden></span>
+      </button>
+      <div id="mini" class="card">
+        <canvas id="minimap" width="180" height="130" aria-label="Bản đồ nhỏ"></canvas>
+        <div class="met"><span>Đã gặp <b id="metc">0</b>/<b id="mett">0</b></span><span class="zoom"><button id="rotl" aria-label="Xoay trái (Q)" title="Xoay trái (Q)">↺</button><button id="rotr" aria-label="Xoay phải (E)" title="Xoay phải (E)">↻</button><button id="zin" aria-label="Phóng to">+</button><button id="zout" aria-label="Thu nhỏ">−</button></span></div>
+      </div>
     </div>
 
     <div id="roomintro" class="card" role="status" aria-live="polite" hidden></div>
@@ -292,8 +286,8 @@ body.dark #header-logo { filter: brightness(0) invert(1); }
       <p class="eyebrow">Ngày đầu đi làm</p>
       <h1>Bạn là UI/UX Designer mới của công ty</h1>
       <p>Đi một vòng văn phòng, gặp từng người để biết họ đang làm gì và làm việc với bạn ra sao. Bấm vào ai cũng có bài viết chi tiết về vai trò đó.</p>
-      <p>Bắt đầu với <b>công ty nhỏ</b> (3 team). Khi đã quen, chuyển sang <b>công ty vài trăm người</b> hoặc thử chế độ <b>Quest</b>.</p>
-      <div class="row"><button class="btn btn-primary" id="start">Vào văn phòng</button><button class="btn btn-ghost" id="start-quest">Chơi Quest luôn</button></div>
+      <p>Bắt đầu với <b>công ty product nhỏ</b> (3 team). Khi đã quen, chuyển sang <b>tập đoàn product 100+ nhân sự</b> hoặc bấm nút <b>Nhiệm vụ</b> cạnh bản đồ.</p>
+      <div class="row"><button class="btn btn-primary" id="start">Vào văn phòng</button><button class="btn btn-ghost" id="start-quest">Làm nhiệm vụ luôn</button></div>
     </div>
 
     <div id="modal" hidden></div>

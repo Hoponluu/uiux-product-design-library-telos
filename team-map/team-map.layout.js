@@ -4,8 +4,8 @@
 // Đổi bố cục phòng = sửa file này (và giữ id khớp với tm_rooms).
 window.TM_LAYOUT = {
   scales: {
-    small: { name:'Công ty nhỏ' },
-    large: { name:'Công ty vài trăm người' }
+    small: { name:'Công ty product nhỏ' },
+    large: { name:'Tập đoàn product 100+ nhân sự' }
   },
   // kind: pod | meeting | lounge | locked | glass · tv = vị trí TV (lệch theo trục x), chỉ phòng có tv mới dùng được bước "present"
   rooms: [
