@@ -70,13 +70,27 @@ Menu là dãy tab `#tab-pill` trong `TELOS_Knowledge_Graph.html` (Graph view, A-
 - Nút của tác giả / khách: tối đa 2 nút (`Nút 1` là nút chính).
 - Ở sheet `Vi tri`, đổi phòng của một dòng sẽ tạo chỗ ngồi mới (vì id chứa mã phòng, mà import không xoá). Muốn đổi phòng thì làm trong CMS để nhiệm vụ tự cập nhật theo.
 
-## 10. Các bước triển khai
+## 10. Quy mô Outsource agency (SPEC-agency)
+
+- Quy mô thứ ba `agency`: 6 phòng `A1`–`A6` (bố cục trong `team-map.layout.js`, TV ở `A4`), 5 nhân vật mới (Client, Design Director, Graphic Designer, Sales / Business Developer, Freelancer), 17 vị trí, 8 nhiệm vụ về dự án app đặt lịch cho chuỗi phòng gym.
+- Báo cáo cho ai ở agency: cột `tm_characters.reports_to_agency`. Khác `reports_to_small`, ô trống ở agency nghĩa là **không báo cáo cho ai** (không lùi về `reports_to`).
+- Đường "nhận việc từ Project Manager" (dotted line) cho người ngồi ở `A1`, `A2`: cấu hình trong `team-map.layout.js → dotted`.
+- `tm_placements.fixed`: nhân vật ngồi yên tại ghế, không đi dạo, không bị kéo tới điểm tập hợp, không bị "đưa về chỗ" sau nhiệm vụ (dùng cho `client@A4`). Client vẫn được tính vào "Đã gặp" và có bảng thông tin thường.
+- Màu thân tuỳ chỉnh: `appearance.body_color` / `appearance.outline_color` (#RRGGBB). Sửa được trong CMS và Excel.
+- Nếu DB chưa có dữ liệu agency, loader bỏ qua quy mô này và nút "Outsource agency" tự hiện "Sắp ra mắt". Trang không bị lỗi.
+- Tên nút giữ là **"Outsource agency"** (theo tên chủ dự án đã chốt), SPEC gọi là "Agency / Outsource".
+
+### Thêm agency vào DB đang chạy
+1. SQL Editor: chạy lại `supabase_team_map.sql` (an toàn, tự nâng cấp bảng cũ).
+2. Chạy `supabase_team_map_agency_seed.sql`. File này chỉ thêm / cập nhật phần agency, không sửa nội dung nhân vật cũ. Kết quả cuối là bảng báo cáo gắn thuật ngữ / thẻ thưởng chưa khớp.
+
+## 11. Các bước triển khai
 
 1. Supabase → SQL Editor: chạy `supabase_team_map.sql`.
 2. Authentication → Users → **Add user** (email + mật khẩu) cho admin. Sau đó chạy:
    `insert into admin_users (email) values ('email-cua-ban@...');`
 3. Authentication → Sign In / Providers: tắt **Allow new users to sign up**.
-4. Chạy `supabase_team_map_seed.sql`. Kết quả cuối là bảng báo cáo: nhân vật nào đã gắn thuật ngữ, thẻ thưởng nào chưa khớp.
+4. Chạy `supabase_team_map_seed.sql` (đầy đủ mọi quy mô, gồm cả agency). Kết quả cuối là bảng báo cáo: nhân vật nào đã gắn thuật ngữ, thẻ thưởng nào chưa khớp.
 5. Deploy. Đăng nhập `/adminCMS` bằng email + mật khẩu vừa tạo.
 6. **Bỏ hẳn service_role key cũ** (key này đã nằm công khai trong lịch sử git nên phải coi như đã lộ):
    1. Supabase → **Settings → API Keys** → lấy **publishable key** (`sb_publishable_...`).
@@ -85,4 +99,4 @@ Menu là dãy tab `#tab-pill` trong `TELOS_Knowledge_Graph.html` (Graph view, A-
 
 Mọi trang đọc URL + key từ một chỗ duy nhất là `supabase.config.js`. File này chỉ chứa key công khai, không bao giờ đặt secret key vào đây.
 
-Sửa `team-map/seed.json` → chạy `python3 scripts/gen_team_map_seed.py` để sinh lại file seed. **Chạy lại seed sẽ ghi đè nội dung đã sửa trong CMS.**
+Sửa `team-map/seed.json` → chạy `python3 scripts/gen_team_map_seed.py` để sinh lại cả hai file seed. **Chạy lại seed sẽ ghi đè nội dung đã sửa trong CMS.**

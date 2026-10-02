@@ -5,7 +5,9 @@
   const L = window.TM_LAYOUT;
   const GROUPS = L.groups, GROUP_KEYS = Object.keys(GROUPS);
   const KINDS = { role:'Vai trò', player:'Nhân vật chính', author:'Tác giả', guest:'Khách' };
-  const SCALE_NAME = { small:'Quy mô nhỏ', large:'Quy mô lớn' };
+  const SCALE_NAME = { small:'Công ty product nhỏ', large:'Tập đoàn product 100+', agency:'Outsource agency' };
+  const SCALE_KEYS = Object.keys(SCALE_NAME);
+  const HEX = /^#[0-9a-f]{6}$/i;
   const STEP_TYPES = { talk:'Nói chuyện với một người', work:'Về chỗ ngồi làm việc', present:'Trình bày trên TV' };
   const QTYPES = { main:'Chính', daily:'Daily' };
   const TV_ROOMS = L.rooms.filter(r => r.tv !== undefined).map(r => r.id);
@@ -195,21 +197,21 @@
       </div>
       <div class="tm-filters">
         <select class="form-control" data-f="group"><option value="">Mọi nhóm</option>${GROUP_KEYS.map(k => `<option value="${k}"${f.group === k ? ' selected' : ''}>${GROUPS[k].name}</option>`).join('')}</select>
-        <select class="form-control" data-f="scale"><option value="">Mọi quy mô</option><option value="small"${f.scale === 'small' ? ' selected' : ''}>Có ở quy mô nhỏ</option><option value="large"${f.scale === 'large' ? ' selected' : ''}>Có ở quy mô lớn</option><option value="none"${f.scale === 'none' ? ' selected' : ''}>Chưa có chỗ ngồi</option></select>
+        <select class="form-control" data-f="scale"><option value="">Mọi quy mô</option>${SCALE_KEYS.map(k => `<option value="${k}"${f.scale === k ? ' selected' : ''}>Có ở ${SCALE_NAME[k].toLowerCase()}</option>`).join('')}<option value="none"${f.scale === 'none' ? ' selected' : ''}>Chưa có chỗ ngồi</option></select>
         <label class="tm-check"><input type="checkbox" data-f="noArticle"${f.noArticle ? ' checked' : ''}/> Chưa có bài</label>
       </div>
-      <div class="table-wrap"><table><thead><tr><th>Chức danh</th><th>Nhóm</th><th>Loại</th><th>Thuật ngữ</th><th>Phòng (nhỏ)</th><th>Phòng (lớn)</th><th>Bài viết</th><th>Hiển thị</th><th></th></tr></thead>
+      <div class="table-wrap"><table><thead><tr><th>Chức danh</th><th>Nhóm</th><th>Loại</th><th>Thuật ngữ</th><th>Phòng (nhỏ)</th><th>Phòng (lớn)</th><th>Phòng (agency)</th><th>Bài viết</th><th>Hiển thị</th><th></th></tr></thead>
       <tbody>${rows.map(c => { const t = termOf(c.term_id), url = resolvedUrl(c);
         return `<tr>
           <td><div class="td-name">${esc(c.title)}</div><div class="td-slug">${esc(c.id)}</div></td>
           <td class="tm-nowrap"><span class="tm-dot" style="background:${(GROUPS[c.group] || {}).color || '#999'}"></span>${esc((GROUPS[c.group] || {}).name || c.group)}</td>
           <td><span class="badge ${c.kind === 'role' ? 'badge-sub' : 'badge-vai-tro'}">${KINDS[c.kind] || c.kind}</span></td>
           <td class="td-desc">${t ? esc(t.name) : '<span class="no-url">—</span>'}</td>
-          <td>${roomCodes(c, 'small')}</td><td>${roomCodes(c, 'large')}</td>
+          ${SCALE_KEYS.map(k => `<td>${roomCodes(c, k)}</td>`).join('')}
           <td>${url ? `<a class="badge badge-pub" href="${esc(url)}" target="_blank" rel="noopener" title="${esc(url)}">Đã có bài</a>` : '<span class="badge badge-draft">Sắp ra mắt</span>'}</td>
           <td><button class="tm-toggle${c.is_active ? ' on' : ''}" data-act="char-toggle" data-id="${esc(c.id)}" aria-pressed="${c.is_active}" title="${c.is_active ? 'Đang hiện — bấm để ẩn' : 'Đang ẩn — bấm để hiện'}"></button></td>
           <td class="td-actions"><button class="btn-edit" data-act="char-edit" data-id="${esc(c.id)}">Sửa</button><button class="btn-del" data-act="char-del" data-id="${esc(c.id)}">Xoá</button></td>
-        </tr>`; }).join('') || '<tr><td colspan="9" class="empty-state">Không có nhân vật phù hợp</td></tr>'}</tbody></table></div>`;
+        </tr>`; }).join('') || '<tr><td colspan="10" class="empty-state">Không có nhân vật phù hợp</td></tr>'}</tbody></table></div>`;
   }
 
   async function toggleChar(id){
@@ -230,12 +232,11 @@
   function openChar(id){
     const c = id ? charOf(id) : null;
     const F = S.form = { kind:'char', isNew:!c, orig:c,
-      pls: { small: S.pls.filter(p => c && p.character_id === c.id && p.scale === 'small').map(p => ({ orig:p.id, room_id:p.room_id, seat_order:p.seat_order })),
-             large: S.pls.filter(p => c && p.character_id === c.id && p.scale === 'large').map(p => ({ orig:p.id, room_id:p.room_id, seat_order:p.seat_order })) },
+      pls: Object.fromEntries(SCALE_KEYS.map(k => [k, S.pls.filter(p => c && p.character_id === c.id && p.scale === k)
+             .map(p => ({ orig:p.id, room_id:p.room_id, seat_order:p.seat_order, fixed:!!p.fixed }))])),
       cta: (c && c.cta || []).map(b => ({ label:b.label || '', url:b.url || '', primary:!!b.primary })),
       props: new Set(c ? c.props || [] : []) };
-    if (!F.pls.small.length) F.pls.small.push({ orig:null, room_id:'', seat_order:null });
-    if (!F.pls.large.length) F.pls.large.push({ orig:null, room_id:'', seat_order:null });
+    SCALE_KEYS.forEach(k => { if (!F.pls[k].length) F.pls[k].push({ orig:null, room_id:'', seat_order:null, fixed:false }); });
     const t = c ? termOf(c.term_id) : null;
     const charOpts = sel => `<option value="">— Không —</option>` + S.chars.filter(x => !c || x.id !== c.id).map(x => `<option value="${esc(x.id)}"${sel === x.id ? ' selected' : ''}>${esc(x.title)}</option>`).join('');
     const vt = allCats.filter(x => roleCategoryIds().has(x.id));
@@ -275,6 +276,13 @@
       <div class="form-row">
         <div class="form-group"><label>Báo cáo cho (quy mô lớn)</label><select class="form-control" name="reports_to">${charOpts(c && c.reports_to)}</select></div>
         <div class="form-group"><label>Báo cáo cho (quy mô nhỏ)</label><select class="form-control" name="reports_to_small">${charOpts(c && c.reports_to_small)}</select><div class="form-hint">Trống thì dùng giá trị của quy mô lớn</div></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Báo cáo cho (agency)</label><select class="form-control" name="reports_to_agency">${charOpts(c && c.reports_to_agency)}</select><div class="form-hint">Ở agency, trống = không báo cáo cho ai</div></div>
+        <div class="form-group"><label>Màu thân / viền (tuỳ chọn)</label><div class="tm-row">
+          <input class="form-control" name="body_color" value="${esc(c && c.appearance ? c.appearance.body_color || '' : '')}" placeholder="Thân, vd #FFC53D" maxlength="7"/>
+          <input class="form-control" name="outline_color" value="${esc(c && c.appearance ? c.appearance.outline_color || '' : '')}" placeholder="Viền, vd #8A5D00" maxlength="7"/></div>
+          <div class="form-hint">Mã màu #RRGGBB. Trống thì dùng tạo hình mặc định.</div></div>
       </div>
       <div class="form-group"><label>Đồ nghề</label><div class="tm-chipgrid">${L.props.map(p => `<label class="tm-chip"><input type="checkbox" data-prop="${p}"${F.props.has(p) ? ' checked' : ''}/>${p}</label>`).join('')}</div></div>
 
@@ -319,17 +327,17 @@
       const moved = p.orig && p.room_id && p.orig !== `${id}@${p.room_id}`;
       return `<div class="tm-row">
         <select class="form-control" data-pl-f="room_id" data-scale="${scale}" data-i="${i}">
-          <option value="">${scale === 'small' ? 'Không xuất hiện' : (i ? '— Chọn phòng —' : 'Không xuất hiện')}</option>
+          <option value="">${i ? '— Chọn phòng —' : 'Không xuất hiện'}</option>
           ${opts.map(r => `<option value="${r.id}"${p.room_id === r.id ? ' selected' : ''}>${esc(r.code || r.id)} · ${esc(r.name)}</option>`).join('')}</select>
         <input class="form-control tm-num" type="number" min="0" data-pl-f="seat_order" data-scale="${scale}" data-i="${i}" value="${p.seat_order ?? ''}" placeholder="Ghế" title="Thứ tự ghế (0, 1, 2…)"/>
-        ${scale === 'large' && i ? `<button type="button" class="btn-del" data-act="pl-del" data-i="${i}">Bỏ</button>` : ''}
+        <label class="tm-check" title="Ngồi yên tại ghế: không đi dạo, không đi tới điểm tập hợp (vd Client)"><input type="checkbox" data-pl-f="fixed" data-scale="${scale}" data-i="${i}"${p.fixed ? ' checked' : ''}/> Cố định</label>
+        ${scale !== 'small' && i ? `<button type="button" class="btn-del" data-act="pl-del" data-scale="${scale}" data-i="${i}">Bỏ</button>` : ''}
       </div>${used.length && (moved || !p.room_id) ? `<div class="tm-warn">${!p.room_id ? 'Không bỏ được' : 'Đổi phòng'}: vị trí <code>${esc(p.orig)}</code> đang được nhiệm vụ dùng (${esc(questNames(used))}).
         ${!p.room_id ? 'Gỡ khỏi các nhiệm vụ đó trước.' : `Mã sẽ tự đổi thành <code>${esc(id)}@${esc(p.room_id)}</code> trong các nhiệm vụ này. Kiểm tra lại người giao / bước "work" nếu nhiệm vụ phụ thuộc phòng cũ.`}</div>` : ''}`;
     };
-    box.innerHTML = `<div class="form-group"><label>Quy mô nhỏ</label>${row('small', F.pls.small[0], 0)}</div>
-      <div class="form-group"><label>Quy mô lớn</label>${F.pls.large.map((p, i) => row('large', p, i)).join('')}
-      <button type="button" class="tm-link" data-act="pl-add">+ Thêm phòng ở quy mô lớn</button>
-      <div class="form-hint">Nhân vật "Tác giả" không có ghế cố định (đi khắp nơi), phòng chỉ là điểm xuất phát. "Khách" ngồi ở Pantry.</div></div>`;
+    box.innerHTML = SCALE_KEYS.map(k => `<div class="form-group"><label>${SCALE_NAME[k]}</label>${(k === 'small' ? F.pls[k].slice(0, 1) : F.pls[k]).map((p, i) => row(k, p, i)).join('')}
+      ${k === 'small' ? '' : `<button type="button" class="tm-link" data-act="pl-add" data-scale="${k}">+ Thêm phòng ở ${SCALE_NAME[k].toLowerCase()}</button>`}</div>`).join('') +
+      `<div class="form-hint">Nhân vật "Tác giả" không có ghế cố định (đi khắp nơi), phòng chỉ là điểm xuất phát. "Khách" ngồi ở Pantry.</div>`;
   }
 
   async function createTerm(){
@@ -357,12 +365,12 @@
     if (!/^[a-z0-9][a-z0-9-]*$/.test(id)) err('[name="id"]', 'Id chỉ gồm chữ thường không dấu, số và dấu -');
     else if (F.isNew && charOf(id)) err('[name="id"]', 'Id này đã tồn tại');
     if (kind === 'player' && S.chars.some(x => x.kind === 'player' && x.id !== id)) err('[name="kind"]', 'Đã có nhân vật chính khác. Chỉ được 1 nhân vật chính.');
-    const pls = [...F.pls.small, ...F.pls.large].filter(p => p.room_id);
-    F.pls.large.forEach((p, i) => { if (F.pls.large.filter(x => x.room_id && x.room_id === p.room_id).length > 1) err(`[data-pl-f="room_id"][data-scale="large"][data-i="${i}"]`, 'Trùng phòng'); });
-    [...F.pls.small, ...F.pls.large].forEach(p => { if (p.orig && !p.room_id && questsUsingPlacement(p.orig).length) bad = true; });
+    const all = SCALE_KEYS.flatMap(k => F.pls[k]), pls = all.filter(p => p.room_id);
+    SCALE_KEYS.forEach(k => F.pls[k].forEach((p, i) => { if (F.pls[k].filter(x => x.room_id && x.room_id === p.room_id).length > 1) err(`[data-pl-f="room_id"][data-scale="${k}"][data-i="${i}"]`, 'Trùng phòng'); }));
+    all.forEach(p => { if (p.orig && !p.room_id && questsUsingPlacement(p.orig).length) bad = true; });
+    ['body_color','outline_color'].forEach(k => { if (fv(k) && !HEX.test(fv(k))) err(`[name="${k}"]`, 'Mã màu dạng #RRGGBB'); });
     if (kind === 'player'){
-      if (!F.pls.small[0].room_id) err('[data-pl-f="room_id"][data-scale="small"]', 'Nhân vật chính cần đúng 1 chỗ ở quy mô nhỏ');
-      if (F.pls.large.filter(p => p.room_id).length !== 1) err('[data-pl-f="room_id"][data-scale="large"]', 'Nhân vật chính cần đúng 1 chỗ ở quy mô lớn');
+      SCALE_KEYS.forEach(k => { if (roomsOf(k).length && F.pls[k].filter(p => p.room_id).length !== 1) err(`[data-pl-f="room_id"][data-scale="${k}"]`, `Nhân vật chính cần đúng 1 chỗ ở ${SCALE_NAME[k].toLowerCase()}`); });
     }
     const cta = F.cta.filter(b => b.label || b.url);
     cta.forEach((b, i) => { if (!/^https?:\/\//.test(b.url)) err(`[data-cta-f="url"][data-i="${F.cta.indexOf(b)}"]`, 'Nhập URL đầy đủ (https://...)'); });
@@ -371,14 +379,16 @@
     const termId = root.querySelector('[data-combo-v="term"]').value;
     const character = { id, title: fv('title'), kind, group: fv('group'), term_id: termId === '' ? null : termId,
       article_url: fv('article_url') || null, summary: fv('summary') || null, doing: fv('doing') || null, with_designer: fv('with_designer') || null,
-      reports_to: fv('reports_to') || null, reports_to_small: fv('reports_to_small') || null, props: L.props.filter(p => F.props.has(p)),
-      appearance: F.orig ? F.orig.appearance : { dark:false, outfit:null },
+      reports_to: fv('reports_to') || null, reports_to_small: fv('reports_to_small') || null, reports_to_agency: fv('reports_to_agency') || null,
+      props: L.props.filter(p => F.props.has(p)),
+      appearance: (() => { const a = { ...(F.orig && F.orig.appearance || { dark:false, outfit:null }) }; delete a.body_color; delete a.outline_color;
+        if (fv('body_color')) a.body_color = fv('body_color'); if (fv('outline_color')) a.outline_color = fv('outline_color'); return a; })(),
       tag: ['author','guest'].includes(kind) ? (fv('tag') || null) : (F.orig ? F.orig.tag : null),
       cta: ['author','guest'].includes(kind) ? (cta.length ? cta : null) : (F.orig ? F.orig.cta : null),
       is_active: fv('is_active') };
     const btn = root.querySelector('[data-act="char-save"]'); btn.disabled = true; btn.textContent = 'Đang lưu...';
     try {
-      await sbRpc('tm_save_character', { p: { character, placements: pls.map(p => ({ id:p.orig, room_id:p.room_id, seat_order: p.seat_order === '' || p.seat_order == null ? null : +p.seat_order })) } });
+      await sbRpc('tm_save_character', { p: { character, placements: pls.map(p => ({ id:p.orig, room_id:p.room_id, seat_order: p.seat_order === '' || p.seat_order == null ? null : +p.seat_order, fixed:!!p.fixed })) } });
       toast(F.isNew ? `Đã thêm "${character.title}"` : `Đã lưu "${character.title}"`);
       closeModal(); await reload();
     } catch(e) { toast('Lỗi: ' + e.message, true); }
@@ -397,7 +407,7 @@
         <td class="td-actions"><button class="btn-edit" data-act="room-edit" data-id="${esc(r.id)}">Sửa</button></td></tr>`; }).join('')}</tbody></table></div>`;
     body().innerHTML = `<div class="toolbar"><h2>Phòng ban</h2></div>
       <p class="tm-note">Bố cục phòng (vị trí, kích thước, cửa, TV) cố định trong code nên không thêm/xoá phòng ở đây. Sửa được mã, tên, đoạn giới thiệu và thứ tự ghế.</p>
-      ${table('small')}${table('large')}`;
+      ${SCALE_KEYS.map(table).join('')}`;
   }
 
   function openRoom(id){
@@ -579,15 +589,19 @@
       cols:[['id','id',18],['title','Chức danh',26],['kind','Loại',10,{ list:Object.keys(KINDS) }],['group','Nhóm',13,{ list:GROUP_KEYS }],
         ['term_id','Thuật ngữ liên kết (id)',38],['_term_name','Tên thuật ngữ',24],['article_url','Link bài (ghi đè)',40],['_resolved_url','Link đang dùng',40],
         ['summary','Họ là ai',50,{ wrap:1 }],['doing','Đang làm',40,{ wrap:1 }],['with_designer','Làm việc với bạn',50,{ wrap:1 }],
-        ['reports_to','Báo cáo cho',18],['reports_to_small','Báo cáo cho (nhỏ)',18],['props','Đồ nghề',26],['tag','Nhãn phụ',26],
+        ['reports_to','Báo cáo cho',18],['reports_to_small','Báo cáo cho (nhỏ)',18],['reports_to_agency','Báo cáo cho (agency)',18],['props','Đồ nghề',26],
+        ['body_color','Màu thân',11],['outline_color','Màu viền',11],['tag','Nhãn phụ',26],
         ['cta1_label','Nút 1 nhãn',16],['cta1_url','Nút 1 URL',36],['cta2_label','Nút 2 nhãn',16],['cta2_url','Nút 2 URL',36],['is_active','Hiển thị',10,{ list:[YES, NO] }]],
       rows:() => S.chars.slice().sort((a, b) => a.id.localeCompare(b.id)),
       toCells:c => { const t = termOf(c.term_id), b = c.cta || [];
         return { id:c.id, title:c.title, kind:c.kind, group:c.group, term_id:c.term_id ?? '', _term_name:t ? t.name : '', article_url:c.article_url, _resolved_url:resolvedUrl(c) || '',
-          summary:c.summary, doing:c.doing, with_designer:c.with_designer, reports_to:c.reports_to, reports_to_small:c.reports_to_small, props:joinList(c.props), tag:c.tag,
+          summary:c.summary, doing:c.doing, with_designer:c.with_designer, reports_to:c.reports_to, reports_to_small:c.reports_to_small, reports_to_agency:c.reports_to_agency, props:joinList(c.props),
+          body_color:(c.appearance || {}).body_color || '', outline_color:(c.appearance || {}).outline_color || '', tag:c.tag,
           cta1_label:b[0] ? b[0].label : '', cta1_url:b[0] ? b[0].url : '', cta2_label:b[1] ? b[1].label : '', cta2_url:b[1] ? b[1].url : '', is_active:c.is_active ? YES : NO }; },
       fromCells:(v, has) => { const o = { id:v.id };
-        ['title','kind','group','article_url','summary','doing','with_designer','reports_to','reports_to_small','tag'].forEach(k => { if (has(k)) o[k] = v[k] || null; });
+        ['title','kind','group','article_url','summary','doing','with_designer','reports_to','reports_to_small','reports_to_agency','tag'].forEach(k => { if (has(k)) o[k] = v[k] || null; });
+        if (has('body_color') || has('outline_color')){ const cur = (charOf(v.id) || {}).appearance || {};
+          o.appearance_patch = { body_color: has('body_color') ? v.body_color || null : cur.body_color || null, outline_color: has('outline_color') ? v.outline_color || null : cur.outline_color || null }; }
         if (has('term_id')) o.term_id = v.term_id || null;
         if (has('props')) o.props = splitList(v.props);
         if (has('is_active')) o.is_active = v.is_active !== NO;
@@ -596,11 +610,12 @@
           o.cta = b.length ? b : null; }
         return o; } },
     { name:'Vi tri', key:'placements', title:'Vị trí', required:['character_id','room_id'],
-      cols:[['id','id',28],['character_id','Nhân vật (id)',20],['_title','Chức danh',26],['_scale','Quy mô',10],['room_id','Phòng (id)',11],['_room_name','Tên phòng',24],['seat_order','Thứ tự ghế',11]],
+      cols:[['id','id',28],['character_id','Nhân vật (id)',20],['_title','Chức danh',26],['_scale','Quy mô',10],['room_id','Phòng (id)',11],['_room_name','Tên phòng',24],['seat_order','Thứ tự ghế',11],['fixed','Cố định',10,{ list:[YES, NO] }]],
       rows:() => S.pls.slice().sort((a, b) => a.scale.localeCompare(b.scale) || a.room_id.localeCompare(b.room_id) || (a.seat_order ?? 1e9) - (b.seat_order ?? 1e9)),
-      toCells:p => ({ id:p.id, character_id:p.character_id, _title:(charOf(p.character_id) || {}).title || '', _scale:p.scale, room_id:p.room_id, _room_name:(roomOf(p.room_id) || {}).name || '', seat_order:p.seat_order ?? '' }),
+      toCells:p => ({ id:p.id, character_id:p.character_id, _title:(charOf(p.character_id) || {}).title || '', _scale:p.scale, room_id:p.room_id, _room_name:(roomOf(p.room_id) || {}).name || '', seat_order:p.seat_order ?? '', fixed:p.fixed ? YES : NO }),
       fromCells:(v, has) => { const o = { id:v.id || `${v.character_id}@${v.room_id}`, character_id:v.character_id, room_id:v.room_id };
-        if (has('seat_order')) o.seat_order = v.seat_order === '' ? null : Number(v.seat_order); return o; } },
+        if (has('seat_order')) o.seat_order = v.seat_order === '' ? null : Number(v.seat_order);
+        if (has('fixed')) o.fixed = v.fixed === YES; return o; } },
     { name:'Phong ban', key:'rooms', title:'Phòng ban', required:['id'],
       cols:[['id','id',8],['_scale','Quy mô',10],['code','Mã',12],['name','Tên',28],['intro','Giới thiệu',70,{ wrap:1 }],['sort_order','Thứ tự',9]],
       rows:() => S.rooms.slice().sort((a, b) => a.scale.localeCompare(b.scale) * -1 || a.sort_order - b.sort_order),
@@ -609,7 +624,7 @@
         ['code','name','intro'].forEach(k => { if (has(k)) o[k] = v[k] || (k === 'code' ? '' : null); });
         if (has('sort_order')) o.sort_order = v.sort_order === '' ? 0 : Number(v.sort_order); return o; } },
     { name:'Nhiem vu', key:'quests', title:'Nhiệm vụ', required:['id','scale','title','room_id'],
-      cols:[['id','id',14],['type','Loại',9,{ list:Object.keys(QTYPES) }],['scale','Quy mô',9,{ list:['small','large'] }],['sort_order','Thứ tự',8],['title','Tên',28],['room_id','Phòng tập hợp (id)',12],
+      cols:[['id','id',14],['type','Loại',9,{ list:Object.keys(QTYPES) }],['scale','Quy mô',9,{ list:SCALE_KEYS }],['sort_order','Thứ tự',8],['title','Tên',28],['room_id','Phòng tập hợp (id)',12],
         ['giver','Người giao (mã vị trí)',26],['gather','Người tham gia',44,{ wrap:1 }],['offer_text','Lời nhận việc',50,{ wrap:1 }],['done_text','Lời trả việc',50,{ wrap:1 }],
         ['rewards','Thẻ thưởng',44,{ wrap:1 }],['daily_date','Ngày (daily)',13],['is_active','Hiển thị',10,{ list:[YES, NO] }]],
       rows:() => S.quests.slice().sort((a, b) => a.scale.localeCompare(b.scale) * -1 || a.type.localeCompare(b.type) || a.sort_order - b.sort_order),
@@ -695,7 +710,9 @@
       ['Nhóm (group)', GROUP_KEYS.map(k => `${k} = ${GROUPS[k].name}`).join(' · ')],
       ['Đồ nghề (props)', L.props.join(', ')],
       ['Loại nhiệm vụ (type)', 'main = chuỗi quest chính · daily = nhiệm vụ hằng ngày (game chưa chạy)'],
-      ['Quy mô (scale)', 'small = công ty nhỏ · large = công ty vài trăm người'],
+      ['Quy mô (scale)', SCALE_KEYS.map(k => `${k} = ${SCALE_NAME[k]}`).join(' · ')],
+      ['Màu thân / viền', 'Mã màu dạng #RRGGBB (vd #FFC53D). Để trống thì dùng tạo hình mặc định.'],
+      ['Cố định (Vi tri)', `"${YES}" = ngồi yên tại ghế: không đi dạo, không đi tới điểm tập hợp (vd Client ở phòng họp).`],
       ['Loại bước', Object.entries(STEP_TYPES).map(([k, v]) => `${k} = ${v}`).join(' · ')],
       ['Phòng có TV', TV_ROOMS.join(', ')],
       ['Thẻ thưởng', 'term:<id thuật ngữ> · character:<id nhân vật> · link:<tên>|<url> (thẻ chưa có trong thư viện)'],
@@ -793,7 +810,8 @@
       if (!KINDS[m.kind || 'role']) E(d, r.n, 'kind', `Giá trị không hợp lệ "${m.kind}". Hợp lệ: ${Object.keys(KINDS).join(', ')}`);
       if (!GROUPS[m.group]) E(d, r.n, 'group', isNew && !m.group ? 'Thiếu nhóm' : `Giá trị không hợp lệ "${m.group}". Hợp lệ: ${GROUP_KEYS.join(', ')}`);
       if (o.term_id && !termIds.has(String(o.term_id))) E(d, r.n, 'term_id', `Không có thuật ngữ id "${o.term_id}" (xem sheet Thuat ngu)`);
-      ['reports_to','reports_to_small'].forEach(k => { if (o[k] && !C[o[k]]) E(d, r.n, k, `Không có nhân vật "${o[k]}"`); if (o[k] && o[k] === o.id) E(d, r.n, k, 'Không thể báo cáo cho chính mình'); });
+      ['body_color','outline_color'].forEach(k => { if (r.v[k] && !HEX.test(r.v[k])) E(d, r.n, k, 'Mã màu dạng #RRGGBB'); });
+      ['reports_to','reports_to_small','reports_to_agency'].forEach(k => { if (o[k] && !C[o[k]]) E(d, r.n, k, `Không có nhân vật "${o[k]}"`); if (o[k] && o[k] === o.id) E(d, r.n, k, 'Không thể báo cáo cho chính mình'); });
       (o.props || []).forEach(p => { if (!L.props.includes(p)) E(d, r.n, 'props', `Đồ nghề không hợp lệ "${p}"`); });
       (o.cta || []).forEach((b, i) => { if (!/^https?:\/\//.test(b.url)) E(d, r.n, `cta${i + 1}_url`, 'Cần URL đầy đủ (https://...)'); });
       if (o.article_url && !/^https?:\/\//.test(o.article_url)) E(d, r.n, 'article_url', 'Cần URL đầy đủ (https://...)');
@@ -805,7 +823,8 @@
       if (!roomOf(o.room_id)) E(d, r.n, 'room_id', `Không có phòng "${o.room_id}"`);
       else if (roomKind(o.room_id) === 'locked') E(d, r.n, 'room_id', 'Không xếp chỗ vào phòng đóng');
       if (o.id !== `${o.character_id}@${o.room_id}`) E(d, r.n, 'id', `id phải là "${o.character_id}@${o.room_id}"`);
-      if (!isInt(r.v.seat_order ?? '')) E(d, r.n, 'seat_order', 'Thứ tự ghế phải là số nguyên'); });
+      if (!isInt(r.v.seat_order ?? '')) E(d, r.n, 'seat_order', 'Thứ tự ghế phải là số nguyên');
+      yesNo(d, r, 'fixed'); });
 
     (parsed.rooms || []).forEach(r => { const d = def('rooms'), o = r.o;
       if (!roomOf(o.id)) E(d, r.n, 'id', `Không có phòng "${o.id}" (import không tạo phòng mới)`);
@@ -815,7 +834,7 @@
     const plOk = (pid, scale) => P[pid] && P[pid].scale === scale;
     (parsed.quests || []).forEach(r => { const d = def('quests'), o = r.o, m = Q[o.id];
       if (!QTYPES[m.type || 'main']) E(d, r.n, 'type', 'Chỉ nhận main hoặc daily');
-      if (!SCALE_NAME[m.scale]) E(d, r.n, 'scale', 'Chỉ nhận small hoặc large');
+      if (!SCALE_NAME[m.scale]) E(d, r.n, 'scale', `Chỉ nhận ${SCALE_KEYS.join(', ')}`);
       if (!m.title) E(d, r.n, 'title', 'Thiếu tên');
       const room = roomOf(m.room_id);
       if (!room) E(d, r.n, 'room_id', `Không có phòng "${m.room_id}"`); else if (room.scale !== m.scale) E(d, r.n, 'room_id', `Phòng ${m.room_id} không thuộc quy mô ${m.scale}`);
@@ -941,8 +960,8 @@
       case 'term-clear': formRoot().querySelector('[data-combo-v="term"]').value = ''; formRoot().querySelector('[data-combo-q="term"]').value = ''; return updateResolved();
       case 'cta-add': F.cta.push({ label:'', url:'', primary:!F.cta.length }); return renderCta();
       case 'cta-del': F.cta.splice(i, 1); return renderCta();
-      case 'pl-add': F.pls.large.push({ orig:null, room_id:'', seat_order:null }); return renderPls();
-      case 'pl-del': F.pls.large.splice(i, 1); return renderPls();
+      case 'pl-add': F.pls[b.dataset.scale].push({ orig:null, room_id:'', seat_order:null, fixed:false }); return renderPls();
+      case 'pl-del': F.pls[b.dataset.scale].splice(i, 1); return renderPls();
       case 'room-edit': return openRoom(id);
       case 'room-save': return saveRoom();
       case 'quest-new': return openQuest(null);
@@ -993,6 +1012,7 @@
     if (t.name === 'kind'){ formRoot().querySelector('.tm-special').hidden = !['author','guest'].includes(t.value); return; }
     if (t.name === 'id' && F.isNew) return renderPls();
     if (t.dataset.plF === 'room_id'){ F.pls[t.dataset.scale][+t.dataset.i].room_id = t.value; return renderPls(); }
+    if (t.dataset.plF === 'fixed'){ F.pls[t.dataset.scale][+t.dataset.i].fixed = t.checked; return; }
     if (t.dataset.gather){ const g = new Set(F.q.gather || []); t.checked ? g.add(t.dataset.gather) : g.delete(t.dataset.gather); F.q.gather = [...g]; return; }
     if (t.dataset.q){
       const k = t.dataset.q;

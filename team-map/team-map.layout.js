@@ -5,7 +5,8 @@
 window.TM_LAYOUT = {
   scales: {
     small: { name:'Công ty product nhỏ' },
-    large: { name:'Tập đoàn product 100+ nhân sự' }
+    large: { name:'Tập đoàn product 100+ nhân sự' },
+    agency: { name:'Outsource agency' }
   },
   // kind: pod | meeting | lounge | locked | glass · tv = vị trí TV (lệch theo trục x), chỉ phòng có tv mới dùng được bước "present"
   rooms: [
@@ -25,8 +26,20 @@ window.TM_LAYOUT = {
     {"id":"R06", "scale":"large", "kind":"pod", "x":0, "z":12, "w":11, "d":9, "floor":"#F7C9DD", "tv":-3.4},
     {"id":"R09", "scale":"large", "kind":"pod", "x":14, "z":12, "w":11, "d":9, "floor":"#FFDCC4"},
     {"id":"R11", "scale":"large", "kind":"lounge", "x":-27, "z":0, "w":9, "d":7, "floor":"#E6DFF6"},
-    {"id":"R10", "scale":"large", "kind":"glass", "x":29, "z":0, "w":9, "d":33, "floor":"#DEF3F8", "doors":[{"side":"w", "off":-12}, {"side":"w", "off":0}, {"side":"w", "off":12}]}
+    {"id":"R10", "scale":"large", "kind":"glass", "x":29, "z":0, "w":9, "d":33, "floor":"#DEF3F8", "doors":[{"side":"w", "off":-12}, {"side":"w", "off":0}, {"side":"w", "off":12}]},
+    {"id":"A1", "scale":"agency", "kind":"pod", "x":-13, "z":-6, "w":11, "d":9, "floor":"#F9D3E3"},
+    {"id":"A2", "scale":"agency", "kind":"pod", "x":0, "z":-6, "w":11, "d":9, "floor":"#CDEFF8"},
+    {"id":"A3", "scale":"agency", "kind":"pod", "x":13, "z":-6, "w":11, "d":9, "floor":"#FFDCC4"},
+    {"id":"A4", "scale":"agency", "kind":"meeting", "x":-13, "z":7, "w":11, "d":9, "floor":"#FFEAB8", "tv":-3.4},
+    {"id":"A5", "scale":"agency", "kind":"lounge", "x":0, "z":7, "w":9, "d":7, "floor":"#E6DFF6"},
+    {"id":"A6", "scale":"agency", "kind":"pod", "x":13, "z":7, "w":11, "d":9, "floor":"#DCD6F7"}
   ],
+  // Đường đứt (dotted line) trong cây "Báo cáo cho ai": ai ngồi ở các phòng này nhận việc hằng ngày từ `target`
+  dotted: {
+    small:  { rooms:['P2'], target:'product-manager', label:'ưu tiên từ PM', title:'Đặt ưu tiên công việc: PM (dotted line)' },
+    large:  { rooms:['R02','R03','R04'], target:'product-manager', also:['growth-pm'], label:'ưu tiên từ PM', title:'Đặt ưu tiên công việc: PM của squad (dotted line)' },
+    agency: { rooms:['A1','A2'], target:'project-manager', label:'nhận việc từ Project Manager', title:'Nhận việc theo dự án: Project Manager (dotted line)' }
+  },
   groups: {
     design:      {"name":"Design", "color":"#E92F7C"},
     product:     {"name":"Product", "color":"#FFC53D"},

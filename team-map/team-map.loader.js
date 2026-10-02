@@ -54,7 +54,9 @@
     const chars = raw.characters.filter(c => c.is_active !== false);
     const byId = Object.fromEntries(chars.map(c => [c.id, c]));
 
-    const ROLES = {}, SMALL_REPORTS = {};
+    // Báo cáo cho ai theo quy mô. small: chỉ ghi đè khi có giá trị (trống thì dùng reports_to);
+    // agency: luôn dùng cột riêng (trống = không báo cáo cho ai). large: reports_to.
+    const ROLES = {}, SCALE_REPORTS = { small:{}, agency:{} };
     chars.forEach(c => {
       const url = resolveUrl(c, termById), ap = c.appearance || {};
       const links = (c.cta || []).filter(b => b && b.url).map(b => ({ label:b.label || b.url, url:b.url, primary:!!b.primary }));
@@ -63,10 +65,13 @@
         reportsTo: byId[c.reports_to] ? c.reports_to : null, kind:c.kind || 'role' };
       if (ap.dark) r.dark = true;
       if (ap.outfit) r.outfit = ap.outfit;
+      if (/^#[0-9a-f]{6}$/i.test(ap.body_color || '')) r.bodyColor = ap.body_color;
+      if (/^#[0-9a-f]{6}$/i.test(ap.outline_color || '')) r.outlineColor = ap.outline_color;
       if (c.kind === 'author') r.special = { tag:c.tag || '', links };
       if (c.kind === 'guest') r.guest = { tag:c.tag || '', links };
       ROLES[c.id] = r;
-      if (c.reports_to_small && byId[c.reports_to_small]) SMALL_REPORTS[c.id] = c.reports_to_small;
+      if (c.reports_to_small && byId[c.reports_to_small]) SCALE_REPORTS.small[c.id] = c.reports_to_small;
+      SCALE_REPORTS.agency[c.id] = c.reports_to_agency && byId[c.reports_to_agency] ? c.reports_to_agency : null;
     });
     const find = k => chars.find(c => c.kind === k);
     const player = find('player'), author = find('author'), guest = find('guest');
@@ -85,18 +90,20 @@
         if (g.tv !== undefined) TV_ROOMS[g.id] = g.tv;
         const here = placements.filter(p => p.room_id === g.id);
         here.forEach(p => pids.add(p.id));
-        const members = g.kind === 'locked' ? [] : here
+        const seated = g.kind === 'locked' ? [] : here
           .filter(p => ['role','player'].includes(byId[p.character_id].kind))
-          .sort((a, b) => (a.seat_order ?? 1e9) - (b.seat_order ?? 1e9) || a.character_id.localeCompare(b.character_id))
-          .map(p => p.character_id);
-        const r = { id:g.id, code:row.code ?? g.id, name:row.name || g.id, x:g.x, z:g.z, w:g.w, d:g.d, kind:g.kind, floor:g.floor, members };
+          .sort((a, b) => (a.seat_order ?? 1e9) - (b.seat_order ?? 1e9) || a.character_id.localeCompare(b.character_id));
+        const members = seated.map(p => p.character_id), fixed = seated.filter(p => p.fixed).map(p => p.character_id);
+        const r = { id:g.id, code:row.code ?? g.id, name:row.name || g.id, x:g.x, z:g.z, w:g.w, d:g.d, kind:g.kind, floor:g.floor, members, fixed };
         if (g.doors) r.doors = g.doors;
         return r;
       });
-      SCALES[scale] = { name:meta.name, rooms };
+      // quy mô chưa có dữ liệu (vd DB chưa chạy seed agency) → ẩn quy mô đó thay vì làm hỏng cả trang
       const seats = rooms.filter(r => r.members.includes(player.id)).length;
-      if (seats !== 1) throw new Error(`Nhân vật chính phải có đúng 1 chỗ ngồi ở quy mô ${scale} (đang có ${seats})`);
+      if (seats !== 1){ warn.push(`Bỏ qua quy mô ${scale}: nhân vật chính có ${seats} chỗ ngồi (cần đúng 1)`); continue; }
+      SCALES[scale] = { name:meta.name, rooms };
     }
+    if (!SCALES.small && !SCALES.large) throw new Error('Không dựng được quy mô nào: thiếu chỗ ngồi của nhân vật chính');
 
     // "Phòng ban khác": role đang bật, có ghế ở quy mô lớn nhưng không có ở quy mô nhỏ
     const seatedIn = s => new Set(placements.filter(p => p.scale === s || (roomRow[p.room_id] || {}).scale === s).map(p => p.character_id));
@@ -108,7 +115,7 @@
     const stepsByQuest = {};
     (raw.steps || []).forEach(s => (stepsByQuest[s.quest_id] = stepsByQuest[s.quest_id] || []).push(s));
     const refOk = (ref, scale) => !!ref && pids.has(ref) && (roomRow[ref.split('@')[1]] || L.rooms.find(g => g.id === ref.split('@')[1]) || {}).scale === scale;
-    const QUESTS = { small:[], large:[] };
+    const QUESTS = Object.fromEntries(Object.keys(SCALES).map(k => [k, []]));
     raw.quests.filter(q => (q.type || 'main') === 'main' && q.is_active !== false)
       .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
       .forEach(q => {
@@ -136,7 +143,7 @@
         QUESTS[q.scale].push({ id:q.id, title:q.title, room:q.room_id, giver:q.giver, gather:q.gather || [], offer:q.offer_text || '', done:q.done_text || '', steps, rewards });
       });
 
-    return { data:{ GROUPS:L.groups, ROLES, TERMS, SCALES, LOCKED_ROLES, QUESTS, ROOM_INFO, TV_ROOMS, SMALL_REPORTS,
+    return { data:{ GROUPS:L.groups, ROLES, TERMS, SCALES, LOCKED_ROLES, QUESTS, ROOM_INFO, TV_ROOMS, SCALE_REPORTS, DOTTED:L.dotted,
       SCREEN_KIND:L.screenKind, PLAYER_ID:player.id, AUTHOR_ID:author ? author.id : null, GUEST_ID:guest ? guest.id : null }, warn };
   }
 
