@@ -131,6 +131,7 @@ body { background: #F5F5F5; font-family: -apple-system, BlinkMacSystemFont, 'Seg
   display: flex; flex-direction: column; align-items: center; gap: 3px;
 }
 .tab-btn:hover { background: rgba(0,0,0,0.05); }
+a.tab-btn { text-decoration: none; }
 .tab-btn.active { background: #241775; color: #fafafa; }
 .tb-icon { display: none; font-size: 20px; line-height: 1; }
 .tb-label { display: block; }
@@ -775,6 +776,9 @@ body.dark .ascii-cell.fg { color: rgba(255,255,255,0.82); }
   <button class="tab-btn" onclick="switchTab('challenge',this)">
     <span class="tb-icon">🎲</span><span class="tb-label">UI Challenge</span>
   </button>
+  <a class="tab-btn" href="/team-map">
+    <span class="tb-icon">🏢</span><span class="tb-label">Team Map</span>
+  </a>
   <button class="tab-btn" onclick="switchTab('about',this)">
     <span class="tb-icon">ℹ️</span><span class="tb-label">Về dự án</span>
   </button>
@@ -1183,6 +1187,13 @@ window.addEventListener('DOMContentLoaded', async () => {
   } catch(err) {
     document.querySelector('.loading-text').textContent = 'Không tải được dữ liệu. Vui lòng thử lại.';
     console.error(err);
+  }
+
+  // Mở thẳng một tab qua ?tab=… (dùng khi bấm tab từ trang con như /team-map)
+  const startTab = new URLSearchParams(location.search).get('tab');
+  if (['glossary','flashcard','challenge','about'].includes(startTab)) {
+    const btn = document.querySelector(`.tab-btn[onclick*="'${startTab}'"]`);
+    if (btn) switchTab(startTab, btn);
   }
 });
 
