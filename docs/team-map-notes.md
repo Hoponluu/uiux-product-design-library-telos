@@ -86,7 +86,7 @@ Menu là dãy tab `#tab-pill` trong `TELOS_Knowledge_Graph.html` (Graph view, A-
 
 ## 11. Mobile, lưu tiến độ, xem trước bài viết
 
-- **Mobile (≤ 760px):** thanh nhiệm vụ một dòng (có nút "Đi tới"), minimap thu thành nút bản đồ, giới thiệu phòng là toast nhỏ. Mọi popup là bottom sheet cao tối đa ~1/3 màn hình, chạm ra ngoài thì đóng, mỗi lúc chỉ mở một cái. Desktop giữ nguyên.
+- **Mobile (≤ 760px):** thanh nhiệm vụ một dòng (có nút "Tới đó"), minimap thu thành nút bản đồ, giới thiệu phòng là toast nhỏ. Mọi popup là bottom sheet cao tối đa ~1/3 màn hình, chạm ra ngoài thì đóng, mỗi lúc chỉ mở một cái. Desktop giữ nguyên.
 - **Lưu tiến độ:** `localStorage['tm-progress-v1']` trên trình duyệt của người chơi (quy mô, chế độ, nhiệm vụ đã xong, người đã gặp, thẻ kiến thức). Không lưu dữ liệu cá nhân, không gửi lên server, hết hạn sau 30 ngày. Rời game giữa một nhiệm vụ thì quay lại chơi lại từ đầu nhiệm vụ đó. Có nút "Chơi lại từ đầu".
 - **Xem trước bài (mobile):** link tới `academy.telos.vn` mở sheet xem trước (tiêu đề, ảnh, đoạn mở đầu) lấy từ WordPress REST API (`/wp-json/wp/v2/posts?slug=…`, thử `pages` nếu không thấy). academy.telos.vn chặn iframe (`X-Frame-Options: SAMEORIGIN`) nhưng REST API cho phép đọc từ domain này. Nếu đổi cấu hình CORS / tắt REST API trên academy thì sheet vẫn hiện nút mở bài đầy đủ.
 

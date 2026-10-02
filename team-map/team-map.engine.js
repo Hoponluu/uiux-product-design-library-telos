@@ -892,7 +892,7 @@ function renderQuest(){
   const el = $('#quest'); updateFab(); if (mode !== 'quest'){ el.hidden = true; return; }
   const list = qlist(), i = Q.idx[scaleKey], q = list[i];
   const prog = list.map((_,k) => `<i class="${k < i ? 'done' : k === i ? 'now' : ''}"></i>`).join('');
-  const go = ['offer', 'step', 'return'].includes(Q.phase) && !Q.prog ? '<button class="q-go" aria-label="Tự đi tới chỗ cần tới">Đi tới</button>' : '';
+  const go = ['offer', 'step', 'return'].includes(Q.phase) && !Q.prog ? '<button class="q-go" aria-label="Tự đi tới chỗ cần tới">Tới đó</button>' : '';
   const pill = (n, text) => `<div class="q-pill"><button class="q-compact" aria-label="Xem chi tiết nhiệm vụ"><span class="qc-n">${n}</span><span class="qc-t">${text}</span><span class="qc-more" aria-hidden="true">›</span></button>${go}</div><button class="close q-close" aria-label="Thu nhỏ nhiệm vụ">×</button>`;
   if (!q){ el.innerHTML = pill('✓', 'Đã xong mọi quest · xem tổng kết') + `<div class="q-full"><p class="eyebrow">Hoàn thành</p><h3>Bạn đã xong mọi quest</h3><p>Mở lại tổng kết để xem các thẻ kiến thức.</p><div class="qprog">${prog}</div><div class="row" style="margin-top:12px"><button class="btn btn-primary" id="q-sum">Xem tổng kết</button><button class="btn btn-ghost" id="q-reset">Chơi lại</button></div></div>`;
     el.hidden = false; $('#q-sum').onclick = showSummary; $('#q-reset').onclick = () => { Q.idx[scaleKey] = 0; Q.cards[scaleKey] = []; saveProgress(); startQuest(); }; if (Q.phase === 'finished' && !Q.summaryShown){ Q.summaryShown = true; showSummary(); } return; }
@@ -908,7 +908,7 @@ function renderQuest(){
   el.innerHTML = pill(`${i+1}/${list.length}`, plain) + `<div class="q-full"><p class="eyebrow">Quest ${i+1}/${list.length}</p><h3>${q.title}</h3><div class="objective">${obj}</div><div class="qprog">${prog}</div></div>`;
   el.hidden = false;
 }
-// "Đi tới": tự đi tới người / vòng tròn hồng của bước hiện tại (mobile, khi đích nằm ngoài màn hình)
+// "Tới đó": tự đi tới người / vòng tròn hồng của bước hiện tại (mobile, khi đích nằm ngoài màn hình)
 function goToQuestTarget(){
   if (spot && spot.ring.visible) return walkTo(player, spot.ring.position.x, spot.ring.position.z);
   const c = chars.find(x => x.markerKind && !x.isPlayer); if (!c) return;
