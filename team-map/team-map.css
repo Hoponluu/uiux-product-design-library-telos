@@ -39,7 +39,6 @@
 .seg button{border:0;background:transparent;color:var(--ink-soft);padding:7px 13px;border-radius:999px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg);}
 .seg.modes button[aria-pressed="true"]{background:var(--accent);color:#fff;}
-.seg-label{font-family:var(--font-caption);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-faint);padding:0 6px 0 8px;align-self:center;}
 .spacer{flex:1;}
 .icon-btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:var(--shadow);}
 .icon-btn:hover{border-color:var(--ink-faint);}
@@ -139,7 +138,7 @@
 .ri-off{border:0;background:transparent;color:var(--accent);font-weight:600;font-size:12px;cursor:pointer;padding:2px 0;text-decoration:underline;text-underline-offset:3px;}
 @keyframes ri-in{from{opacity:0;transform:translateY(6px);}}
 @media (prefers-reduced-motion: reduce){#roomintro{animation:none;}}
-@media (max-width:760px){#roomintro{bottom:160px;right:16px;width:auto;max-height:130px;overflow:auto;}}
+@media (max-width:760px){#roomintro{bottom:160px;right:16px;width:auto;max-height:150px;}}
 #welcome{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:440px;max-width:calc(100% - 32px);padding:22px 24px;pointer-events:auto;z-index:8;}
 #welcome h1{font-family:var(--font-display);font-size:24px;line-height:1.2;margin:8px 0 8px;text-wrap:balance;}
 #welcome p{margin:0 0 8px;color:var(--ink-soft);line-height:1.6;}
@@ -168,11 +167,11 @@
 #list .close-list{position:sticky;top:0;float:right;z-index:1;}
 
 @media (max-width:760px){
-  .seg-label{display:none;}
   .seg button{padding:6px 10px;font-size:12px;}
   #hint{display:none;}
   #mini canvas{width:120px;height:90px;}
-  #quest,  #panel{top:auto;bottom:12px;right:16px;left:16px;width:auto;max-height:60%;}
+  #quest{top:64px;left:12px;right:12px;width:auto;max-width:none;box-sizing:border-box;}
+  #panel{top:auto;bottom:12px;right:12px;left:12px;width:auto;max-width:none;max-height:min(58%,440px);}
 }
 
 /* scale switch: "Outsource agency" coming soon */
@@ -230,6 +229,44 @@
   .quest-fab .qf-icon{width:34px;height:34px;}
   .quest-fab .qf-label{font-size:12px;}
   #list ul.tree ul{margin-left:8px;padding-left:14px;}
+}
+
+/* dialogs: the close button stays put, only .sheet-body scrolls */
+#panel,#roomintro,#modal .card.sheet{display:flex;flex-direction:column;overflow:hidden;}
+#panel{padding:0;}
+#panel > .sheet-body{padding:18px;}
+#modal .card.sheet{padding:0;}
+#modal .card.sheet > .sheet-body{padding:22px;}
+#roomintro > .sheet-body{padding:0;}
+.sheet-body{overflow:auto;min-height:0;flex:1 1 auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
+#panel > .close,#modal .card.sheet > .close,#roomintro > .close{z-index:2;background:var(--surface);}
+#panel > .sheet-body > .eyebrow:first-child,#modal .card.sheet > .sheet-body > .eyebrow:first-child,#roomintro .eyebrow{padding-right:34px;}
+
+/* scale: segmented buttons on desktop, native dropdown list on mobile */
+.scale-select{display:none;position:relative;}
+.scale-select select{appearance:none;-webkit-appearance:none;font:600 13px/1.2 var(--font-body);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:999px;
+  padding:9px 34px 9px 14px;box-shadow:var(--shadow);cursor:pointer;max-width:100%;}
+.scale-select::after{content:"";position:absolute;right:14px;top:50%;width:7px;height:7px;border-right:2px solid var(--ink-soft);border-bottom:2px solid var(--ink-soft);transform:translateY(-70%) rotate(45deg);pointer-events:none;}
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+.show-sm{display:none;}
+
+@media (max-width:760px){
+  .topbar{flex-wrap:nowrap;gap:8px;padding-left:12px;padding-right:12px;}
+  .scale-seg{display:none;}
+  .scale-select{display:block;flex:1 1 auto;min-width:0;}
+  .scale-select select{width:100%;}
+  .topbar .spacer{display:none;}
+  .hide-sm{display:none;} .show-sm{display:inline;}
+  #btn-list{flex:none;}
+  #welcome{max-height:calc(100% - 24px);overflow:auto;padding:18px 18px 16px;}
+  #welcome h1{font-size:20px;}
+  #panel h2{font-size:18px;}
+  #modal{padding:12px;}
+  #modal .card{padding:18px;}
+  #modal .card.sheet{padding:0;}
+  #modal .card.sheet > .sheet-body{padding:18px;}
+  #dialog{bottom:12px;max-height:50%;overflow:auto;padding:14px 16px;}
+  #dialog p{font-size:14px;}
 }
 
 /* loading state while data is fetched */

@@ -249,14 +249,21 @@ body.dark #header-logo { filter: brightness(0) invert(1); }
     <div id="overlay"></div>
 
     <div class="topbar">
-      <div class="seg" role="group" aria-label="Quy mô công ty">
-        <span class="seg-label">Quy mô</span>
+      <div class="seg scale-seg" role="group" aria-label="Mô hình công ty">
         <button id="sc-small" aria-pressed="true">Công ty product nhỏ</button>
         <button id="sc-large" aria-pressed="false">Tập đoàn product 100+ nhân sự</button>
         <button id="sc-agency" class="soon" aria-disabled="true" title="Outsource agency · sắp ra mắt">Outsource agency <span class="soon-chip">Sắp ra mắt</span></button>
       </div>
+      <label class="scale-select">
+        <span class="sr-only">Mô hình công ty</span>
+        <select id="scale-select">
+          <option value="small" selected>Công ty product nhỏ</option>
+          <option value="large">Tập đoàn product 100+ nhân sự</option>
+          <option value="agency" disabled>Outsource agency · Sắp ra mắt</option>
+        </select>
+      </label>
       <div class="spacer"></div>
-      <button class="icon-btn" id="btn-list">Xem dạng danh sách</button>
+      <button class="icon-btn" id="btn-list"><span class="hide-sm">Xem dạng danh sách</span><span class="show-sm">Danh sách</span></button>
     </div>
 
     <div id="quest" class="card" hidden></div>
