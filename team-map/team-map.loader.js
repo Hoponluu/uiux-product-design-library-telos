@@ -48,6 +48,12 @@
     return t && t.url && t.is_published !== false ? t.url : null;
   }
 
+  // Trang /en/team-map: lấy bản dịch trong cột i18n.en, ô nào chưa dịch thì dùng tiếng Việt.
+  const tr = (row, field) => {
+    const en = window.TM_LANG === 'en' && row.i18n && row.i18n.en;
+    return en && typeof en[field] === 'string' && en[field].trim() ? en[field] : row[field];
+  };
+
   function build(raw){
     const L = window.TM_LAYOUT, warn = [];
     const termById = {}; (raw.terms || []).forEach(t => { termById[String(t.id)] = t; });
@@ -59,16 +65,17 @@
     const ROLES = {}, SCALE_REPORTS = { small:{}, agency:{} };
     chars.forEach(c => {
       const url = resolveUrl(c, termById), ap = c.appearance || {};
-      const links = (c.cta || []).filter(b => b && b.url).map(b => ({ label:b.label || b.url, url:b.url, primary:!!b.primary }));
-      const r = { id:c.id, title:c.title, group:L.groups[c.group] ? c.group : 'business', url, status: url ? 'pub' : 'todo',
-        props:(c.props || []).filter(p => L.props.includes(p)), summary:c.summary || '', doing:c.doing || '', withDesigner:c.with_designer || '',
+      const ctaEn = window.TM_LANG === 'en' && c.i18n && c.i18n.en && Array.isArray(c.i18n.en.cta) ? c.i18n.en.cta : [];
+      const links = (c.cta || []).map((b, i) => b && b.url ? { label:(typeof ctaEn[i] === 'string' && ctaEn[i].trim()) || b.label || b.url, url:b.url, primary:!!b.primary } : null).filter(Boolean);
+      const r = { id:c.id, title:tr(c, 'title'), group:L.groups[c.group] ? c.group : 'business', url, status: url ? 'pub' : 'todo',
+        props:(c.props || []).filter(p => L.props.includes(p)), summary:tr(c, 'summary') || '', doing:tr(c, 'doing') || '', withDesigner:tr(c, 'with_designer') || '',
         reportsTo: byId[c.reports_to] ? c.reports_to : null, kind:c.kind || 'role' };
       if (ap.dark) r.dark = true;
       if (ap.outfit) r.outfit = ap.outfit;
       if (/^#[0-9a-f]{6}$/i.test(ap.body_color || '')) r.bodyColor = ap.body_color;
       if (/^#[0-9a-f]{6}$/i.test(ap.outline_color || '')) r.outlineColor = ap.outline_color;
-      if (c.kind === 'author') r.special = { tag:c.tag || '', links };
-      if (c.kind === 'guest') r.guest = { tag:c.tag || '', links };
+      if (c.kind === 'author') r.special = { tag:tr(c, 'tag') || '', links };
+      if (c.kind === 'guest') r.guest = { tag:tr(c, 'tag') || '', links };
       ROLES[c.id] = r;
       if (c.reports_to_small && byId[c.reports_to_small]) SCALE_REPORTS.small[c.id] = c.reports_to_small;
       SCALE_REPORTS.agency[c.id] = c.reports_to_agency && byId[c.reports_to_agency] ? c.reports_to_agency : null;
@@ -86,7 +93,7 @@
       const rooms = L.rooms.filter(g => g.scale === scale).map(g => {
         const row = roomRow[g.id] || {};
         if (!roomRow[g.id]) warn.push(`Phòng ${g.id} chưa có trong tm_rooms`);
-        if (row.intro) ROOM_INFO[g.id] = row.intro;
+        if (row.intro) ROOM_INFO[g.id] = tr(row, 'intro');
         if (g.tv !== undefined) TV_ROOMS[g.id] = g.tv;
         const here = placements.filter(p => p.room_id === g.id);
         here.forEach(p => pids.add(p.id));
@@ -94,7 +101,7 @@
           .filter(p => ['role','player'].includes(byId[p.character_id].kind))
           .sort((a, b) => (a.seat_order ?? 1e9) - (b.seat_order ?? 1e9) || a.character_id.localeCompare(b.character_id));
         const members = seated.map(p => p.character_id), fixed = seated.filter(p => p.fixed).map(p => p.character_id);
-        const r = { id:g.id, code:row.code ?? g.id, name:row.name || g.id, x:g.x, z:g.z, w:g.w, d:g.d, kind:g.kind, floor:g.floor, members, fixed };
+        const r = { id:g.id, code:(row.code != null ? tr(row, 'code') : null) ?? g.id, name:tr(row, 'name') || g.id, x:g.x, z:g.z, w:g.w, d:g.d, kind:g.kind, floor:g.floor, members, fixed };
         if (g.doors) r.doors = g.doors;
         return r;
       });
@@ -125,9 +132,9 @@
         if (!refOk(q.giver, q.scale)) bad.push('người giao ' + q.giver);
         (q.gather || []).forEach(g => { if (!refOk(g, q.scale)) bad.push('người tham gia ' + g); });
         const steps = (stepsByQuest[q.id] || []).slice().sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)).map(s => {
-          if (s.type === 'talk'){ if (!refOk(s.target, q.scale)) bad.push('bước ' + s.id + ' → ' + s.target); return { who:s.target, task:s.task_text || '', line:s.line_text || '' }; }
+          if (s.type === 'talk'){ if (!refOk(s.target, q.scale)) bad.push('bước ' + s.id + ' → ' + s.target); return { who:s.target, task:tr(s, 'task_text') || '', line:tr(s, 'line_text') || '' }; }
           if (s.type === 'present' && TV_ROOMS[q.room_id] === undefined) bad.push('bước present ở phòng không có TV');
-          return { type:s.type, task:s.task_text || '', secs: s.secs != null ? Number(s.secs) : 5, line:s.line_text || '' };
+          return { type:s.type, task:tr(s, 'task_text') || '', secs: s.secs != null ? Number(s.secs) : 5, line:tr(s, 'line_text') || '' };
         });
         if (bad.length){ warn.push(`Bỏ qua nhiệm vụ ${q.id} (${q.title}): ${bad.join(', ')}`); return; }
         const rewards = [];
@@ -140,7 +147,7 @@
             TERMS[name] = url || null; rewards.push(name);
           }
         });
-        QUESTS[q.scale].push({ id:q.id, title:q.title, room:q.room_id, giver:q.giver, gather:q.gather || [], offer:q.offer_text || '', done:q.done_text || '', steps, rewards });
+        QUESTS[q.scale].push({ id:q.id, title:tr(q, 'title'), room:q.room_id, giver:q.giver, gather:q.gather || [], offer:tr(q, 'offer_text') || '', done:tr(q, 'done_text') || '', steps, rewards });
       });
 
     return { data:{ GROUPS:L.groups, ROLES, TERMS, SCALES, LOCKED_ROLES, QUESTS, ROOM_INFO, TV_ROOMS, SCALE_REPORTS, DOTTED:L.dotted,
