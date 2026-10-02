@@ -4,7 +4,7 @@ window.SB_CONFIG = {
   url: 'https://vvpqhsglgtfwjklvlvuh.supabase.co',
   // Publishable key: Supabase → Settings → API Keys (dạng sb_publishable_...).
   // Tạm thời vẫn là anon key cũ; dán publishable key vào đây rồi mới tắt legacy API keys.
-  key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2cHFoc2dsZ3Rmd2prbHZsdnVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwMjkyMDQsImV4cCI6MjA5NzYwNTIwNH0.tpa9hfNxcdN_Fu67NLSdMGUbUUrvCGX9v4jDqqyC4JA',
+  key: 'sb_publishable_slwezFWl9SM0ngQiVdIZuQ_XvVkhmCU',
 };
 
 // Header cho request tới Supabase.
