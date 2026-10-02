@@ -777,7 +777,7 @@ body.dark .ascii-cell.fg { color: rgba(255,255,255,0.82); }
     <span class="tb-icon">🎲</span><span class="tb-label">UI Challenge</span>
   </button>
   <a class="tab-btn" href="/team-map">
-    <span class="tb-icon">🏢</span><span class="tb-label">Team Map</span>
+    <span class="tb-icon">🏢</span><span class="tb-label">Product Map</span>
   </a>
   <button class="tab-btn" onclick="switchTab('about',this)">
     <span class="tb-icon">ℹ️</span><span class="tb-label">Về dự án</span>
@@ -1105,6 +1105,9 @@ function nodeColor(d) {
 // ════════════════════════════════════════════════════════
 // FETCH FROM SUPABASE
 // ════════════════════════════════════════════════════════
+// Google Analytics: custom event (bỏ qua nếu gtag không có, vd trình chặn quảng cáo)
+function track(name, params) { try { if (typeof window.gtag === 'function') window.gtag('event', name, params || {}); } catch (e) {} }
+
 async function fetchData() {
   const h = window.SB_CONFIG.headers();
   const [catRes, conRes] = await Promise.all([
@@ -1201,6 +1204,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 // TABS
 // ════════════════════════════════════════════════════════
 function switchTab(tab, btn) {
+  track('tab_view', { tab_name: tab });
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('panel-graph').style.display     = tab === 'graph'     ? 'block' : 'none';
@@ -1261,6 +1265,11 @@ function closeNav() {
   document.body.style.overflow = '';
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeNav(); });
+document.addEventListener('click', e => {
+  const a = e.target.closest('a[href]'); if (!a || !/academy\.telos\.vn/.test(a.href)) return;
+  const src = a.closest('#node-modal') ? 'graph_modal' : a.closest('#panel-glossary') ? 'glossary' : a.closest('#panel-flashcard') ? 'flashcard' : a.closest('#panel-about') ? 'about' : 'other';
+  track('article_click', { link_url: a.href, link_text: a.textContent.trim().slice(0, 100), click_source: src });
+});
 
 // ════════════════════════════════════════════════════════
 // 3D GRAPH
@@ -1292,8 +1301,9 @@ function initGraph(nodes, links) {
     .linkWidth(l => l.ltype === 'root-cat' ? 2.5 : l.ltype === 'cat-sub' ? 1.5 : 0.8)
     .onNodeClick(n => {
       if (!n || n.type === 'root') return;
+      track('term_open', { term_name: n.label, term_group: n.group || '', has_article: !!n.url, click_source: 'graph' });
       if (window.innerWidth < 768) openModal(n);
-      else if (n.url) window.open(n.url, '_blank');
+      else if (n.url){ track('article_click', { link_url: n.url, link_text: n.label, click_source: 'graph' }); window.open(n.url, '_blank'); }
     })
     .onNodeHover(n => {
       const tip = document.getElementById('tooltip');
@@ -1438,6 +1448,7 @@ function getRootGroup(con){
 }
 
 function startGame(){
+  track('flashcard_start');
   const pool=allConcepts.filter(n=>n.description);
   deck=shuffle(pool).slice(0,10); cur=0; score=0;
   document.getElementById('fc-start').style.display='none';
@@ -1503,6 +1514,7 @@ function skipCard(){flip(null);}
 function nextCard(){cur++;if(cur>=deck.length)showResult();else renderCard();}
 
 function showResult(){
+  track('flashcard_complete', { score: score, total: deck.length });
   document.getElementById('fc-game').style.display='none';
   document.getElementById('fc-result').style.display='block';
   document.getElementById('fc-result-score').textContent=score;
@@ -1606,8 +1618,11 @@ function renderGlossary(q = glQuery) {
 }
 
 // ── Search input ─────────────────────────────────────────
+let glSearchTimer;
 function onGlSearch() {
   glQuery = document.getElementById('gl-search').value;
+  clearTimeout(glSearchTimer);
+  if (glQuery.trim().length >= 2) glSearchTimer = setTimeout(() => track('search', { search_term: glQuery.trim(), click_source: 'glossary' }), 1500);
   document.getElementById('gl-search-clear').style.display = glQuery ? 'block' : 'none';
   renderGlossary(glQuery);
   buildAC(glQuery);
@@ -1768,6 +1783,7 @@ function animateRoll(k, finalVal, duration, onDone) {
 let rolling = false;
 function rollAll() {
   if (rolling) return;
+  track('challenge_roll', { locked: Object.values(locked).filter(Boolean).length });
   const keys = ['a','b','c','d','e','f'];
   const unlocked = keys.filter(k => !locked[k]);
   if (!unlocked.length) return;
@@ -1791,6 +1807,7 @@ function rollAll() {
 function copyIt() {
   const v = k => document.getElementById('v-' + k).textContent;
   const text = ['✦ TELOS UI Design Challenge','',`Hãy thiết kế màn hình "${v('c')}" cho ứng dụng ${v('b')} trên ${v('a')},`,`dành cho ${v('d')}, theo phong cách ${v('e')}.`,`Ràng buộc: ${v('f')}.`,'','academy.telos.vn'].join('\n');
+  track('challenge_copy');
   navigator.clipboard.writeText(text).then(() => {
     const btn = document.getElementById('btn-copy');
     btn.textContent = '✅ Đã copy!'; btn.classList.add('ok');
