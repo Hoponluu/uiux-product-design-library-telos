@@ -103,6 +103,7 @@
 .btn-ghost{border-color:var(--line);color:var(--ink);background:transparent;}
 .btn-ghost:hover{border-color:var(--ink-faint);}
 .btn[disabled],.btn.is-disabled{opacity:.55;cursor:default;pointer-events:none;}
+#panel .btn.is-disabled{pointer-events:auto;cursor:not-allowed;} /* still clickable so GA can count "tm_article_missing" */
 .close{position:absolute;right:10px;top:10px;border:0;background:transparent;color:var(--ink-faint);font-size:20px;cursor:pointer;width:32px;height:32px;border-radius:50%;}
 .close:hover{background:var(--surface-alt);color:var(--ink);}
 

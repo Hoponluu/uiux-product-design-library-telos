@@ -3,6 +3,8 @@
 window.startTeamMap = function(D){
 const { GROUPS, ROLES, TERMS, SCALES, LOCKED_ROLES, QUESTS, ROOM_INFO, TV_ROOMS, SCALE_REPORTS, DOTTED, SCREEN_KIND, PLAYER_ID, AUTHOR_ID, GUEST_ID } = D;
 const SCALE_KEYS = Object.keys(SCALES), perScale = f => Object.fromEntries(SCALE_KEYS.map(k => [k, f()]));
+// Google Analytics: custom event (bỏ qua nếu trang không có gtag, vd trình chặn quảng cáo)
+const track = (name, params = {}) => { try { if (typeof window.gtag === 'function') window.gtag('event', name, Object.assign({ tm_scale: scaleKey }, params)); } catch (e) {} };
 const $ = s => document.querySelector(s);
 const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const isDark = () => { const t = document.documentElement.getAttribute('data-theme'); if (t) return t === 'dark'; return matchMedia('(prefers-color-scheme: dark)').matches; };
@@ -720,6 +722,8 @@ const ctaButtons = links => links.map((b, i) => `<a class="btn ${(links.some(x =
 const statusChip = s => s === 'pub' ? '<span class="chip pub">Đã có bài</span>' : s === 'draft' ? '<span class="chip draft">Bản nháp</span>' : '<span class="chip todo">Sắp ra mắt</span>';
 function openPanel(c){
   hideIntro();
+  track('tm_character_open', { character_id: c.role.id, character_title: c.role.title, character_kind: c.roamer ? 'author' : c.guest ? 'guest' : c.isPlayer ? 'player' : 'role',
+    has_article: !!c.role.url, room_id: c.room.id });
   if (c.roamer){ const sp = c.role.special;
     $('#panel').innerHTML = `<button class="close" aria-label="Đóng">×</button><div class="sheet-body">
       <p class="eyebrow">Tác giả của game</p><h2>${c.role.title}</h2>
@@ -753,6 +757,7 @@ function openPanel(c){
   $('#panel .close').onclick = closePanel; $('#p-close').onclick = closePanel;
 }
 function openLocked(r){
+  track('tm_locked_room_open');
   const items = LOCKED_ROLES.map(id => ROLES[id]).filter(Boolean).map(x => `<li style="display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:13px">${x.url ? `<a href="${x.url}" target="_blank" rel="noopener" style="color:var(--ink)">${x.title}</a>` : x.title}${statusChip(x.status)}</li>`).join('');
   $('#panel').innerHTML = `<button class="close" aria-label="Đóng">×</button><div class="sheet-body"><p class="eyebrow">Cửa đóng</p><h2>Phòng ban khác</h2>
     <div class="sec"><p>Ở công ty product nhỏ, những vai trò này chưa có bàn riêng. Việc của họ thường do PM, designer hoặc dev kiêm nhiệm. Khi công ty lớn lên, từng vai trò sẽ có phòng riêng.</p></div>
@@ -782,6 +787,7 @@ function startQuest(){
   const list = qlist(), i = Q.idx[scaleKey];
   if (i >= list.length){ Q.phase = 'finished'; renderQuest(); return; }
   const q = list[i], room = roomOf(q.room);
+  track('tm_quest_start', { quest_id: q.id, quest_title: q.title, quest_index: i + 1, quest_total: list.length });
   const giver = inst(q.giver), people = [giver, ...q.gather.map(inst)].filter(Boolean);
   Q.people = people; Q.phase = 'gather'; Q.step = 0; Q.giver = giver; Q.prog = null; hideSpot();
   // nhân vật ngồi cố định (vd Client) ở yên tại ghế, chỉ những người còn lại đi tới điểm tập hợp
@@ -806,7 +812,8 @@ function questTalk(c){
     dialog(c, q.steps[Q.step].line, 'Tiếp tục', () => advanceStep(q));
     return true; }
   if (Q.phase === 'return' && c === Q.giver){
-    dialog(c, q.done, 'Trả việc', () => { clearMarkers(); setFace(player.obj, 'happy', 'mSmile'); player.faceT = 3; Q.cards[scaleKey].push(...q.rewards); showRewards(q); });
+    dialog(c, q.done, 'Trả việc', () => { clearMarkers(); setFace(player.obj, 'happy', 'mSmile'); player.faceT = 3; Q.cards[scaleKey].push(...q.rewards);
+      track('tm_quest_complete', { quest_id: q.id, quest_title: q.title, quest_index: Q.idx[scaleKey] + 1, quest_total: qlist().length }); showRewards(q); });
     return true; }
   if (Q.phase === 'gather' && Q.people.includes(c)){ dialog(c, 'Mọi người đang tập hợp, chờ chút nhé.', 'Ok', () => {}); return true; }
   return false;
@@ -822,8 +829,11 @@ function showRewards(q){
   $('#next-q').onclick = () => { $('#modal').hidden = true; sendHome(Q.people); Q.idx[scaleKey]++; Q.phase = 'between'; renderQuest(); setTimeout(() => mode === 'quest' && startQuest(), 1400); };
   $('#next-q').focus();
 }
+const chainTracked = new Set();
 function showSummary(){
   const all = [...new Set(Q.cards[scaleKey])].map(cardFor);
+  if (Q.idx[scaleKey] >= qlist().length && !chainTracked.has(scaleKey)){ chainTracked.add(scaleKey);
+    track('tm_quest_chain_complete', { quests: qlist().length, cards: all.length, met: met[scaleKey].size }); }
   $('#modal').innerHTML = `<div class="card sheet" role="dialog" aria-modal="true" aria-label="Tổng kết"><button class="close" aria-label="Đóng">×</button><div class="sheet-body"><p class="eyebrow">Tổng kết sprint</p><h2>Bạn đã hoàn thành ${qlist().length} quest</h2>
     <p style="margin:0;color:var(--ink-soft)">Đã gặp ${met[scaleKey].size}/${$('#mett').textContent} vai trò và mở khoá ${all.length} thẻ kiến thức.${scaleKey === 'small' ? ' Thử tiếp ở tập đoàn product 100+ nhân sự để gặp Design Manager, UX Researcher và team Design System.' : scaleKey === 'agency' ? ' Bạn vừa đi hết một dự án ở agency. Thử so với cách làm việc ở công ty sản phẩm xem khác gì nhé.' : ''}</p>
     <div class="rewards">${all.map(c => `<div class="reward"><span>${c.kind}</span><b>${c.title}</b>${c.url ? `<a href="${c.url}" target="_blank" rel="noopener">Đọc bài</a>` : '<span>Sắp ra mắt</span>'}</div>`).join('')}</div>
@@ -862,11 +872,13 @@ function setMode(m){
   const prev = mode; mode = m;
   $('#quest-fab').setAttribute('aria-pressed', m === 'quest');
   if (prev === 'quest' && m !== 'quest'){ clearMarkers(); hideSpot(); closeDialog(); sendHome(chars); clearTimeout(Q.timer); Q.phase = null; Q.prog = null; player.sitting = false; rooms.forEach(r => r.tv && (r.tv.mat.map = r.tv.idle)); }
+  if (m !== prev && (m === 'quest' || prev === 'quest')) track('tm_quest_mode', { state: m === 'quest' ? 'on' : 'off' });
   if (m === 'quest' && prev !== 'quest'){ closePanel(); if (small()) hideIntro(); Q.summaryShown = false; startQuest(); }
   renderQuest(); updateFab();
 }
 function setScale(k){
   if (k === scaleKey && world) return;
+  if (world) track('tm_scale_change', { tm_scale: k, from_scale: scaleKey });
   ['small','large','agency'].forEach(x => $('#sc-' + x).setAttribute('aria-pressed', k === x)); $('#scale-select').value = k;
   closePanel(); closeDialog(); clearTimeout(Q.timer); Q.phase = null;
   buildWorld(k);
@@ -886,8 +898,8 @@ function updateFab(){
 }
 $('#quest-fab').onclick = () => { $('#welcome').hidden = true; setMode(mode === 'quest' ? 'explore' : 'quest'); };
 updateFab();
-$('#start').onclick = () => { $('#welcome').hidden = true; canvas.focus(); };
-$('#start-quest').onclick = () => { $('#welcome').hidden = true; setMode('quest'); };
+$('#start').onclick = () => { $('#welcome').hidden = true; track('tm_start', { start_action: 'explore' }); canvas.focus(); };
+$('#start-quest').onclick = () => { $('#welcome').hidden = true; track('tm_start', { start_action: 'quest' }); setMode('quest'); };
 
 // ---------- list view (SEO / screen readers) ----------
 // Hai cách xem: theo phòng ban, và "Báo cáo cho ai" dạng cây thư mục 2D (thay cho chế độ đường nối 3D cũ).
@@ -925,11 +937,20 @@ function renderList(){
     <div class="seg list-tabs" role="tablist">${tabs.map(([k, t]) => `<button role="tab" data-tab="${k}" aria-pressed="${listTab === k}" aria-selected="${listTab === k}">${t}</button>`).join('')}</div>
     ${listTab === 'report' ? reportTree() : `<div class="grid">${roomCards}</div>`}</div>`;
   $('#list-close').onclick = () => { $('#list').hidden = true; };
-  $('#list').querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { listTab = b.dataset.tab; renderList(); });
+  $('#list').querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { listTab = b.dataset.tab; track('tm_list_view', { list_tab: listTab }); renderList(); });
   $('#list').querySelectorAll('.gfilter button').forEach(b => b.onclick = () => { const k = b.dataset.g; treeGroups.has(k) ? treeGroups.delete(k) : treeGroups.add(k); renderList(); });
   $('#list').querySelectorAll('.tree-all').forEach(b => b.onclick = () => $('#list').querySelectorAll('.tree details').forEach(d => d.open = b.dataset.open === '1'));
 }
-$('#btn-list').onclick = () => { renderList(); $('#list').hidden = false; $('#list-close').focus(); };
+$('#btn-list').onclick = () => { renderList(); $('#list').hidden = false; track('tm_list_view', { list_tab: listTab }); $('#list-close').focus(); };
+
+// Bấm đọc bài (link ra academy.telos.vn…) và bấm vào vai trò chưa có bài — để biết nên viết bài nào trước
+$('#app').addEventListener('click', e => {
+  const where = el => el.closest('#panel') ? 'panel' : el.closest('#modal') ? 'reward' : el.closest('#list') ? (listTab === 'report' ? 'tree' : 'list') : 'other';
+  const a = e.target.closest('a[href]');
+  if (a && /^https?:/.test(a.href)) return track('tm_article_click', { link_url: a.href, link_text: a.textContent.trim().slice(0, 100), click_source: where(a) });
+  const off = e.target.closest('.is-disabled');
+  if (off && off.closest('#panel')){ const h = $('#panel h2'); track('tm_article_missing', { character_title: h ? h.textContent : '' }); }
+});
 
 // ---------- minimap ----------
 const mm = $('#minimap'), mx = mm.getContext('2d');
