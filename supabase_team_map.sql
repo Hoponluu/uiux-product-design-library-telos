@@ -154,6 +154,15 @@ alter table tm_characters add column if not exists reports_to_agency text refere
 -- nhân vật ngồi cố định (không đi dạo, không tới điểm tập hợp), vd Client ở phòng họp
 alter table tm_placements add column if not exists fixed boolean not null default false;
 
+-- 1.7 Bản tiếng Anh (/en/team-map): nội dung dịch nằm trong cột i18n, dạng {"en": {"<tên cột>": "..."}}.
+-- Ô nào chưa có bản tiếng Anh thì trang EN hiện tiếng Việt.
+--   tm_characters: title, summary, doing, with_designer, tag, cta (mảng nhãn nút)
+--   tm_rooms: code, name, intro · tm_quests: title, offer_text, done_text · tm_quest_steps: task_text, line_text
+alter table tm_characters  add column if not exists i18n jsonb not null default '{}'::jsonb;
+alter table tm_rooms       add column if not exists i18n jsonb not null default '{}'::jsonb;
+alter table tm_quests      add column if not exists i18n jsonb not null default '{}'::jsonb;
+alter table tm_quest_steps add column if not exists i18n jsonb not null default '{}'::jsonb;
+
 
 -- ════════════════════════════════════════════════════════
 -- 2. TRIGGER
@@ -329,16 +338,17 @@ declare
 begin
   perform tm_require_admin();
   insert into tm_characters (id, title, kind, "group", term_id, article_url, summary, doing, with_designer,
-                             reports_to, reports_to_small, reports_to_agency, props, appearance, tag, cta, is_active)
+                             reports_to, reports_to_small, reports_to_agency, props, appearance, tag, cta, is_active, i18n)
   values (c.id, c.title, coalesce(c.kind,'role'), c."group", c.term_id, c.article_url, c.summary, c.doing, c.with_designer,
           c.reports_to, c.reports_to_small, c.reports_to_agency, coalesce(c.props,'[]'::jsonb),
-          coalesce(c.appearance,'{"dark":false,"outfit":null}'::jsonb), c.tag, c.cta, coalesce(c.is_active, true))
+          coalesce(c.appearance,'{"dark":false,"outfit":null}'::jsonb), c.tag, c.cta, coalesce(c.is_active, true), coalesce(c.i18n,'{}'::jsonb))
   on conflict (id) do update set
     title = excluded.title, kind = excluded.kind, "group" = excluded."group", term_id = excluded.term_id,
     article_url = excluded.article_url, summary = excluded.summary, doing = excluded.doing,
     with_designer = excluded.with_designer, reports_to = excluded.reports_to,
     reports_to_small = excluded.reports_to_small, reports_to_agency = excluded.reports_to_agency, props = excluded.props, appearance = excluded.appearance,
-    tag = excluded.tag, cta = excluded.cta, is_active = excluded.is_active;
+    tag = excluded.tag, cta = excluded.cta, is_active = excluded.is_active,
+    i18n = case when p -> 'character' ? 'i18n' then excluded.i18n else tm_characters.i18n end;
 
   if p ? 'placements' then
     select coalesce(array_agg(x ->> 'id'), array[]::text[]) into keep
@@ -370,23 +380,27 @@ declare
   keep text[];
 begin
   perform tm_require_admin();
-  insert into tm_quests (id, type, scale, sort_order, title, room_id, giver, gather, offer_text, done_text, rewards, is_active, daily_date)
+  insert into tm_quests (id, type, scale, sort_order, title, room_id, giver, gather, offer_text, done_text, rewards, is_active, daily_date, i18n)
   values (q.id, coalesce(q.type,'main'), q.scale, coalesce(q.sort_order,0), q.title, q.room_id, q.giver,
           coalesce(q.gather,'[]'::jsonb), q.offer_text, q.done_text, coalesce(q.rewards,'[]'::jsonb),
-          coalesce(q.is_active,true), q.daily_date)
+          coalesce(q.is_active,true), q.daily_date, coalesce(q.i18n,'{}'::jsonb))
   on conflict (id) do update set
     type = excluded.type, scale = excluded.scale, sort_order = excluded.sort_order, title = excluded.title,
     room_id = excluded.room_id, giver = excluded.giver, gather = excluded.gather, offer_text = excluded.offer_text,
-    done_text = excluded.done_text, rewards = excluded.rewards, is_active = excluded.is_active, daily_date = excluded.daily_date;
+    done_text = excluded.done_text, rewards = excluded.rewards, is_active = excluded.is_active, daily_date = excluded.daily_date,
+    i18n = case when p -> 'quest' ? 'i18n' then excluded.i18n else tm_quests.i18n end;
 
   select coalesce(array_agg(s ->> 'id'), array[]::text[]) into keep from jsonb_array_elements(coalesce(p -> 'steps','[]'::jsonb)) s;
   delete from tm_quest_steps where quest_id = q.id and not (id = any (keep));
-  insert into tm_quest_steps (id, quest_id, sort_order, type, target, task_text, line_text, secs)
-  select s.id, q.id, coalesce(s.sort_order,0), s.type, s.target, s.task_text, s.line_text, s.secs
-  from jsonb_populate_recordset(null::tm_quest_steps, coalesce(p -> 'steps','[]'::jsonb)) s
+  -- bước không gửi kèm i18n (client cũ) thì giữ nguyên bản dịch đang có
+  insert into tm_quest_steps (id, quest_id, sort_order, type, target, task_text, line_text, secs, i18n)
+  select s.id, q.id, coalesce(s.sort_order,0), s.type, s.target, s.task_text, s.line_text, s.secs,
+         coalesce(x -> 'i18n', (select o.i18n from tm_quest_steps o where o.id = s.id), '{}'::jsonb)
+  from jsonb_array_elements(coalesce(p -> 'steps','[]'::jsonb)) x,
+       lateral jsonb_populate_record(null::tm_quest_steps, x) s
   on conflict (id) do update set
     quest_id = excluded.quest_id, sort_order = excluded.sort_order, type = excluded.type, target = excluded.target,
-    task_text = excluded.task_text, line_text = excluded.line_text, secs = excluded.secs;
+    task_text = excluded.task_text, line_text = excluded.line_text, secs = excluded.secs, i18n = excluded.i18n;
 
   return jsonb_build_object(
     'quest', (select to_jsonb(x) from tm_quests x where x.id = q.id),
@@ -439,7 +453,9 @@ begin
       props            = case when r ? 'props'            then coalesce(r -> 'props','[]'::jsonb) else props end,
       tag              = case when r ? 'tag'              then r ->> 'tag'              else tag end,
       cta              = case when r ? 'cta'              then nullif(r -> 'cta','null'::jsonb) else cta end,
-      is_active        = case when r ? 'is_active'        then (r ->> 'is_active')::boolean else is_active end
+      is_active        = case when r ? 'is_active'        then (r ->> 'is_active')::boolean else is_active end,
+      -- i18n_en: chỉ các ô tiếng Anh có trong file; ô trống (null) = xoá bản dịch đó
+      i18n             = case when r ? 'i18n_en' then jsonb_set(i18n, '{en}', jsonb_strip_nulls(coalesce(i18n -> 'en','{}'::jsonb) || (r -> 'i18n_en'))) else i18n end
     where id = r ->> 'id';
   end loop;
   n := n || jsonb_build_object('characters', jsonb_array_length(coalesce(p -> 'characters','[]'::jsonb)));
@@ -458,7 +474,8 @@ begin
       code       = case when r ? 'code'       then coalesce(r ->> 'code','') else code end,
       name       = case when r ? 'name'       then r ->> 'name'       else name end,
       intro      = case when r ? 'intro'      then r ->> 'intro'      else intro end,
-      sort_order = case when r ? 'sort_order' then coalesce((r ->> 'sort_order')::int, 0) else sort_order end
+      sort_order = case when r ? 'sort_order' then coalesce((r ->> 'sort_order')::int, 0) else sort_order end,
+      i18n             = case when r ? 'i18n_en' then jsonb_set(i18n, '{en}', jsonb_strip_nulls(coalesce(i18n -> 'en','{}'::jsonb) || (r -> 'i18n_en'))) else i18n end
     where id = r ->> 'id';
     get diagnostics cnt = row_count;
     if cnt = 0 then raise exception 'Phòng % không tồn tại (import không tạo phòng mới)', r ->> 'id'; end if;
@@ -474,6 +491,9 @@ begin
       type = excluded.type, scale = excluded.scale, sort_order = excluded.sort_order, title = excluded.title,
       room_id = excluded.room_id, giver = excluded.giver, gather = excluded.gather, offer_text = excluded.offer_text,
       done_text = excluded.done_text, rewards = excluded.rewards, is_active = excluded.is_active, daily_date = excluded.daily_date;
+    if r ? 'i18n_en' then
+      update tm_quests set i18n = jsonb_set(i18n, '{en}', jsonb_strip_nulls(coalesce(i18n -> 'en','{}'::jsonb) || (r -> 'i18n_en'))) where id = r ->> 'id';
+    end if;
   end loop;
   n := n || jsonb_build_object('quests', jsonb_array_length(coalesce(p -> 'quests','[]'::jsonb)));
 
@@ -484,6 +504,9 @@ begin
     on conflict (id) do update set
       quest_id = excluded.quest_id, sort_order = excluded.sort_order, type = excluded.type, target = excluded.target,
       task_text = excluded.task_text, line_text = excluded.line_text, secs = excluded.secs;
+    if r ? 'i18n_en' then
+      update tm_quest_steps set i18n = jsonb_set(i18n, '{en}', jsonb_strip_nulls(coalesce(i18n -> 'en','{}'::jsonb) || (r -> 'i18n_en'))) where id = r ->> 'id';
+    end if;
   end loop;
   n := n || jsonb_build_object('steps', jsonb_array_length(coalesce(p -> 'steps','[]'::jsonb)));
 

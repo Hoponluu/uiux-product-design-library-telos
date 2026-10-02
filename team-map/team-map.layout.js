@@ -2,10 +2,13 @@
 // hình học phòng theo id, bảng màu nhóm nghề, danh sách đồ nghề, loại màn hình theo nhóm.
 // Nội dung phòng (mã hiển thị, tên, giới thiệu) nằm trong bảng tm_rooms.
 // Đổi bố cục phòng = sửa file này (và giữ id khớp với tm_rooms).
+// Chuỗi hiển thị có hai ngôn ngữ: L(vi, en) theo window.TM_LANG (trang /en/team-map đặt 'en').
+(function(){
+const L = (vi, en) => window.TM_LANG === 'en' ? en : vi;
 window.TM_LAYOUT = {
   scales: {
-    small: { name:'Công ty product nhỏ' },
-    large: { name:'Tập đoàn product 100+ nhân sự' },
+    small: { name:L('Công ty product nhỏ', 'Small product company') },
+    large: { name:L('Tập đoàn product 100+ nhân sự', '100+ person product company') },
     agency: { name:'Outsource agency' }
   },
   // kind: pod | meeting | lounge | locked | glass · tv = vị trí TV (lệch theo trục x), chỉ phòng có tv mới dùng được bước "present"
@@ -36,9 +39,9 @@ window.TM_LAYOUT = {
   ],
   // Đường đứt (dotted line) trong cây "Báo cáo cho ai": ai ngồi ở các phòng này nhận việc hằng ngày từ `target`
   dotted: {
-    small:  { rooms:['P2'], target:'product-manager', label:'ưu tiên từ PM', title:'Đặt ưu tiên công việc: PM (dotted line)' },
-    large:  { rooms:['R02','R03','R04'], target:'product-manager', also:['growth-pm'], label:'ưu tiên từ PM', title:'Đặt ưu tiên công việc: PM của squad (dotted line)' },
-    agency: { rooms:['A1','A2'], target:'project-manager', label:'nhận việc từ Project Manager', title:'Nhận việc theo dự án: Project Manager (dotted line)' }
+    small:  { rooms:['P2'], target:'product-manager', label:L('ưu tiên từ PM', 'priorities from PM'), title:L('Đặt ưu tiên công việc: PM (dotted line)', 'Sets work priorities: PM (dotted line)') },
+    large:  { rooms:['R02','R03','R04'], target:'product-manager', also:['growth-pm'], label:L('ưu tiên từ PM', 'priorities from PM'), title:L('Đặt ưu tiên công việc: PM của squad (dotted line)', 'Sets work priorities: the squad PM (dotted line)') },
+    agency: { rooms:['A1','A2'], target:'project-manager', label:L('nhận việc từ Project Manager', 'work from Project Manager'), title:L('Nhận việc theo dự án: Project Manager (dotted line)', 'Project work from: Project Manager (dotted line)') }
   },
   groups: {
     design:      {"name":"Design", "color":"#E92F7C"},
@@ -52,3 +55,4 @@ window.TM_LAYOUT = {
   props: ["briefcase", "flag", "laptop", "glasses", "pointer", "chart", "headset", "clipboard", "cards", "cap", "tablet", "palette", "pencil", "backpack", "monocle", "play", "database", "phone", "magnifier", "scroll", "gear", "pie", "flask", "timer", "calendar", "megaphone", "blazer", "necklace", "laptopCarry", "phoneUse"],
   roleCategoryByGroup: { design:'vt-design', product:'vt-product', engineering:'vt-engineering', business:'vt-business', data:'vt-cross', delivery:'vt-cross' }
 };
+})();

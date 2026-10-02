@@ -2,11 +2,13 @@
   "redirects": [
     { "source": "/TELOS_Knowledge_Graph.html", "destination": "/", "permanent": true },
     { "source": "/adminCMS.html", "destination": "/adminCMS", "permanent": true },
-    { "source": "/team-map.html", "destination": "/team-map", "permanent": true }
+    { "source": "/team-map.html", "destination": "/team-map", "permanent": true },
+    { "source": "/en/team-map.html", "destination": "/en/team-map", "permanent": true }
   ],
   "rewrites": [
     { "source": "/adminCMS", "destination": "/adminCMS.html" },
     { "source": "/team-map", "destination": "/team-map.html" },
+    { "source": "/en/team-map", "destination": "/en/team-map.html" },
     { "source": "/", "destination": "/TELOS_Knowledge_Graph.html" }
   ],
   "headers": [

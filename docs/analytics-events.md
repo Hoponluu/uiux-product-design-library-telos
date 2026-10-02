@@ -16,7 +16,7 @@ Lượt xem trang (`page_view`) GA tự ghi nhận. Các sự kiện dưới đ�
 
 ## Team Map
 
-Mọi sự kiện Team Map tự kèm `tm_scale` (`small` · `large` · `agency`).
+Mọi sự kiện Team Map tự kèm `tm_scale` (`small` · `large` · `agency`) và `tm_lang` (`vi` · `en`, bản tiếng Anh ở `/en/team-map`).
 
 | Sự kiện | Khi nào | Tham số thêm |
 | --- | --- | --- |
@@ -38,7 +38,7 @@ Mọi sự kiện Team Map tự kèm `tm_scale` (`small` · `large` · `agency`)
 Tham số tuỳ chỉnh chỉ hiện trong báo cáo sau khi đăng ký thành **custom dimension**:
 
 GA → Admin → Data display → **Custom definitions** → *Create custom dimension*, phạm vi **Event**, tạo lần lượt cho:
-`tab_name`, `term_name`, `click_source`, `tm_scale`, `quest_id`, `quest_title`, `character_title`, `character_kind`, `has_article`, `list_tab`, `start_action`.
+`tab_name`, `term_name`, `click_source`, `tm_scale`, `tm_lang`, `quest_id`, `quest_title`, `character_title`, `character_kind`, `has_article`, `list_tab`, `start_action`.
 (`link_url`, `search_term` GA đã có sẵn.) Với `score`, `quest_index` có thể tạo **custom metric** nếu cần tính trung bình.
 
 Link sang academy.telos.vn từ phần xem trước có gắn `utm_source=uiux-library&utm_medium=product-map&utm_content=<click_source>`, xem được trong GA của trang academy.

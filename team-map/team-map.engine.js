@@ -4,8 +4,10 @@ window.startTeamMap = function(D){
 const { GROUPS, ROLES, TERMS, SCALES, LOCKED_ROLES, QUESTS, ROOM_INFO, TV_ROOMS, SCALE_REPORTS, DOTTED, SCREEN_KIND, PLAYER_ID, AUTHOR_ID, GUEST_ID } = D;
 const SCALE_KEYS = Object.keys(SCALES), perScale = f => Object.fromEntries(SCALE_KEYS.map(k => [k, f()]));
 // Google Analytics: custom event (bỏ qua nếu trang không có gtag, vd trình chặn quảng cáo)
-const track = (name, params = {}) => { try { if (typeof window.gtag === 'function') window.gtag('event', name, Object.assign({ tm_scale: scaleKey }, params)); } catch (e) {} };
+const track = (name, params = {}) => { try { if (typeof window.gtag === 'function') window.gtag('event', name, Object.assign({ tm_scale: scaleKey, tm_lang: LANG }, params)); } catch (e) {} };
 const $ = s => document.querySelector(s);
+// Ngôn ngữ: /en/team-map → 'en'. L(vi, en) chọn chuỗi theo ngôn ngữ trang.
+const LANG = window.TM_LANG === 'en' ? 'en' : 'vi', L = (vi, en) => LANG === 'en' ? en : vi;
 const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const isDark = () => { const t = document.documentElement.getAttribute('data-theme'); if (t) return t === 'dark'; return matchMedia('(prefers-color-scheme: dark)').matches; };
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -443,7 +445,7 @@ function addChar(roleId, room, x, z, rot){
   const c = { idx:chars.length, id: roleId + '@' + room.id, role, room, isPlayer, obj, seat:{ x:fx, z:fz, rot }, path:[], speed: isPlayer ? 4.6 : 3.6, phase:Math.random()*6, seed:Math.random()*6, faceT:0, onArrive:null, walking:false };
   chars.push(c);
   c.roamer = !!role.special; c.guest = !!role.guest; c.fixed = !!(room.fixed && room.fixed.includes(roleId)); // fixed: ngồi yên, không đi dạo / tập hợp
-  c.label = addLabel(isPlayer ? `Bạn · ${role.title}` : c.roamer ? `${role.title}${role.special.tag ? ' · ' + role.special.tag.split(' · ')[0] : ''}` : c.guest ? `${role.title} · Người dùng` : role.title, 'name-lbl' + (isPlayer ? ' me' : c.roamer ? ' vip' : ''), new THREE.Vector3(), { inst:c });
+  c.label = addLabel(isPlayer ? `${L('Bạn', 'You')} · ${role.title}` : c.roamer ? `${role.title}${role.special.tag ? ' · ' + role.special.tag.split(' · ')[0] : ''}` : c.guest ? `${role.title} · ${L('Người dùng', 'User')}` : role.title, 'name-lbl' + (isPlayer ? ' me' : c.roamer ? ' vip' : ''), new THREE.Vector3(), { inst:c });
   c.marker = addLabel('', 'qm', new THREE.Vector3(), { inst:c, marker:true }); c.marker.el.hidden = true;
   c.chatEl = addLabel('', 'chat', new THREE.Vector3(), { inst:c, chat:true }); c.chatEl.el.hidden = true;
   return c;
@@ -582,12 +584,13 @@ function updateLabels(){
   const bTarget = near || null;
   if (bTarget && $('#dialog').hidden && $('#panel').hidden){
     const rp = bTarget.obj.root.position, s = project(new THREE.Vector3(rp.x, 1.62, rp.z));
-    const html = `<small>${bTarget.role.title}</small><span class="b-long">${bTarget.role.doing}<br></span><span class="b-key" style="color:var(--ink-faint)">Bấm <kbd>F</kbd> hoặc click để nói chuyện</span><span class="b-touch">Chạm để nói chuyện</span>`;
+    const html = `<small>${bTarget.role.title}</small><span class="b-long">${bTarget.role.doing}<br></span><span class="b-key" style="color:var(--ink-faint)">${L('Bấm <kbd>F</kbd> hoặc click để nói chuyện', 'Press <kbd>F</kbd> or click to talk')}</span><span class="b-touch">${L('Chạm để nói chuyện', 'Tap to talk')}</span>`;
     if (bubble.dataset.k !== bTarget.id){ bubble.innerHTML = html; bubble.dataset.k = bTarget.id; }
     bubble.hidden = false; bubble.style.transform = `translate(${s.x|0}px,${s.y|0}px) translate(-50%,-100%)`;
   } else if (lockNear && $('#panel').hidden){
     const s = project(new THREE.Vector3(lockNear.doorPoint[0], 1.9, lockNear.doorPoint[1] + .3));
-    bubble.innerHTML = '<small>Phòng ban khác</small><span class="b-long">Ở công ty product nhỏ chưa có các vai trò này.<br></span><span class="b-key" style="color:var(--ink-faint)">Bấm <kbd>F</kbd> để xem bên trong</span><span class="b-touch">Chạm cửa để xem bên trong</span>'; bubble.dataset.k = 'lock';
+    bubble.innerHTML = L('<small>Phòng ban khác</small><span class="b-long">Ở công ty product nhỏ chưa có các vai trò này.<br></span><span class="b-key" style="color:var(--ink-faint)">Bấm <kbd>F</kbd> để xem bên trong</span><span class="b-touch">Chạm cửa để xem bên trong</span>',
+      '<small>Other departments</small><span class="b-long">A small product company doesn\'t have these roles yet.<br></span><span class="b-key" style="color:var(--ink-faint)">Press <kbd>F</kbd> to look inside</span><span class="b-touch">Tap the door to look inside</span>'); bubble.dataset.k = 'lock';
     bubble.hidden = false; bubble.style.transform = `translate(${s.x|0}px,${s.y|0}px) translate(-50%,-100%)`;
   } else bubble.hidden = true;
 }
@@ -696,7 +699,7 @@ function questTick(dt){
     if (Math.hypot(pp.x - sp[0], pp.z - sp[1]) < 1.0 && !player.path.length){
       Q.prog = { kind:s.type, t:0, dur:s.secs || 5 }; hideSpot();
       if (s.type === 'work'){ player.sitting = true; player.obj.root.position.set(player.seat.x, 0, player.seat.z); player.heading = player.seat.rot; if (player.screen) player.screen.material.map = screenTex('figma'); }
-      else { const r = roomOf(q.room); player.heading = Math.atan2(r.x - pp.x, r.z + 2 - pp.z); if (r.tv) r.tv.mat.map = slideTex(q.title, 'Trình bày bởi UI/UX Designer');
+      else { const r = roomOf(q.room); player.heading = Math.atan2(r.x - pp.x, r.z + 2 - pp.z); if (r.tv) r.tv.mat.map = slideTex(q.title, L('Trình bày bởi UI/UX Designer', 'Presented by the UI/UX Designer'));
         [...new Set([...Q.people, ...chars.filter(c => c.fixed && c.room === r)])].forEach(c => { const pc = c.obj.root.position; c.heading = Math.atan2(pp.x - pc.x, pp.z - pc.z); setFace(c.obj, 'look', 'mO'); c.faceT = s.secs || 5; }); setFace(player.obj, 'happy', 'mSmile'); player.faceT = s.secs || 5; }
       renderQuest();
     }
@@ -706,7 +709,7 @@ function questTick(dt){
   Q.prog.t += dt; const bar = document.querySelector('#quest .qbar i'); if (bar) bar.style.width = Math.min(100, Q.prog.t / Q.prog.dur * 100) + '%';
   if (Q.prog.t >= Q.prog.dur){ const kind = Q.prog.kind; Q.prog = { kind:'done', t:0, dur:1e9 };
     if (kind === 'work') player.sitting = false;
-    dialog(Q.giver, s.line, 'Tiếp tục', () => { const r = roomOf(q.room); if (r.tv) r.tv.mat.map = r.tv.idle; advanceStep(q); }); }
+    dialog(Q.giver, s.line, L('Tiếp tục', 'Continue'), () => { const r = roomOf(q.room); if (r.tv) r.tv.mat.map = r.tv.idle; advanceStep(q); }); }
 }
 
 // ---------- room intro ----------
@@ -723,8 +726,8 @@ function checkRoom(){
 function showIntro(r){
   const n = new Set(r.members).size, el = $('#roomintro');
   el.classList.remove('open');
-  el.innerHTML = `<button class="ri-compact" aria-label="Xem giới thiệu ${r.name}"><span class="ri-i" aria-hidden="true">i</span><span>Bạn vừa vào <b>${r.name}</b></span></button><button class="close" aria-label="Đóng giới thiệu">×</button><div class="sheet-body"><p class="eyebrow">Bạn vừa vào · ${r.code}</p><h3>${r.name}</h3><p>${ROOM_INFO[r.id]}</p>
-    <div class="ri-foot"><span>${n ? n + ' vai trò trong phòng' : 'Khu vực chung'}</span></div></div>`;
+  el.innerHTML = `<button class="ri-compact" aria-label="${L('Xem giới thiệu', 'About')} ${r.name}"><span class="ri-i" aria-hidden="true">i</span><span>${L('Bạn vừa vào', 'You just entered')} <b>${r.name}</b></span></button><button class="close" aria-label="${L('Đóng giới thiệu', 'Close')}">×</button><div class="sheet-body"><p class="eyebrow">${L('Bạn vừa vào', 'You just entered')} · ${r.code}</p><h3>${r.name}</h3><p>${ROOM_INFO[r.id]}</p>
+    <div class="ri-foot"><span>${n ? n + L(' vai trò trong phòng', n === 1 ? ' role in this room' : ' roles in this room') : L('Khu vực chung', 'Shared space')}</span></div></div>`;
   el.hidden = false;
   el.querySelector('.close').onclick = hideIntro;
   el.querySelector('.ri-compact').onclick = () => { closeSheets('intro'); clearTimeout(introTimer); el.hidden = false; el.classList.add('open'); };
@@ -763,50 +766,50 @@ mqMobile.addEventListener && mqMobile.addEventListener('change', () => ['#roomin
 
 // ---------- panel ----------
 const ctaButtons = links => links.map((b, i) => `<a class="btn ${(links.some(x => x.primary) ? b.primary : !i) ? 'btn-primary' : 'btn-ghost'}" href="${b.url}" target="_blank" rel="noopener">${b.label}</a>`).join('');
-const statusChip = s => s === 'pub' ? '<span class="chip pub">Đã có bài</span>' : s === 'draft' ? '<span class="chip draft">Bản nháp</span>' : '<span class="chip todo">Sắp ra mắt</span>';
+const statusChip = s => s === 'pub' ? `<span class="chip pub">${L('Đã có bài', 'Article')}</span>` : s === 'draft' ? `<span class="chip draft">${L('Bản nháp', 'Draft')}</span>` : `<span class="chip todo">${L('Sắp ra mắt', 'Coming soon')}</span>`;
 function openPanel(c){
   hideIntro(); closeSheets('panel');
   track('tm_character_open', { character_id: c.role.id, character_title: c.role.title, character_kind: c.roamer ? 'author' : c.guest ? 'guest' : c.isPlayer ? 'player' : 'role',
     has_article: !!c.role.url, room_id: c.room.id });
   if (c.roamer){ const sp = c.role.special;
-    $('#panel').innerHTML = `<button class="close" aria-label="Đóng">×</button><div class="sheet-body">
-      <p class="eyebrow">Tác giả của game</p><h2>${c.role.title}</h2>
+    $('#panel').innerHTML = `<button class="close" aria-label="${L('Đóng', 'Close')}">×</button><div class="sheet-body">
+      <p class="eyebrow">${L('Tác giả của game', 'Author of this game')}</p><h2>${c.role.title}</h2>
       <div class="chips"><span class="chip pub">${sp.tag}</span></div>
       <div class="sec"><p>${c.role.summary}</p></div>
-      <div class="sec"><h4>Ổng có thể giúp gì cho bạn?</h4><p>${c.role.withDesigner}</p></div>
-      <div class="sec"><h4>Nhiệm vụ hằng ngày</h4><p style="color:var(--ink-faint)">Sắp ra mắt. Ổng sẽ giao cho bạn một nhiệm vụ nhỏ mỗi ngày.</p></div>
+      <div class="sec"><h4>${L('Ổng có thể giúp gì cho bạn?', 'How can he help you?')}</h4><p>${c.role.withDesigner}</p></div>
+      <div class="sec"><h4>${L('Nhiệm vụ hằng ngày', 'Daily quest')}</h4><p style="color:var(--ink-faint)">${L('Sắp ra mắt. Ổng sẽ giao cho bạn một nhiệm vụ nhỏ mỗi ngày.', 'Coming soon. He will give you a small quest every day.')}</p></div>
       <div class="row">${ctaButtons(sp.links)}</div></div>`;
     $('#panel').hidden = false; $('#panel .close').onclick = closePanel; return; }
   if (c.guest){ const gs = c.role.guest;
-    $('#panel').innerHTML = `<button class="close" aria-label="Đóng">×</button><div class="sheet-body">
+    $('#panel').innerHTML = `<button class="close" aria-label="${L('Đóng', 'Close')}">×</button><div class="sheet-body">
       <p class="eyebrow">${c.room.name}</p><h2>${c.role.title}</h2>
       <div class="chips"><span class="chip draft">${gs.tag}</span></div>
       <div class="sec"><p>${c.role.summary}</p></div>
-      <div class="sec"><h4>Đang làm</h4><p>${c.role.doing}</p></div>
-      <div class="sec"><h4>Vì sao nên nói chuyện với User</h4><p>${c.role.withDesigner}</p></div>
-      ${gs.links.length ? `<div class="sec"><h4>Bài nên đọc</h4></div>
+      <div class="sec"><h4>${L('Đang làm', 'Doing now')}</h4><p>${c.role.doing}</p></div>
+      <div class="sec"><h4>${L('Vì sao nên nói chuyện với User', 'Why talk to the User')}</h4><p>${c.role.withDesigner}</p></div>
+      ${gs.links.length ? `<div class="sec"><h4>${L('Bài nên đọc', 'Worth reading')}</h4></div>
       <div class="row" style="margin-top:6px">${ctaButtons(gs.links)}</div>` : ''}</div>`;
     $('#panel').hidden = false; $('#panel .close').onclick = closePanel; return; }
   const r = c.role, g = GROUPS[r.group], boss = reportName(c);
-  $('#panel').innerHTML = `<button class="close" aria-label="Đóng">×</button><div class="sheet-body">
+  $('#panel').innerHTML = `<button class="close" aria-label="${L('Đóng', 'Close')}">×</button><div class="sheet-body">
     <p class="eyebrow">${c.room.code} · ${c.room.name}</p>
     <h2>${r.title}</h2>
     <div class="chips"><span class="chip"><i class="sw" style="background:${g.color}"></i>${g.name}</span>${statusChip(r.status)}</div>
-    <div class="sec"><h4>Họ là ai</h4><p>${r.summary}</p></div>
-    <div class="sec"><h4>Đang làm</h4><p>${r.doing}</p></div>
-    <div class="sec"><h4>Làm việc với bạn thế nào</h4><p>${r.withDesigner}</p></div>
-    ${boss ? `<div class="sec"><h4>Báo cáo cho</h4><p>${boss}</p></div>` : ''}
-    <div class="row">${r.url ? `<a class="btn btn-primary" href="${r.url}" target="_blank" rel="noopener">Đọc bài đầy đủ</a>` : '<span class="btn btn-primary is-disabled">Bài viết sắp ra mắt</span>'}<button class="btn btn-ghost" id="p-close">Tiếp tục đi dạo</button></div></div>`;
+    <div class="sec"><h4>${L('Họ là ai', 'Who they are')}</h4><p>${r.summary}</p></div>
+    <div class="sec"><h4>${L('Đang làm', 'Doing now')}</h4><p>${r.doing}</p></div>
+    <div class="sec"><h4>${L('Làm việc với bạn thế nào', 'How they work with you')}</h4><p>${r.withDesigner}</p></div>
+    ${boss ? `<div class="sec"><h4>${L('Báo cáo cho', 'Reports to')}</h4><p>${boss}</p></div>` : ''}
+    <div class="row">${r.url ? `<a class="btn btn-primary" href="${r.url}" target="_blank" rel="noopener">${L('Đọc bài đầy đủ', 'Read the article (Vietnamese)')}</a>` : `<span class="btn btn-primary is-disabled">${L('Bài viết sắp ra mắt', 'Article coming soon')}</span>`}<button class="btn btn-ghost" id="p-close">${L('Tiếp tục đi dạo', 'Keep exploring')}</button></div></div>`;
   $('#panel').hidden = false;
   $('#panel .close').onclick = closePanel; $('#p-close').onclick = closePanel;
 }
 function openLocked(r){
   track('tm_locked_room_open'); closeSheets('panel');
   const items = LOCKED_ROLES.map(id => ROLES[id]).filter(Boolean).map(x => `<li style="display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:13px">${x.url ? `<a href="${x.url}" target="_blank" rel="noopener" style="color:var(--ink)">${x.title}</a>` : x.title}${statusChip(x.status)}</li>`).join('');
-  $('#panel').innerHTML = `<button class="close" aria-label="Đóng">×</button><div class="sheet-body"><p class="eyebrow">Cửa đóng</p><h2>Phòng ban khác</h2>
-    <div class="sec"><p>Ở công ty product nhỏ, những vai trò này chưa có bàn riêng. Việc của họ thường do PM, designer hoặc dev kiêm nhiệm. Khi công ty lớn lên, từng vai trò sẽ có phòng riêng.</p></div>
+  $('#panel').innerHTML = `<button class="close" aria-label="${L('Đóng', 'Close')}">×</button><div class="sheet-body"><p class="eyebrow">${L('Cửa đóng', 'Closed door')}</p><h2>${L('Phòng ban khác', 'Other departments')}</h2>
+    <div class="sec"><p>${L('Ở công ty product nhỏ, những vai trò này chưa có bàn riêng. Việc của họ thường do PM, designer hoặc dev kiêm nhiệm. Khi công ty lớn lên, từng vai trò sẽ có phòng riêng.', 'In a small product company these roles don\'t have their own desks yet. Their work is usually covered by the PM, designers or developers. As the company grows, each role gets its own room.')}</p></div>
     <ul style="list-style:none;padding:0;margin:14px 0 0;display:grid;gap:7px">${items}</ul>
-    <div class="row"><button class="btn btn-primary" id="go-large">Gặp họ ở tập đoàn product 100+ nhân sự</button></div></div>`;
+    <div class="row"><button class="btn btn-primary" id="go-large">${L('Gặp họ ở tập đoàn product 100+ nhân sự', 'Meet them at the 100+ person product company')}</button></div></div>`;
   $('#panel').hidden = false; $('#panel .close').onclick = closePanel; $('#go-large').onclick = () => { closePanel(); setScale('large'); };
 }
 function closePanel(){ $('#panel').hidden = true; }
@@ -850,26 +853,26 @@ function sendHome(list){ list.forEach(c => { if (c.isPlayer || !c.busy) return; 
 function questTalk(c){
   const q = qlist()[Q.idx[scaleKey]]; if (!q) return false;
   if (c === Q.giver && Q.phase === 'offer'){
-    dialog(c, q.offer, 'Nhận việc', () => { Q.step = 0; clearMarkers(); if (q.steps.length){ Q.phase = 'step'; setStepTarget(q); } else { Q.phase = 'return'; setMarker(Q.giver, '?'); } renderQuest(); });
+    dialog(c, q.offer, L('Nhận việc', 'Accept'), () => { Q.step = 0; clearMarkers(); if (q.steps.length){ Q.phase = 'step'; setStepTarget(q); } else { Q.phase = 'return'; setMarker(Q.giver, '?'); } renderQuest(); });
     return true; }
   if (Q.phase === 'step' && !q.steps[Q.step].type && c === inst(q.steps[Q.step].who)){
-    dialog(c, q.steps[Q.step].line, 'Tiếp tục', () => advanceStep(q));
+    dialog(c, q.steps[Q.step].line, L('Tiếp tục', 'Continue'), () => advanceStep(q));
     return true; }
   if (Q.phase === 'return' && c === Q.giver){
-    dialog(c, q.done, 'Trả việc', () => { clearMarkers(); setFace(player.obj, 'happy', 'mSmile'); player.faceT = 3; Q.cards[scaleKey].push(...q.rewards);
+    dialog(c, q.done, L('Trả việc', 'Hand it in'), () => { clearMarkers(); setFace(player.obj, 'happy', 'mSmile'); player.faceT = 3; Q.cards[scaleKey].push(...q.rewards);
       track('tm_quest_complete', { quest_id: q.id, quest_title: q.title, quest_index: Q.idx[scaleKey] + 1, quest_total: qlist().length }); showRewards(q); });
     return true; }
-  if (Q.phase === 'gather' && Q.people.includes(c)){ dialog(c, 'Mọi người đang tập hợp, chờ chút nhé.', 'Ok', () => {}); return true; }
+  if (Q.phase === 'gather' && Q.people.includes(c)){ dialog(c, L('Mọi người đang tập hợp, chờ chút nhé.', 'Everyone is still gathering, hang on a moment.'), 'Ok', () => {}); return true; }
   return false;
 }
-function cardFor(name){ if (ROLES[name]){ const r = ROLES[name]; return { title:r.title, kind:'Vai trò', url:r.url }; } return { title:name, kind:'Thuật ngữ', url: TERMS[name] || null }; }
+function cardFor(name){ if (ROLES[name]){ const r = ROLES[name]; return { title:r.title, kind:L('Vai trò', 'Role'), url:r.url }; } return { title:name, kind:L('Thuật ngữ', 'Term'), url: TERMS[name] || null }; }
 function showRewards(q){
   const list = qlist(), last = Q.idx[scaleKey] >= list.length - 1;
-  const cards = q.rewards.map(cardFor).map(c => `<div class="reward"><span>${c.kind}</span><b>${c.title}</b>${c.url ? `<a href="${c.url}" target="_blank" rel="noopener">Đọc bài</a>` : '<span>Bài viết sắp ra mắt</span>'}</div>`).join('');
+  const cards = q.rewards.map(cardFor).map(c => `<div class="reward"><span>${c.kind}</span><b>${c.title}</b>${c.url ? `<a href="${c.url}" target="_blank" rel="noopener">${L('Đọc bài', 'Read (Vietnamese)')}</a>` : `<span>${L('Bài viết sắp ra mắt', 'Article coming soon')}</span>`}</div>`).join('');
   closeSheets('modal');
-  $('#modal').innerHTML = `<div class="card" role="dialog" aria-modal="true" aria-label="Phần thưởng quest"><p class="eyebrow">Hoàn thành quest ${Q.idx[scaleKey]+1}/${list.length}</p><h2>${q.title}</h2>
-    <p style="margin:0;color:var(--ink-soft)">Bạn mở khoá ${q.rewards.length} thẻ kiến thức. Đọc ngay hoặc để dành, thẻ sẽ nằm trong bộ sưu tập cuối game.</p>
-    <div class="rewards">${cards}</div><div class="row"><button class="btn btn-primary" id="next-q">${last ? 'Xem tổng kết' : 'Quest tiếp theo'}</button></div></div>`;
+  $('#modal').innerHTML = `<div class="card" role="dialog" aria-modal="true" aria-label="${L('Phần thưởng quest', 'Quest rewards')}"><p class="eyebrow">${L('Hoàn thành quest', 'Quest complete')} ${Q.idx[scaleKey]+1}/${list.length}</p><h2>${q.title}</h2>
+    <p style="margin:0;color:var(--ink-soft)">${L(`Bạn mở khoá ${q.rewards.length} thẻ kiến thức. Đọc ngay hoặc để dành, thẻ sẽ nằm trong bộ sưu tập cuối game.`, `You unlocked ${q.rewards.length} knowledge cards. Read them now or later, they stay in your collection at the end of the game.`)}</p>
+    <div class="rewards">${cards}</div><div class="row"><button class="btn btn-primary" id="next-q">${last ? L('Xem tổng kết', 'See summary') : L('Quest tiếp theo', 'Next quest')}</button></div></div>`;
   $('#modal').hidden = false;
   saveProgress();
   $('#next-q').onclick = () => { $('#modal').hidden = true; sendHome(Q.people); Q.idx[scaleKey]++; Q.phase = 'between'; saveProgress(); renderQuest(); setTimeout(() => mode === 'quest' && startQuest(), 1400); };
@@ -881,10 +884,10 @@ function showSummary(){
   if (Q.idx[scaleKey] >= qlist().length && !chainTracked.has(scaleKey)){ chainTracked.add(scaleKey);
     track('tm_quest_chain_complete', { quests: qlist().length, cards: all.length, met: met[scaleKey].size }); }
   closeSheets('modal');
-  $('#modal').innerHTML = `<div class="card sheet" role="dialog" aria-modal="true" aria-label="Tổng kết"><button class="close" aria-label="Đóng">×</button><div class="sheet-body"><p class="eyebrow">Tổng kết sprint</p><h2>Bạn đã hoàn thành ${qlist().length} quest</h2>
-    <p style="margin:0;color:var(--ink-soft)">Đã gặp ${met[scaleKey].size}/${$('#mett').textContent} vai trò và mở khoá ${all.length} thẻ kiến thức.${scaleKey === 'small' ? ' Thử tiếp ở tập đoàn product 100+ nhân sự để gặp Design Manager, UX Researcher và team Design System.' : scaleKey === 'agency' ? ' Bạn vừa đi hết một dự án ở agency. Thử so với cách làm việc ở công ty sản phẩm xem khác gì nhé.' : ''}</p>
-    <div class="rewards">${all.map(c => `<div class="reward"><span>${c.kind}</span><b>${c.title}</b>${c.url ? `<a href="${c.url}" target="_blank" rel="noopener">Đọc bài</a>` : '<span>Sắp ra mắt</span>'}</div>`).join('')}</div>
-    <div class="row">${scaleKey === 'small' ? '<button class="btn btn-primary" id="sum-large">Chơi ở tập đoàn 100+ nhân sự</button>' : scaleKey === 'agency' && SCALES.large ? '<button class="btn btn-primary" id="sum-large">So với tập đoàn product 100+ nhân sự</button>' : ''}<a class="btn btn-ghost" href="https://academy.telos.vn/" target="_blank" rel="noopener">Khám phá khoá học TELOS</a></div></div></div>`;
+  $('#modal').innerHTML = `<div class="card sheet" role="dialog" aria-modal="true" aria-label="${L('Tổng kết', 'Summary')}"><button class="close" aria-label="${L('Đóng', 'Close')}">×</button><div class="sheet-body"><p class="eyebrow">${L('Tổng kết sprint', 'Sprint summary')}</p><h2>${L(`Bạn đã hoàn thành ${qlist().length} quest`, `You completed ${qlist().length} quests`)}</h2>
+    <p style="margin:0;color:var(--ink-soft)">${L(`Đã gặp ${met[scaleKey].size}/${$('#mett').textContent} vai trò và mở khoá ${all.length} thẻ kiến thức.`, `You met ${met[scaleKey].size}/${$('#mett').textContent} roles and unlocked ${all.length} knowledge cards.`)}${scaleKey === 'small' ? L(' Thử tiếp ở tập đoàn product 100+ nhân sự để gặp Design Manager, UX Researcher và team Design System.', ' Next, try the 100+ person product company to meet the Design Manager, UX Researcher and the Design System team.') : scaleKey === 'agency' ? L(' Bạn vừa đi hết một dự án ở agency. Thử so với cách làm việc ở công ty sản phẩm xem khác gì nhé.', ' You just went through a whole agency project. Compare it with how a product company works and see what is different.') : ''}</p>
+    <div class="rewards">${all.map(c => `<div class="reward"><span>${c.kind}</span><b>${c.title}</b>${c.url ? `<a href="${c.url}" target="_blank" rel="noopener">${L('Đọc bài', 'Read (Vietnamese)')}</a>` : `<span>${L('Sắp ra mắt', 'Coming soon')}</span>`}</div>`).join('')}</div>
+    <div class="row">${scaleKey === 'small' ? `<button class="btn btn-primary" id="sum-large">${L('Chơi ở tập đoàn 100+ nhân sự', 'Play at the 100+ person company')}</button>` : scaleKey === 'agency' && SCALES.large ? `<button class="btn btn-primary" id="sum-large">${L('So với tập đoàn product 100+ nhân sự', 'Compare with the 100+ person product company')}</button>` : ''}<a class="btn btn-ghost" href="https://academy.telos.vn/" target="_blank" rel="noopener">${L('Khám phá khoá học TELOS', 'Explore TELOS courses')}</a></div></div></div>`;
   $('#modal').hidden = false; $('#modal .close').onclick = () => $('#modal').hidden = true;
   const b = $('#sum-large'); if (b) b.onclick = () => { $('#modal').hidden = true; setScale('large'); };
 }
@@ -892,23 +895,23 @@ function renderQuest(){
   const el = $('#quest'); updateFab(); if (mode !== 'quest'){ el.hidden = true; return; }
   const list = qlist(), i = Q.idx[scaleKey], q = list[i];
   const prog = list.map((_,k) => `<i class="${k < i ? 'done' : k === i ? 'now' : ''}"></i>`).join('');
-  const go = ['offer', 'step', 'return'].includes(Q.phase) && !Q.prog ? '<button class="q-go" aria-label="Tự đi tới chỗ cần tới">Đi tới</button>' : '';
-  const pill = (n, text) => `<div class="q-pill"><button class="q-compact" aria-label="Xem chi tiết nhiệm vụ"><span class="qc-n">${n}</span><span class="qc-t">${text}</span><span class="qc-more" aria-hidden="true">›</span></button>${go}</div><button class="close q-close" aria-label="Thu nhỏ nhiệm vụ">×</button>`;
-  if (!q){ el.innerHTML = pill('✓', 'Đã xong mọi quest · xem tổng kết') + `<div class="q-full"><p class="eyebrow">Hoàn thành</p><h3>Bạn đã xong mọi quest</h3><p>Mở lại tổng kết để xem các thẻ kiến thức.</p><div class="qprog">${prog}</div><div class="row" style="margin-top:12px"><button class="btn btn-primary" id="q-sum">Xem tổng kết</button><button class="btn btn-ghost" id="q-reset">Chơi lại</button></div></div>`;
+  const go = ['offer', 'step', 'return'].includes(Q.phase) && !Q.prog ? `<button class="q-go" aria-label="${L('Tự đi tới chỗ cần tới', 'Walk there automatically')}">${L('Tới đó', 'Go there')}</button>` : '';
+  const pill = (n, text) => `<div class="q-pill"><button class="q-compact" aria-label="${L('Xem chi tiết nhiệm vụ', 'Quest details')}"><span class="qc-n">${n}</span><span class="qc-t">${text}</span><span class="qc-more" aria-hidden="true">›</span></button>${go}</div><button class="close q-close" aria-label="${L('Thu nhỏ nhiệm vụ', 'Collapse quest')}">×</button>`;
+  if (!q){ el.innerHTML = pill('✓', L('Đã xong mọi quest · xem tổng kết', 'All quests done · see summary')) + `<div class="q-full"><p class="eyebrow">${L('Hoàn thành', 'Complete')}</p><h3>${L('Bạn đã xong mọi quest', 'You finished every quest')}</h3><p>${L('Mở lại tổng kết để xem các thẻ kiến thức.', 'Open the summary again to see your knowledge cards.')}</p><div class="qprog">${prog}</div><div class="row" style="margin-top:12px"><button class="btn btn-primary" id="q-sum">${L('Xem tổng kết', 'See summary')}</button><button class="btn btn-ghost" id="q-reset">${L('Chơi lại', 'Play again')}</button></div></div>`;
     el.hidden = false; $('#q-sum').onclick = showSummary; $('#q-reset').onclick = () => { Q.idx[scaleKey] = 0; Q.cards[scaleKey] = []; saveProgress(); startQuest(); }; if (Q.phase === 'finished' && !Q.summaryShown){ Q.summaryShown = true; showSummary(); } return; }
   const room = roomOf(q.room), gname = Q.giver ? Q.giver.role.title : '';
   let obj = '';
-  if (Q.phase === 'gather') obj = `Mọi người đang tập hợp ở ${room.name}…`;
-  else if (Q.phase === 'offer') obj = `Tới gặp ${gname} ở ${room.name} để nhận việc`;
+  if (Q.phase === 'gather') obj = L(`Mọi người đang tập hợp ở ${room.name}…`, `Everyone is gathering in ${room.name}…`);
+  else if (Q.phase === 'offer') obj = L(`Tới gặp ${gname} ở ${room.name} để nhận việc`, `Meet ${gname} in ${room.name} to get your task`);
   else if (Q.phase === 'step') { const s = q.steps[Q.step], tg = s.type ? null : inst(s.who); obj = `${s.task}${tg && tg.room !== room ? ` (${tg.room.name})` : ''}`;
-    if (s.type) obj += Q.prog ? `<div class="qbar"><i></i></div>` : `<br><span class="objhint">${s.type === 'work' ? 'Đi tới vòng tròn hồng ở chỗ ngồi của bạn' : 'Đi tới vòng tròn hồng cạnh TV'}</span>`; }
-  else if (Q.phase === 'return') obj = `Quay lại báo cáo với ${gname}`;
-  else obj = 'Chuẩn bị quest tiếp theo…';
-  const plain = obj.replace(/<div class="qbar">.*$/, ' · đang làm…').replace(/<br>.*$/, '').replace(/<[^>]+>/g, '');
+    if (s.type) obj += Q.prog ? `<div class="qbar"><i></i></div>` : `<br><span class="objhint">${s.type === 'work' ? L('Đi tới vòng tròn hồng ở chỗ ngồi của bạn', 'Walk to the pink circle at your desk') : L('Đi tới vòng tròn hồng cạnh TV', 'Walk to the pink circle by the TV')}</span>`; }
+  else if (Q.phase === 'return') obj = L(`Quay lại báo cáo với ${gname}`, `Go back and report to ${gname}`);
+  else obj = L('Chuẩn bị quest tiếp theo…', 'Getting the next quest ready…');
+  const plain = obj.replace(/<div class="qbar">.*$/, L(' · đang làm…', ' · working…')).replace(/<br>.*$/, '').replace(/<[^>]+>/g, '');
   el.innerHTML = pill(`${i+1}/${list.length}`, plain) + `<div class="q-full"><p class="eyebrow">Quest ${i+1}/${list.length}</p><h3>${q.title}</h3><div class="objective">${obj}</div><div class="qprog">${prog}</div></div>`;
   el.hidden = false;
 }
-// "Đi tới": tự đi tới người / vòng tròn hồng của bước hiện tại (mobile, khi đích nằm ngoài màn hình)
+// "Tới đó": tự đi tới người / vòng tròn hồng của bước hiện tại (mobile, khi đích nằm ngoài màn hình)
 function goToQuestTarget(){
   if (spot && spot.ring.visible) return walkTo(player, spot.ring.position.x, spot.ring.position.z);
   const c = chars.find(x => x.markerKind && !x.isPlayer); if (!c) return;
@@ -948,14 +951,14 @@ function setScale(k){
 }
 ['small','large','agency'].forEach(k => { const b = $('#sc-' + k), o = $(`#scale-select option[value="${k}"]`);
   if (SCALES[k]){ b.onclick = () => setScale(k); return; }
-  b.classList.add('soon'); b.setAttribute('aria-disabled', 'true'); b.title = 'Sắp ra mắt'; b.insertAdjacentHTML('beforeend', ' <span class="soon-chip">Sắp ra mắt</span>');
-  o.disabled = true; o.textContent += ' · Sắp ra mắt'; });
+  b.classList.add('soon'); b.setAttribute('aria-disabled', 'true'); b.title = L('Sắp ra mắt', 'Coming soon'); b.insertAdjacentHTML('beforeend', ` <span class="soon-chip">${L('Sắp ra mắt', 'Coming soon')}</span>`);
+  o.disabled = true; o.textContent += ' · ' + L('Sắp ra mắt', 'Coming soon'); });
 $('#scale-select').onchange = e => { if (SCALES[e.target.value]) setScale(e.target.value); else e.target.value = scaleKey; };
 // Nút "Nhiệm vụ" cạnh bản đồ: bật / tắt chế độ quest
 function updateFab(){
   const list = QUESTS[scaleKey] || [], i = Math.min(Q.idx[scaleKey], list.length), b = $('#qf-badge');
   b.textContent = mode === 'quest' ? `${i}/${list.length}` : list.length; b.hidden = !list.length;
-  $('#quest-fab').title = mode === 'quest' ? 'Đang làm nhiệm vụ · bấm để quay lại khám phá' : `${list.length} nhiệm vụ đang chờ bạn`;
+  $('#quest-fab').title = mode === 'quest' ? L('Đang làm nhiệm vụ · bấm để quay lại khám phá', 'Quest mode on · click to go back to exploring') : L(`${list.length} nhiệm vụ đang chờ bạn`, `${list.length} quests are waiting for you`);
 }
 $('#quest-fab').onclick = () => { $('#welcome').hidden = true; setMode(mode === 'quest' ? 'explore' : 'quest'); };
 updateFab();
@@ -975,26 +978,26 @@ function reportTree(){
     while (p && !here.has(p) && guard++ < 8) p = bossOf(p); return p && p !== id && here.has(p) ? p : null; };
   const kids = {}; const roots = [];
   here.forEach((e, id) => { const p = parentOf(id); (p ? (kids[p] = kids[p] || []) : roots).push(id); });
-  const byTitle = (a, b) => ROLES[a].title.localeCompare(ROLES[b].title, 'vi');
+  const byTitle = (a, b) => ROLES[a].title.localeCompare(ROLES[b].title, LANG);
   const node = id => { const e = here.get(id), x = e.role, g = GROUPS[x.group], me = id === PLAYER_ID, ch = (kids[id] || []).sort(byTitle);
     const dim = !treeGroups.has(x.group) ? ' dim' : '';
-    const label = `<span class="tnode${me ? ' me' : ''}${dim}"><i class="sw" style="background:${g.color}"></i><b>${me ? `Bạn · ${x.title}` : roleLink(x)}</b>
+    const label = `<span class="tnode${me ? ' me' : ''}${dim}"><i class="sw" style="background:${g.color}"></i><b>${me ? `${L('Bạn', 'You')} · ${x.title}` : roleLink(x)}</b>
       <small>${[...e.rooms].join(' · ')}</small>${e.squad && ![dot.target, ...(dot.also || [])].includes(id) && parentOf(id) !== dot.target ? `<em class="dotted" title="${dot.title}">┄ ${dot.label}</em>` : ''}${me ? '' : statusChip(x.status)}</span>`;
     return ch.length ? `<li><details open><summary>${label}<span class="tcount">${ch.length}</span></summary><ul>${ch.map(node).join('')}</ul></details></li>` : `<li>${label}</li>`; };
-  return `<div class="tree-head"><div class="tree-legend"><span><i class="ln"></i>Báo cáo chuyên môn (solid line)</span>${dot ? `<span><em class="dotted">┄ ${dot.label}</em> ${scaleKey === 'agency' ? 'Nhận việc theo dự án từ Project Manager (dotted line)' : 'Nhận ưu tiên công việc từ PM squad (dotted line)'}</span>` : ''}</div>
+  return `<div class="tree-head"><div class="tree-legend"><span><i class="ln"></i>${L('Báo cáo chuyên môn (solid line)', 'Craft reporting line (solid line)')}</span>${dot ? `<span><em class="dotted">┄ ${dot.label}</em> ${scaleKey === 'agency' ? L('Nhận việc theo dự án từ Project Manager (dotted line)', 'Gets project work from the Project Manager (dotted line)') : L('Nhận ưu tiên công việc từ PM squad (dotted line)', 'Gets work priorities from the squad PM (dotted line)')}</span>` : ''}</div>
       <div class="tree-tools"><div class="gfilter">${Object.entries(GROUPS).map(([k, g]) => `<button data-g="${k}" aria-pressed="${treeGroups.has(k)}"><i class="sw" style="background:${g.color}"></i>${g.name}</button>`).join('')}</div>
-      <button class="btn btn-ghost tree-all" data-open="1">Mở hết</button><button class="btn btn-ghost tree-all" data-open="0">Thu gọn</button></div></div>
+      <button class="btn btn-ghost tree-all" data-open="1">${L('Mở hết', 'Expand all')}</button><button class="btn btn-ghost tree-all" data-open="0">${L('Thu gọn', 'Collapse')}</button></div></div>
     <ul class="tree">${roots.sort(byTitle).map(node).join('')}</ul>`;
 }
 function renderList(){
   const sc = SCALES[scaleKey];
   const roomCards = sc.rooms.filter(r => r.kind !== 'lounge').map(r => {
     const ids = r.kind === 'locked' ? LOCKED_ROLES : [...new Set(r.members)];
-    return `<section class="card room"><p class="eyebrow">${r.code}</p><h3>${r.name}</h3><ul>${ids.filter(id => ROLES[id]).map(id => { const x = ROLES[id]; return `<li>${roleLink(x)}${statusChip(x.status)}</li>`; }).join('') || '<li><span style="color:var(--ink-faint)">Phòng dùng chung cho các buổi họp</span></li>'}</ul></section>`; }).join('');
-  const tabs = [['rooms','Theo phòng ban'],['report','Báo cáo cho ai']];
-  $('#list').innerHTML = `<button class="btn btn-ghost close-list" id="list-close">Quay lại mô hình 3D</button><div class="inner"><p class="eyebrow">${sc.name}</p>
-    <h1>${listTab === 'report' ? 'Ai báo cáo cho ai trong team sản phẩm' : 'Ai ngồi ở đâu trong team sản phẩm'}</h1>
-    <p class="lead">${listTab === 'report' ? 'Đường báo cáo chuyên môn (solid line) khác với người đặt ưu tiên công việc hằng ngày (dotted line). Mỗi nhánh là một người quản lý và những người báo cáo cho họ.' : 'Danh sách các phòng và vai trò trong mô hình. Mỗi vai trò dẫn tới bài viết chi tiết trong thư viện thuật ngữ của TELOS Academy.'}</p>
+    return `<section class="card room"><p class="eyebrow">${r.code}</p><h3>${r.name}</h3><ul>${ids.filter(id => ROLES[id]).map(id => { const x = ROLES[id]; return `<li>${roleLink(x)}${statusChip(x.status)}</li>`; }).join('') || `<li><span style="color:var(--ink-faint)">${L('Phòng dùng chung cho các buổi họp', 'Shared room for meetings')}</span></li>`}</ul></section>`; }).join('');
+  const tabs = [['rooms', L('Theo phòng ban', 'By department')], ['report', L('Báo cáo cho ai', 'Who reports to whom')]];
+  $('#list').innerHTML = `<button class="btn btn-ghost close-list" id="list-close">${L('Quay lại mô hình 3D', 'Back to the 3D map')}</button><div class="inner"><p class="eyebrow">${sc.name}</p>
+    <h1>${listTab === 'report' ? L('Ai báo cáo cho ai trong team sản phẩm', 'Who reports to whom in a product team') : L('Ai ngồi ở đâu trong team sản phẩm', 'Who sits where in a product team')}</h1>
+    <p class="lead">${listTab === 'report' ? L('Đường báo cáo chuyên môn (solid line) khác với người đặt ưu tiên công việc hằng ngày (dotted line). Mỗi nhánh là một người quản lý và những người báo cáo cho họ.', 'The craft reporting line (solid line) is different from the person who sets your daily priorities (dotted line). Each branch is a manager and the people who report to them.') : L('Danh sách các phòng và vai trò trong mô hình. Mỗi vai trò dẫn tới bài viết chi tiết trong thư viện thuật ngữ của TELOS Academy.', 'Every room and role in the map. Each role links to a detailed article (in Vietnamese) in the TELOS Academy glossary.')}</p>
     <div class="seg list-tabs" role="tablist">${tabs.map(([k, t]) => `<button role="tab" data-tab="${k}" aria-pressed="${listTab === k}" aria-selected="${listTab === k}">${t}</button>`).join('')}</div>
     ${listTab === 'report' ? reportTree() : `<div class="grid">${roomCards}</div>`}</div>`;
   $('#list-close').onclick = () => { $('#list').hidden = true; };
@@ -1065,9 +1068,9 @@ function resumeFrom(d){
   }
   renderQuest(); updateFab();
   const list = QUESTS[scaleKey] || [], i = Q.idx[scaleKey];
-  const where = mode === 'quest' ? (i >= list.length ? 'đã xong mọi quest' : `quest ${i + 1}/${list.length}`) : `đã gặp ${met[scaleKey].size}/${$('#mett').textContent} người`;
+  const where = mode === 'quest' ? (i >= list.length ? L('đã xong mọi quest', 'all quests done') : `quest ${i + 1}/${list.length}`) : L(`đã gặp ${met[scaleKey].size}/${$('#mett').textContent} người`, `met ${met[scaleKey].size}/${$('#mett').textContent} people`);
   const el = $('#resume');
-  el.innerHTML = `<span>Tiếp tục từ lần trước · ${where}</span><button class="ri-off" id="resume-reset">Chơi lại từ đầu</button>`;
+  el.innerHTML = `<span>${L('Tiếp tục từ lần trước', 'Picking up where you left off')} · ${where}</span><button class="ri-off" id="resume-reset">${L('Chơi lại từ đầu', 'Start over')}</button>`;
   el.hidden = false;
   const timer = setTimeout(() => el.hidden = true, 9000);
   $('#resume-reset').onclick = () => { clearTimeout(timer); el.hidden = true; resetProgress(); };
@@ -1109,8 +1112,8 @@ async function fetchPreview(url){
 function openReader(a, source){
   const url = a.href, label = a.textContent.trim(), el = $('#reader');
   const out = new URL(url); out.searchParams.set('utm_source', 'uiux-library'); out.searchParams.set('utm_medium', 'product-map'); out.searchParams.set('utm_content', source);
-  const shell = body => `<button class="close" aria-label="Đóng">×</button><div class="sheet-body"><p class="eyebrow">Bài viết · TELOS Academy</p>${body}
-    <div class="row"><a class="btn btn-primary" href="${escapeHtml(out.href)}" target="_blank" rel="noopener">Đọc tiếp trên TELOS Academy</a><p class="rd-note">Tiến độ game đã được lưu. Đọc xong quay lại đây để chơi tiếp.</p></div></div>`;
+  const shell = body => `<button class="close" aria-label="${L('Đóng', 'Close')}">×</button><div class="sheet-body"><p class="eyebrow">${L('Bài viết · TELOS Academy', 'Article in Vietnamese · TELOS Academy')}</p>${body}
+    <div class="row"><a class="btn btn-primary" href="${escapeHtml(out.href)}" target="_blank" rel="noopener">${L('Đọc tiếp trên TELOS Academy', 'Read on TELOS Academy')}</a><p class="rd-note">${L('Tiến độ game đã được lưu. Đọc xong quay lại đây để chơi tiếp.', 'Your progress is saved. Come back here when you are done reading.')}</p></div></div>`;
   // mở từ sheet phần thưởng / tổng kết thì chồng lên trên, đóng xem trước sẽ quay lại đó
   if (!a.closest('#modal')) closeSheets('reader');
   el.dataset.url = url;
@@ -1121,7 +1124,7 @@ function openReader(a, source){
     if (el.hidden || el.dataset.url !== url) return;
     el.innerHTML = shell(p
       ? `<div class="rd-head">${p.img ? `<img class="rd-img" src="${escapeHtml(p.img)}" alt="" loading="lazy">` : ''}<h3>${escapeHtml(p.title || label)}</h3></div><p class="rd-ex">${escapeHtml(p.excerpt)}</p>`
-      : `<div class="rd-head"><h3>${escapeHtml(label)}</h3></div><p class="rd-ex" style="color:var(--ink-faint)">Chưa tải được phần xem trước. Bạn vẫn có thể mở bài đầy đủ.</p>`);
+      : `<div class="rd-head"><h3>${escapeHtml(label)}</h3></div><p class="rd-ex" style="color:var(--ink-faint)">${L('Chưa tải được phần xem trước. Bạn vẫn có thể mở bài đầy đủ.', 'Could not load the preview. You can still open the full article.')}</p>`);
     el.querySelector('.close').onclick = closeReader;
   });
 }

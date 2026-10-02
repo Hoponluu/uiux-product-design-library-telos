@@ -383,3 +383,7 @@
 #resume[hidden]{display:none;}
 #resume span{overflow:hidden;text-overflow:ellipsis;}
 @media (max-width:760px){#resume{top:106px;left:12px;right:12px;transform:none;max-width:none;justify-content:space-between;font-size:12.5px;border-radius:999px;}}
+
+/* nút chuyển ngôn ngữ VI / EN */
+.lang-switch{display:inline-flex;align-items:center;justify-content:center;min-width:40px;text-decoration:none;font-family:var(--font-caption);letter-spacing:.06em;}
+@media (max-width:760px){.lang-switch{flex:none;padding:8px 10px;}}

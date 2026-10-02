@@ -9,7 +9,13 @@
   Chỉ thêm phòng, nhân vật mới, vị trí, nhiệm vụ của agency và cột reports_to_agency;
   không sửa nội dung các nhân vật cũ.
 
-Cả hai chạy trong Supabase → SQL Editor, sau supabase_team_map.sql.
+- supabase_team_map_en.sql: chỉ bản tiếng Anh (cột i18n.en), cho DB đã có dữ liệu.
+  Không đụng tới nội dung tiếng Việt đã sửa trong CMS.
+
+Bản tiếng Anh lấy từ team-map/i18n-en.json và được ghép vào team-map/seed.json (trường i18n)
+để trang /en/team-map vẫn có tiếng Anh khi phải dùng seed dự phòng.
+
+Tất cả chạy trong Supabase → SQL Editor, sau supabase_team_map.sql.
 """
 import json
 import os
@@ -18,6 +24,47 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, 'team-map', 'seed.json')
 OUT = os.path.join(ROOT, 'supabase_team_map_seed.sql')
 OUT_AGENCY = os.path.join(ROOT, 'supabase_team_map_agency_seed.sql')
+SRC_EN = os.path.join(ROOT, 'team-map', 'i18n-en.json')
+OUT_EN = os.path.join(ROOT, 'supabase_team_map_en.sql')
+EN_GROUPS = [('characters', 'characters', 'tm_characters'), ('rooms', 'rooms', 'tm_rooms'),
+             ('quests', 'quests', 'tm_quests'), ('quest_steps', 'steps', 'tm_quest_steps')]
+
+
+def merge_en(d):
+    """Ghép bản tiếng Anh vào từng dòng của seed.json (trường i18n.en)."""
+    en = json.load(open(SRC_EN, encoding='utf-8'))
+    for key, en_key, _ in EN_GROUPS:
+        tr = en[en_key]
+        ids = {it['id'] for it in d[key]}
+        unknown = set(tr) - ids
+        assert not unknown, f'i18n-en.json có id không tồn tại trong {key}: {sorted(unknown)}'
+        for it in d[key]:
+            if it['id'] in tr:
+                it['i18n'] = {'en': tr[it['id']]}
+            else:
+                it.pop('i18n', None)
+    return d
+
+
+def build_en(d):
+    out = ['-- ════════════════════════════════════════════════════════',
+           '-- TEAM MAP — bản tiếng Anh (sinh tự động bởi scripts/gen_team_map_seed.py, đừng sửa tay)',
+           '-- Chạy sau supabase_team_map.sql. Chỉ ghi cột i18n.en (nội dung trang /en/team-map),',
+           '-- không đụng tới nội dung tiếng Việt. Chạy lại sẽ ghi đè bản tiếng Anh đã sửa trong CMS.',
+           '-- ════════════════════════════════════════════════════════', 'begin;', '']
+    for key, _, table in EN_GROUPS:
+        items = [it for it in d[key] if it.get('i18n')]
+        out.append(f'-- {table}: {len(items)} dòng')
+        out.append(f"update {table} t set i18n = jsonb_set(t.i18n, '{{en}}', v.en) from (values")
+        out.append(',\n'.join(f"  ({lit(it['id'])}, {lit(it['i18n']['en'])})" for it in items))
+        out.append(') as v(id, en) where t.id = v.id;\n')
+    out += ['commit;', '',
+            '-- Kiểm tra: số dòng đã có bản tiếng Anh',
+            "select 'tm_characters' as bang, count(*) filter (where i18n ? 'en') as co_tieng_anh, count(*) as tong from tm_characters",
+            "union all select 'tm_rooms', count(*) filter (where i18n ? 'en'), count(*) from tm_rooms",
+            "union all select 'tm_quests', count(*) filter (where i18n ? 'en'), count(*) from tm_quests",
+            "union all select 'tm_quest_steps', count(*) filter (where i18n ? 'en'), count(*) from tm_quest_steps;", '']
+    return '\n'.join(out)
 
 
 def lit(v):
@@ -153,31 +200,37 @@ def build(d, agency_only=False):
            '-- ════════════════════════════════════════════════════════',
            'begin;', '',
            '-- 1. Phòng ban (chỉ nội dung; hình học nằm trong team-map/team-map.layout.js)',
-           upsert('tm_rooms', rooms, ['id', 'scale', 'code', 'name', 'intro', 'sort_order']),
+           upsert('tm_rooms', rooms, ['id', 'scale', 'code', 'name', 'intro', 'sort_order', 'i18n']),
            '-- 2. Nhân vật (lượt 1: chưa gắn báo cáo cho ai)',
            upsert('tm_characters', chars,
                   ['id', 'title', 'kind', 'group', 'article_url', 'summary', 'doing', 'with_designer',
-                   'props', 'appearance', 'tag', 'cta', 'is_active']),
+                   'props', 'appearance', 'tag', 'cta', 'is_active', 'i18n']),
            *reports_sql, '',
            '-- 3. Vị trí (fixed = ngồi cố định, không đi dạo, không tới điểm tập hợp)',
            upsert('tm_placements', placements, ['id', 'character_id', 'scale', 'room_id', 'seat_order', 'fixed']),
            '-- 4. Nhiệm vụ',
            upsert('tm_quests', quests,
                   ['id', 'type', 'scale', 'sort_order', 'title', 'room_id', 'giver', 'gather',
-                   'offer_text', 'done_text', 'rewards', 'is_active', 'daily_date']),
+                   'offer_text', 'done_text', 'rewards', 'is_active', 'daily_date', 'i18n']),
            '-- 5. Bước nhiệm vụ',
            upsert('tm_quest_steps', steps,
-                  ['id', 'quest_id', 'sort_order', 'type', 'target', 'task_text', 'line_text', 'secs']),
+                  ['id', 'quest_id', 'sort_order', 'type', 'target', 'task_text', 'line_text', 'secs', 'i18n']),
            TAIL.replace('{HINTS}', hints).replace('{CHARS}', chars_scope).replace('{QUESTS}', quests_scope)]
     return '\n'.join(out)
 
 
 def main():
-    d = json.load(open(SRC, encoding='utf-8'))
+    d = merge_en(json.load(open(SRC, encoding='utf-8')))
     check(d)
+    with open(SRC, 'w', encoding='utf-8') as fh:
+        json.dump(d, fh, ensure_ascii=False, indent=1)
+        fh.write('\n')
+    print('Đã ghép bản tiếng Anh vào', os.path.relpath(SRC, ROOT))
     for path, agency_only in [(OUT, False), (OUT_AGENCY, True)]:
         open(path, 'w', encoding='utf-8').write(build(d, agency_only))
         print('Đã ghi', os.path.relpath(path, ROOT))
+    open(OUT_EN, 'w', encoding='utf-8').write(build_en(d))
+    print('Đã ghi', os.path.relpath(OUT_EN, ROOT))
 
 
 if __name__ == '__main__':
