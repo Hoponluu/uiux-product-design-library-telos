@@ -35,6 +35,10 @@ def values(rows):
     return ',\n'.join('  (' + ', '.join(lit(x) for x in r) + ')' for r in rows)
 
 
+def inline(rows):
+    return ', '.join('(' + ', '.join(lit(x) for x in r) + ')' for r in rows)
+
+
 def with_en(items, tr, fields):
     """Gắn i18n.en cho từng dòng."""
     out = []
@@ -72,6 +76,8 @@ def main():
     quiz = with_en(h['quiz_questions'], en['quiz'], ['question', 'options'])
     badges = with_en(h['badges'], en['badges'], ['name', 'description'])
     cfg = h['config']
+    rank_rows = [(k, v) for k, v in h['character_rank'].items()]
+    line_refs = [(l['id'], l['character_id']) for l in lines if l['character_id']]
 
     sql = [
         '-- ════════════════════════════════════════════════════════',
@@ -85,9 +91,9 @@ def main():
         'on conflict (id) do update set slot_minutes = excluded.slot_minutes, no_repeat_slots = excluded.no_repeat_slots,',
         '  counted_wins_per_slot = excluded.counted_wins_per_slot;', '',
         '-- 2. Cấp bậc: chỉ ghi cho nhân vật chưa có cấp (id không tồn tại thì bỏ qua, xem báo cáo cuối file)',
-        'create temp table _rank (id text, rank int) on commit drop;',
-        'insert into _rank values', values([(k, v) for k, v in h['character_rank'].items()]) + ';',
-        'update tm_characters c set rank = r.rank from _rank r where c.id = r.id and c.rank is null;', '',
+        '--    (Không dùng bảng tạm: SQL Editor của Supabase không giữ bảng tạm giữa các câu lệnh.)',
+        'update tm_characters c set rank = r.rank from (values', values(rank_rows), ') as r(id, rank)',
+        'where c.id = r.id and c.rank is null;', '',
         '-- 3. Hành động',
         'insert into tm_hourly_actions (id, sort_order, name, title_template, offer_text, win_text, lose_text, weight, config, is_active, i18n) values',
         values([(a['id'], a['sort_order'], a['name'], a['title_template'], a['offer_text'], a['win_text'], a['lose_text'],
@@ -96,17 +102,17 @@ def main():
         '  offer_text = excluded.offer_text, win_text = excluded.win_text, lose_text = excluded.lose_text, weight = excluded.weight,',
         '  config = excluded.config, is_active = excluded.is_active, i18n = excluded.i18n;', '',
         '-- 4. Lời thoại (câu của nhân vật chưa có trong DB thì bỏ qua)',
-        'create temp table _lines (id text, action_id text, kind text, character_id text, text text, is_active boolean, i18n jsonb) on commit drop;',
-        'insert into _lines values', values([(l['id'], l['action_id'], l['kind'], l['character_id'], l['text'], l['is_active'], l['i18n']) for l in lines]) + ';',
         'insert into tm_hourly_lines (id, action_id, kind, character_id, text, is_active, i18n)',
-        'select * from _lines l where l.character_id is null or exists (select 1 from tm_characters c where c.id = l.character_id)',
+        'select l.id, l.action_id, l.kind, l.character_id::text, l.text, l.is_active, l.i18n from (values',
+        values([(l['id'], l['action_id'], l['kind'], l['character_id'], l['text'], l['is_active'], l['i18n']) for l in lines]),
+        ') as l(id, action_id, kind, character_id, text, is_active, i18n) where l.character_id is null or exists (select 1 from tm_characters c where c.id = l.character_id)',
         'on conflict (id) do update set action_id = excluded.action_id, kind = excluded.kind, character_id = excluded.character_id,',
         '  text = excluded.text, is_active = excluded.is_active, i18n = excluded.i18n;', '',
         '-- 5. Câu hỏi trắc nghiệm',
-        'create temp table _quiz (id text, character_id text, question text, options jsonb, correct_index int, is_active boolean, i18n jsonb) on commit drop;',
-        'insert into _quiz values', values([(q['id'], q['character_id'], q['question'], q['options'], q['correct_index'], q['is_active'], q['i18n']) for q in quiz]) + ';',
         'insert into tm_quiz_questions (id, character_id, question, options, correct_index, is_active, i18n)',
-        'select * from _quiz q where exists (select 1 from tm_characters c where c.id = q.character_id)',
+        'select q.* from (values',
+        values([(q['id'], q['character_id'], q['question'], q['options'], q['correct_index'], q['is_active'], q['i18n']) for q in quiz]),
+        ') as q(id, character_id, question, options, correct_index, is_active, i18n) where exists (select 1 from tm_characters c where c.id = q.character_id)',
         'on conflict (id) do update set character_id = excluded.character_id, question = excluded.question, options = excluded.options,',
         '  correct_index = excluded.correct_index, is_active = excluded.is_active, i18n = excluded.i18n;', '',
         '-- 6. Huy hiệu (image_url để trống, admin upload sau; giữ hình đã upload nếu chạy lại)',
@@ -133,21 +139,19 @@ def main():
         ')',
         "update tm_characters c set related_term_ids = t.ids from t where c.id = t.cid and c.related_term_ids = '[]'::jsonb;", '',
         '-- 7b. (ngoài SPEC) còn dưới 4 thuật ngữ → bổ sung thuật ngữ theo nhóm nghề, tra theo tên trong kho',
-        'create temp table _gterms (grp text, name text) on commit drop;',
-        'insert into _gterms values', values([(g, n) for g, names in GROUP_TERMS.items() for n in names]) + ';',
-        'with add as (',
+        'with g(grp, name) as (values', values([(g, n) for g, names in GROUP_TERMS.items() for n in names]), '), add as (',
         "  select c.id, jsonb_agg(distinct to_jsonb(k.id)) as ids from tm_characters c",
-        '  join _gterms g on g.grp = c."group" join concepts k on lower(k.name) = lower(g.name) and k.is_published',
+        '  join g on g.grp = c."group" join concepts k on lower(k.name) = lower(g.name) and k.is_published',
         "  where c.kind = 'role' and jsonb_array_length(c.related_term_ids) < 4 group by c.id",
         ')',
         'update tm_characters c set related_term_ids = (select jsonb_agg(distinct e) from (',
         '    select jsonb_array_elements(c.related_term_ids) e union select jsonb_array_elements(add.ids)) x)',
         'from add where c.id = add.id;', '',
         '-- Báo cáo: id bị bỏ qua + nhân vật có dưới 4 thuật ngữ liên quan (flashcard cần ít nhất 4)',
-        "select 'Cấp bậc: id không tồn tại' as muc, string_agg(r.id, ', ') as chi_tiet from _rank r where not exists (select 1 from tm_characters c where c.id = r.id)",
-        "union all select 'Lời thoại bỏ qua (nhân vật chưa có)', string_agg(l.id || ' → ' || l.character_id, ', ') from _lines l",
+        "select 'Cấp bậc: id không tồn tại' as muc, string_agg(r.id, ', ') as chi_tiet from (values " + inline([(k,) for k in h['character_rank']]) + ") as r(id) where not exists (select 1 from tm_characters c where c.id = r.id)",
+        "union all select 'Lời thoại bỏ qua (nhân vật chưa có)', string_agg(l.id || ' → ' || l.character_id, ', ') from (values " + inline(line_refs) + ") as l(id, character_id)",
         '  where l.character_id is not null and not exists (select 1 from tm_characters c where c.id = l.character_id)',
-        "union all select 'Câu hỏi bỏ qua (nhân vật chưa có)', string_agg(q.id, ', ') from _quiz q where not exists (select 1 from tm_characters c where c.id = q.character_id)",
+        "union all select 'Câu hỏi bỏ qua (nhân vật chưa có)', string_agg(q.id, ', ') from (values " + inline([(q['id'], q['character_id']) for q in quiz]) + ") as q(id, character_id) where not exists (select 1 from tm_characters c where c.id = q.character_id)",
         "union all select 'Dưới 4 thuật ngữ liên quan', string_agg(c.id || ' (' || jsonb_array_length(c.related_term_ids) || ')', ', ' order by c.id)",
         "  from tm_characters c where c.kind = 'role' and c.is_active and jsonb_array_length(c.related_term_ids) < 4;",
         '', 'commit;', '']

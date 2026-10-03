@@ -10,8 +10,8 @@ on conflict (id) do update set slot_minutes = excluded.slot_minutes, no_repeat_s
   counted_wins_per_slot = excluded.counted_wins_per_slot;
 
 -- 2. Cấp bậc: chỉ ghi cho nhân vật chưa có cấp (id không tồn tại thì bỏ qua, xem báo cáo cuối file)
-create temp table _rank (id text, rank int) on commit drop;
-insert into _rank values
+--    (Không dùng bảng tạm: SQL Editor của Supabase không giữ bảng tạm giữa các câu lệnh.)
+update tm_characters c set rank = r.rank from (values
   ('intern', 1),
   ('product-designer', 2),
   ('ui-designer', 2),
@@ -63,8 +63,9 @@ insert into _rank values
   ('cto', 6),
   ('stakeholder', 6),
   ('client', 7),
-  ('user', 8);
-update tm_characters c set rank = r.rank from _rank r where c.id = r.id and c.rank is null;
+  ('user', 8)
+) as r(id, rank)
+where c.id = r.id and c.rank is null;
 
 -- 3. Hành động
 insert into tm_hourly_actions (id, sort_order, name, title_template, offer_text, win_text, lose_text, weight, config, is_active, i18n) values
@@ -81,8 +82,8 @@ on conflict (id) do update set sort_order = excluded.sort_order, name = excluded
   config = excluded.config, is_active = excluded.is_active, i18n = excluded.i18n;
 
 -- 4. Lời thoại (câu của nhân vật chưa có trong DB thì bỏ qua)
-create temp table _lines (id text, action_id text, kind text, character_id text, text text, is_active boolean, i18n jsonb) on commit drop;
-insert into _lines values
+insert into tm_hourly_lines (id, action_id, kind, character_id, text, is_active, i18n)
+select l.id, l.action_id, l.kind, l.character_id::text, l.text, l.is_active, l.i18n from (values
   ('hl-001', 'poptask', 'task', null, 'Em ơi sửa giúp anh cái banner, 5 phút thôi.', true, '{"en": {"text": "Could you fix this banner for me, just 5 minutes."}}'::jsonb),
   ('hl-002', 'poptask', 'task', null, 'Cái này gấp nha, chiều nay gửi anh.', true, '{"en": {"text": "This one''s urgent, send it to me this afternoon."}}'::jsonb),
   ('hl-003', 'poptask', 'task', null, 'Khách mới đổi ý, làm lại từ đầu giúp chị.', true, '{"en": {"text": "The client changed their mind, please redo it from scratch."}}'::jsonb),
@@ -149,15 +150,14 @@ insert into _lines values
   ('hl-064', 'gossip', 'say', 'data-analyst', 'Xin một con số thôi mà hẹn sang tuần sau.', true, '{"en": {"text": "Asked for one number and got told \"next week\"."}}'::jsonb),
   ('hl-065', 'gossip', 'say', 'scrum-master', 'Ngày nào cũng bắt đứng họp, mà họp đứng 45 phút.', true, '{"en": {"text": "Makes us do a stand-up every day, and the stand-up takes 45 minutes."}}'::jsonb),
   ('hl-066', 'gossip', 'say', 'design-director', 'Kêu sáng tạo tự do đi, xong sửa lại y như ý ổng.', true, '{"en": {"text": "Says \"be creative, total freedom\", then changes it to exactly what he wanted."}}'::jsonb),
-  ('hl-067', 'gossip', 'say', 'sales', 'Hứa với khách cái tính năng mà team chưa ai nghe tới.', true, '{"en": {"text": "Promised the client a feature nobody on the team has heard of."}}'::jsonb);
-insert into tm_hourly_lines (id, action_id, kind, character_id, text, is_active, i18n)
-select * from _lines l where l.character_id is null or exists (select 1 from tm_characters c where c.id = l.character_id)
+  ('hl-067', 'gossip', 'say', 'sales', 'Hứa với khách cái tính năng mà team chưa ai nghe tới.', true, '{"en": {"text": "Promised the client a feature nobody on the team has heard of."}}'::jsonb)
+) as l(id, action_id, kind, character_id, text, is_active, i18n) where l.character_id is null or exists (select 1 from tm_characters c where c.id = l.character_id)
 on conflict (id) do update set action_id = excluded.action_id, kind = excluded.kind, character_id = excluded.character_id,
   text = excluded.text, is_active = excluded.is_active, i18n = excluded.i18n;
 
 -- 5. Câu hỏi trắc nghiệm
-create temp table _quiz (id text, character_id text, question text, options jsonb, correct_index int, is_active boolean, i18n jsonb) on commit drop;
-insert into _quiz values
+insert into tm_quiz_questions (id, character_id, question, options, correct_index, is_active, i18n)
+select q.* from (values
   ('qz-product-manager-1', 'product-manager', 'Product Manager chịu trách nhiệm chính về điều gì?', '["Quyết định sản phẩm nên giải quyết vấn đề gì và ưu tiên cái nào trước", "Viết code cho các tính năng chính", "Vẽ toàn bộ giao diện của sản phẩm"]'::jsonb, 0, true, '{"en": {"question": "What is a Product Manager mainly responsible for?", "options": ["Deciding which problems the product should solve and what comes first", "Writing the code for the main features", "Designing the entire interface"]}}'::jsonb),
   ('qz-product-owner-1', 'product-owner', 'Trong một nhóm Scrum, Product Owner là người quản lý thứ gì?', '["Lương thưởng của cả nhóm", "Product backlog và thứ tự ưu tiên của nó", "Máy chủ và hạ tầng"]'::jsonb, 1, true, '{"en": {"question": "In a Scrum team, what does the Product Owner manage?", "options": ["The team''s salaries and bonuses", "The product backlog and its priorities", "Servers and infrastructure"]}}'::jsonb),
   ('qz-product-designer-1', 'product-designer', 'So với UI Designer, Product Designer thường gánh thêm phần nào?', '["Chỉ làm ảnh quảng cáo", "Viết API cho backend", "Cả bài toán sản phẩm: từ tìm hiểu vấn đề tới đo kết quả sau khi ra mắt"]'::jsonb, 2, true, '{"en": {"question": "Compared with a UI Designer, what extra does a Product Designer usually take on?", "options": ["Only advertising images", "Writing backend APIs", "The whole product problem: from understanding it to measuring results after launch"]}}'::jsonb),
@@ -169,9 +169,8 @@ insert into _quiz values
   ('qz-backend-developer-1', 'backend-developer', 'Backend Developer lo phần nào của sản phẩm?', '["Màu sắc và kiểu chữ", "Bài đăng mạng xã hội", "Máy chủ, dữ liệu và API phía sau giao diện"]'::jsonb, 2, true, '{"en": {"question": "Which part of the product does a Backend Developer handle?", "options": ["Colours and typography", "Social media posts", "Servers, data and the APIs behind the interface"]}}'::jsonb),
   ('qz-fullstack-developer-1', 'fullstack-developer', 'Fullstack Developer khác gì so với Frontend hay Backend Developer?', '["Làm được cả phần giao diện lẫn phần máy chủ", "Chỉ làm thiết kế, không viết code", "Chỉ kiểm thử sản phẩm"]'::jsonb, 0, true, '{"en": {"question": "How is a Fullstack Developer different from a Frontend or Backend Developer?", "options": ["They can build both the interface and the server side", "They only design and never code", "They only test the product"]}}'::jsonb),
   ('qz-business-analyst-1', 'business-analyst', 'Business Analyst thường giúp đội làm rõ điều gì?', '["Bảng màu thương hiệu", "Yêu cầu nghiệp vụ và quy trình mà sản phẩm phải đáp ứng", "Lịch nghỉ phép của nhóm"]'::jsonb, 1, true, '{"en": {"question": "What does a Business Analyst usually help the team clarify?", "options": ["The brand colour palette", "The business requirements and processes the product must support", "The team''s holiday schedule"]}}'::jsonb),
-  ('qz-stakeholder-1', 'stakeholder', 'Stakeholder là ai trong một dự án?', '["Người viết code chính", "Người dùng cuối của sản phẩm", "Người có quyền lợi hoặc tiếng nói với kết quả dự án, dù không trực tiếp làm"]'::jsonb, 2, true, '{"en": {"question": "Who is a stakeholder in a project?", "options": ["The lead developer", "The product''s end user", "Someone with an interest in or a say over the outcome, even if they don''t do the work"]}}'::jsonb);
-insert into tm_quiz_questions (id, character_id, question, options, correct_index, is_active, i18n)
-select * from _quiz q where exists (select 1 from tm_characters c where c.id = q.character_id)
+  ('qz-stakeholder-1', 'stakeholder', 'Stakeholder là ai trong một dự án?', '["Người viết code chính", "Người dùng cuối của sản phẩm", "Người có quyền lợi hoặc tiếng nói với kết quả dự án, dù không trực tiếp làm"]'::jsonb, 2, true, '{"en": {"question": "Who is a stakeholder in a project?", "options": ["The lead developer", "The product''s end user", "Someone with an interest in or a say over the outcome, even if they don''t do the work"]}}'::jsonb)
+) as q(id, character_id, question, options, correct_index, is_active, i18n) where exists (select 1 from tm_characters c where c.id = q.character_id)
 on conflict (id) do update set character_id = excluded.character_id, question = excluded.question, options = excluded.options,
   correct_index = excluded.correct_index, is_active = excluded.is_active, i18n = excluded.i18n;
 
@@ -208,8 +207,7 @@ with part as (
 update tm_characters c set related_term_ids = t.ids from t where c.id = t.cid and c.related_term_ids = '[]'::jsonb;
 
 -- 7b. (ngoài SPEC) còn dưới 4 thuật ngữ → bổ sung thuật ngữ theo nhóm nghề, tra theo tên trong kho
-create temp table _gterms (grp text, name text) on commit drop;
-insert into _gterms values
+with g(grp, name) as (values
   ('design', 'Wireframe'),
   ('design', 'Mockup'),
   ('design', 'Prototype'),
@@ -254,10 +252,10 @@ insert into _gterms values
   ('business', 'Problem Statement'),
   ('business', 'Empathy Map'),
   ('business', 'Sitemap'),
-  ('business', 'Bố cục Website');
-with add as (
+  ('business', 'Bố cục Website')
+), add as (
   select c.id, jsonb_agg(distinct to_jsonb(k.id)) as ids from tm_characters c
-  join _gterms g on g.grp = c."group" join concepts k on lower(k.name) = lower(g.name) and k.is_published
+  join g on g.grp = c."group" join concepts k on lower(k.name) = lower(g.name) and k.is_published
   where c.kind = 'role' and jsonb_array_length(c.related_term_ids) < 4 group by c.id
 )
 update tm_characters c set related_term_ids = (select jsonb_agg(distinct e) from (
@@ -265,10 +263,10 @@ update tm_characters c set related_term_ids = (select jsonb_agg(distinct e) from
 from add where c.id = add.id;
 
 -- Báo cáo: id bị bỏ qua + nhân vật có dưới 4 thuật ngữ liên quan (flashcard cần ít nhất 4)
-select 'Cấp bậc: id không tồn tại' as muc, string_agg(r.id, ', ') as chi_tiet from _rank r where not exists (select 1 from tm_characters c where c.id = r.id)
-union all select 'Lời thoại bỏ qua (nhân vật chưa có)', string_agg(l.id || ' → ' || l.character_id, ', ') from _lines l
+select 'Cấp bậc: id không tồn tại' as muc, string_agg(r.id, ', ') as chi_tiet from (values ('intern'), ('product-designer'), ('ui-designer'), ('ux-designer'), ('ds-designer'), ('ux-design-engineer'), ('ux-researcher'), ('ux-writer'), ('motion-designer'), ('frontend-developer'), ('backend-developer'), ('fullstack-developer'), ('mobile-developer'), ('qa-engineer'), ('devops'), ('data-analyst'), ('bi-analyst'), ('data-scientist'), ('data-engineer'), ('performance-marketer'), ('content-marketer'), ('seo-specialist'), ('customer-support'), ('business-analyst'), ('graphic-designer'), ('sales'), ('freelancer'), ('tech-lead'), ('software-architect'), ('scrum-master'), ('product-owner'), ('product-manager'), ('growth-pm'), ('data-pm'), ('project-manager'), ('account-manager'), ('crm-manager'), ('csm'), ('design-manager'), ('delivery-manager'), ('growth-manager'), ('brand-manager'), ('head-of-design'), ('head-of-data'), ('head-of-eng'), ('design-director'), ('ceo'), ('cpo'), ('cto'), ('stakeholder'), ('client'), ('user')) as r(id) where not exists (select 1 from tm_characters c where c.id = r.id)
+union all select 'Lời thoại bỏ qua (nhân vật chưa có)', string_agg(l.id || ' → ' || l.character_id, ', ') from (values ('hl-013', 'product-manager'), ('hl-014', 'frontend-developer'), ('hl-015', 'backend-developer'), ('hl-016', 'qa-engineer'), ('hl-017', 'client'), ('hl-018', 'ceo'), ('hl-019', 'intern'), ('hl-023', 'user'), ('hl-024', 'client'), ('hl-043', 'product-manager'), ('hl-044', 'product-owner'), ('hl-045', 'frontend-developer'), ('hl-046', 'backend-developer'), ('hl-047', 'fullstack-developer'), ('hl-048', 'mobile-developer'), ('hl-049', 'qa-engineer'), ('hl-050', 'tech-lead'), ('hl-051', 'design-manager'), ('hl-052', 'head-of-design'), ('hl-053', 'ceo'), ('hl-054', 'cpo'), ('hl-055', 'cto'), ('hl-056', 'stakeholder'), ('hl-057', 'business-analyst'), ('hl-058', 'project-manager'), ('hl-059', 'account-manager'), ('hl-060', 'intern'), ('hl-061', 'client'), ('hl-062', 'user'), ('hl-063', 'ux-researcher'), ('hl-064', 'data-analyst'), ('hl-065', 'scrum-master'), ('hl-066', 'design-director'), ('hl-067', 'sales')) as l(id, character_id)
   where l.character_id is not null and not exists (select 1 from tm_characters c where c.id = l.character_id)
-union all select 'Câu hỏi bỏ qua (nhân vật chưa có)', string_agg(q.id, ', ') from _quiz q where not exists (select 1 from tm_characters c where c.id = q.character_id)
+union all select 'Câu hỏi bỏ qua (nhân vật chưa có)', string_agg(q.id, ', ') from (values ('qz-product-manager-1', 'product-manager'), ('qz-product-owner-1', 'product-owner'), ('qz-product-designer-1', 'product-designer'), ('qz-intern-1', 'intern'), ('qz-ds-designer-1', 'ds-designer'), ('qz-ux-design-engineer-1', 'ux-design-engineer'), ('qz-motion-designer-1', 'motion-designer'), ('qz-frontend-developer-1', 'frontend-developer'), ('qz-backend-developer-1', 'backend-developer'), ('qz-fullstack-developer-1', 'fullstack-developer'), ('qz-business-analyst-1', 'business-analyst'), ('qz-stakeholder-1', 'stakeholder')) as q(id, character_id) where not exists (select 1 from tm_characters c where c.id = q.character_id)
 union all select 'Dưới 4 thuật ngữ liên quan', string_agg(c.id || ' (' || jsonb_array_length(c.related_term_ids) || ')', ', ' order by c.id)
   from tm_characters c where c.kind = 'role' and c.is_active and jsonb_array_length(c.related_term_ids) < 4;
 
