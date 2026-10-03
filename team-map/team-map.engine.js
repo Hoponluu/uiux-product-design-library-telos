@@ -12,6 +12,8 @@ const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(
 const isDark = () => { const t = document.documentElement.getAttribute('data-theme'); if (t) return t === 'dark'; return matchMedia('(prefers-color-scheme: dark)').matches; };
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const canvas = $('#stage'), overlay = $('#overlay');
+// Nhiệm vụ theo giờ + 8 mini-game (team-map.hourly-games.js). null nếu chưa có dữ liệu / file.
+let HX = null;
 const small = () => innerWidth < 760;
 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias:true });
@@ -268,6 +270,7 @@ function buildWorld(key){
   placeCamera(player.obj.root.position, camY.overview ? camY.dist : Math.round(18 * Math.min(1.6, Math.max(1, .8 / camera.aspect))));
 }
 
+let decorRoom = null;
 function buildRoom(r){
   const wallH = r.kind === 'glass' ? .9 : r.kind === 'locked' ? 1.7 : .6, t = .22;
   const fl = new THREE.Mesh(new THREE.PlaneGeometry(r.w, r.d), new THREE.MeshLambertMaterial({ color:r.floor }));
@@ -277,7 +280,7 @@ function buildRoom(r){
     const tb = cyl(.9,.9,.08,'#FFFFFF',28); tb.position.set(r.x,.72,r.z); world.add(tb); const leg = cyl(.08,.08,.7,'#5B5270'); leg.position.set(r.x,.36,r.z); world.add(leg); blockRect(r.x, r.z, 1.8, 1.8, .2);
     r.gather = (k) => Array.from({ length:k }, (_,i) => [r.x - 2.3, r.z + (i-(k-1)/2)*1.2]);
     if (GUEST_ID){ const ux = r.x + 1.5, uz = r.z + .2; chair(ux, uz, -Math.PI/2); addChar(GUEST_ID, r, ux, uz, -Math.PI/2); }
-    decor(r);
+    decorRoom = r; decor(r); decorRoom = null; resolveHides(r);
     return;
   }
   const wm = r.kind === 'glass' ? mat('#9FE3F2',{ transparent:true, opacity:.35 }) : mat('#FFFFFF');
@@ -314,6 +317,7 @@ function buildRoom(r){
     const dx = r.x, dz = tall ? r.z : r.z - .4;
     const top = box(dw, .08, dd, '#FFFFFF'); top.position.set(dx, .64, dz); top.receiveShadow = true; world.add(top);
     const base = box(dw-.3, .6, dd-.3, '#DCD5EE'); base.position.set(dx, .3, dz); world.add(base); blockRect(dx, dz, dw, dd, .12);
+    if (tall){ addHide(r, dx, dz - dd/2 - .5); addHide(r, dx, dz + dd/2 + .5); } else { addHide(r, dx - dw/2 - .5, dz); addHide(r, dx + dw/2 + .5, dz); }
     r.members.forEach((id,i) => { const col = Math.floor(i/2), side = i%2 ? 1 : -1, along = (col-(cols-1)/2)*sp, across = side*1.15;
       const x = tall ? dx + across : dx + along, z = tall ? dz + along : dz + across;
       const rot = tall ? (side < 0 ? Math.PI/2 : -Math.PI/2) : (side < 0 ? 0 : Math.PI);
@@ -322,7 +326,7 @@ function buildRoom(r){
     r.gather = (k) => Array.from({ length:k }, (_,i) => tall ? [r.x - r.w/2 + 1.4, r.z + (i-(k-1)/2)*1.2] : [r.x + (i-(k-1)/2)*1.25, r.z + r.d/2 - 1.5]);
   }
   if (TV_ROOMS[r.id] !== undefined) addTV(r, TV_ROOMS[r.id]);
-  decor(r);
+  decorRoom = r; decor(r); decorRoom = null; resolveHides(r);
 }
 const screenCache = {};
 function screenTex(kind){
@@ -407,8 +411,15 @@ function addTV(r, off){
   const idle = slideTex('TELOS', r.name, true);
   const sm = new THREE.MeshBasicMaterial({ map: idle });
   const sc = new THREE.Mesh(new THREE.PlaneGeometry(2.5,1.4), sm); sc.position.set(x,1.35,z+.045); world.add(sc);
-  r.tv = { mat:sm, idle }; r.presentSpot = nearestFree(x + 1.9, z + 1.1);
+  r.tv = { mat:sm, idle }; r.presentSpot = nearestFree(x + 1.9, z + 1.1); addHide(r, x - 1.7, z + .4);
 }
+// điểm nấp cho trốn tìm: cạnh chậu cây, sau beanbag, sau TV, đầu bàn (ô đi tới được, lệch về phía trong phòng)
+// (ghi điểm neo trước, tới khi dựng xong cả phòng mới chọn ô trống gần nhất để không rơi vào ô bị đồ đạc chặn)
+function addHide(r, x, z){ (r.hideAnchors = r.hideAnchors || []).push([x, z]); }
+function resolveHides(r){
+  r.hideSpots = (r.hideAnchors || []).map(([x, z]) => { const dx = r.x - x, dz = r.z - z, d = Math.hypot(dx, dz) || 1; return nearestFree(x + dx/d*.75, z + dz/d*.75); })
+    .filter(([hx, hz]) => free(hx, hz) && Math.abs(hx - r.x) < r.w/2 - .3 && Math.abs(hz - r.z) < r.d/2 - .3);
+  r.hideAnchors = null; }
 function decor(r){
   if (r.kind === 'locked') return;
   const cx = s => r.x + s*(r.w/2 - .85), cz = s => r.z + s*(r.d/2 - .85);
@@ -419,7 +430,7 @@ function decor(r){
   if (!tvWest) plant(cx(-1), cz(-1)); else plant(cx(1), cz(-1));
   beanbag(cx(-1), cz(1), ['#E92F7C','#FFC53D','#35C6E8'][Math.abs(Math.round(r.x+r.z)) % 3]);
 }
-function beanbag(x, z, c){ const b = ball(1, c); b.scale.set(.5,.3,.5); b.position.set(x,.28,z); b.castShadow = true; world.add(b);
+function beanbag(x, z, c){ if (decorRoom) addHide(decorRoom, x, z); const b = ball(1, c); b.scale.set(.5,.3,.5); b.position.set(x,.28,z); b.castShadow = true; world.add(b);
   const d = ball(1, c); d.scale.set(.36,.2,.36); d.position.set(x - .05,.5,z - .05); world.add(d); blockRect(x, z, .9, .9, .1); }
 function floorText(code, name, x, z, w){
   const c = document.createElement('canvas'); c.width = 1024; c.height = 160; const g = c.getContext('2d');
@@ -433,7 +444,7 @@ function floorText(code, name, x, z, w){
   const m = new THREE.Mesh(new THREE.PlaneGeometry(w, w*160/1024), new THREE.MeshBasicMaterial({ map:t, transparent:true, depthWrite:false }));
   m.rotation.x = -Math.PI/2; m.position.set(x, .03, z); world.add(m);
 }
-function plant(x,z){ const p = cyl(.22,.17,.42,'#FFFFFF'); p.position.set(x,.21,z); world.add(p); const rim = cyl(.24,.24,.06,'#E92F7C'); rim.position.set(x,.42,z); world.add(rim);
+function plant(x,z){ if (decorRoom) addHide(decorRoom, x, z); const p = cyl(.22,.17,.42,'#FFFFFF'); p.position.set(x,.21,z); world.add(p); const rim = cyl(.24,.24,.06,'#E92F7C'); rim.position.set(x,.42,z); world.add(rim);
   [[0,.85,0,.3],[.16,.7,.08,.22],[-.14,.72,-.06,.22],[.02,.62,-.16,.2]].forEach(([dx,y,dz,r]) => { const b = ball(r,'#3FA87A'); b.position.set(x+dx,y,z+dz); b.castShadow = true; world.add(b); });
   blockRect(x,z,.5,.5,.1); }
 
@@ -478,6 +489,7 @@ canvas.addEventListener('contextmenu', e => e.preventDefault());
 const keys = {};
 addEventListener('keydown', e => {
   if (e.target.closest && e.target.closest('input,textarea')) return;
+  if (HX && HX.onKey(e, true)) return;
   const k = e.key.toLowerCase(); keys[k] = true;
   if (['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k)) e.preventDefault();
   if (k === 'f' || k === ' ' || k === 'enter'){ if (!(e.target.closest && e.target.closest('button,a'))) interact(); }
@@ -485,7 +497,7 @@ addEventListener('keydown', e => {
   if (k === 'e') rotateCam(1);
   if (k === 'escape'){ closePanel(); closeDialog(); }
 });
-addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; if (HX) HX.onKey(e, false); });
 let drag = null;
 // hai ngón tay: pinch để zoom (mobile)
 const touches = new Map(); let pinch = null;
@@ -516,7 +528,9 @@ function pick(e){ const r = canvas.getBoundingClientRect(); ndc.set(((e.clientX-
   const hits = ray.intersectObjects(chars.map(c => c.obj.body)); return hits.length ? chars[hits[0].object.userData.inst] : null; }
 let hovered = null;
 function hover(e){ const c = pick(e); hovered = c && !c.isPlayer ? c : null; canvas.style.cursor = hovered ? 'pointer' : ''; }
+function groundPoint(e){ pick(e); const p = new THREE.Vector3(); return ray.ray.intersectPlane(ground, p) ? p : null; }
 function click(e){
+  if (HX && HX.onClick(e)) return;
   const c = pick(e);
   if (c && !c.isPlayer){ walkTo(player, c.obj.root.position.x, c.obj.root.position.z, () => talk(c), 1.3); return; }
   const p = new THREE.Vector3(); if (ray.ray.intersectPlane(ground, p)){
@@ -536,6 +550,7 @@ function walkTo(c, x, z, onArrive, stopDist=0){
 const clock = new THREE.Clock(); let t = 0, frame = 0;
 function stepChar(c, dt){
   const o = c.obj; let moving = false;
+  if (c.frozenUntil && t < c.frozenUntil){ c.path = []; c.walking = false; return; }
   if (c.isPlayer){
     const f = (keys['w']||keys['arrowup']?1:0) - (keys['s']||keys['arrowdown']?1:0), s = (keys['d']||keys['arrowright']?1:0) - (keys['a']||keys['arrowleft']?1:0);
     if (f || s){ c.path = []; c.onArrive = null; c.sitting = false; const y = camY.yaw; let mx = -Math.sin(y)*f + Math.cos(y)*s, mz = -Math.cos(y)*f - Math.sin(y)*s; const L = Math.hypot(mx,mz); mx /= L; mz /= L;
@@ -569,7 +584,9 @@ function updateLabels(){
   const lockNear = rooms.find(r => r.kind === 'locked' && Math.hypot(pp.x-r.doorPoint[0], pp.z-r.doorPoint[1]) < 2);
   labels.forEach(L => {
     let pos = L.pos, show = true;
-    if (L.inst){ const c = L.inst, rp = c.obj.root.position;
+    if (L.custom){ const r = L.custom(); show = !!(r && r.show); if (show) pos = r.pos; }
+    else if (L.inst && L.inst.hidden) show = false;
+    else if (L.inst){ const c = L.inst, rp = c.obj.root.position;
       if (L.marker){ show = !!c.markerKind && mode === 'quest'; pos = new THREE.Vector3(rp.x, 1.72, rp.z); }
       else if (L.chat){ const a = c.ai; show = a && a.s === 'chat' && a.conv.speaker === c; pos = new THREE.Vector3(rp.x, 2.05, rp.z);
         if (show && L.el.dataset.k !== a.conv.icon){ L.el.dataset.k = a.conv.icon; L.el.innerHTML = a.conv.icon === '•••' ? '<span class="dots"><i></i><i></i><i></i></span>' : a.conv.icon; } }
@@ -582,7 +599,7 @@ function updateLabels(){
     L.el.hidden = false; L.el.style.transform = `translate(${s.x|0}px,${s.y|0}px) translate(-50%,-100%)`;
   });
   const bTarget = near || null;
-  if (bTarget && $('#dialog').hidden && $('#panel').hidden){
+  if (bTarget && !bTarget.hidden && !(HX && HX.playing()) && $('#dialog').hidden && $('#panel').hidden){
     const rp = bTarget.obj.root.position, s = project(new THREE.Vector3(rp.x, 1.62, rp.z));
     const html = `<small>${bTarget.role.title}</small><span class="b-long">${bTarget.role.doing}<br></span><span class="b-key" style="color:var(--ink-faint)">${L('Bấm <kbd>F</kbd> hoặc click để nói chuyện', 'Press <kbd>F</kbd> or click to talk')}</span><span class="b-touch">${L('Chạm để nói chuyện', 'Tap to talk')}</span>`;
     if (bubble.dataset.k !== bTarget.id){ bubble.innerHTML = html; bubble.dataset.k = bTarget.id; }
@@ -605,6 +622,7 @@ function talk(c){
   if (c.sitting){ const pa = player.obj.root.position, pb = c.obj.root.position; player.heading = Math.atan2(pb.x-pa.x, pb.z-pa.z); } else faceEach(player, c);
   if (!c.busy && !c.guest && !c.fixed){ if (c.ai && c.ai.conv) endConv(c.ai.conv, c); c.path = []; c.onArrive = null; c.ai = { s:'pause', t:5 }; } setFace(c.obj, 'happy', 'mSmile'); c.faceT = 3; setFace(player.obj, 'look', 'mO'); player.faceT = 2;
   if (!c.roamer && !c.guest){ met[scaleKey].add(c.role.id); updateMet(); }
+  if (HX && HX.onTalk(c)) return;
   if (mode === 'quest' && questTalk(c)) return;
   openPanel(c);
 }
@@ -741,13 +759,14 @@ function hideIntro(){ const el = $('#roomintro'); el.hidden = true; el.classList
 const mqMobile = matchMedia('(max-width:760px)'), isMobile = () => mqMobile.matches;
 function sheetOpen(){
   if (!isMobile()) return false;
-  return !$('#panel').hidden || !$('#dialog').hidden || !$('#welcome').hidden || !$('#modal').hidden || !$('#reader').hidden
+  return !$('#panel').hidden || !$('#dialog').hidden || !$('#welcome').hidden || !$('#modal').hidden || !$('#reader').hidden || !!(HX && HX.sheetOpen())
     || ['#roomintro', '#mini', '#quest'].some(id => $(id).classList.contains('open'));
 }
 function closeSheets(except){
   if (!isMobile()) return;
   if (except !== 'panel') closePanel();
   if (except !== 'reader') closeReader();
+  if (except !== 'hourly' && HX) HX.closeSheet();
   if (except !== 'dialog') closeDialog();
   if (except !== 'intro') hideIntro();
   if (except !== 'mini') $('#mini').classList.remove('open');
@@ -755,7 +774,7 @@ function closeSheets(except){
   if (except !== 'welcome' && !$('#welcome').hidden) $('#start').click();
   if (except !== 'modal' && !$('#modal').hidden){ const n = $('#next-q'); if (n) n.click(); else $('#modal').hidden = true; }
 }
-const SHEET_SEL = '#reader:not([hidden]),#panel:not([hidden]),#dialog:not([hidden]),#welcome:not([hidden]),#modal .card,#roomintro.open,#mini.open,#quest.open,#list,#nav-overlay';
+const SHEET_SEL = '#h-sheet:not([hidden]),#h-bar,#h-act,#badges:not([hidden]),#reader:not([hidden]),#panel:not([hidden]),#dialog:not([hidden]),#welcome:not([hidden]),#modal .card,#roomintro.open,#mini.open,#quest.open,#list,#nav-overlay';
 document.addEventListener('click', e => {
   if (!isMobile() || e.target === canvas || !e.target.closest) return;
   if (!$('#reader').hidden){ if (!e.target.closest('#reader')) closeReader(); return; }
@@ -777,9 +796,10 @@ function openPanel(c){
       <div class="chips"><span class="chip pub">${sp.tag}</span></div>
       <div class="sec"><p>${c.role.summary}</p></div>
       <div class="sec"><h4>${L('Ổng có thể giúp gì cho bạn?', 'How can he help you?')}</h4><p>${c.role.withDesigner}</p></div>
-      <div class="sec"><h4>${L('Nhiệm vụ hằng ngày', 'Daily quest')}</h4><p style="color:var(--ink-faint)">${L('Sắp ra mắt. Ổng sẽ giao cho bạn một nhiệm vụ nhỏ mỗi ngày.', 'Coming soon. He will give you a small quest every day.')}</p></div>
+      ${HX ? '' : `<div class="sec"><h4>${L('Nhiệm vụ hằng ngày', 'Daily quest')}</h4><p style="color:var(--ink-faint)">${L('Sắp ra mắt. Ổng sẽ giao cho bạn một nhiệm vụ nhỏ mỗi ngày.', 'Coming soon. He will give you a small quest every day.')}</p></div>`}
+      ${HX ? HX.authorCard() : ''}
       <div class="row">${ctaButtons(sp.links)}</div></div>`;
-    $('#panel').hidden = false; $('#panel .close').onclick = closePanel; return; }
+    $('#panel').hidden = false; $('#panel .close').onclick = closePanel; if (HX) HX.bindPanel(c); return; }
   if (c.guest){ const gs = c.role.guest;
     $('#panel').innerHTML = `<button class="close" aria-label="${L('Đóng', 'Close')}">×</button><div class="sheet-body">
       <p class="eyebrow">${c.room.name}</p><h2>${c.role.title}</h2>
@@ -799,8 +819,8 @@ function openPanel(c){
     <div class="sec"><h4>${L('Đang làm', 'Doing now')}</h4><p>${r.doing}</p></div>
     <div class="sec"><h4>${L('Làm việc với bạn thế nào', 'How they work with you')}</h4><p>${r.withDesigner}</p></div>
     ${boss ? `<div class="sec"><h4>${L('Báo cáo cho', 'Reports to')}</h4><p>${boss}</p></div>` : ''}
-    <div class="row">${r.url ? `<a class="btn btn-primary" href="${r.url}" target="_blank" rel="noopener">${L('Đọc bài đầy đủ', 'Read the article (Vietnamese)')}</a>` : `<span class="btn btn-primary is-disabled">${L('Bài viết sắp ra mắt', 'Article coming soon')}</span>`}<button class="btn btn-ghost" id="p-close">${L('Tiếp tục đi dạo', 'Keep exploring')}</button></div></div>`;
-  $('#panel').hidden = false;
+    <div class="row">${r.url ? `<a class="btn btn-primary" href="${r.url}" target="_blank" rel="noopener">${L('Đọc bài đầy đủ', 'Read the article (Vietnamese)')}</a>` : `<span class="btn btn-primary is-disabled">${L('Bài viết sắp ra mắt', 'Article coming soon')}</span>`}<button class="btn btn-ghost" id="p-close">${L('Tiếp tục đi dạo', 'Keep exploring')}</button></div>${HX ? HX.panelExtra(c) : ''}</div>`;
+  $('#panel').hidden = false; if (HX) HX.bindPanel(c);
   $('#panel .close').onclick = closePanel; $('#p-close').onclick = closePanel;
 }
 function openLocked(r){
@@ -852,6 +872,8 @@ function startQuest(){
 function sendHome(list){ list.forEach(c => { if (c.isPlayer || !c.busy) return; if (c.fixed){ c.busy = false; c.heading = c.seat.rot; return; } goHome(c, () => { c.busy = false; }); }); }
 function questTalk(c){
   const q = qlist()[Q.idx[scaleKey]]; if (!q) return false;
+  if (c === Q.giver && Q.phase === 'offer' && HX && HX.holdsMain()){
+    dialog(c, L('Làm xong nhiệm vụ giờ này của Nhân Lưu đã rồi qua nhận việc nha.', 'Finish Nhân Lưu\'s quest of the hour first, then come and get this task.'), 'Ok', () => {}); return true; }
   if (c === Q.giver && Q.phase === 'offer'){
     dialog(c, q.offer, L('Nhận việc', 'Accept'), () => { Q.step = 0; clearMarkers(); if (q.steps.length){ Q.phase = 'step'; setStepTarget(q); } else { Q.phase = 'return'; setMarker(Q.giver, '?'); } renderQuest(); });
     return true; }
@@ -933,6 +955,7 @@ function closeDialog(){ $('#dialog').hidden = true; }
 
 // ---------- modes & scale ----------
 function setMode(m){
+  if (HX && HX.playing()){ HX.flashLocked(); $('#quest-fab').setAttribute('aria-pressed', mode === 'quest'); return; }
   const prev = mode; mode = m;
   $('#quest-fab').setAttribute('aria-pressed', m === 'quest');
   if (prev === 'quest' && m !== 'quest'){ clearMarkers(); hideSpot(); closeDialog(); sendHome(chars); clearTimeout(Q.timer); Q.phase = null; Q.prog = null; player.sitting = false; rooms.forEach(r => r.tv && (r.tv.mat.map = r.tv.idle)); }
@@ -942,12 +965,13 @@ function setMode(m){
 }
 function setScale(k){
   if (k === scaleKey && world) return;
+  if (HX && HX.playing()){ HX.flashLocked(); $('#scale-select').value = scaleKey; return; }
   if (world) track('tm_scale_change', { tm_scale: k, from_scale: scaleKey });
   ['small','large','agency'].forEach(x => $('#sc-' + x).setAttribute('aria-pressed', k === x)); $('#scale-select').value = k;
   closePanel(); closeDialog(); clearTimeout(Q.timer); Q.phase = null;
   buildWorld(k);
   if (mode === 'quest'){ Q.summaryShown = false; startQuest(); }
-  renderQuest(); updateFab(); if (!$('#list').hidden) renderList(); saveProgress();
+  renderQuest(); updateFab(); if (!$('#list').hidden) renderList(); saveProgress(); if (HX) HX.onWorld();
 }
 ['small','large','agency'].forEach(k => { const b = $('#sc-' + k), o = $(`#scale-select option[value="${k}"]`);
   if (SCALES[k]){ b.onclick = () => setScale(k); return; }
@@ -1130,8 +1154,21 @@ function openReader(a, source){
 }
 function closeReader(){ $('#reader').hidden = true; }
 
+// ---------- nhiệm vụ theo giờ ----------
+if (window.TM_HOURLY_GAMES && D.HOURLY){
+  try {
+    HX = window.TM_HOURLY_GAMES({ D, L, LANG, $, track, THREE, Q, camera, canvas, overlay, keys, labels,
+      get world(){ return world; }, get chars(){ return chars; }, get player(){ return player; }, get rooms(){ return rooms; },
+      get scaleKey(){ return scaleKey; }, get mode(){ return mode; }, get t(){ return t; }, get camYaw(){ return camY.yaw; },
+      setYaw:y => { camY.yawT = y; }, addLabel, walkTo, nearestFree, free, roomAt, roomOf, setFace, dialog, closeDialog, closePanel, openPanel,
+      closeSheets, isMobile, goHome, sitDown, bossOf, mat, ball, box, cyl, groundPoint, pick, inst, drawLogo, faceEach, talk,
+      setScale, project, mainBusy:() => mode === 'quest' && (['step','return'].includes(Q.phase) || !!Q.prog) });
+  } catch (e) { console.error('[Team Map] Không khởi động được nhiệm vụ theo giờ:', e); HX = null; }
+}
+
 // ---------- boot ----------
 const DEBUG = location.hash === '#debug' && /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? Object.assign(document.createElement('div'), { id:'dbg' }) : null; if (DEBUG) $('#app').appendChild(DEBUG);
+if (DEBUG && HX) window.__tmHX = HX;   // chỉ khi chạy thử trên máy (localhost + #debug), dùng cho test tự động
 function resize(){ const app = $('#app'), r = app.getBoundingClientRect(), w = Math.round(r.width) || innerWidth, h = Math.round(r.height) || innerHeight; if (w === resize.w && h === resize.h) return; resize.w = w; resize.h = h; renderer.setSize(w, h, false); camera.aspect = w/h; camera.updateProjectionMatrix(); }
 addEventListener('resize', resize);
 if (window.ResizeObserver) new ResizeObserver(resize).observe($('#app'));
@@ -1143,11 +1180,13 @@ Promise.race([document.fonts ? document.fonts.ready : Promise.resolve(), new Pro
   buildWorld(saved && SCALES[saved.scale] ? saved.scale : SCALES.small ? 'small' : SCALE_KEYS[0]);
   ['small','large','agency'].forEach(x => $('#sc-' + x).setAttribute('aria-pressed', scaleKey === x)); $('#scale-select').value = scaleKey;
   if (saved) resumeFrom(saved); else renderQuest();
+  if (HX) HX.onWorld();
   loop(); });
 function loop(){
   const dt = Math.min(.05, clock.getDelta()); t += dt; frame++;
   chars.forEach(c => { think(c, dt); stepChar(c, dt); });
   questTick(dt);
+  if (HX) HX.tick(dt);
   updateCamera(dt);
   renderer.render(scene, camera);
   updateLabels();

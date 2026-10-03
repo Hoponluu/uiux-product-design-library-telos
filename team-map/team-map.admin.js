@@ -10,6 +10,7 @@
   const HEX = /^#[0-9a-f]{6}$/i;
   const STEP_TYPES = { talk:'Nói chuyện với một người', work:'Về chỗ ngồi làm việc', present:'Trình bày trên TV' };
   const QTYPES = { main:'Chính', daily:'Daily' };
+  const QTYPES_UI = { main:'Chính' };   // daily cũ không dùng nữa (thay bằng nhiệm vụ theo giờ): ẩn khỏi CMS, giữ cột / dữ liệu
   const TV_ROOMS = L.rooms.filter(r => r.tv !== undefined).map(r => r.id);
   const LAYOUT = Object.fromEntries(L.rooms.map(r => [r.id, r]));
   const EXCELJS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js';
@@ -96,6 +97,7 @@
       sbGet('tm_quest_steps', 'select=*&order=sort_order'),
     ]);
     Object.assign(S, { chars, rooms, pls, quests, steps, loaded:true });
+    if (AH) await AH.load();
   }
   async function reload(){ await load(); render(); }
 
@@ -116,10 +118,11 @@
   const TABS = { chars:'Nhân vật', rooms:'Phòng ban', quests:'Nhiệm vụ', io:'Import / Export' };
   function render(){
     S.loading = null;
-    panel().innerHTML = `<div class="tm-subtabs">${Object.entries(TABS).map(([k, v]) =>
+    const tabs = Object.assign({}, TABS, AH && S.hourly ? AH.tabs : {}); if (!tabs[S.tab]) S.tab = 'chars';
+    panel().innerHTML = `<div class="tm-subtabs">${Object.entries(tabs).map(([k, v]) =>
       `<button class="tm-sub${S.tab === k ? ' active' : ''}" data-act="tab" data-tab="${k}">${v}</button>`).join('')}
       <span class="tm-sub-note">Lưu là lên ngay · game cập nhật ở lần tải trang sau</span></div><div id="tm-body"></div>`;
-    ({ chars:renderChars, rooms:renderRooms, quests:renderQuests, io:renderIO })[S.tab]();
+    (({ chars:renderChars, rooms:renderRooms, quests:renderQuests, io:renderIO })[S.tab] || AH.render[S.tab])();
   }
   const body = () => document.getElementById('tm-body');
 
@@ -142,7 +145,7 @@
     m.classList.add('open'); m.querySelector('.modal').scrollTop = 0;
     return m;
   }
-  function closeModal(){ const m = document.getElementById('tm-modal'); if (m) m.classList.remove('open'); S.form = null; }
+  function closeModal(){ const m = document.getElementById('tm-modal'); if (m) m.classList.remove('open'); S.form = null; if (AH) AH.onClose(); }
 
   // Hỏi lại ngay trong trang (không dùng confirm() của trình duyệt)
   function ask(title, msg, okLabel = 'Xoá', danger = true){
@@ -320,6 +323,8 @@
         ${enInput('en_with_designer', 'Làm việc với bạn thế nào (tiếng Anh)', enOf(c).with_designer, 2)}
       </details>
 
+      ${AH && S.hourly ? AH.charSection(c) : ''}
+
       <div class="tm-section">Vị trí</div>
       <div data-pls></div>
 
@@ -415,6 +420,7 @@
       tag: ['author','guest'].includes(kind) ? (fv('tag') || null) : (F.orig ? F.orig.tag : null),
       cta: ['author','guest'].includes(kind) ? (cta.length ? cta : null) : (F.orig ? F.orig.cta : null),
       is_active: fv('is_active') };
+    if (AH && S.hourly) Object.assign(character, AH.charValues(root));
     const special = ['author','guest'].includes(kind);
     character.i18n = withEn(F.orig && F.orig.i18n, { title:fv('en_title'), summary:fv('en_summary'), doing:fv('en_doing'), with_designer:fv('en_with_designer'),
       tag: special ? fv('en_tag') : enOf(F.orig).tag, cta: special ? ctaRows.map(b => b.label_en || '') : enOf(F.orig).cta });
@@ -485,7 +491,7 @@
     const stepsN = id => S.steps.filter(s => s.quest_id === id).length;
     body().innerHTML = `<div class="toolbar"><h2>Nhiệm vụ <span class="tm-count">(${list.length})</span></h2>
         <select class="form-control tm-w-auto" data-f="qScale">${Object.entries(SCALE_NAME).map(([k, v]) => `<option value="${k}"${f.qScale === k ? ' selected' : ''}>${v}</option>`).join('')}</select>
-        <select class="form-control tm-w-auto" data-f="qType">${Object.entries(QTYPES).map(([k, v]) => `<option value="${k}"${f.qType === k ? ' selected' : ''}>${v}</option>`).join('')}</select>
+        <select class="form-control tm-w-auto" data-f="qType">${Object.entries(QTYPES_UI).map(([k, v]) => `<option value="${k}"${f.qType === k ? ' selected' : ''}>${v}</option>`).join('')}</select>
         <button class="btn-add" data-act="quest-new">+ Thêm nhiệm vụ</button></div>
       ${f.qType === 'daily' ? '<p class="tm-note">Nhiệm vụ daily chỉ được lưu để chuẩn bị dữ liệu. Game chưa chạy daily.</p>' : '<p class="tm-note">Kéo ⋮⋮ để đổi thứ tự trong chuỗi quest. Nhiệm vụ đang tắt không xuất hiện trong game.</p>'}
       <ul class="tm-qlist" data-sort="quests">${list.map((q, i) => `<li draggable="true" data-id="${esc(q.id)}" class="${q.is_active ? '' : 'off'}">
@@ -531,7 +537,7 @@
     box.innerHTML = `
       <div class="form-group"><label>Tên nhiệm vụ *</label><input class="form-control" data-q="title" value="${esc(q.title)}"/></div>
       <div class="form-row">
-        <div class="form-group"><label>Loại</label><select class="form-control" data-q="type">${Object.entries(QTYPES).map(([k, v]) => `<option value="${k}"${q.type === k ? ' selected' : ''}>${v}</option>`).join('')}</select></div>
+        <div class="form-group"><label>Loại</label><select class="form-control" data-q="type">${Object.entries(QTYPES_UI).map(([k, v]) => `<option value="${k}"${q.type === k ? ' selected' : ''}>${v}</option>`).join('')}</select></div>
         <div class="form-group"><label>Quy mô</label><select class="form-control" data-q="scale" ${S.form.isNew ? '' : 'title="Đổi quy mô sẽ phải chọn lại người giao, người tham gia và người cần gặp"'}>${Object.entries(SCALE_NAME).map(([k, v]) => `<option value="${k}"${q.scale === k ? ' selected' : ''}>${v}</option>`).join('')}</select></div>
       </div>
       <div class="form-row">
@@ -641,6 +647,11 @@
     if (Object.keys(p).length) o.i18n_en = Object.assign(o.i18n_en || {}, p); return o; };
   const EN_CHAR = ['title','summary','doing','with_designer','tag'], EN_ROOM = ['code','name','intro'], EN_QUEST = ['title','offer_text','done_text'], EN_STEP = ['task_text','line_text'];
 
+  // Nhiệm vụ theo giờ (team-map.admin-hourly.js): 3 tab, nhóm trường trong form nhân vật, 4 sheet Excel
+  const AH = window.TM_ADMIN_HOURLY ? window.TM_ADMIN_HOURLY({ S, esc, toast, body:() => body(), openModal, closeModal, formRoot, fv, clearErrs, setErr, ask, sortable,
+    reload:() => reload(), render:() => render(), charOf, enOf, withEn, enInput, enBadge, SCALE_NAME, toSlug, YES, NO, joinList, splitList, enCols, enCells, enFrom }) : null;
+  const allSheets = () => [...SHEETS, ...(AH && S.hourly ? AH.sheets() : [])];
+
   const SHEETS = [
     { name:'Nhan vat', key:'characters', title:'Nhân vật', required:['id','title','kind','group'],
       cols:[['id','id',18],['title','Chức danh',26],['kind','Loại',10,{ list:Object.keys(KINDS) }],['group','Nhóm',13,{ list:GROUP_KEYS }],
@@ -650,14 +661,15 @@
         ['body_color','Màu thân',11],['outline_color','Màu viền',11],['tag','Nhãn phụ',26],
         ['cta1_label','Nút 1 nhãn',16],['cta1_url','Nút 1 URL',36],['cta2_label','Nút 2 nhãn',16],['cta2_url','Nút 2 URL',36],['is_active','Hiển thị',10,{ list:[YES, NO] }],
         ...enCols([['title','Chức danh',26],['summary','Họ là ai',50],['doing','Đang làm',40],['with_designer','Làm việc với bạn',50],['tag','Nhãn phụ',26]]),
-        ['en_cta1_label','Nút 1 nhãn (EN)',16],['en_cta2_label','Nút 2 nhãn (EN)',16]],
+        ['en_cta1_label','Nút 1 nhãn (EN)',16],['en_cta2_label','Nút 2 nhãn (EN)',16],
+        ...(window.TM_ADMIN_HOURLY ? [['rank','Cấp bậc (1–8)',10],['related_term_ids','Thuật ngữ liên quan (id)',40,{ wrap:1 }],['gossip_partner_ids','Người nấu xói cùng (id)',30,{ wrap:1 }],['hourly_exclude','Không tham gia hành động',26]] : [])],
       rows:() => S.chars.slice().sort((a, b) => a.id.localeCompare(b.id)),
       toCells:c => { const t = termOf(c.term_id), b = c.cta || [];
         return { id:c.id, title:c.title, kind:c.kind, group:c.group, term_id:c.term_id ?? '', _term_name:t ? t.name : '', article_url:c.article_url, _resolved_url:resolvedUrl(c) || '',
           summary:c.summary, doing:c.doing, with_designer:c.with_designer, reports_to:c.reports_to, reports_to_small:c.reports_to_small, reports_to_agency:c.reports_to_agency, props:joinList(c.props),
           body_color:(c.appearance || {}).body_color || '', outline_color:(c.appearance || {}).outline_color || '', tag:c.tag,
           cta1_label:b[0] ? b[0].label : '', cta1_url:b[0] ? b[0].url : '', cta2_label:b[1] ? b[1].label : '', cta2_url:b[1] ? b[1].url : '', is_active:c.is_active ? YES : NO,
-          ...enCells(c, EN_CHAR), en_cta1_label:(enOf(c).cta || [])[0] || '', en_cta2_label:(enOf(c).cta || [])[1] || '' }; },
+          ...enCells(c, EN_CHAR), en_cta1_label:(enOf(c).cta || [])[0] || '', en_cta2_label:(enOf(c).cta || [])[1] || '', ...(AH ? AH.charCells(c) : {}) }; },
       fromCells:(v, has) => { const o = { id:v.id };
         ['title','kind','group','article_url','summary','doing','with_designer','reports_to','reports_to_small','reports_to_agency','tag'].forEach(k => { if (has(k)) o[k] = v[k] || null; });
         if (has('body_color') || has('outline_color')){ const cur = (charOf(v.id) || {}).appearance || {};
@@ -671,6 +683,7 @@
         enFrom(v, has, EN_CHAR, o);
         if (has('en_cta1_label') || has('en_cta2_label')){ const l = [v.en_cta1_label || '', v.en_cta2_label || ''];
           o.i18n_en = Object.assign(o.i18n_en || {}, { cta: l.some(Boolean) ? l : null }); }
+        if (AH) AH.charFrom(v, has, o);
         return o; } },
     { name:'Vi tri', key:'placements', title:'Vị trí', required:['character_id','room_id'],
       cols:[['id','id',28],['character_id','Nhân vật (id)',20],['_title','Chức danh',26],['_scale','Quy mô',10],['room_id','Phòng (id)',11],['_room_name','Tên phòng',24],['seat_order','Thứ tự ghế',11],['fixed','Cố định',10,{ list:[YES, NO] }]],
@@ -794,7 +807,7 @@
       await loadExcelJS(); await load();
       const wb = new ExcelJS.Workbook(); wb.creator = 'TELOS Admin CMS';
       addGuide(wb);
-      SHEETS.forEach(d => addSheet(wb, d));
+      allSheets().forEach(d => addSheet(wb, d));
       const tws = wb.addWorksheet('Thuat ngu', { views:[{ state:'frozen', ySplit:1 }] });
       tws.columns = [{ header:'id', key:'id', width:38 }, { header:'Tên', key:'name', width:32 }, { header:'Nhóm', key:'cat', width:20 }, { header:'URL', key:'url', width:60 }, { header:'Published', key:'pub', width:10 }];
       tws.getRow(1).font = { bold:true };
@@ -847,7 +860,8 @@
     const errors = [], res = { file:fileName, sheets:{}, errors };
     const E = (def, n, key, msg) => errors.push({ sheet:def.name, row:n, col: key ? ((def.cols.find(c => c[0] === key) || [])[1] || key) : '', msg });
     const parsed = {};
-    SHEETS.forEach(def => {
+    const SH = allSheets();
+    SH.forEach(def => {
       const ws = wb.getWorksheet(def.name); if (!ws) return;
       const { keys, rows } = readSheet(ws);
       const missing = def.required.filter(k => !keys.has(k));
@@ -866,7 +880,7 @@
     const C = merged(S.chars, 'characters'), P = merged(S.pls, 'placements'), Q = merged(S.quests, 'quests');
     Object.values(P).forEach(p => { if (!p.scale) p.scale = (roomOf(p.room_id) || {}).scale; });
     const termIds = new Set(allConcepts.map(t => String(t.id)));
-    const def = k => SHEETS.find(d => d.key === k);
+    const def = k => SH.find(d => d.key === k);
     const isInt = v => v === '' || /^-?\d+$/.test(v);
     const isNum = v => v === '' || !isNaN(Number(v));
     const yesNo = (d, r, k) => { if (r.v[k] !== undefined && r.v[k] !== '' && ![YES, NO].includes(r.v[k])) E(d, r.n, k, `Chỉ nhận "${YES}" hoặc "${NO}"`); };
@@ -882,6 +896,7 @@
       (o.props || []).forEach(p => { if (!L.props.includes(p)) E(d, r.n, 'props', `Đồ nghề không hợp lệ "${p}"`); });
       (o.cta || []).forEach((b, i) => { if (!/^https?:\/\//.test(b.url)) E(d, r.n, `cta${i + 1}_url`, 'Cần URL đầy đủ (https://...)'); });
       if (o.article_url && !/^https?:\/\//.test(o.article_url)) E(d, r.n, 'article_url', 'Cần URL đầy đủ (https://...)');
+      if (AH) AH.charValidate(r, (k, msg) => E(d, r.n, k, msg));
       yesNo(d, r, 'is_active'); });
     if (Object.values(C).filter(c => c.kind === 'player').length > 1) errors.push({ sheet:'Nhan vat', row:'', col:'Loại', msg:'Có nhiều hơn 1 nhân vật "player"' });
 
@@ -930,10 +945,13 @@
         if (s.type === 'talk' && !plOk(s.target, q.scale)) E(def('quests'), r.n, 'scale', `Bước ${s.id} đang gặp "${s.target}" không thuộc quy mô ${q.scale}`);
         if (s.type === 'present' && !TV_ROOMS.includes(q.room_id)) E(def('quests'), r.n, 'room_id', `Bước ${s.id} là present nhưng phòng ${q.room_id} không có TV`); }); });
 
+    // sheet tự kiểm tra (nhiệm vụ theo giờ)
+    SH.forEach(d => { if (!d.validate) return; (parsed[d.key] || []).forEach(r => { d.validate(r, (k, msg) => E(d, r.n, k, msg)); yesNo(d, r, 'is_active'); }); });
+
     // so sánh từng ô (theo đúng định dạng đã xuất) để biết thêm mới / cập nhật / không đổi
-    SHEETS.forEach(d => {
+    SH.forEach(d => {
       const list = parsed[d.key]; if (!list) return;
-      const cur = { characters:S.chars, placements:S.pls, rooms:S.rooms, quests:S.quests, steps:S.steps }[d.key];
+      const cur = d.cur ? d.cur() : { characters:S.chars, placements:S.pls, rooms:S.rooms, quests:S.quests, steps:S.steps }[d.key];
       const out = { title:d.title, name:d.name, added:[], updated:[], same:0, errors:errors.filter(e => e.sheet === d.name).length };
       list.forEach(r => {
         const old = r.o.id ? byId(cur, r.o.id) : null;
@@ -951,8 +969,8 @@
   async function applyImport(btn){
     const imp = S.imp; if (!imp || imp.errors.length) return;
     const p = {};
-    SHEETS.forEach(d => { const s = imp.sheets[d.key]; if (!s) return;
-      let rows = [...s.added, ...s.updated].map(r => r.o);
+    allSheets().forEach(d => { const s = imp.sheets[d.key]; if (!s) return;
+      let rows = d.prepare ? d.prepare(s) : [...s.added, ...s.updated].map(r => r.o);
       if (d.key === 'quests' || d.key === 'steps'){ // gửi đủ cột (giữ giá trị cũ cho cột không có trong file)
         const cur = d.key === 'quests' ? S.quests : S.steps;
         rows = rows.map(o => ({ ...(byId(cur, o.id) || {}), ...o }));
@@ -965,7 +983,7 @@
     btn.disabled = true; btn.textContent = 'Đang ghi...';
     try {
       await sbRpc('tm_import', { p });
-      const sum = SHEETS.filter(d => imp.sheets[d.key]).map(d => { const s = imp.sheets[d.key]; return `${d.title}: ${s.added.length} thêm · ${s.updated.length} cập nhật`; });
+      const sum = allSheets().filter(d => imp.sheets[d.key]).map(d => { const s = imp.sheets[d.key]; return `${d.title}: ${s.added.length} thêm · ${s.updated.length} cập nhật`; });
       S.imp = { done:sum, file:imp.file }; await load(); renderIO(); toast('Đã áp dụng import');
     } catch(e) { toast('Lỗi, chưa ghi gì vào DB: ' + e.message, true); btn.disabled = false; btn.textContent = 'Áp dụng'; }
   }
@@ -981,7 +999,7 @@
       preview = `<h3 class="tm-h3">Xem trước · ${esc(imp.file)}</h3>
         ${imp.errors.length ? `<div class="tm-warn"><b>${imp.errors.length} lỗi — chưa ghi gì. Sửa file rồi chọn lại.</b><table class="tm-errtable"><tr><th>Sheet</th><th>Dòng</th><th>Cột</th><th>Lý do</th></tr>
           ${imp.errors.map(e => `<tr><td>${esc(e.sheet)}</td><td>${esc(e.row)}</td><td>${esc(e.col)}</td><td>${esc(e.msg)}</td></tr>`).join('')}</table></div>` : ''}
-        <div class="tm-impgrid">${SHEETS.filter(d => imp.sheets[d.key]).map(d => { const s = imp.sheets[d.key];
+        <div class="tm-impgrid">${allSheets().filter(d => imp.sheets[d.key]).map(d => { const s = imp.sheets[d.key];
           return `<details class="tm-impcard"><summary><b>${esc(s.title)}</b><span>${s.added.length} thêm mới · ${s.updated.length} cập nhật · ${s.same} không đổi · <span class="${s.errors ? 'tm-bad' : ''}">${s.errors} lỗi</span></span></summary>
             ${s.added.map(r => `<div class="tm-impline"><span class="badge badge-pub">Thêm</span> dòng ${r.n} · <code>${esc(r.o.id)}</code> ${esc(r.v.title || r.v.name || r.v.task_text || '')}</div>`).join('')}
             ${s.updated.map(r => `<div class="tm-impline"><span class="badge badge-vai-tro">Cập nhật</span> dòng ${r.n} · <code>${esc(r.o.id)}</code>
@@ -1043,6 +1061,7 @@
       case 'exp': return exportXlsx(b);
       case 'imp-apply': return applyImport(b);
       case 'imp-cancel': S.imp = null; return renderIO();
+      default: if (AH) AH.onClick(b.dataset.act, b);
     }
   }
 
@@ -1054,6 +1073,7 @@
 
   function onInput(e){
     const t = e.target;
+    if (AH && AH.onInput(e)) return;
     if (t.dataset.f === 'q'){ S.f.q = t.value; renderChars(); const el = body().querySelector('[data-f="q"]'); el.focus(); el.setSelectionRange(el.value.length, el.value.length); return; }
     if (t.dataset.comboQ){ const name = t.dataset.comboQ;
       const items = name === 'term' ? roleTerms().map(x => ({ id:String(x.id), label:x.name, sub:catName(x.category_id) }))
@@ -1072,6 +1092,7 @@
 
   function onChange(e){
     const t = e.target, F = S.form;
+    if (AH && AH.onChange(e)) return;
     if (t.dataset.act === 'imp-file' && t.files[0]) return importFile(t.files[0]);
     if (t.dataset.f && t.dataset.f !== 'q'){ S.f[t.dataset.f] = t.type === 'checkbox' ? t.checked : t.value; return S.tab === 'quests' ? renderQuests() : renderChars(); }
     if (!F) return;
@@ -1103,5 +1124,5 @@
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.getElementById('tm-modal')?.classList.contains('open') && !document.getElementById('tm-confirm')?.classList.contains('open')) closeModal(); });
   });
 
-  window.TMAdmin = { open, reload, _S:S, _analyse:analyse, _SHEETS:SHEETS };
+  window.TMAdmin = { open, reload, _S:S, _analyse:analyse, _SHEETS:SHEETS, _allSheets:allSheets };
 })();

@@ -195,6 +195,26 @@ select.form-control { cursor: pointer; }
 .tm-h3 { font-size: 13px; font-weight: 700; margin: 22px 0 10px; color: rgba(0,0,0,0.6); text-transform: uppercase; letter-spacing: 0.04em; }
 .modal.tm-wide { width: 760px; }
 .tm-section { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #241775; border-top: 1px solid rgba(0,0,0,0.07); padding-top: 14px; margin-top: 4px; }
+.tm-hgrid { display: grid; grid-template-columns: minmax(280px, 1fr) minmax(320px, 1.4fr); gap: 16px; align-items: start; }
+@media (max-width: 900px) { .tm-hgrid { grid-template-columns: 1fr; } }
+.tm-runcard { margin-top: 10px; } .tm-runcard h4 { margin: 0 0 6px; font-size: 13px; }
+.tm-runtable { width: 100%; border-collapse: collapse; font-size: 12.5px; } .tm-runtable td { padding: 4px 6px; border-bottom: 1px solid rgba(0,0,0,0.06); }
+.tm-runtable tr.tm-now td { font-weight: 700; color: #241775; background: rgba(255,197,61,0.15); }
+.tm-actions { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 10px; }
+.tm-actcard { border: 1px solid rgba(0,0,0,0.08); border-radius: 10px; padding: 10px 12px; background: #fff; }
+.tm-actcard.off { opacity: .55; }
+.tm-actcard-h { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; } .tm-actcard-h b { font-size: 14px; }
+.tm-cfggrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0 12px; }
+.tm-cointhumb { width: 40px; height: 40px; border-radius: 50%; padding: 3px; background: var(--rim, #FFC53D); flex: none; box-sizing: border-box; overflow: hidden; }
+.tm-cointhumb img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
+.tm-badgefields [hidden], .tm-pick .tm-chip[hidden] { display: none !important; }
+.tm-badgeform { display: grid; grid-template-columns: 1fr 280px; gap: 18px; align-items: start; }
+@media (max-width: 760px) { .tm-badgeform { grid-template-columns: 1fr; } }
+.tm-badgeprev { position: sticky; top: 0; text-align: center; } .tm-coinprev { width: 260px; height: 260px; max-width: 100%; cursor: grab; }
+.tm-pick { max-height: 150px; overflow: auto; padding: 4px; border: 1px solid rgba(0,0,0,0.08); border-radius: 8px; margin-top: 6px; }
+.tm-elig { display: grid; gap: 6px; font-size: 12px; }
+.tm-why { display: inline-block; padding: 1px 7px; border-radius: 5px; margin: 1px 2px; font-size: 11.5px; }
+.tm-why.ok { background: rgba(47,191,143,0.14); color: #1d7a5b; } .tm-why.bad { background: rgba(0,0,0,0.05); color: #777; }
 .tm-en { border: 1px dashed rgba(36,23,117,0.25); border-radius: 10px; padding: 0 12px 4px; margin: 8px 0 12px; background: rgba(36,23,117,0.025); }
 .tm-en > summary { cursor: pointer; padding: 10px 0; border-top: 0; margin: 0; list-style: revert; }
 .tm-en > .tm-note { margin-top: 0; }
@@ -951,6 +971,9 @@ document.getElementById('cat-modal').addEventListener('click', function(e) {
 </script>
 <script src="/team-map/team-map.layout.js"></script>
 <script src="/team-map/team-map.loader.js"></script>
+<script src="/team-map/team-map.hourly.js"></script>
+<script src="/team-map/team-map.coin.js"></script>
+<script src="/team-map/team-map.admin-hourly.js"></script>
 <script src="/team-map/team-map.admin.js"></script>
 </body>
 </html>
