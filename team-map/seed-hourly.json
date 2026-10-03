@@ -1,9 +1,10 @@
 {
  "version": 1,
  "config": {
-  "slot_minutes": 60,
+  "slot_minutes": 30,
   "no_repeat_slots": 3,
-  "counted_wins_per_slot": 1
+  "counted_wins_per_slot": 1,
+  "open_count": 4
  },
  "character_rank": {
   "intern": 1,
@@ -104,12 +105,14 @@
    "win_text": "Ném việc cho người khác vui ha? Giờ hiểu cảm giác của sếp chưa.",
    "lose_text": "Hết task để ném rồi. Hiếm khi nào công ty hết việc vậy lắm.",
    "config": {
-    "ammo": 6,
+    "ammo": 10,
     "hits_needed": 3,
-    "flight_secs": 0.45,
-    "hit_radius": 0.6,
-    "max_range": 6,
-    "target_speed_factor": 1.25
+    "flight_secs": 0.35,
+    "hit_radius": 1.0,
+    "max_range": 8,
+    "target_speed_factor": 0.7,
+    "pause_secs": 1.2,
+    "aim_assist": 2.0
    },
    "is_active": true
   },

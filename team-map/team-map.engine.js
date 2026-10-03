@@ -774,7 +774,7 @@ function closeSheets(except){
   if (except !== 'welcome' && !$('#welcome').hidden) $('#start').click();
   if (except !== 'modal' && !$('#modal').hidden){ const n = $('#next-q'); if (n) n.click(); else $('#modal').hidden = true; }
 }
-const SHEET_SEL = '#h-sheet:not([hidden]),#h-bar,#h-act,#badges:not([hidden]),#reader:not([hidden]),#panel:not([hidden]),#dialog:not([hidden]),#welcome:not([hidden]),#modal .card,#roomintro.open,#mini.open,#quest.open,#list,#nav-overlay';
+const SHEET_SEL = '#h-sheet:not([hidden]),#h-bar,#h-act,#h-fab,#h-tools,#h-card,#badges:not([hidden]),#reader:not([hidden]),#panel:not([hidden]),#dialog:not([hidden]),#welcome:not([hidden]),#modal .card,#roomintro.open,#mini.open,#quest.open,#list,#nav-overlay';
 document.addEventListener('click', e => {
   if (!isMobile() || e.target === canvas || !e.target.closest) return;
   if (!$('#reader').hidden){ if (!e.target.closest('#reader')) closeReader(); return; }
@@ -873,7 +873,7 @@ function sendHome(list){ list.forEach(c => { if (c.isPlayer || !c.busy) return; 
 function questTalk(c){
   const q = qlist()[Q.idx[scaleKey]]; if (!q) return false;
   if (c === Q.giver && Q.phase === 'offer' && HX && HX.holdsMain()){
-    dialog(c, L('Làm xong nhiệm vụ giờ này của Nhân Lưu đã rồi qua nhận việc nha.', 'Finish Nhân Lưu\'s quest of the hour first, then come and get this task.'), 'Ok', () => {}); return true; }
+    dialog(c, L('Chơi xong trò đang chơi đã rồi qua nhận việc nha.', 'Finish the game you are playing first, then come and get this task.'), 'Ok', () => {}); return true; }
   if (c === Q.giver && Q.phase === 'offer'){
     dialog(c, q.offer, L('Nhận việc', 'Accept'), () => { Q.step = 0; clearMarkers(); if (q.steps.length){ Q.phase = 'step'; setStepTarget(q); } else { Q.phase = 'return'; setMarker(Q.giver, '?'); } renderQuest(); });
     return true; }

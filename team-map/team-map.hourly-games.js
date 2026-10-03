@@ -1,4 +1,5 @@
-// Team Map — nhiệm vụ theo giờ của Nhân Lưu: luồng nhận / trả, 8 mini-game, huy hiệu, đồng xu 3D (SPEC-hourly).
+// Team Map — hành động tự do + 8 mini-game + huy hiệu (SPEC-hourly, bản chơi tự do).
+// Thanh công cụ: Đọc bài, Lật flashcard luôn mở; mỗi lượt (30 phút) mở thêm vài hành động vui. Chọn hành động → chọn người → chơi.
 // Engine gọi window.TM_HOURLY_GAMES(E) với E là các hàm / dữ liệu nội bộ của engine. Logic thuần nằm ở team-map.hourly.js.
 window.TM_HOURLY_GAMES = function(E){
 'use strict';
@@ -10,13 +11,16 @@ const cfgOf = a => Object.assign({}, DEFAULTS[a] || {}, (HD.actions[a] || {}).co
 const DEFAULTS = {
   read:{ options:3, retry_wait_secs:10 },
   fight:{ duration_secs:10, start_percent:50, tap_gain:2.5, npc_base:5, npc_per_rank:1.9, max_taps_per_sec:15 },
-  poptask:{ ammo:6, hits_needed:3, flight_secs:.45, hit_radius:.6, max_range:6, target_speed_factor:1.25 },
+  poptask:{ ammo:10, hits_needed:3, flight_secs:.35, hit_radius:1, max_range:8, target_speed_factor:.7, pause_secs:1.2, aim_assist:2 },
   flashcard:{ cards:4, pass_correct:3, min_terms:4 },
   coffee:{ secs_per_cup:30, max_cups:3, spill_radius:.7 },
   hide:{ secs:60, countdown_secs:3 },
   race:{ speed_top:.97, speed_step:.055, npc_delay_secs:.5, false_start_penalty_secs:1 },
   gossip:{ fill_secs:8, time_limit_secs:45, hear_radius:2.2, grace_secs:.25, warn_secs:.6 }
 };
+const ICON = { read:'📖', fight:'🥊', poptask:'📝', flashcard:'🃏', coffee:'☕', hide:'🙈', race:'🏃', gossip:'🤫' };
+// hành động bắt đầu ngay sau khi chọn người (không cần đi tới gặp)
+const INSTANT = ['flashcard', 'coffee', 'hide'];
 
 // ---------- tiến độ ----------
 const ST = H.load();
@@ -25,10 +29,12 @@ const persist = () => { H.save(ST); };
 const slotNow = () => H.slotAt(HD.config);
 const roleName = id => (D.ROLES[id] || {}).title || id;
 const titleOf = tk => H.fill(HD.actions[tk.action].title, { target:roleName(tk.who), partner:roleName(tk.partner) });
+const tools = () => H.ACTIONS.filter(a => HD.actions[a] && HD.actions[a].active);
+const isOpen = a => HD.config.is_enabled && H.openAt(D, slotNow()).includes(a);
+const nameOf = a => (HD.actions[a] || {}).name || a;
 
-// nhiệm vụ của lượt hiện tại ở quy mô đang xem (null nếu tắt / không có cặp nào)
-function current(){ return HD.config.is_enabled ? H.pick(D, E.scaleKey, slotNow()) : null; }
-const accepted = () => ST.accepted && HD.actions[ST.accepted.action] && D.ROLES[ST.accepted.who] ? ST.accepted : null;
+// pending: đã chọn người, đang đi tới gặp (null nếu không) · picking: đang chọn người cho một hành động
+let pending = null, picking = null;
 const here = tk => tk && tk.scale === E.scaleKey;
 
 // nhân vật trong thế giới 3D: đúng phòng theo vị trí có id nhỏ nhất
@@ -44,6 +50,7 @@ const app = $('#app');
 const el = (tag, attrs, html) => { const x = document.createElement(tag); Object.assign(x, attrs || {}); if (html != null) x.innerHTML = html; return x; };
 const fab = el('button', { id:'h-fab', className:'h-fab', type:'button' });
 const bfab = el('button', { id:'b-fab', className:'icon-btn b-fab', type:'button' });
+const toolbar = el('div', { id:'h-tools', className:'card h-tools', hidden:true });
 const card = el('div', { id:'h-card', className:'card', hidden:true });
 const bar = el('div', { id:'h-bar', className:'card', hidden:true });
 const act = el('button', { id:'h-act', className:'h-act', type:'button', hidden:true });
@@ -53,14 +60,15 @@ const shade = el('div', { id:'h-shade', hidden:true });
 const badgesEl = el('div', { id:'badges', hidden:true });
 $('.dock').insertBefore(fab, $('.dock').firstChild);
 $('.topbar').insertBefore(bfab, $('#btn-list'));
-[card, bar, act, sheet, toast, shade, badgesEl].forEach(x => app.appendChild(x));
-fab.setAttribute('aria-label', L('Nhiệm vụ giờ này', 'Quest of the hour'));
+[toolbar, card, bar, act, sheet, toast, shade, badgesEl].forEach(x => app.appendChild(x));
+toolbar.setAttribute('role', 'toolbar'); toolbar.setAttribute('aria-label', L('Hành động', 'Actions'));
+fab.setAttribute('aria-label', L('Hành động', 'Actions'));
 
 const fmt = ms => { const s = Math.max(0, Math.ceil(ms / 1000)), m = Math.floor(s / 60); return `${m}:${String(s % 60).padStart(2, '0')}`; };
 let toastT = 0;
 function say(text, secs = 3){ toast.textContent = text; toast.hidden = false; toastT = secs; }
 
-// ---------- nhãn 3D (◆ trên đầu mục tiêu, ! trên đầu Nhân Lưu, bong bóng thoại, ? cảnh báo) ----------
+// ---------- nhãn 3D (◆ trên đầu người cần gặp, • trên đầu người chọn được, bong bóng thoại, ? cảnh báo) ----------
 const tags = [];
 function tag(cls, getter){ const T = E.addLabel('', cls, new THREE.Vector3(), { custom:() => getter(T) }); tags.push(T); return T; }
 const above = (c, h) => { const p = c.obj.root.position; return new THREE.Vector3(p.x, h, p.z); };
@@ -73,78 +81,186 @@ function speak(c, text, secs = 2.6){
   bubbles.push(b);
 }
 function buildTags(){
-  tags.length = 0; bubbles = [];
-  tag('hqm', T => { const a = author(), tk = current(); if (!a || game || accepted() || !tk) return { show:false };
-    if (T.el.dataset.k !== '!'){ T.el.dataset.k = '!'; T.el.innerHTML = '<div class="qmark hq">!</div>'; } return { show:true, pos:above(a, 2.05) }; });
-  tag('hqm', T => { const tk = accepted(); if (!tk || !here(tk)) return { show:false };
-    const who = targetFor(tk); if (!who || who.hidden) return { show:false };
+  tags.length = 0; bubbles = []; pickTags = [];
+  tag('hqm', T => { if (!pending || game) return { show:false };
+    const who = targetFor(pending); if (!who || who.hidden) return { show:false };
     if (T.el.dataset.k !== '◆'){ T.el.dataset.k = '◆'; T.el.innerHTML = '<div class="qmark hq step">◆</div>'; } return { show:true, pos:above(who, 2.05) }; });
 }
 // người cần tới gặp để bắt đầu / tiếp tục
 function targetFor(tk){
   if (game && game.marker) return game.marker();
-  if (tk.action === 'hide' || tk.action === 'coffee') return null;
+  if (tk.action === 'hide' || tk.action === 'coffee' || tk.action === 'flashcard') return null;
   return charOf(tk.action === 'gossip' ? tk.partner : tk.who);
 }
+// chấm trên đầu những người chọn được (chỉ trong lúc chọn)
+let pickTags = [];
+function showPickTags(ids){
+  clearPickTags();
+  ids.forEach(id => { const c = charOf(id); if (!c) return;
+    const T = E.addLabel('<div class="qmark hq pick">•</div>', 'hqm hpick', new THREE.Vector3(), { custom:() => picking && !c.hidden ? { show:true, pos:above(c, 2.0) } : { show:false } });
+    T.c = c; pickTags.push(T); });
+}
+function clearPickTags(){ pickTags.forEach(T => { T.el.remove(); const i = E.labels.indexOf(T); if (i >= 0) E.labels.splice(i, 1); }); pickTags = []; }
 
-// ---------- vòng sáng trên sàn (điểm lấy cà phê, đích chạy đua, tầm nghe) ----------
+// ---------- vòng sáng trên sàn (điểm lấy cà phê, đích chạy đua, tầm nghe, tầm ném) ----------
 function ring(x, z, r, color, opacity = .9){
   const m = new THREE.Mesh(new THREE.TorusGeometry(r, .05, 8, 48), new THREE.MeshBasicMaterial({ color, transparent:true, opacity }));
   m.rotation.x = -Math.PI/2; m.position.set(x, .07, z); E.world.add(m); return m;
 }
 const drop = m => { if (m && m.parent) m.parent.remove(m); };
 
+// ════════════════════════════════════════════════════════
+// THANH CÔNG CỤ
+// ════════════════════════════════════════════════════════
+let lastTools = '';
+function renderTools(force){
+  const on = HD.config.is_enabled && !game, open = H.openAt(D, slotNow()), left = H.slotEnds(HD.config, slotNow()) - Date.now();
+  const sig = [on, open.join(), picking && picking.action, E.isMobile(), tools().map(a => (H.statOf(ST, a).wins)).join()].join('|');
+  const tm = toolbar.querySelector('.h-tools-t');
+  if (!force && sig === lastTools){ if (tm) tm.textContent = L(`đổi lượt sau ${fmt(left)}`, `new round in ${fmt(left)}`); return; } lastTools = sig;
+  app.classList.toggle('h-tools-on', on);
+  if (!on){ toolbar.hidden = true; toolbar.classList.remove('open'); return; }
+  toolbar.innerHTML = `<div class="h-tools-h"><b>${L('Hành động', 'Actions')}</b><span class="h-tools-t">${L(`đổi lượt sau ${fmt(left)}`, `new round in ${fmt(left)}`)}</span>
+      <button class="close h-tools-x" type="button" aria-label="${L('Đóng', 'Close')}">×</button></div>
+    <div class="h-tools-row">${tools().map((a, k) => { const o = open.includes(a), w = H.statOf(ST, a).wins;
+      return `<button class="h-tool${o ? '' : ' locked'}${picking && picking.action === a ? ' on' : ''}" type="button" data-tool="${a}" aria-disabled="${!o}"
+        title="${esc(nameOf(a))}${o ? '' : ' · ' + L('đang khoá, mở lại ở lượt sau', 'locked, may open next round')}">
+        <span class="h-ico" aria-hidden="true">${o ? ICON[a] : '🔒'}</span><span class="h-tn">${esc(nameOf(a))}</span>
+        ${w ? `<i class="h-tw" title="${L('Số lần thắng', 'Wins')}">${w}</i>` : ''}<kbd>${k + 1}</kbd></button>`; }).join('')}</div>`;
+  toolbar.hidden = false;
+  toolbar.querySelector('.h-tools-x').onclick = () => toolbar.classList.remove('open');
+}
+toolbar.addEventListener('click', e => { const b = e.target.closest('[data-tool]'); if (b) chooseTool(b.dataset.tool, 'toolbar'); });
+function chooseTool(a, source){
+  if (game) return flashLocked();
+  if (!isOpen(a)) return say(L(`${nameOf(a)} đang khoá. Lượt sau có thể mở, xem đồng hồ trên thanh hành động.`, `${nameOf(a)} is locked. It may open next round, check the timer on the action bar.`), 3.5);
+  if (E.mainBusy()) return say(L('Làm xong nhiệm vụ đang dở đã, rồi quay lại chơi.', 'Finish your current quest first, then come back to play.'), 3);
+  if (picking && picking.action === a) return cancelPick();
+  startPick(a, source);
+}
+
+// ════════════════════════════════════════════════════════
+// CHỌN NGƯỜI
+// ════════════════════════════════════════════════════════
+const stars = id => '★'.repeat(Math.min(5, Math.max(1, Math.ceil(((D.ROLES[id] || {}).rank || 2) / 1.6))));
+const distTo = id => { const c = charOf(id); if (!c) return 1e9; const p = E.player.obj.root.position, q = c.obj.root.position; return Math.hypot(p.x - q.x, p.z - q.z); };
+const roomName = id => (H.roomOfChar(D, E.scaleKey, id) || {}).name || '';
+const PICK_TITLE = {
+  read:['Đọc bài của ai?', 'Whose article?'], fight:['Đánh nhau với ai?', 'Fight who?'], poptask:['Ném pop-task vào ai?', 'Throw pop-tasks at who?'],
+  flashcard:['Lật thẻ thuật ngữ của ai?', 'Whose term cards?'], coffee:['Mang cà phê cho ai?', 'Coffee for who?'], hide:['Ai đi trốn?', 'Who hides?'],
+  race:['Chạy đua với ai?', 'Race who?'], gossip:['Nấu xói ai?', 'Gossip about who?'] };
+const PICK_HINT = {
+  read:['Đọc bài của người đó rồi trả lời một câu hỏi.', 'Read their article, then answer one question.'],
+  fight:['Cấp càng cao càng trâu.', 'Higher rank, tougher fight.'], poptask:['Cấp càng cao càng hay né.', 'Higher rank dodges more.'],
+  flashcard:['Đoán thuật ngữ trong nghề của người đó.', 'Guess the terms of their craft.'], coffee:['Lấy ly ở Pantry rồi mang tới, đừng đụng ai.', 'Grab a cup in the Pantry and bring it over without bumping anyone.'],
+  hide:['Người đó trốn ở phòng khác, bạn đi tìm.', 'They hide in another room, you go find them.'], race:['Cấp càng thấp chạy càng nhanh.', 'Lower rank runs faster.'],
+  gossip:['Cấp càng cao đi tuần càng gắt. Chọn người bị nấu xói trước, người nghe chọn sau.', 'Higher rank patrols harder. Pick who to gossip about first, then who to tell.'] };
+function startPick(a, source, opts = {}){
+  closeSheet(); E.closeDialog(); E.closePanel(); toolbar.classList.remove('open'); cancelPending(true);
+  let ids = H.targets(D, E.scaleKey, a).filter(id => charOf(id));
+  if (opts.partner) ids = ids.filter(v => H.partners(D, E.scaleKey, v).includes(opts.partner));
+  picking = { action:a, step:'who', source, fixedPartner:opts.partner || null };
+  track('tm_action_open', { action_id:a, source });
+  if (!ids.length){ picking = null; renderTools(true);
+    return say(L(`Quy mô này chưa có ai để ${nameOf(a).toLowerCase()}. Thử quy mô khác nha.`, `Nobody here for ${nameOf(a).toLowerCase()} at this company size. Try another size.`), 3.5); }
+  ids.sort((x, y) => distTo(x) - distTo(y));
+  picking.ids = ids; showPickTags(ids); renderPick(); renderTools(true);
+}
+function renderPick(){
+  const p = picking; if (!p) return;
+  if (p.step === 'partner') return renderPartner();
+  const t = PICK_TITLE[p.action], h = PICK_HINT[p.action];
+  sheet.innerHTML = `<button class="close" aria-label="${L('Huỷ', 'Cancel')}">×</button><div class="sheet-body">
+    <p class="eyebrow">${ICON[p.action]} ${esc(nameOf(p.action))}${p.fixedPartner ? ' · ' + L('với', 'with') + ' ' + esc(roleName(p.fixedPartner)) : ''}</p>
+    <h2>${L(t[0], t[1])}</h2><p class="h-pickhint">${L(h[0], h[1])} ${L('Bấm vào người có dấu • trên bản đồ, hoặc chọn dưới đây.', 'Tap someone with a • on the map, or pick below.')}</p>
+    <div class="h-picklist">${p.ids.map(id => `<button class="h-pickrow" type="button" data-pick="${esc(id)}"><b>${esc(roleName(id))}</b><span>${esc(roomName(id))}</span><em title="${L('Độ khó', 'Difficulty')}">${stars(id)}</em></button>`).join('')}</div></div>`;
+  E.closeSheets('hourly'); sheet.hidden = false; sheet.classList.add('h-picking');
+  sheet.querySelector('.close').onclick = cancelPick;
+  sheet.querySelectorAll('[data-pick]').forEach(b => b.onclick = () => choose(b.dataset.pick, 'list'));
+}
+function choose(id, how){
+  const p = picking; if (!p) return;
+  if (p.step === 'partner'){ p.partner = id; return confirmPick(); }
+  if (!p.ids.includes(id)){
+    const why = H.whyNot(D, E.scaleKey, p.action, id);
+    return say(why ? L(`${roleName(id)}: ${why}.`, `${roleName(id)} can't be picked for this.`) : L(`Chọn người khác nha.`, 'Pick someone else.'), 2.6); }
+  p.who = id;
+  if (p.action === 'gossip'){
+    const ps = H.partners(D, E.scaleKey, id).filter(x => charOf(x)).sort((x, y) => distTo(x) - distTo(y));
+    if (!ps.length) return say(L('Không có ai để nói cùng.', 'Nobody to gossip with.'), 2.5);
+    p.partners = ps; p.partner = p.fixedPartner && ps.includes(p.fixedPartner) ? p.fixedPartner : ps[0];
+    if (p.fixedPartner) return confirmPick();
+    p.step = 'partner'; clearPickTags(); return renderPick();
+  }
+  confirmPick();
+}
+// nấu xói bước 2: người nghe đã chọn sẵn (gần nhất), cho đổi bằng chip
+function renderPartner(){
+  const p = picking;
+  sheet.innerHTML = `<button class="close" aria-label="${L('Huỷ', 'Cancel')}">×</button><div class="sheet-body">
+    <p class="eyebrow">${ICON.gossip} ${esc(nameOf('gossip'))}</p>
+    <h2>${L('Nấu xói', 'Gossip about')} ${esc(roleName(p.who))}</h2>
+    <p class="h-pickhint">${L('Nói với', 'Tell')}: <b>${esc(roleName(p.partner))}</b> · ${esc(roomName(p.partner))}</p>
+    ${p.partners.length > 1 ? `<div class="chips h-partners">${p.partners.slice(0, 4).map(id => `<button class="chip${id === p.partner ? ' pub' : ''}" type="button" data-partner="${esc(id)}">${esc(roleName(id))}</button>`).join('')}</div>` : ''}
+    <div class="row"><button class="btn btn-primary" data-go="1">${L('Bắt đầu', 'Start')}</button><button class="btn btn-ghost" data-back="1">${L('Chọn người khác', 'Pick someone else')}</button></div></div>`;
+  sheet.hidden = false;
+  sheet.querySelector('.close').onclick = cancelPick;
+  sheet.querySelectorAll('[data-partner]').forEach(b => b.onclick = () => { p.partner = b.dataset.partner; renderPartner(); });
+  sheet.querySelector('[data-go]').onclick = confirmPick;
+  sheet.querySelector('[data-back]').onclick = () => { p.step = 'who'; showPickTags(p.ids); renderPick(); };
+}
+function confirmPick(){
+  const p = picking; if (!p) return;
+  const tk = { slot:slotNow(), scale:E.scaleKey, action:p.action, who:p.who, partner:p.action === 'gossip' ? p.partner : null };
+  endPick(); pending = tk;
+  track('tm_action_pick', { action_id:tk.action, character_id:tk.who, source:p.source });
+  if (INSTANT.includes(tk.action)) return start(tk.action);
+  if (tk.action === 'read'){ renderCard(); return goTo(tk); }
+  renderCard(); say(objective(tk), 3.5); goTo(tk);
+}
+function endPick(){ picking = null; clearPickTags(); sheet.classList.remove('h-picking'); closeSheet(); renderTools(true); }
+function cancelPick(){ if (!picking) return; endPick(); }
+function cancelPending(quiet){ if (!pending) return; pending = null; E.player.path = []; E.player.onArrive = null; renderCard(); if (!quiet) say(L('Đã huỷ.', 'Cancelled.'), 1.5); }
+
 // ---------- HUD ----------
 function objective(tk){
   const who = roleName(tk.who), room = (H.roomOfChar(D, tk.scale, tk.action === 'gossip' ? tk.partner : tk.who) || {}).name || '';
   switch (tk.action){
     case 'read': return L(`Tới gặp ${who} ở ${room}, bấm "Đọc bài đầy đủ" rồi "Đọc xong rồi, hỏi đi"`, `Meet ${who} in ${room}, open the article, then press "Done reading, quiz me"`);
-    case 'coffee': return L('Ra Pantry, đứng vào vòng tròn hồng để lấy cà phê', 'Go to the Pantry and stand in the pink circle to grab a coffee');
-    case 'hide': return L(`Tìm ${who}. Hỏi người xung quanh để có gợi ý`, `Find ${who}. Ask people around for hints`);
-    case 'gossip': return L(`Tới gặp ${roleName(tk.partner)} ở ${room} để bắt đầu nấu xói`, `Meet ${roleName(tk.partner)} in ${room} to start gossiping`);
+    case 'gossip': return L(`Tới gặp ${roleName(tk.partner)} ở ${room} để bắt đầu nấu xói ${who}`, `Meet ${roleName(tk.partner)} in ${room} to start gossiping about ${who}`);
     default: return L(`Tới gặp ${who} ở ${room} để bắt đầu`, `Meet ${who} in ${room} to start`);
   }
 }
 function renderCard(){
-  const tk = accepted();
-  if (!tk || game){ card.hidden = true; return; }
-  const other = !here(tk), sc = (D.SCALES[tk.scale] || {}).name || tk.scale;
-  card.innerHTML = `<p class="eyebrow">${L('Nhiệm vụ giờ này', 'Quest of the hour')}</p><h3>${esc(titleOf(tk))}</h3>
-    <div class="objective">${other ? L(`Nhiệm vụ này ở ${esc(sc)}.`, `This quest is in the ${esc(sc)}.`) : esc(objective(tk))}</div>
-    <div class="row h-row">${other ? `<button class="btn btn-primary" data-h="switch">${L('Chuyển sang đó', 'Switch there')}</button>`
-      : tk.action !== 'hide' ? `<button class="btn btn-primary" data-h="go">${L('Tới đó', 'Go there')}</button>` : ''}
-      <button class="btn btn-ghost" data-h="drop">${L('Bỏ', 'Drop')}</button></div>`;
+  const tk = pending;
+  if (!tk || game || !here(tk)){ card.hidden = true; return; }
+  card.innerHTML = `<p class="eyebrow">${ICON[tk.action]} ${esc(nameOf(tk.action))}</p><h3>${esc(titleOf(tk))}</h3>
+    <div class="objective">${esc(objective(tk))}</div>
+    <div class="row h-row"><button class="btn btn-primary" data-h="go">${L('Tới đó', 'Go there')}</button><button class="btn btn-ghost" data-h="cancel">${L('Huỷ', 'Cancel')}</button></div>`;
   card.hidden = false;
 }
-card.addEventListener('click', e => { const b = e.target.closest('[data-h]'); if (!b) return; const tk = accepted(); if (!tk) return;
-  if (b.dataset.h === 'drop'){ ST.accepted = null; persist(); track('tm_hourly_drop', { action_id:tk.action, character_id:tk.who }); renderCard(); return; }
-  if (b.dataset.h === 'switch') return E.setScale(tk.scale);
-  if (b.dataset.h === 'go') goTo(tk); });
+card.addEventListener('click', e => { const b = e.target.closest('[data-h]'); if (!b || !pending) return;
+  if (b.dataset.h === 'cancel') return cancelPending();
+  if (b.dataset.h === 'go') goTo(pending); });
 function goTo(tk){
   const p = E.player.obj.root.position;
-  if (tk.action === 'coffee' && lounge()){ const [x, z] = cupSpot(); E.walkTo(E.player, x, z); return; }
   const c = targetFor(tk); if (!c) return; const q = c.obj.root.position;
   E.walkTo(E.player, q.x, q.z, () => E.talk(c), 1.3);
   if (Math.hypot(q.x - p.x, q.z - p.z) < 1.4) E.talk(c);
 }
+// nút ở dock: mobile mở thanh hành động dạng bottom sheet; desktop nhảy tới thanh công cụ
 let lastFab = '';
 function renderFab(){
-  const tk = current(), acc = accepted(), left = H.slotEnds(HD.config, slotNow()) - Date.now();
-  const s = `${fmt(left)}|${!!tk}|${!!acc}`; if (s === lastFab) return; lastFab = s;
-  fab.innerHTML = `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="13" r="8" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M12 9v4l2.5 2M9 2h6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
-    <span class="mb-met">${tk ? fmt(left) : '—'}</span>${tk && !acc ? '<i class="h-dot" aria-hidden="true">!</i>' : ''}`;
-  fab.title = tk ? L(`Nhiệm vụ giờ này · đổi sau ${fmt(left)}`, `Quest of the hour · changes in ${fmt(left)}`) : L('Giờ này chưa có nhiệm vụ', 'No quest this hour');
+  const left = H.slotEnds(HD.config, slotNow()) - Date.now(), s = `${Math.ceil(left / 60000)}|${HD.config.is_enabled}`; if (s === lastFab) return; lastFab = s;
+  fab.innerHTML = `<span class="h-fab-ico" aria-hidden="true">⚔</span><span class="mb-met">${L('Chơi', 'Play')}</span>`;
+  fab.title = L(`Hành động · đổi lượt sau ${fmt(left)}`, `Actions · new round in ${fmt(left)}`);
   fab.hidden = !HD.config.is_enabled;
 }
 fab.addEventListener('click', () => {
   if (game) return flashLocked();
-  const acc = accepted(); if (acc){ renderCard(); if (here(acc)) goTo(acc); return; }
-  const a = author(); if (!a) return;
-  // xoay camera về phía Nhân Lưu và chỉ đường
-  const p = E.player.obj.root.position, q = a.obj.root.position;
-  E.setYaw(Math.atan2(p.x - q.x, p.z - q.z));
-  say(L(`Nhân Lưu đang ở ${a.room.name}. Tới nói chuyện để nhận nhiệm vụ giờ này.`, `Nhân Lưu is in ${a.room.name}. Talk to him to get the quest of the hour.`), 4);
-  E.walkTo(E.player, q.x, q.z, () => E.talk(a), 1.3);
+  if (toolbar.classList.contains('open')){ toolbar.classList.remove('open'); return; }
+  E.closeSheets(); toolbar.classList.add('open'); renderTools(true);
+  const b = toolbar.querySelector('.h-tool:not(.locked)'); if (b && !E.isMobile()) b.focus();
 });
 function renderBfab(){
   const n = HD.badges.filter(b => ST.badges[b.id]).length;
@@ -153,55 +269,49 @@ function renderBfab(){
 }
 bfab.addEventListener('click', () => openBadges());
 
-// ---------- thẻ nhiệm vụ trong bảng của Nhân Lưu ----------
+// ---------- bảng của Nhân Lưu: giới thiệu + gợi ý ----------
 function authorCard(){
   if (!HD.config.is_enabled) return '';
-  const acc = accepted(), tk = acc || current();
-  if (!tk) return `<div class="h-offer"><h4>${L('Nhiệm vụ giờ này', 'Quest of the hour')}</h4><p>${L('Giờ này ổng chưa nghĩ ra việc gì. Quay lại sau nha.', 'He has no quest for you this hour. Come back later.')}</p></div>`;
-  const left = H.slotEnds(HD.config, tk.slot) - Date.now(), a = HD.actions[tk.action];
-  const blocked = !acc && E.mainBusy();
-  return `<div class="h-offer"><h4>${L('Nhiệm vụ giờ này', 'Quest of the hour')}<span class="h-left">${acc && tk.slot !== slotNow() ? L('lượt cũ', 'earlier slot') : L(`còn ${fmt(left)}`, `${fmt(left)} left`)}</span></h4>
-    <b>${esc(titleOf(tk))}</b><p>${esc(H.fill(a.offer, { target:roleName(tk.who), partner:roleName(tk.partner) }))}</p>
-    ${acc ? `<div class="h-status">${L('Đang làm', 'In progress')}${here(acc) ? '' : ' · ' + esc((D.SCALES[acc.scale] || {}).name || acc.scale)}</div>
-      <div class="row"><button class="btn btn-ghost" data-h="drop">${L('Bỏ nhiệm vụ này', 'Drop this quest')}</button></div>`
-    : `<div class="row"><button class="btn btn-primary" data-h="accept"${blocked ? ' disabled' : ''}>${blocked ? L('Làm xong nhiệm vụ đang dở đã', 'Finish your current quest first') : L('Nhận', 'Accept')}</button></div>`}</div>`;
+  const tk = H.suggest(D, E.scaleKey, slotNow()), left = H.slotEnds(HD.config, slotNow()) - Date.now();
+  return `<div class="h-offer"><h4>${L('Chơi gì bây giờ?', 'What to play?')}<span class="h-left">${L(`đổi lượt sau ${fmt(left)}`, `new round in ${fmt(left)}`)}</span></h4>
+    <p>${L('Chọn một hành động trên thanh công cụ, chọn người, rồi chơi. Đọc bài và Lật flashcard lúc nào cũng mở, mấy trò còn lại đổi mỗi lượt. Thắng nhiều để mở huy hiệu.',
+      'Pick an action on the action bar, pick a person, then play. Reading and Flashcards are always open, the other games change every round. Win to unlock badges.')}</p>
+    ${tk ? `<b>${L('Gợi ý của ổng', 'His suggestion')}: ${esc(titleOf(tk))}</b><p>${esc(H.fill(HD.actions[tk.action].offer, { target:roleName(tk.who), partner:roleName(tk.partner) }))}</p>
+    <div class="row"><button class="btn btn-primary" data-h="suggest">${L('Chơi luôn', 'Play it')}</button></div>` : ''}</div>`;
 }
-// nút "Đọc xong rồi, hỏi đi" trong bảng của nhân vật mục tiêu (hành động read)
+// trong bảng nhân vật: nút đọc bài (khi đang chọn đọc bài người này) + lối tắt nấu xói với người này
 function panelExtra(c){
-  const tk = accepted(); if (!tk || !here(tk) || tk.action !== 'read' || c.role.id !== tk.who || game) return '';
-  const ok = readOpened.has(tk.who), wait = Math.ceil((readRetryAt - Date.now()) / 1000);
-  return `<div class="h-offer h-read"><h4>${L('Nhiệm vụ giờ này', 'Quest of the hour')}</h4>
-    <p>${ok ? L('Đọc xong chưa? Người ta hỏi lại một câu đó.', 'Done reading? They will ask you one question.') : L('Bấm "Đọc bài đầy đủ" trước, đọc xong quay lại đây.', 'Open the full article first, then come back here.')}</p>
-    <div class="row"><button class="btn btn-primary" data-h="quiz"${ok && wait <= 0 ? '' : ' disabled'}>${wait > 0 ? L(`Đợi ${wait} giây`, `Wait ${wait}s`) : L('Đọc xong rồi, hỏi đi', 'Done reading, quiz me')}</button></div></div>`;
+  if (game || !HD.config.is_enabled || c.roamer) return '';
+  const tk = pending;
+  if (tk && here(tk) && tk.action === 'read' && c.role.id === tk.who){
+    const ok = readOpened.has(tk.who), wait = Math.ceil((readRetryAt - Date.now()) / 1000);
+    return `<div class="h-offer h-read"><h4>${ICON.read} ${esc(nameOf('read'))}</h4>
+      <p>${ok ? L('Đọc xong chưa? Người ta hỏi lại một câu đó.', 'Done reading? They will ask you one question.') : L('Bấm "Đọc bài đầy đủ" trước, đọc xong quay lại đây.', 'Open the full article first, then come back here.')}</p>
+      <div class="row"><button class="btn btn-primary" data-h="quiz"${ok && wait <= 0 ? '' : ' disabled'}>${wait > 0 ? L(`Đợi ${wait} giây`, `Wait ${wait}s`) : L('Đọc xong rồi, hỏi đi', 'Done reading, quiz me')}</button></div></div>`;
+  }
+  if (isOpen('gossip') && H.targets(D, E.scaleKey, 'gossip').some(v => H.partners(D, E.scaleKey, v).includes(c.role.id)))
+    return `<div class="h-offer h-gos"><div class="row"><button class="btn btn-ghost" data-h="gossip-with">${ICON.gossip} ${L('Nấu xói ai đó với người này', 'Gossip with this person')}</button></div></div>`;
+  return '';
 }
 function bindPanel(c){
   const p = $('#panel');
   p.querySelectorAll('[data-h]').forEach(b => b.onclick = () => {
     const k = b.dataset.h;
-    if (k === 'accept') return acceptNow();
-    if (k === 'drop'){ ST.accepted = null; persist(); renderCard(); E.closePanel(); return; }
+    if (k === 'suggest'){ const tk = H.suggest(D, E.scaleKey, slotNow()); if (!tk) return; E.closePanel();
+      if (E.mainBusy()) return say(L('Làm xong nhiệm vụ đang dở đã.', 'Finish your current quest first.'));
+      picking = { action:tk.action, step:'who', source:'author', who:tk.who, partner:tk.partner, ids:[tk.who] }; return confirmPick(); }
     if (k === 'quiz'){ E.closePanel(); return start('read'); }
+    if (k === 'gossip-with'){ E.closePanel(); if (E.mainBusy()) return say(L('Làm xong nhiệm vụ đang dở đã.', 'Finish your current quest first.')); return startPick('gossip', 'panel', { partner:c.role.id }); }
   });
 }
 const readOpened = new Set(); let readRetryAt = 0;
 // mở bài viết (tab mới trên desktop, xem trước trên mobile) = đã đọc
 document.addEventListener('click', e => {
-  const a = e.target.closest && e.target.closest('a[href]'); const tk = accepted(); if (!a || !tk || tk.action !== 'read') return;
+  const a = e.target.closest && e.target.closest('a[href]'); const tk = pending; if (!a || !tk || tk.action !== 'read') return;
   const url = (D.ROLES[tk.who] || {}).url; if (!url) return;
   const norm = u => String(u).split('?')[0].replace(/\/$/, '');
   if (norm(a.href) === norm(url)){ readOpened.add(tk.who); setTimeout(() => { const btn = $('#panel [data-h="quiz"]'); if (btn && readRetryAt <= Date.now()){ btn.disabled = false; btn.textContent = L('Đọc xong rồi, hỏi đi', 'Done reading, quiz me'); } }, 50); }
 }, true);
-
-function acceptNow(){
-  const tk = current(); if (!tk || accepted()) return;
-  if (E.mainBusy()) return say(L('Làm xong nhiệm vụ đang dở đã.', 'Finish your current quest first.'));
-  ST.accepted = { slot:tk.slot, scale:tk.scale, action:tk.action, who:tk.who, partner:tk.partner || null }; persist();
-  track('tm_hourly_accept', { action_id:tk.action, character_id:tk.who });
-  E.closePanel(); renderCard();
-  if (tk.action === 'hide') start('hide');
-  else if (tk.action === 'coffee') start('coffee');
-  else say(objective(ST.accepted), 4);
-}
 const track = (n, p) => E.track(n, Object.assign({ tm_slot:slotNow() }, p));
 
 // ---------- khung mini-game ----------
@@ -209,12 +319,13 @@ let game = null;
 const GAMES = {};
 function flashLocked(){ say(L('Đang chơi mini-game. Bấm "Thoát" nếu muốn dừng.', 'A mini-game is running. Press "Quit" to stop.'), 2.5); }
 function start(id){
-  const tk = accepted(); if (!tk || !here(tk) || game) return;
-  E.closeSheets(); E.closeDialog(); closeSheet();
+  const tk = pending; if (!tk || !here(tk) || game || tk.action !== id) return;
+  E.closeSheets(); E.closeDialog(); closeSheet(); cancelPick();
   const target = charOf(tk.who);
   if (!target && id !== 'flashcard' && id !== 'read') return;
   game = { id, tk, target, rank:(D.ROLES[tk.who] || {}).rank || 2, cfg:cfgOf(id), t0:E.t, cleanup:[], held:new Set() };
-  app.classList.add('h-playing'); card.hidden = true;
+  app.classList.add('h-playing'); card.hidden = true; toolbar.hidden = true; toolbar.classList.remove('open');
+  track('tm_hourly_start', { action_id:tk.action, character_id:tk.who });
   GAMES[id].start(game);
 }
 // thanh HUD ở giữa phía trên + nút to (Space tương đương)
@@ -233,25 +344,24 @@ function endGame(){
   if (!game) return; const g = game; game = null;
   g.cleanup.forEach(f => { try { f(); } catch (e) {} });
   bar.hidden = true; act.hidden = true; shade.hidden = true; app.classList.remove('h-playing');
-  E.player.frozenUntil = 0;
+  E.player.frozenUntil = 0; renderTools(true);
 }
-// kết quả: ghi tiến độ, chấm huy hiệu, Nhân Lưu khen (thắng) hoặc chê (thua)
+// kết quả: ghi tiến độ, chấm huy hiệu, Nhân Lưu khen (thắng)
 function finish(r){
   if (!game) return; const g = game, tk = g.tk, a = HD.actions[tk.action];
   const ev = { action_id:tk.action, character_id:tk.who, rank:g.rank, scale:tk.scale, slot:tk.slot, win:!!r.win, flawless:!!r.flawless,
     secs: r.secs != null ? r.secs : E.t - g.t0, fail_kind: r.win ? null : (r.fail_kind || 'lose') };
   endGame();
-  const { counted } = H.record(ST, ev, HD.config);
+  H.record(ST, ev);
   const got = H.evaluate(ST, D);
-  if (r.win) ST.accepted = null;
-  persist(); renderBfab();
-  track('tm_hourly_result', { action_id:ev.action_id, character_id:ev.character_id, win:ev.win, flawless:ev.flawless, fail_kind:ev.fail_kind || '', counted });
+  pending = null;
+  persist(); renderBfab(); renderTools(true);
+  track('tm_hourly_result', { action_id:ev.action_id, character_id:ev.character_id, win:ev.win, flawless:ev.flawless, fail_kind:ev.fail_kind || '' });
   got.forEach(id => track('tm_badge_unlock', { badge_id:id }));
-  if (r.win){
-    praise(a.win, () => resultSheet(tk, true, got, counted));
-  } else resultSheet(tk, false, got, true, r.note);
+  if (r.win && got.length) praise(a.win, () => resultSheet(tk, true, got));
+  else resultSheet(tk, r.win, got, r.note);
 }
-// thắng: Nhân Lưu tự đi tới chỗ người chơi rồi nói câu thắng
+// mở huy hiệu: Nhân Lưu tự đi tới chỗ người chơi rồi nói câu thắng
 function praise(text, then){
   const a = author(); if (!a){ then(); return; }
   a.ai = null; a.busy = true; a.path = [];
@@ -262,48 +372,61 @@ function praise(text, then){
   E.walkTo(a, x, z, arrive, .4);
   setTimeout(() => { if (!done){ a.path = []; a.obj.root.position.set(x, 0, z); arrive(); } }, 9000);
 }
-function resultSheet(tk, win, got, counted, note){
-  const a = HD.actions[tk.action];
+function resultSheet(tk, win, got, note){
+  const a = HD.actions[tk.action], w = H.statOf(ST, tk.action).wins, open = isOpen(tk.action);
   sheet.innerHTML = `<button class="close" aria-label="${L('Đóng', 'Close')}">×</button><div class="sheet-body">
-    <p class="eyebrow">${L('Nhiệm vụ giờ này', 'Quest of the hour')}</p><h2>${esc(titleOf(tk))}</h2>
-    <div class="chips"><span class="chip ${win ? 'pub' : 'todo'}">${win ? L('Thắng', 'Won') : L('Thua', 'Lost')}</span>${win && !counted ? `<span class="chip">${L('Lượt này đã tính rồi, chơi cho vui', 'Already counted this hour, just for fun')}</span>` : ''}</div>
-    ${win ? '' : `<p class="h-lose">${esc(a.lose)}</p>`}${note ? `<p class="h-note">${esc(note)}</p>` : ''}
+    <p class="eyebrow">${ICON[tk.action]} ${esc(nameOf(tk.action))}</p><h2>${esc(titleOf(tk))}</h2>
+    <div class="chips"><span class="chip ${win ? 'pub' : 'todo'}">${win ? L('Thắng', 'Won') : L('Thua', 'Lost')}</span>${win ? `<span class="chip">${L(`Đã thắng ${w} lần`, `${w} wins so far`)}</span>` : ''}</div>
+    <p class="${win ? 'h-win' : 'h-lose'}">${esc(win ? a.win : a.lose)}</p>${note ? `<p class="h-note">${esc(note)}</p>` : ''}
     ${got.length ? `<div class="h-got">${got.map(id => { const b = HD.badges.find(x => x.id === id); return `<div class="h-gotb"><canvas class="h-coin-mini" data-badge="${esc(id)}" width="160" height="160"></canvas><div><b>${L('Mở huy hiệu', 'Badge unlocked')}: ${esc(b.name)}</b><p>${esc(b.desc)}</p></div></div>`; }).join('')}</div>` : ''}
-    <div class="row">${win ? (got.length ? `<button class="btn btn-primary" data-r="badges">${L('Xem huy hiệu', 'See badges')}</button>` : '')
-      : `<button class="btn btn-primary" data-r="retry">${L('Chơi lại', 'Play again')}</button><button class="btn btn-ghost" data-r="drop">${L('Bỏ nhiệm vụ', 'Drop quest')}</button>`}
+    <div class="row">${got.length ? `<button class="btn btn-primary" data-r="badges">${L('Xem huy hiệu', 'See badges')}</button>` : ''}
+      ${open ? `<button class="btn ${got.length ? 'btn-ghost' : 'btn-primary'}" data-r="retry">${win ? L('Chơi tiếp', 'Play again') : L('Chơi lại', 'Try again')}</button>
+        <button class="btn btn-ghost" data-r="other">${L('Chọn người khác', 'Pick someone else')}</button>` : ''}
       <button class="btn btn-ghost" data-r="close">${L('Đóng', 'Close')}</button></div></div>`;
   E.closeSheets('hourly'); sheet.hidden = false;
   sheet.querySelector('.close').onclick = closeSheet;
   sheet.querySelectorAll('[data-r]').forEach(b => b.onclick = () => {
     const k = b.dataset.r; closeSheet();
     if (k === 'badges') openBadges(got[0]);
-    if (k === 'drop'){ ST.accepted = null; persist(); renderCard(); }
     if (k === 'retry') retry(tk);
+    if (k === 'other') chooseTool(tk.action, 'result');
   });
   sheet.querySelectorAll('.h-coin-mini').forEach(cv => miniCoin(cv, HD.badges.find(x => x.id === cv.dataset.badge)));
-  renderCard();
 }
 function retry(tk){
+  if (!isOpen(tk.action)) return say(L(`${nameOf(tk.action)} vừa khoá, chờ lượt sau nha.`, `${nameOf(tk.action)} just locked, wait for the next round.`), 3);
   if (tk.action === 'read'){ const w = Math.ceil((readRetryAt - Date.now()) / 1000);
-    if (w > 0) return say(L(`Đợi ${w} giây nữa rồi hỏi lại nha.`, `Wait ${w} more seconds before trying again.`)); return start('read'); }
-  if (tk.action === 'hide' || tk.action === 'coffee' || tk.action === 'flashcard') return start(tk.action);
-  const c = targetFor(tk); if (c){ const q = c.obj.root.position; E.walkTo(E.player, q.x, q.z, () => E.talk(c), 1.3); say(objective(tk), 3); }
+    if (w > 0) return say(L(`Đợi ${w} giây nữa rồi hỏi lại nha.`, `Wait ${w} more seconds before trying again.`)); }
+  pending = Object.assign({}, tk, { slot:slotNow() });
+  if (tk.action === 'read' || INSTANT.includes(tk.action)) return start(tk.action);
+  const c = targetFor(pending); if (c){ renderCard(); goTo(pending); say(objective(pending), 3); }
 }
-function closeSheet(){ sheet.hidden = true; }
+function closeSheet(){ sheet.hidden = true; if (E.isMobile()) toolbar.classList.remove('open'); }
 
 // ---------- hook từ engine ----------
 function onTalk(c){
   if (game) return game.onTalk ? game.onTalk(c) : true;
-  const tk = accepted(); if (!tk || !here(tk)) return false;
-  if (tk.action === 'read' || tk.action === 'hide' || tk.action === 'coffee') return false;
+  if (picking){ if (!c.roamer) choose(c.role.id, 'map'); return true; }
+  const tk = pending; if (!tk || !here(tk)) return false;
+  if (tk.action === 'read' || INSTANT.includes(tk.action)) return false;
   const starter = tk.action === 'gossip' ? tk.partner : tk.who;
   if (c.role.id !== starter || c.roamer) return false;
   start(tk.action); return true;
 }
-function onClick(e){ return !!(game && game.onClick && game.onClick(e)); }
+function onClick(e){
+  if (game) return !!(game.onClick && game.onClick(e));
+  if (picking && picking.step === 'who'){ const c = E.pick(e); if (c && !c.isPlayer && !c.roamer){ choose(c.role.id, 'map'); return true; } }
+  return false;
+}
 function onKey(e, down){
   const k = e.key;
-  if (!game){ if (down && k === 'Escape' && !badgesEl.hidden){ closeBadges(); return true; } return false; }
+  if (!game){
+    if (!down) return false;
+    if (k === 'Escape'){ if (!badgesEl.hidden){ closeBadges(); return true; } if (picking){ cancelPick(); return true; } if (toolbar.classList.contains('open')){ toolbar.classList.remove('open'); return true; } return false; }
+    if (/^[1-8]$/.test(k) && !e.ctrlKey && !e.metaKey && !e.altKey && badgesEl.hidden && $('#panel').hidden && $('#dialog').hidden && !$('#welcome').offsetParent){
+      const a = tools()[+k - 1]; if (a && !toolbar.hidden){ chooseTool(a, 'key'); return true; } }
+    return false;
+  }
   if (k === 'Escape'){ if (down) quit(); return true; }
   if (k === ' ' || k === 'Spacebar'){ e.preventDefault(); if (down && e.repeat) return true; game.onAct && game.onAct(down, true); return true; }
   if (game.onKey) return game.onKey(e, down);
@@ -319,15 +442,18 @@ function tick(dt){
   if (game && game.tick) game.tick(dt);
   if (toastT > 0){ toastT -= dt; if (toastT <= 0) toast.hidden = true; }
   tickAcc += dt; if (tickAcc < .5) return; tickAcc = 0;
-  renderFab();
-  // vị trí thẻ nhiệm vụ: ngay dưới thẻ quest chính nếu đang hiện
+  renderFab(); renderTools();
+  // hết lượt: hành động đang chọn / đang đi tới bị khoá thì huỷ (trò đang chơi vẫn chơi tiếp tới hết)
+  if (!game && picking && !isOpen(picking.action)){ cancelPick(); say(L('Hết lượt, hành động này vừa khoá.', 'Round over, this action just locked.'), 3); }
+  if (!game && pending && !isOpen(pending.action)){ pending = null; E.player.path = []; E.player.onArrive = null; renderCard(); say(L('Hết lượt, hành động này vừa khoá.', 'Round over, this action just locked.'), 3); }
+  // vị trí thẻ: ngay dưới thẻ quest chính nếu đang hiện
   const q = $('#quest'), top = !q.hidden && q.offsetParent ? q.offsetTop + q.offsetHeight + 8 : null;
   card.style.top = top != null ? top + 'px' : '';
-  if (!card.hidden && accepted() && !game){ const o = card.querySelector('.objective'); if (o && here(accepted())) o.textContent = objective(accepted()); }
 }
 function onWorld(){
   if (game){ const g = game; game = null; g.cleanup.forEach(f => { try { f(); } catch (e) {} }); bar.hidden = true; act.hidden = true; shade.hidden = true; app.classList.remove('h-playing'); }
-  buildTags(); renderCard(); renderFab(); renderBfab();
+  picking = null; pending = null; sheet.classList.remove('h-picking'); if (!sheet.hidden) closeSheet();
+  buildTags(); renderCard(); renderFab(); renderBfab(); renderTools(true);
 }
 // ════════════════════════════════════════════════════════
 // 8 MINI-GAME
@@ -389,38 +515,59 @@ function dust(a, b){ // bụi bay giữa hai người
   E.world.add(m); let life = .6; const id = setInterval(() => { life -= .05; m.position.y += .02; m.scale.multiplyScalar(1.04); if (life <= 0){ clearInterval(id); drop(m); } }, 50);
 }
 
-// 5.3 poptask — ném pop-task vào nhân vật đang đi lại trong phòng
+// 5.3 poptask — ném pop-task vào nhân vật đang đi lại trong phòng.
+// Cho dễ trúng: nhắm gần nhân vật (trong aim_assist m) hoặc bấm Space / nút thì tự nhắm đón đầu theo hướng đi;
+// tờ giấy trúng khi bay ngang qua người (nửa sau đường bay), không cần rơi đúng chỗ; nhân vật đi chậm và đứng lại giữa các lần đi.
 GAMES.poptask = { start(g){
-  const c = g.target, cf = g.cfg; grab(c); g.cleanup.push(() => { release(c); stuck.forEach(drop); flying.forEach(f => drop(f.m)); });
-  c.speed = 3.6 * cf.target_speed_factor;
-  let ammo = cf.ammo, hits = 0, thrown = 0, firstHits = 0, done = false; const flying = [], stuck = [];
-  const wander = () => { if (!game || done) return; const r = c.room, p = [r.x + (Math.random() - .5) * (r.w - 2.4), r.z + (Math.random() - .5) * (r.d - 2.4)];
-    const [x, z] = E.nearestFree(p[0], p[1]); E.walkTo(c, x, z, () => setTimeout(wander, 200 + Math.random() * 500)); };
-  wander();
+  const c = g.target, cf = g.cfg; grab(c);
+  const rangeRing = ring(0, 0, cf.max_range, '#FFC53D', .35), aimRing = ring(0, 0, .55, '#2FBF8F', .8);
+  g.cleanup.push(() => { release(c); stuck.forEach(drop); flying.forEach(f => drop(f.m)); drop(rangeRing); drop(aimRing); });
+  c.speed = 3.6 * cf.target_speed_factor * (1 + .04 * (g.rank - 1));
+  const pause = () => Math.max(.4, cf.pause_secs * (1.25 - .08 * g.rank)) * (.7 + Math.random() * .6);
+  let ammo = cf.ammo, hits = 0, misses = 0, done = false, vel = { x:0, z:0 }, last = null; const flying = [], stuck = [];
+  // đi tới một điểm trong phòng, ưu tiên điểm còn trong tầm ném của người chơi
+  const wander = () => { if (!game || done) return; const r = c.room, m = pos(E.player); let pt = null;
+    for (let k = 0; k < 8 && !pt; k++){ const x = r.x + (Math.random() - .5) * (r.w - 2.4), z = r.z + (Math.random() - .5) * (r.d - 2.4);
+      if (Math.hypot(x - m.x, z - m.z) < cf.max_range * .8 || k === 7) pt = [x, z]; }
+    const [x, z] = E.nearestFree(pt[0], pt[1]); E.walkTo(c, x, z, () => setTimeout(wander, pause() * 1000)); };
+  setTimeout(wander, 1200);
   const hud = () => showBar(`<div class="h-title">${L('Ném trúng', 'Hit')} ${esc(roleName(g.tk.who))}</div>
-    <div class="h-sub">${L('Bấm / chạm sàn để ném · Space ném về phía nhân vật · WASD để đi', 'Click / tap the floor to throw · Space throws towards them · WASD to move')}</div>
+    <div class="h-sub">${E.isMobile() ? L('Chạm nút "Ném" là tự nhắm · đứng trong vòng vàng', 'Tap "Throw" to auto-aim · stay within the yellow circle')
+      : L('Space / nút "Ném" là tự nhắm · hoặc bấm vào người · WASD để đi, đứng trong vòng vàng', 'Space / "Throw" auto-aims · or click on them · WASD to move, stay within the yellow circle')}</div>
     <div class="h-count">${L('Trúng', 'Hits')} <b>${hits}/${cf.hits_needed}</b> · ${L('Còn', 'Left')} <b>${ammo}</b> ${L('tờ', 'tasks')}</div>`);
   hud(); showAct(L('Ném', 'Throw'));
+  const inRange = () => { const p = pos(E.player), q = pos(c); return Math.hypot(q.x - p.x, q.z - p.z) <= cf.max_range; };
+  // điểm đón đầu: vị trí sau thời gian bay, theo vận tốc hiện tại
+  const lead = () => { const q = pos(c); return { x:q.x + vel.x * cf.flight_secs, z:q.z + vel.z * cf.flight_secs }; };
   const throwTo = (tx, tz) => { if (done || ammo <= 0) return; const p = pos(E.player); let dx = tx - p.x, dz = tz - p.z; const d = Math.hypot(dx, dz) || 1;
     if (d > cf.max_range){ dx *= cf.max_range / d; dz *= cf.max_range / d; }
-    ammo--; thrown++; const m = E.box(.26, .02, .2, '#FFF6A8'); m.position.set(p.x, 1, p.z); E.world.add(m);
+    ammo--; const m = E.box(.26, .02, .2, '#FFF6A8'); m.position.set(p.x, 1, p.z); E.world.add(m);
     E.player.heading = Math.atan2(dx, dz);
-    flying.push({ m, x0:p.x, z0:p.z, x1:p.x + dx, z1:p.z + dz, t:0, n:thrown }); hud(); };
-  g.onClick = e => { const q = E.groundPoint(e); if (q) throwTo(q.x, q.z); return true; };
-  g.onAct = down => { if (!down) return; const q = pos(c); throwTo(q.x, q.z); };
+    flying.push({ m, x0:p.x, z0:p.z, x1:p.x + dx, z1:p.z + dz, t:0 }); hud(); };
+  const autoThrow = () => { if (!inRange()){ say(L('Xa quá, lại gần chút (vào trong vòng vàng).', 'Too far, get closer (inside the yellow circle).'), 2); return; } const t = lead(); throwTo(t.x, t.z); };
+  g.onClick = e => { const o = E.pick(e); if (o === c) { autoThrow(); return true; }
+    const q = E.groundPoint(e); if (!q) return true; const cq = pos(c);
+    if (Math.hypot(q.x - cq.x, q.z - cq.z) <= cf.aim_assist) autoThrow(); else throwTo(q.x, q.z); return true; };
+  g.onAct = down => { if (down) autoThrow(); };
+  const hit = f => { hits++; drop(f.m);
+    const s = E.box(.24, .2, .02, '#FFF6A8'); s.position.set((Math.random() - .5) * .3, .75 + Math.random() * .4, .36); s.rotation.z = (Math.random() - .5) * .6; c.obj.root.add(s); stuck.push(s);
+    speak(c, H.line(D, 'poptask', 'react', g.tk.who), 2.4); say(`📝 ${H.line(D, 'poptask', 'task', g.tk.who)}`, 2.4);
+    E.setFace(c.obj, 'look', 'mO'); c.faceT = 1.5;
+    // trúng thì đứng khựng lại một chút
+    c.path = []; c.onArrive = null; c.frozenUntil = E.t + .8; setTimeout(wander, 1000); };
   g.tick = dt => {
+    const q = pos(c), p = pos(E.player);
+    if (last && dt > 0){ const k = Math.min(1, dt * 8); vel.x += ((q.x - last.x) / dt - vel.x) * k; vel.z += ((q.z - last.z) / dt - vel.z) * k; }
+    last = { x:q.x, z:q.z };
+    rangeRing.position.set(p.x, .07, p.z); aimRing.position.set(q.x, .07, q.z); aimRing.material.color.set(inRange() ? '#2FBF8F' : '#9A93B5');
     for (let i = flying.length - 1; i >= 0; i--){ const f = flying[i]; f.t += dt / cf.flight_secs; const k = Math.min(1, f.t);
-      f.m.position.set(f.x0 + (f.x1 - f.x0) * k, 1 + Math.sin(k * Math.PI) * 1.2 - k * .95, f.z0 + (f.z1 - f.z0) * k); f.m.rotation.y += dt * 12;
-      if (k < 1) continue;
-      flying.splice(i, 1); const q = pos(c);
-      if (Math.hypot(q.x - f.x1, q.z - f.z1) <= cf.hit_radius){
-        hits++; if (f.n <= cf.hits_needed) firstHits++; drop(f.m);
-        const s = E.box(.24, .2, .02, '#FFF6A8'); s.position.set((Math.random() - .5) * .3, .75 + Math.random() * .4, .36); s.rotation.z = (Math.random() - .5) * .6; c.obj.root.add(s); stuck.push(s);
-        speak(c, H.line(D, 'poptask', 'react', g.tk.who), 2.4); say(`📝 ${H.line(D, 'poptask', 'task', g.tk.who)}`, 2.4);
-        E.setFace(c.obj, 'look', 'mO'); c.faceT = 1.5;
-      } else { const m = f.m; setTimeout(() => drop(m), 1500); }
-      hud();
-      if (hits >= cf.hits_needed){ done = true; return finish({ win:true, flawless:firstHits >= cf.hits_needed && thrown === cf.hits_needed }); }
+      const x = f.x0 + (f.x1 - f.x0) * k, z = f.z0 + (f.z1 - f.z0) * k;
+      f.m.position.set(x, 1 + Math.sin(k * Math.PI) * 1.2 - k * .95, z); f.m.rotation.y += dt * 12;
+      if (k >= .45 && Math.hypot(q.x - x, q.z - z) <= cf.hit_radius){ flying.splice(i, 1); hit(f); hud(); }
+      else if (k >= 1){ flying.splice(i, 1); misses++; const m = f.m; setTimeout(() => drop(m), 1500); hud();
+        if (misses === 1 && !hits) say(L('Hụt rồi! Bấm Space hoặc nút "Ném" để tự nhắm đón đầu.', 'Missed! Press Space or "Throw" to auto-aim ahead of them.'), 3); }
+      else continue;
+      if (hits >= cf.hits_needed){ done = true; return finish({ win:true, flawless:misses === 0 }); }
       if (ammo <= 0 && !flying.length){ done = true; return finish({ win:false, fail_kind:'out_of_ammo' }); }
     }
   };
@@ -604,8 +751,8 @@ function coinImg(b){ if (b.image) return b.image; if (!faceUrl.has(b.rim)) faceU
 function openBadges(focus){
   E.closeSheets(); const n = HD.badges.filter(b => ST.badges[b.id]).length;
   badgesEl.innerHTML = `<button class="btn btn-ghost close-list" data-b="close">${L('Quay lại mô hình 3D', 'Back to the 3D map')}</button><div class="inner">
-    <p class="eyebrow">${L('Nhiệm vụ giờ này', 'Quest of the hour')}</p><h1>${L('Huy hiệu', 'Badges')} <span class="h-n">${n}/${HD.badges.length}</span></h1>
-    <p class="lead">${L('Làm nhiệm vụ giờ này của Nhân Lưu để mở huy hiệu. Bấm vào huy hiệu đã mở để xoay đồng xu và lưu ảnh khoe bạn bè.', 'Do Nhân Lưu\'s quest of the hour to unlock badges. Tap an unlocked badge to spin the coin and save an image to share.')}</p>
+    <p class="eyebrow">${L('Product Map', 'Product Map')}</p><h1>${L('Huy hiệu', 'Badges')} <span class="h-n">${n}/${HD.badges.length}</span></h1>
+    <p class="lead">${L('Chơi các hành động trên thanh công cụ để mở huy hiệu. Bấm vào huy hiệu đã mở để xoay đồng xu và lưu ảnh khoe bạn bè.', 'Play the actions on the action bar to unlock badges. Tap an unlocked badge to spin the coin and save an image to share.')}</p>
     <p class="h-store">${storeOk ? L('Huy hiệu lưu trên trình duyệt này. Đổi máy hoặc xoá dữ liệu trình duyệt là mất.', 'Badges are saved in this browser. Switching devices or clearing browser data loses them.')
       : L('Trình duyệt đang chặn lưu dữ liệu (chế độ riêng tư?), nên huy hiệu sẽ không được giữ lại.', 'This browser blocks saving data (private mode?), so badges will not be kept.')}</p>
     <div class="h-grid">${HD.badges.map(b => { const got = ST.badges[b.id];
@@ -671,7 +818,9 @@ function wrap(g, text, x, y, maxW, lh, maxLines){ const words = String(text || '
 onWorld();
 if (!storeOk) console.info('[Team Map] localStorage không dùng được: huy hiệu sẽ không được lưu.');
 return { onTalk, onClick, onKey, tick, onWorld, authorCard, panelExtra, bindPanel, playing:() => !!game, flashLocked,
-  holdsMain:() => !!accepted(), sheetOpen:() => !sheet.hidden, closeSheet:() => { if (!game) closeSheet(); },
-  // cho test / CMS
-  _state:ST, _current:current, _start:start, _openBadges:openBadges, _game:() => game, _E:E, _H:H };
+  holdsMain:() => !!game || !!pending, sheetOpen:() => !sheet.hidden || (E.isMobile() && toolbar.classList.contains('open')), closeSheet:() => { if (!game){ cancelPick(); closeSheet(); } },
+  // cho test
+  _state:ST, _open:() => H.openAt(D, slotNow()), _pending:() => pending, _picking:() => picking, _choose:choose, _tool:chooseTool,
+  _pend:tk => { pending = Object.assign({ slot:slotNow(), scale:E.scaleKey, partner:null }, tk); renderCard(); },
+  _start:(a, who, partner) => { pending = { slot:slotNow(), scale:E.scaleKey, action:a, who:who || (pending && pending.who), partner:partner || (pending && pending.partner) || null }; start(a); }, _openBadges:openBadges, _game:() => game, _E:E, _H:H };
 };

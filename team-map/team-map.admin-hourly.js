@@ -15,7 +15,8 @@ const CFG_LABEL = { options:'Số đáp án', retry_wait_secs:'Chờ trước kh
   flight_secs:'Thời gian bay (giây)', hit_radius:'Bán kính trúng', max_range:'Tầm ném xa nhất', target_speed_factor:'Hệ số tốc độ nhân vật', cards:'Số thẻ', pass_correct:'Số thẻ đúng để thắng',
   min_terms:'Thuật ngữ tối thiểu của nhân vật', secs_per_cup:'Giây cho mỗi ly', max_cups:'Số ly tối đa', spill_radius:'Bán kính va chạm', secs:'Thời gian tìm (giây)', countdown_secs:'Đếm ngược (giây)',
   speed_top:'Tốc độ cấp 1 (× người chơi)', speed_step:'Giảm mỗi cấp', npc_delay_secs:'Nhân vật xuất phát trễ (giây)', false_start_penalty_secs:'Phạt xuất phát sớm (giây)',
-  fill_secs:'Tổng giây giữ để đầy thanh', time_limit_secs:'Giới hạn thời gian (giây)', hear_radius:'Bán kính tầm nghe', grace_secs:'Độ trễ trước khi bị bắt (giây)', warn_secs:'Báo "?" trước (giây)' };
+  fill_secs:'Tổng giây giữ để đầy thanh', time_limit_secs:'Giới hạn thời gian (giây)', hear_radius:'Bán kính tầm nghe', grace_secs:'Độ trễ trước khi bị bắt (giây)', warn_secs:'Báo "?" trước (giây)',
+  pause_secs:'Nhân vật đứng lại (giây)', aim_assist:'Bấm cách nhân vật bao xa vẫn tự nhắm (m)' };
 const RANKS = { 1:'Thực tập', 2:'Nhân viên', 3:'Lead / PM', 4:'Manager', 5:'Head / Director', 6:'C-level / Stakeholder', 7:'Client', 8:'User' };
 const HEX = /^#[0-9a-f]{6}$/i;
 const charName = id => { const c = X.charOf(id); return c ? c.title : id; };
@@ -28,7 +29,7 @@ async function load(){
   try {
     const [config, actions, lines, quiz, badges] = await Promise.all([sbGet('tm_hourly_config', 'select=*&id=eq.1'), sbGet('tm_hourly_actions', 'select=*&order=sort_order'),
       sbGet('tm_hourly_lines', 'select=*&order=id'), sbGet('tm_quiz_questions', 'select=*&order=id'), sbGet('tm_badges', 'select=*&order=sort_order')]);
-    S.hourly = { config:config[0] || { id:1, slot_minutes:60, no_repeat_slots:3, counted_wins_per_slot:1, is_enabled:true }, actions, lines, quiz, badges };
+    S.hourly = { config:Object.assign({ id:1, slot_minutes:30, open_count:4, is_enabled:true }, config[0] || {}), actions, lines, quiz, badges };
   } catch (e) { S.hourly = null; console.warn('[Team Map CMS] Chưa có bảng nhiệm vụ theo giờ:', e.message); }
 }
 // dữ liệu giống hệt game (loader + logic chung) để tính "Đang chạy" và lý do hợp lệ
@@ -46,26 +47,27 @@ function renderHourly(){
   let running = '';
   try {
     const D = gameData(), slot = H.slotAt(C), fmt = s => new Date(s * H.slotMs(C)).toLocaleString('vi-VN', { hour:'2-digit', minute:'2-digit', day:'2-digit', month:'2-digit' });
-    running = Object.keys(D.SCALES).map(sc => { const n = H.pairs(D, sc).length;
-      const rows = C.is_enabled ? Array.from({ length:6 }, (_, k) => { const p = H.pick(D, sc, slot + k); return p ? `<tr${k ? '' : ' class="tm-now"'}><td>${k ? fmt(slot + k) : 'Đang chạy'}</td><td>${esc(actName(p.action))}</td><td>${esc(charName(p.who))}${p.partner ? ' + ' + esc(charName(p.partner)) : ''}</td></tr>` : ''; }).join('') : '';
-      return `<div class="tm-runcard"><h4>${esc(X.SCALE_NAME[sc])} <span class="tm-count">${n} cặp hợp lệ</span></h4>${C.is_enabled ? `<table class="tm-runtable"><tbody>${rows || '<tr><td colspan="3">Không có cặp nào hợp lệ</td></tr>'}</tbody></table>` : '<p class="tm-note">Đang tắt toàn bộ tính năng.</p>'}</div>`; }).join('');
+    const fun = a => !H.ALWAYS_OPEN.includes(a);
+    const rows = C.is_enabled ? Array.from({ length:8 }, (_, k) => `<tr${k ? '' : ' class="tm-now"'}><td>${k ? fmt(slot + k) : 'Đang chạy'}</td><td>${H.openAt(D, slot + k).filter(fun).map(a => esc(actName(a))).join(' · ') || '—'}</td></tr>`).join('') : '';
+    const counts = Object.keys(D.SCALES).map(sc => `<li><b>${esc(X.SCALE_NAME[sc])}</b>: ${H.ACTIONS.filter(a => D.HOURLY.actions[a]).map(a => `${esc(actName(a))} ${H.targets(D, sc, a).length}`).join(' · ')}</li>`).join('');
+    running = C.is_enabled ? `<table class="tm-runtable"><tbody>${rows}</tbody></table><p class="tm-note" style="margin-top:10px">Số người chọn được cho mỗi hành động:</p><ul class="tm-runcount">${counts}</ul>`
+      : '<p class="tm-note">Đang tắt toàn bộ tính năng.</p>';
   } catch (e) { running = `<p class="tm-warn">Không tính được: ${esc(e.message)}</p>`; }
-  X.body().innerHTML = `<div class="toolbar"><h2>Nhiệm vụ theo giờ</h2></div>
-    <p class="tm-note">Mỗi lượt Nhân Lưu giao một cặp "hành động + nhân vật", mọi người chơi cùng quy mô thấy cùng nhiệm vụ. Lưu là có hiệu lực ở lần tải trang sau.</p>
+  X.body().innerHTML = `<div class="toolbar"><h2>Hành động</h2></div>
+    <p class="tm-note">Người chơi chọn hành động trên thanh công cụ, chọn người rồi chơi; lần thắng nào cũng tính vào huy hiệu. <b>Đọc bài</b> và <b>Lật flashcard</b> luôn mở; mỗi lượt mở thêm một số hành động vui (theo trọng số), mọi người chơi thấy giống nhau. Lưu là có hiệu lực ở lần tải trang sau.</p>
     <div class="tm-hgrid">
       <div class="export-card"><h3>Cấu hình</h3>
-        <label class="tm-check"><input type="checkbox" data-hc="is_enabled"${C.is_enabled ? ' checked' : ''}/> Bật nhiệm vụ theo giờ</label>
+        <label class="tm-check"><input type="checkbox" data-hc="is_enabled"${C.is_enabled ? ' checked' : ''}/> Bật thanh hành động</label>
         <div class="form-row">
           <div class="form-group"><label>Độ dài một lượt (phút)</label><input class="form-control" type="number" min="5" max="1440" data-hc="slot_minutes" value="${C.slot_minutes}"/></div>
-          <div class="form-group"><label>Không lặp trong N lượt</label><input class="form-control" type="number" min="0" max="24" data-hc="no_repeat_slots" value="${C.no_repeat_slots}"/></div>
-          <div class="form-group"><label>Số lần thắng được tính mỗi lượt</label><input class="form-control" type="number" min="0" max="100" data-hc="counted_wins_per_slot" value="${C.counted_wins_per_slot}"/></div>
+          <div class="form-group"><label>Số hành động vui mở mỗi lượt (0–6)</label><input class="form-control" type="number" min="0" max="6" data-hc="open_count" value="${C.open_count ?? 4}"/><div class="form-hint">6 = mở hết</div></div>
         </div>
         <button class="btn-save" data-act="h-cfg-save">Lưu cấu hình</button></div>
-      <div class="export-card"><h3>Đang chạy</h3><p class="tm-note">Lượt hiện tại và 5 lượt kế tiếp, tính bằng đúng hàm game dùng (theo dữ liệu đã lưu).</p>${running}</div>
+      <div class="export-card"><h3>Các lượt sắp tới</h3><p class="tm-note">Hành động vui mở ở lượt hiện tại và 7 lượt kế tiếp, tính bằng đúng hàm game dùng (theo dữ liệu đã lưu).</p>${running}</div>
     </div>
     <h3 class="tm-h3">8 hành động</h3>
     <div class="tm-actions">${S.hourly.actions.map(a => `<div class="tm-actcard${a.is_active ? '' : ' off'}">
-      <div class="tm-actcard-h"><b>${esc(a.name)}</b><code>${a.id}</code><span class="badge badge-sub">Trọng số ${a.weight}</span>${X.enBadge(a, ['name','title_template','offer_text','win_text','lose_text'])}
+      <div class="tm-actcard-h"><b>${esc(a.name)}</b><code>${a.id}</code><span class="badge badge-sub">${H.ALWAYS_OPEN.includes(a.id) ? 'Luôn mở' : 'Trọng số ' + a.weight}</span>${X.enBadge(a, ['name','title_template','offer_text','win_text','lose_text'])}
         <button class="tm-toggle${a.is_active ? ' on' : ''}" data-act="h-act-toggle" data-id="${a.id}" aria-pressed="${a.is_active}" title="${a.is_active ? 'Đang bật — bấm để tắt' : 'Đang tắt — bấm để bật'}"></button>
         <button class="btn-edit" data-act="h-act-edit" data-id="${a.id}">Sửa</button></div>
       <div class="td-slug">${esc(a.title_template)}</div></div>`).join('')}</div>`;
@@ -75,9 +77,9 @@ function openAction(id){
   S.hform = { kind:'h-action', id };
   X.openModal(`Sửa hành động · ${a.name}`, `
     <div class="form-row"><div class="form-group"><label>Tên hiển thị *</label><input class="form-control" name="h_name" value="${esc(a.name)}"/></div>
-      <div class="form-group"><label>Trọng số (≥ 1)</label><input class="form-control" type="number" min="1" name="h_weight" value="${a.weight}"/><div class="form-hint">Càng lớn càng hay xuất hiện</div></div></div>
+      <div class="form-group"><label>Trọng số (≥ 1)</label><input class="form-control" type="number" min="1" name="h_weight" value="${a.weight}"/><div class="form-hint">${H.ALWAYS_OPEN.includes(id) ? 'Hành động này luôn mở, trọng số không dùng' : 'Càng lớn càng hay được mở'}</div></div></div>
     <div class="form-group"><label>Mẫu tên nhiệm vụ *</label><input class="form-control" name="h_title" value="${esc(a.title_template)}"/><div class="form-hint">Dùng {target}${id === 'gossip' ? ' và {partner}' : ''}</div></div>
-    <div class="form-group"><label>Lời Nhân Lưu khi giao</label><textarea class="form-control" name="h_offer" rows="2">${esc(a.offer_text || '')}</textarea></div>
+    <div class="form-group"><label>Lời Nhân Lưu khi gợi ý</label><textarea class="form-control" name="h_offer" rows="2">${esc(a.offer_text || '')}</textarea></div>
     <div class="form-row"><div class="form-group"><label>Lời khi thắng</label><textarea class="form-control" name="h_win" rows="2">${esc(a.win_text || '')}</textarea></div>
       <div class="form-group"><label>Lời khi thua</label><textarea class="form-control" name="h_lose" rows="2">${esc(a.lose_text || '')}</textarea></div></div>
     <div class="tm-section">Tham số mini-game</div>
@@ -86,7 +88,7 @@ function openAction(id){
       ${X.enInput('en_name', 'Tên (tiếng Anh)', en.name)}${X.enInput('en_title', 'Mẫu tên nhiệm vụ (tiếng Anh)', en.title_template)}
       ${X.enInput('en_offer', 'Lời giao (tiếng Anh)', en.offer_text, 2)}${X.enInput('en_win', 'Lời thắng (tiếng Anh)', en.win_text, 2)}${X.enInput('en_lose', 'Lời thua (tiếng Anh)', en.lose_text, 2)}
     </details>
-    <div class="tm-block"><label class="tm-check"><input type="checkbox" name="h_active"${a.is_active ? ' checked' : ''}/> Đưa vào vòng xoay</label></div>`,
+    <div class="tm-block"><label class="tm-check"><input type="checkbox" name="h_active"${a.is_active ? ' checked' : ''}/> Hiện trên thanh hành động</label></div>`,
     `<button class="btn-cancel" data-act="close">Huỷ</button><button class="btn-save" data-act="h-act-save">Lưu</button>`);
 }
 async function saveAction(){
@@ -106,9 +108,9 @@ async function saveAction(){
 }
 async function saveConfig(){
   const v = k => X.body().querySelector(`[data-hc="${k}"]`), num = k => parseInt(v(k).value);
-  const p = { is_enabled:v('is_enabled').checked, slot_minutes:num('slot_minutes'), no_repeat_slots:num('no_repeat_slots'), counted_wins_per_slot:num('counted_wins_per_slot') };
+  const p = { is_enabled:v('is_enabled').checked, slot_minutes:num('slot_minutes'), open_count:num('open_count') };
   if (!(p.slot_minutes >= 5 && p.slot_minutes <= 1440)) return toast('Độ dài lượt từ 5 đến 1440 phút', true);
-  if (!(p.no_repeat_slots >= 0 && p.no_repeat_slots <= 24) || !(p.counted_wins_per_slot >= 0)) return toast('Kiểm tra lại các số', true);
+  if (!(p.open_count >= 0 && p.open_count <= 6)) return toast('Số hành động mở từ 0 đến 6', true);
   try { await sbUpdate('tm_hourly_config', 1, p); toast('Đã lưu cấu hình'); await X.reload(); } catch (e) { toast('Lỗi: ' + e.message, true); }
 }
 
@@ -309,7 +311,7 @@ async function del(table, id, label){
 }
 
 // ════════════════════════════════════════════════════════
-// FORM NHÂN VẬT: nhóm "Nhiệm vụ theo giờ"
+// FORM NHÂN VẬT: nhóm "Hành động & mini-game"
 // ════════════════════════════════════════════════════════
 function charSection(c){
   const rel = new Set(((c && c.related_term_ids) || []).map(String)), part = new Set((c && c.gossip_partner_ids) || []), ex = new Set((c && c.hourly_exclude) || []);
@@ -319,7 +321,7 @@ function charSection(c){
     elig = Object.keys(D.SCALES).filter(sc => D.PLACE[sc][c.id]).map(sc => `<div><b>${esc(X.SCALE_NAME[sc])}:</b> ${ACTIONS.map(a => { const why = H.whyNot(D, sc, a, c.id);
       return why ? `<span class="tm-why bad" title="${esc(why)}">${esc(actName(a))}: ${esc(why)}</span>` : `<span class="tm-why ok">${esc(actName(a))}</span>`; }).join(' ')}</div>`).join('') || '<div class="form-hint">Chưa có chỗ ngồi ở quy mô nào</div>';
   } catch (e) { elig = `<div class="tm-warn">${esc(e.message)}</div>`; } }
-  return `<div class="tm-section">Nhiệm vụ theo giờ</div>
+  return `<div class="tm-section">Hành động &amp; mini-game</div>
     <div class="form-row"><div class="form-group"><label>Cấp bậc</label><select class="form-control" name="h_rank"><option value="">— Mặc định (2) —</option>${Object.entries(RANKS).map(([k, v]) => `<option value="${k}"${c && c.rank == k ? ' selected' : ''}>${k} · ${v}</option>`).join('')}</select>
       <div class="form-hint">Cấp càng cao đánh nhau càng trâu, chạy đua càng chậm. 1 Thực tập · 2 Nhân viên · 3 Lead/PM · 4 Manager · 5 Head/Director · 6 C-level · 7 Client · 8 User</div></div>
       <div class="form-group"><label>Không tham gia hành động</label><div class="tm-chipgrid">${ACTIONS.map(a => `<label class="tm-chip"><input type="checkbox" data-hex="${a}"${ex.has(a) ? ' checked' : ''}/>${esc(actName(a))}</label>`).join('')}</div></div></div>
@@ -483,6 +485,6 @@ function onChange(e){
 }
 function onClose(){ if (preview){ preview.destroy(); preview = null; } S.hform = null; }
 
-return { load, tabs:{ hourly:'Nhiệm vụ theo giờ', hlines:'Câu hỏi và lời thoại', badges:'Huy hiệu' }, render:{ hourly:renderHourly, hlines:renderLines, badges:renderBadges },
+return { load, tabs:{ hourly:'Hành động', hlines:'Câu hỏi và lời thoại', badges:'Huy hiệu' }, render:{ hourly:renderHourly, hlines:renderLines, badges:renderBadges },
   onClick, onInput, onChange, onClose, charSection, charValues, sheets, charCols, charCells, charFrom, charValidate };
 };

@@ -86,10 +86,9 @@ def main():
         '-- ════════════════════════════════════════════════════════',
         'begin;', '',
         '-- 1. Cấu hình (một dòng)',
-        'insert into tm_hourly_config (id, slot_minutes, no_repeat_slots, counted_wins_per_slot) values '
-        f"(1, {cfg['slot_minutes']}, {cfg['no_repeat_slots']}, {cfg['counted_wins_per_slot']})",
-        'on conflict (id) do update set slot_minutes = excluded.slot_minutes, no_repeat_slots = excluded.no_repeat_slots,',
-        '  counted_wins_per_slot = excluded.counted_wins_per_slot;', '',
+        'insert into tm_hourly_config (id, slot_minutes, no_repeat_slots, counted_wins_per_slot, open_count) values '
+        f"(1, {cfg['slot_minutes']}, {cfg['no_repeat_slots']}, {cfg['counted_wins_per_slot']}, {cfg['open_count']})",
+        'on conflict (id) do update set slot_minutes = excluded.slot_minutes, open_count = excluded.open_count;', '',
         '-- 2. Cấp bậc: chỉ ghi cho nhân vật chưa có cấp (id không tồn tại thì bỏ qua, xem báo cáo cuối file)',
         '--    (Không dùng bảng tạm: SQL Editor của Supabase không giữ bảng tạm giữa các câu lệnh.)',
         'update tm_characters c set rank = r.rank from (values', values(rank_rows), ') as r(id, rank)',
