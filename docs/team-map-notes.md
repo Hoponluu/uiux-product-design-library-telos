@@ -110,13 +110,32 @@ Menu là dãy tab `#tab-pill` trong `TELOS_Knowledge_Graph.html` (Graph view, A-
 
 Lưu ý: bản dịch dựa trên nội dung seed gốc. Nếu đã sửa nội dung tiếng Việt trong CMS sau khi seed, nên xem lại bản tiếng Anh của các dòng đó trong CMS.
 
-## 13. Các bước triển khai
+## 13. Nhiệm vụ theo giờ & huy hiệu (SPEC-hourly)
+
+- **Nguồn dữ liệu:** `team-map/seed-hourly.json` (gốc, theo SPEC) + `team-map/i18n-hourly-en.json` (tiếng Anh). `python3 scripts/gen_team_map_hourly_seed.py` sinh `supabase_team_map_hourly_seed.sql` và ghép phần `hourly` vào `seed.json` (dùng khi chưa kết nối được DB).
+- **Bảng mới:** `tm_hourly_config` (1 dòng), `tm_hourly_actions` (8 hành động cố định, chỉ sửa được, không thêm/xoá), `tm_hourly_lines`, `tm_quiz_questions`, `tm_badges`. Cột mới ở `tm_characters`: `rank` (1–8), `related_term_ids`, `gossip_partner_ids`, `hourly_exclude`. Tất cả có cột `i18n` cho bản EN.
+- **Xoay vòng:** mỗi khung giờ (mặc định 60 phút) chọn một cặp (hành động, nhân vật) theo công thức cố định từ thời gian, nên mọi người chơi cùng quy mô thấy cùng nhiệm vụ, không cần server. Không lặp lại trong K khung gần nhất và không trùng hành động hai khung liền nhau. Code: `team-map/team-map.hourly.js`.
+- **Mini-game:** `team-map/team-map.hourly-games.js` (8 game, HUD, bảng huy hiệu). Đồng xu 3D + xuất PNG 1080×1350: `team-map/team-map.coin.js`. Nút "🏅 Huy hiệu" ở thanh trên cùng; huy hiệu ẩn hiện "???" tới khi mở được.
+- **Tiến độ:** `localStorage['tm_hourly_v1']` (nhiệm vụ đang nhận, thống kê thắng/thua, huy hiệu). Mỗi khung giờ chỉ tính tối đa `counted_wins_per_slot` lần thắng; lần thua luôn được tính. Trình duyệt chặn lưu trữ thì game vẫn chơi được, màn hình Huy hiệu báo là sẽ không giữ lại.
+- **Ảnh huy hiệu:** Storage bucket công khai `tm-badges` (do `supabase_team_map.sql` tạo, tối đa 1 MB, png/webp/jpeg). Tải lên trong CMS → tab Huy hiệu; nên dùng ảnh vuông. Chưa có ảnh thì đồng xu dùng logo Telos.
+- **CMS:** 3 tab mới "Nhiệm vụ theo giờ" (cấu hình, 8 hành động, xem trước 6 khung giờ tới của mỗi quy mô), "Câu hỏi & lời thoại", "Huy hiệu" (kèm xem trước đồng xu 3D). Form nhân vật có thêm cấp bậc, thuật ngữ liên quan, người hay buôn chuyện cùng, loại trừ hành động, và dòng giải thích vì sao nhân vật đủ / chưa đủ điều kiện. Excel có thêm sheet `Hanh dong`, `Cau hoi`, `Loi thoai`, `Huy hieu` và các cột mới ở sheet `Nhan vat`.
+- **Nhiệm vụ hằng ngày cũ** (`type = daily`) được ẩn khỏi CMS và game vì nhiệm vụ theo giờ thay thế nó. Dữ liệu cũ vẫn nằm trong DB.
+- **Khác SPEC:** sau khi tự gắn thuật ngữ liên quan từ thẻ thưởng của nhiệm vụ chính (theo SPEC), nhân vật nào còn dưới 4 thuật ngữ được bù thêm theo nhóm vai trò (`GROUP_TERMS` trong script seed) để game Lật thẻ / Đọc bài có đủ dữ liệu. Sửa lại trong CMS nếu muốn. Game Lật thẻ dùng mô tả trong bảng `concepts` (tên thuật ngữ được che đi); thuật ngữ chưa có mô tả thì hiện gợi ý 2 chữ cái đầu.
+- **Cần chủ dự án xem lại:** 12 câu hỏi trắc nghiệm (tab Câu hỏi & lời thoại) và tải ảnh cho 10 huy hiệu.
+- **Debug:** mở `localhost:.../team-map.html#debug` để có `window.__tmHX` (bắt đầu game bất kỳ, xem khung giờ hiện tại). Chỉ có hiệu lực trên localhost.
+
+### Bật nhiệm vụ theo giờ trên DB đang chạy
+1. SQL Editor: chạy lại `supabase_team_map.sql` (thêm cột, bảng, bucket `tm-badges`, cập nhật hàm lưu / import).
+2. Chạy `supabase_team_map_hourly_seed.sql`. Chạy lại an toàn: không ghi đè `rank` đã đặt, giữ ảnh huy hiệu đã tải lên. Bảng cuối liệt kê id bị bỏ qua và nhân vật còn dưới 4 thuật ngữ liên quan. Xem nhân vật nào đủ điều kiện cho từng hành động trong CMS (form nhân vật, tab "Nhiệm vụ theo giờ" → Đang chạy).
+3. Deploy.
+
+## 14. Các bước triển khai
 
 1. Supabase → SQL Editor: chạy `supabase_team_map.sql`.
 2. Authentication → Users → **Add user** (email + mật khẩu) cho admin. Sau đó chạy:
    `insert into admin_users (email) values ('email-cua-ban@...');`
 3. Authentication → Sign In / Providers: tắt **Allow new users to sign up**.
-4. Chạy `supabase_team_map_seed.sql` (đầy đủ mọi quy mô, gồm cả agency và bản tiếng Anh). Kết quả cuối là bảng báo cáo: nhân vật nào đã gắn thuật ngữ, thẻ thưởng nào chưa khớp.
+4. Chạy `supabase_team_map_seed.sql` (đầy đủ mọi quy mô, gồm cả agency và bản tiếng Anh), rồi `supabase_team_map_hourly_seed.sql` (nhiệm vụ theo giờ & huy hiệu). Kết quả cuối là bảng báo cáo: nhân vật nào đã gắn thuật ngữ, thẻ thưởng nào chưa khớp.
 5. Deploy. Đăng nhập `/adminCMS` bằng email + mật khẩu vừa tạo.
 6. **Bỏ hẳn service_role key cũ** (key này đã nằm công khai trong lịch sử git nên phải coi như đã lộ):
    1. Supabase → **Settings → API Keys** → lấy **publishable key** (`sb_publishable_...`).

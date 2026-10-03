@@ -32,13 +32,19 @@ Mọi sự kiện Team Map tự kèm `tm_scale` (`small` · `large` · `agency`)
 | `tm_article_missing` | Bấm "Bài viết sắp ra mắt" | `character_title` — gợi ý nên viết bài nào trước |
 | `tm_locked_room_open` | Mở "Phòng ban khác" | |
 | `tm_list_view` | Mở "Xem dạng danh sách" hoặc đổi tab trong đó | `list_tab` (`rooms` / `report`) |
+| `tm_hourly_accept` | Nhận nhiệm vụ theo giờ từ Nhân Lưu | `action_id`, `character_id`, `tm_slot` |
+| `tm_hourly_result` | Kết thúc một mini-game | `action_id`, `character_id`, `win`, `flawless`, `fail_kind`, `counted` (lần thắng có được tính vào huy hiệu không), `tm_slot` |
+| `tm_hourly_drop` | Bỏ nhiệm vụ theo giờ | `action_id`, `character_id`, `tm_slot` |
+| `tm_badge_unlock` | Mở khoá một huy hiệu | `badge_id`, `tm_slot` |
+| `tm_badges_open` | Mở màn hình Huy hiệu | `unlocked` (số huy hiệu đã có), `tm_slot` |
+| `tm_badge_save` | Lưu ảnh huy hiệu | `badge_id`, `method` (`share` / `download`), `tm_slot` |
 
 ## Cần làm một lần trong GA
 
 Tham số tuỳ chỉnh chỉ hiện trong báo cáo sau khi đăng ký thành **custom dimension**:
 
 GA → Admin → Data display → **Custom definitions** → *Create custom dimension*, phạm vi **Event**, tạo lần lượt cho:
-`tab_name`, `term_name`, `click_source`, `tm_scale`, `tm_lang`, `quest_id`, `quest_title`, `character_title`, `character_kind`, `has_article`, `list_tab`, `start_action`.
+`tab_name`, `term_name`, `click_source`, `tm_scale`, `tm_lang`, `quest_id`, `quest_title`, `character_title`, `character_kind`, `has_article`, `list_tab`, `start_action`, `action_id`, `character_id`, `badge_id`, `fail_kind`, `method`.
 (`link_url`, `search_term` GA đã có sẵn.) Với `score`, `quest_index` có thể tạo **custom metric** nếu cần tính trung bình.
 
 Link sang academy.telos.vn từ phần xem trước có gắn `utm_source=uiux-library&utm_medium=product-map&utm_content=<click_source>`, xem được trong GA của trang academy.
