@@ -596,12 +596,10 @@ const COND = {
 };
 const condText = b => (COND[b.type] || (() => ''))(b, b.action && HD.actions[b.action] ? HD.actions[b.action].name : '');
 const dateText = iso => { try { return new Date(iso).toLocaleDateString(E.LANG === 'en' ? 'en-GB' : 'vi-VN'); } catch (e) { return ''; } };
-// mặt đồng xu mặc định: nền màu viền + logo TELOS
-const logoFace = (rim, size = 512) => { const c = document.createElement('canvas'); c.width = c.height = size; const g = c.getContext('2d');
-  g.fillStyle = rim; g.fillRect(0, 0, size, size); g.fillStyle = 'rgba(255,255,255,.18)'; g.beginPath(); g.arc(size/2, size/2, size*.42, 0, 7); g.fill();
-  E.drawLogo(g, size*.24, size*.24, size*.52, '#1C1033'); return c; };
+// mặt đồng xu mặc định / đồng xu 3D: team-map.coin.js (dùng chung với bản xem trước trong CMS)
+const COIN = window.TM_COIN, coinOpts = { drawLogo:E.drawLogo, dateText, reduceMotion };
 const faceUrl = new Map();
-function coinImg(b){ if (b.image) return b.image; if (!faceUrl.has(b.rim)) faceUrl.set(b.rim, logoFace(b.rim, 256).toDataURL()); return faceUrl.get(b.rim); }
+function coinImg(b){ if (b.image) return b.image; if (!faceUrl.has(b.rim)) faceUrl.set(b.rim, COIN.logoFace(b.rim, 256, E.drawLogo).toDataURL()); return faceUrl.get(b.rim); }
 
 function openBadges(focus){
   E.closeSheets(); const n = HD.badges.filter(b => ST.badges[b.id]).length;
@@ -623,57 +621,6 @@ function openBadges(focus){
 }
 function closeBadges(){ closeCoin(); badgesEl.hidden = true; }
 
-// --- đồng xu 3D: canvas Three.js riêng, chỉ tạo khi mở, huỷ khi đóng ---
-function coinTextures(b, iso){
-  const make = c => { const t = new THREE.CanvasTexture(c); t.anisotropy = 4; return t; };
-  const back = document.createElement('canvas'); back.width = back.height = 512; const g = back.getContext('2d');
-  g.fillStyle = b.rim; g.fillRect(0, 0, 512, 512); E.drawLogo(g, 176, 120, 160, '#1C1033');
-  g.fillStyle = '#1C1033'; g.textAlign = 'center'; g.font = '700 34px "Be Vietnam Pro", sans-serif'; g.fillText('TELOS ACADEMY', 256, 340);
-  g.font = '500 28px "Be Vietnam Pro", sans-serif'; g.fillText(iso ? dateText(iso) : '', 256, 384);
-  const front = make(logoFace(b.rim)), backT = make(back);
-  // mặt sau nhìn từ phía sau: lật ngang để chữ không bị ngược
-  backT.wrapS = THREE.RepeatWrapping; backT.repeat.x = -1;
-  if (b.image){ const ld = new THREE.TextureLoader(); ld.setCrossOrigin('anonymous');
-    ld.load(b.image, t => { front.image = t.image; front.needsUpdate = true; }, undefined, () => {}); }
-  return { front, back:backT };
-}
-function makeCoin(b, iso){
-  const geo = new THREE.CylinderGeometry(1, 1, .12, 64); geo.rotateX(Math.PI / 2);
-  const tx = coinTextures(b, iso);
-  const side = new THREE.MeshStandardMaterial({ color:b.rim, metalness:.75, roughness:.32 });
-  const front = new THREE.MeshStandardMaterial({ map:tx.front, metalness:.15, roughness:.45 });
-  const back = new THREE.MeshStandardMaterial({ map:tx.back, metalness:.35, roughness:.4 });
-  // CylinderGeometry: [thân, nắp trên, nắp dưới]; sau rotateX nắp trên quay về +Z (mặt trước)
-  const m = new THREE.Mesh(geo, [side, front, back]);
-  return { mesh:m, dispose:() => { geo.dispose(); [side, front, back].forEach(x => { if (x.map) x.map.dispose(); x.dispose(); }); } };
-}
-function coinScene(canvas, b, iso, opts = {}){
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true, preserveDrawingBuffer:true });
-  renderer.setPixelRatio(Math.min(2, devicePixelRatio || 1));
-  const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(32, 1, .1, 50); cam.position.set(0, 0, 4.4);
-  scene.add(new THREE.AmbientLight(0xffffff, .75)); const dl = new THREE.DirectionalLight(0xffffff, .9); dl.position.set(2, 3, 4); scene.add(dl);
-  const rl = new THREE.DirectionalLight(0xffe7b0, .45); rl.position.set(-3, -1, 2); scene.add(rl);
-  const coin = makeCoin(b, iso); scene.add(coin.mesh);
-  let vel = opts.intro ? 18 : 0, rot = opts.intro ? -Math.PI * 2 : 0, scale = opts.intro ? .2 : 1, dragging = null, alive = true, last = performance.now();
-  const auto = reduceMotion ? 0 : (opts.mini ? 1.2 : .6);
-  const size = () => { const w = canvas.clientWidth || canvas.width, h = canvas.clientHeight || canvas.height; renderer.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix(); };
-  size();
-  const frame = now => { if (!alive) return; const dt = Math.min(.05, (now - last) / 1000); last = now;
-    if (!dragging){ vel += ((auto) - vel) * Math.min(1, dt * 1.6); rot += vel * dt; }
-    scale += (1 - scale) * Math.min(1, dt * 4);
-    coin.mesh.rotation.y = rot; coin.mesh.scale.setScalar(scale); renderer.render(scene, cam); requestAnimationFrame(frame); };
-  requestAnimationFrame(frame);
-  if (!opts.mini){
-    const down = e => { dragging = { x:e.clientX, t:performance.now(), r:rot }; vel = 0; canvas.setPointerCapture(e.pointerId); };
-    const move = e => { if (!dragging) return; const dx = e.clientX - dragging.x; const nr = dragging.r + dx * .012; const dtm = Math.max(1, performance.now() - dragging.t);
-      vel = (nr - rot) / (dtm / 1000) * .5; rot = nr; dragging.t = performance.now(); dragging.r = rot; dragging.x = e.clientX; };
-    const up = () => { dragging = null; };
-    canvas.addEventListener('pointerdown', down); canvas.addEventListener('pointermove', move); canvas.addEventListener('pointerup', up); canvas.addEventListener('pointercancel', up);
-    canvas.style.touchAction = 'none';
-  }
-  return { renderer, render:() => renderer.render(scene, cam), resize:size,
-    destroy:() => { alive = false; coin.dispose(); renderer.dispose(); renderer.forceContextLoss && renderer.forceContextLoss(); } };
-}
 let viewer = null;
 function viewCoin(b, intro){
   if (!b || !ST.badges[b.id]) return; closeCoin();
@@ -685,13 +632,13 @@ function viewCoin(b, intro){
       <button class="btn btn-primary" data-c="save">${L('Lưu ảnh', 'Save image')}</button></div>
     <p class="h-hint">${L('Kéo để xoay đồng xu', 'Drag to spin the coin')}</p></div>`);
   badgesEl.appendChild(box);
-  viewer = { box, scene:coinScene(box.querySelector('canvas'), b, ST.badges[b.id], { intro }) , b };
+  viewer = { box, scene:COIN.scene(box.querySelector('canvas'), b, ST.badges[b.id], Object.assign({ intro }, coinOpts)), b };
   box.querySelector('.close').onclick = closeCoin;
   box.addEventListener('click', e => { if (e.target === box) closeCoin(); });
   box.querySelector('[data-c="save"]').onclick = () => saveImage(b);
 }
 function closeCoin(){ if (!viewer) return; viewer.scene.destroy(); viewer.box.remove(); viewer = null; }
-function miniCoin(canvas, b){ const sc = coinScene(canvas, b, ST.badges[b.id], { intro:true, mini:true });
+function miniCoin(canvas, b){ const sc = COIN.scene(canvas, b, ST.badges[b.id], Object.assign({ intro:true, mini:true }, coinOpts));
   const stop = new MutationObserver(() => { if (!canvas.isConnected || sheet.hidden){ sc.destroy(); stop.disconnect(); } }); stop.observe(sheet, { attributes:true, childList:true, subtree:true }); }
 
 // --- "Lưu ảnh": thẻ PNG 1080 × 1350, đồng xu đúng góc đang xoay ---
@@ -726,5 +673,5 @@ if (!storeOk) console.info('[Team Map] localStorage không dùng được: huy h
 return { onTalk, onClick, onKey, tick, onWorld, authorCard, panelExtra, bindPanel, playing:() => !!game, flashLocked,
   holdsMain:() => !!accepted(), sheetOpen:() => !sheet.hidden, closeSheet:() => { if (!game) closeSheet(); },
   // cho test / CMS
-  _state:ST, _current:current, _start:start, _openBadges:openBadges, _coinScene:coinScene, _game:() => game, _E:E, _H:H };
+  _state:ST, _current:current, _start:start, _openBadges:openBadges, _game:() => game, _E:E, _H:H };
 };

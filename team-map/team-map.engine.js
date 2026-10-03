@@ -280,7 +280,7 @@ function buildRoom(r){
     const tb = cyl(.9,.9,.08,'#FFFFFF',28); tb.position.set(r.x,.72,r.z); world.add(tb); const leg = cyl(.08,.08,.7,'#5B5270'); leg.position.set(r.x,.36,r.z); world.add(leg); blockRect(r.x, r.z, 1.8, 1.8, .2);
     r.gather = (k) => Array.from({ length:k }, (_,i) => [r.x - 2.3, r.z + (i-(k-1)/2)*1.2]);
     if (GUEST_ID){ const ux = r.x + 1.5, uz = r.z + .2; chair(ux, uz, -Math.PI/2); addChar(GUEST_ID, r, ux, uz, -Math.PI/2); }
-    decorRoom = r; decor(r); decorRoom = null;
+    decorRoom = r; decor(r); decorRoom = null; resolveHides(r);
     return;
   }
   const wm = r.kind === 'glass' ? mat('#9FE3F2',{ transparent:true, opacity:.35 }) : mat('#FFFFFF');
@@ -326,7 +326,7 @@ function buildRoom(r){
     r.gather = (k) => Array.from({ length:k }, (_,i) => tall ? [r.x - r.w/2 + 1.4, r.z + (i-(k-1)/2)*1.2] : [r.x + (i-(k-1)/2)*1.25, r.z + r.d/2 - 1.5]);
   }
   if (TV_ROOMS[r.id] !== undefined) addTV(r, TV_ROOMS[r.id]);
-  decorRoom = r; decor(r); decorRoom = null;
+  decorRoom = r; decor(r); decorRoom = null; resolveHides(r);
 }
 const screenCache = {};
 function screenTex(kind){
@@ -414,8 +414,12 @@ function addTV(r, off){
   r.tv = { mat:sm, idle }; r.presentSpot = nearestFree(x + 1.9, z + 1.1); addHide(r, x - 1.7, z + .4);
 }
 // điểm nấp cho trốn tìm: cạnh chậu cây, sau beanbag, sau TV, đầu bàn (ô đi tới được, lệch về phía trong phòng)
-function addHide(r, x, z){ const dx = r.x - x, dz = r.z - z, d = Math.hypot(dx, dz) || 1, [hx, hz] = nearestFree(x + dx/d*.75, z + dz/d*.75);
-  if (Math.abs(hx - r.x) < r.w/2 - .3 && Math.abs(hz - r.z) < r.d/2 - .3) (r.hideSpots = r.hideSpots || []).push([hx, hz]); }
+// (ghi điểm neo trước, tới khi dựng xong cả phòng mới chọn ô trống gần nhất để không rơi vào ô bị đồ đạc chặn)
+function addHide(r, x, z){ (r.hideAnchors = r.hideAnchors || []).push([x, z]); }
+function resolveHides(r){
+  r.hideSpots = (r.hideAnchors || []).map(([x, z]) => { const dx = r.x - x, dz = r.z - z, d = Math.hypot(dx, dz) || 1; return nearestFree(x + dx/d*.75, z + dz/d*.75); })
+    .filter(([hx, hz]) => free(hx, hz) && Math.abs(hx - r.x) < r.w/2 - .3 && Math.abs(hz - r.z) < r.d/2 - .3);
+  r.hideAnchors = null; }
 function decor(r){
   if (r.kind === 'locked') return;
   const cx = s => r.x + s*(r.w/2 - .85), cz = s => r.z + s*(r.d/2 - .85);
