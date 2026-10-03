@@ -55,7 +55,8 @@
      "doing": "Reviewing this quarter's OKRs with the leadership team.",
      "with_designer": "Rarely works with designers directly, but the company goals the CEO sets decide what you design for."
     }
-   }
+   },
+   "rank": 6
   },
   {
    "id": "cpo",
@@ -85,7 +86,8 @@
      "doing": "Finalising the roadmap for the next two quarters.",
      "with_designer": "Approves big product directions. You will present to the CPO at strategy reviews."
     }
-   }
+   },
+   "rank": 6
   },
   {
    "id": "cto",
@@ -115,7 +117,8 @@
      "doing": "Reviewing this month's infrastructure costs.",
      "with_designer": "Sets the technical constraints, which shape what designers can propose."
     }
-   }
+   },
+   "rank": 6
   },
   {
    "id": "head-of-design",
@@ -146,7 +149,8 @@
      "doing": "Building a competency framework for every designer level.",
      "with_designer": "Your most senior craft manager (solid line). You meet at Design all-hands."
     }
-   }
+   },
+   "rank": 5
   },
   {
    "id": "head-of-data",
@@ -176,7 +180,8 @@
      "doing": "Standardising the North Star metrics.",
      "with_designer": "Provides the numbers that tell you whether a design actually works."
     }
-   }
+   },
+   "rank": 5
   },
   {
    "id": "head-of-eng",
@@ -206,7 +211,8 @@
      "doing": "Staffing a new squad.",
      "with_designer": "Rarely works with you directly, but decides how fast developers move and how they work with you."
     }
-   }
+   },
+   "rank": 5
   },
   {
    "id": "product-manager",
@@ -236,7 +242,8 @@
      "doing": "Writing user stories for the onboarding flow.",
      "with_designer": "Sets your priorities every sprint (dotted line). The person you talk to most every day."
     }
-   }
+   },
+   "rank": 3
   },
   {
    "id": "product-owner",
@@ -266,7 +273,8 @@
      "doing": "Ordering the backlog for next sprint.",
      "with_designer": "Clarifies the acceptance criteria for each of your designs."
     }
-   }
+   },
+   "rank": 3
   },
   {
    "id": "growth-pm",
@@ -296,7 +304,8 @@
      "doing": "Reading the A/B test results for the sign-up screen.",
      "with_designer": "Designs experiments with you and reads the A/B test results together."
     }
-   }
+   },
+   "rank": 3
   },
   {
    "id": "data-pm",
@@ -326,7 +335,8 @@
      "doing": "Defining event tracking for a new feature.",
      "with_designer": "Helps you set up the right tracking to measure how well a design performs."
     }
-   }
+   },
+   "rank": 3
   },
   {
    "id": "ui-ux-designer",
@@ -387,7 +397,8 @@
      "doing": "Drawing the user flow for the invite-a-friend feature.",
      "with_designer": "A colleague in the same chapter. You two often meet at Design Critique."
     }
-   }
+   },
+   "rank": 2
   },
   {
    "id": "ui-designer",
@@ -417,7 +428,8 @@
      "doing": "Polishing the profile screen to match the Design System.",
      "with_designer": "Same chapter. Often talks with you about using components the right way."
     }
-   }
+   },
+   "rank": 2
   },
   {
    "id": "ux-designer",
@@ -447,7 +459,8 @@
      "doing": "Redrawing the checkout flow down to 3 steps.",
      "with_designer": "Same chapter. Often reviews user flows with you before moving to UI."
     }
-   }
+   },
+   "rank": 2
   },
   {
    "id": "intern",
@@ -477,7 +490,8 @@
      "doing": "Practising wireframes with your guidance.",
      "with_designer": "You are their direct mentor. The intern asks you everything, from Figma files to how meetings work."
     }
-   }
+   },
+   "rank": 1
   },
   {
    "id": "ds-designer",
@@ -507,7 +521,8 @@
      "doing": "Adding new variants to the Button component.",
      "with_designer": "Ask them before drawing a new component. It may already exist."
     }
-   }
+   },
+   "rank": 2
   },
   {
    "id": "ux-design-engineer",
@@ -537,7 +552,8 @@
      "doing": "Moving colour tokens from Figma into CSS.",
      "with_designer": "The bridge between your Figma file and real code."
     }
-   }
+   },
+   "rank": 2
   },
   {
    "id": "design-manager",
@@ -568,7 +584,8 @@
      "doing": "Preparing this afternoon's Design Critique.",
      "with_designer": "Your direct craft manager (solid line). You have a 1-on-1 every two weeks."
     }
-   }
+   },
+   "rank": 4
   },
   {
    "id": "ux-researcher",
@@ -599,7 +616,8 @@
      "doing": "Writing the script for a Usability Test.",
      "with_designer": "Helps you validate designs with real users before anything gets built."
     }
-   }
+   },
+   "rank": 2
   },
   {
    "id": "ux-writer",
@@ -629,7 +647,8 @@
      "doing": "Rewriting the login error messages.",
      "with_designer": "Polishes the copy on every screen with you."
     }
-   }
+   },
+   "rank": 2
   },
   {
    "id": "motion-designer",
@@ -659,7 +678,8 @@
      "doing": "Animating the onboarding transitions.",
      "with_designer": "Turns the interactions you design into smooth motion."
     }
-   }
+   },
+   "rank": 2
   },
   {
    "id": "tech-lead",
@@ -689,7 +709,8 @@
      "doing": "Estimating effort for a new story.",
      "with_designer": "Forms the product trio with you and the PM. Answers the questions: can we build it, and how long will it take?"
     }
-   }
+   },
+   "rank": 3
   },
   {
    "id": "frontend-developer",
@@ -719,7 +740,8 @@
      "doing": "Building the Card component from your Figma file.",
      "with_designer": "Receives your handoff. Will ask about spacing, states and responsive behaviour."
     }
-   }
+   },
+   "rank": 2
   },
   {
    "id": "backend-developer",
@@ -749,7 +771,8 @@
      "doing": "Writing the API that saves onboarding progress.",
      "with_designer": "Tells you what data is available and how fast the system can respond."
     }
-   }
+   },
+   "rank": 2
   },
   {
    "id": "fullstack-developer",
@@ -779,7 +802,8 @@
      "doing": "Building an SEO landing page end to end.",
      "with_designer": "Often tries out an idea with you in just a few days."
     }
-   }
+   },
+   "rank": 2
   },
   {
    "id": "mobile-developer",
@@ -809,7 +833,8 @@
      "doing": "Fixing a swipe gesture bug on Android.",
      "with_designer": "Asks you about pattern differences between iOS and Android."
     }
-   }
+   },
+   "rank": 2
   },
   {
    "id": "qa-engineer",
@@ -839,7 +864,8 @@
      "doing": "Writing test cases for the checkout flow.",
      "with_designer": "Compares the build against your design and flags anything that does not match."
     }
-   }
+   },
+   "rank": 2
   },
   {
    "id": "software-architect",
@@ -869,7 +895,8 @@
      "doing": "Diagramming how to split out the payment service.",
      "with_designer": "Rarely works with you directly, but their decisions affect speed and feature limits."
     }
-   }
+   },
+   "rank": 3
   },
   {
    "id": "devops",
@@ -899,7 +926,8 @@
      "doing": "Watching this afternoon's deploy.",
      "with_designer": "When the product is slow or goes down, they are the first to respond."
     }
-   }
+   },
+   "rank": 2
   },
   {
    "id": "data-analyst",
@@ -929,7 +957,8 @@
      "doing": "Building this week's sign-up funnel.",
      "with_designer": "Shows you at which step of a flow users drop off."
     }
-   }
+   },
+   "rank": 2
   },
   {
    "id": "bi-analyst",
@@ -959,7 +988,8 @@
      "doing": "Updating the revenue dashboard.",
      "with_designer": "Their dashboards are the fastest place to find numbers."
     }
-   }
+   },
+   "rank": 2
   },
   {
    "id": "data-scientist",
@@ -989,7 +1019,8 @@
      "doing": "Training the course recommendation model.",
      "with_designer": "Designs with you how AI-generated recommendations are shown."
     }
-   }
+   },
+   "rank": 2
   },
   {
    "id": "data-engineer",
@@ -1019,7 +1050,8 @@
      "doing": "Fixing last night's data sync pipeline.",
      "with_designer": "Rarely works with you directly, but the tracking you propose needs them to run."
     }
-   }
+   },
+   "rank": 2
   },
   {
    "id": "scrum-master",
@@ -1049,7 +1081,8 @@
      "doing": "Preparing the end-of-sprint Retro.",
      "with_designer": "Helps you unblock work that is stuck in the sprint."
     }
-   }
+   },
+   "rank": 3
   },
   {
    "id": "delivery-manager",
@@ -1079,7 +1112,8 @@
      "doing": "Updating the release plan.",
      "with_designer": "Tells you the real deadline for a feature."
     }
-   }
+   },
+   "rank": 4
   },
   {
    "id": "project-manager",
@@ -1109,7 +1143,8 @@
      "doing": "Tracking progress on the partner integration project.",
      "with_designer": "Needs you to estimate design time for each work item."
     }
-   }
+   },
+   "rank": 3
   },
   {
    "id": "growth-manager",
@@ -1139,7 +1174,8 @@
      "doing": "Planning a refer-a-friend campaign.",
      "with_designer": "Needs you to design landing pages and the invite-a-friend flow."
     }
-   }
+   },
+   "rank": 4
   },
   {
    "id": "performance-marketer",
@@ -1169,7 +1205,8 @@
      "doing": "Comparing 3 ad banner variants.",
      "with_designer": "Often asks you for banner variants and landing pages."
     }
-   }
+   },
+   "rank": 2
   },
   {
    "id": "brand-manager",
@@ -1199,7 +1236,8 @@
      "doing": "Approving the identity kit for a new campaign.",
      "with_designer": "You need to follow the brand guidelines they set."
     }
-   }
+   },
+   "rank": 4
   },
   {
    "id": "content-marketer",
@@ -1229,7 +1267,8 @@
      "doing": "Writing the launch blog post for a feature.",
      "with_designer": "Needs feature illustrations from you."
     }
-   }
+   },
+   "rank": 2
   },
   {
    "id": "crm-manager",
@@ -1259,7 +1298,8 @@
      "doing": "Setting up the welcome email sequence.",
      "with_designer": "Designs emails and in-app messages with you."
     }
-   }
+   },
+   "rank": 3
   },
   {
    "id": "seo-specialist",
@@ -1289,7 +1329,8 @@
      "doing": "Checking page load speed.",
      "with_designer": "Gives feedback on page structure and headings when you build landing pages."
     }
-   }
+   },
+   "rank": 2
   },
   {
    "id": "csm",
@@ -1319,7 +1360,8 @@
      "doing": "Calling customers whose plans are about to expire.",
      "with_designer": "Brings real customer feedback back to you."
     }
-   }
+   },
+   "rank": 3
   },
   {
    "id": "customer-support",
@@ -1349,7 +1391,8 @@
      "doing": "Answering 12 tickets about forgotten passwords.",
      "with_designer": "A valuable source of insight: which problems users ask about most."
     }
-   }
+   },
+   "rank": 2
   },
   {
    "id": "account-manager",
@@ -1379,7 +1422,8 @@
      "doing": "Preparing a demo for an enterprise customer.",
      "with_designer": "Needs you to make a polished demo for big customers."
     }
-   }
+   },
+   "rank": 3
   },
   {
    "id": "business-analyst",
@@ -1409,7 +1453,8 @@
      "doing": "Writing the requirements spec for the invoicing feature.",
      "with_designer": "Translates business requirements into specs for you to design from."
     }
-   }
+   },
+   "rank": 2
   },
   {
    "id": "stakeholder",
@@ -1439,7 +1484,8 @@
      "doing": "Waiting for the Sprint Review to see the demo.",
      "with_designer": "You need to convince them with reasons, data and a clear demo."
     }
-   }
+   },
+   "rank": 6
   },
   {
    "id": "nhan-luu",
@@ -1536,7 +1582,8 @@
       "Learnability"
      ]
     }
-   }
+   },
+   "rank": 8
   },
   {
    "id": "client",
@@ -1570,7 +1617,8 @@
      "with_designer": "You present designs to them and listen to their feedback. Every new request from them must go through the Account Manager and the Project Manager.",
      "tag": "The agency's client"
     }
-   }
+   },
+   "rank": 7
   },
   {
    "id": "design-director",
@@ -1602,7 +1650,8 @@
      "doing": "Reviewing concepts for three different projects.",
      "with_designer": "Your direct craft manager. Approves designs, gives feedback and decides which version is good enough to send to the client."
     }
-   }
+   },
+   "rank": 5
   },
   {
    "id": "graphic-designer",
@@ -1633,7 +1682,8 @@
      "doing": "Adjusting the banner set for a client's grand opening campaign.",
      "with_designer": "Tells you the client's brand colours, fonts and imagery so the interface stays on brand."
     }
-   }
+   },
+   "rank": 2
   },
   {
    "id": "sales",
@@ -1664,7 +1714,8 @@
      "doing": "Preparing slides for this afternoon's client meeting.",
      "with_designer": "Often asks you to put together a quick demo so the client can picture the product before signing."
     }
-   }
+   },
+   "rank": 2
   },
   {
    "id": "freelancer",
@@ -1696,7 +1747,8 @@
      "doing": "Making an icon set for a project that is due this week.",
      "with_designer": "Works with you for a few weeks and then leaves. Hand over clean files so they can get going fast."
     }
-   }
+   },
+   "rank": 2
   }
  ],
  "rooms": [
@@ -4376,5 +4428,1611 @@
   "product": "board",
   "delivery": "board",
   "business": "chart"
+ },
+ "hourly": {
+  "config": {
+   "slot_minutes": 60,
+   "no_repeat_slots": 3,
+   "counted_wins_per_slot": 1,
+   "is_enabled": true
+  },
+  "actions": [
+   {
+    "id": "read",
+    "sort_order": 1,
+    "name": "Đọc bài và trả lời",
+    "title_template": "Đọc bài về {target} rồi trả lời một câu hỏi",
+    "weight": 1,
+    "offer_text": "Giờ này đọc sách đi con. Qua đọc bài về {target}, rồi để người ta hỏi lại một câu coi có hiểu không.",
+    "win_text": "Đọc thiệt hả? Tui tưởng lướt cho có thôi chứ.",
+    "lose_text": "Sai rồi. Đọc lại đi, bài có dài lắm đâu.",
+    "config": {
+     "options": 3,
+     "retry_wait_secs": 10
+    },
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "name": "Read and answer",
+      "title_template": "Read about {target}, then answer one question",
+      "offer_text": "Reading time, kiddo. Go read the article about {target}, then let them quiz you to see if it stuck.",
+      "win_text": "You actually read it? I thought you'd just skim it.",
+      "lose_text": "Wrong. Read it again, it's not that long."
+     }
+    }
+   },
+   {
+    "id": "fight",
+    "sort_order": 2,
+    "name": "Đánh nhau",
+    "title_template": "Đánh nhau với {target}",
+    "weight": 1,
+    "offer_text": "Nghe nói bạn muốn đánh nhau với đồng nghiệp. Được, giờ này cho đánh {target}. Bấm thiệt nhanh vô, sếp càng to càng trâu đó.",
+    "win_text": "Thắng rồi. Mai nhớ đi làm bình thường, đừng nhìn mặt người ta.",
+    "lose_text": "Thua rồi. Người ta ăn lương cao hơn thì khoẻ hơn, có gì lạ đâu.",
+    "config": {
+     "duration_secs": 10,
+     "start_percent": 50,
+     "tap_gain": 2.5,
+     "npc_base": 5,
+     "npc_per_rank": 1.9,
+     "max_taps_per_sec": 15
+    },
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "name": "Fight",
+      "title_template": "Fight {target}",
+      "offer_text": "I hear you want to fight a coworker. Fine, this hour you get to fight {target}. Tap as fast as you can, the bigger the boss the tougher they are.",
+      "win_text": "You won. Come to work tomorrow like nothing happened, and don't make eye contact.",
+      "lose_text": "You lost. People on a bigger salary are stronger, nothing strange about that."
+     }
+    }
+   },
+   {
+    "id": "poptask",
+    "sort_order": 3,
+    "name": "Ném pop-task",
+    "title_template": "Ném trúng {target} 3 pop-task",
+    "weight": 1,
+    "offer_text": "Bình thường người ta ném việc gấp vô mặt bạn. Giờ này đổi vai: ném trúng {target} 3 cái pop-task cho tui.",
+    "win_text": "Ném việc cho người khác vui ha? Giờ hiểu cảm giác của sếp chưa.",
+    "lose_text": "Hết task để ném rồi. Hiếm khi nào công ty hết việc vậy lắm.",
+    "config": {
+     "ammo": 6,
+     "hits_needed": 3,
+     "flight_secs": 0.45,
+     "hit_radius": 0.6,
+     "max_range": 6,
+     "target_speed_factor": 1.25
+    },
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "name": "Throw pop-tasks",
+      "title_template": "Hit {target} with 3 pop-tasks",
+      "offer_text": "Normally people throw urgent tasks in your face. This hour we switch roles: hit {target} with 3 pop-tasks for me.",
+      "win_text": "Fun dumping work on other people, huh? Now you know how the boss feels.",
+      "lose_text": "Out of tasks to throw. The company rarely runs out of work like that."
+     }
+    }
+   },
+   {
+    "id": "flashcard",
+    "sort_order": 4,
+    "name": "Lật flashcard",
+    "title_template": "Chơi flashcard thuật ngữ của {target}",
+    "weight": 1,
+    "offer_text": "{target} hay nói mấy từ nghe sang lắm. Qua đó lật vài thẻ flashcard coi bạn hiểu được mấy từ.",
+    "win_text": "Giỏi. Giờ họp bạn gật đầu là gật thiệt chứ không phải gật cho có nữa.",
+    "lose_text": "Chưa đủ điểm. Không sao, đi họp cứ gật đầu là được.",
+    "config": {
+     "cards": 4,
+     "pass_correct": 3,
+     "min_terms": 4
+    },
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "name": "Flashcards",
+      "title_template": "Play {target}'s jargon flashcards",
+      "offer_text": "{target} loves fancy words. Go flip a few flashcards and see how many you actually understand.",
+      "win_text": "Nice. Now when you nod in meetings, you actually mean it.",
+      "lose_text": "Not enough points. Don't worry, in meetings just keep nodding."
+     }
+    }
+   },
+   {
+    "id": "coffee",
+    "sort_order": 5,
+    "name": "Mang cà phê",
+    "title_template": "Mang cà phê cho {target}",
+    "weight": 1,
+    "offer_text": "{target} đang buồn ngủ. Ra Pantry lấy ly cà phê mang qua, đừng có đụng ai kẻo đổ.",
+    "win_text": "Tới nơi còn nguyên ly. Kỹ năng này không có trong JD đâu nhưng quý lắm.",
+    "lose_text": "Đổ hết ba ly rồi. Thôi để người ta tự đi lấy.",
+    "config": {
+     "secs_per_cup": 30,
+     "max_cups": 3,
+     "spill_radius": 0.7
+    },
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "name": "Bring coffee",
+      "title_template": "Bring {target} a coffee",
+      "offer_text": "{target} is falling asleep. Grab a coffee from the Pantry and bring it over, and don't bump into anyone or it spills.",
+      "win_text": "Arrived without a drop spilled. Not in the JD, but a precious skill.",
+      "lose_text": "Three cups spilled. Let them get their own."
+     }
+    }
+   },
+   {
+    "id": "hide",
+    "sort_order": 6,
+    "name": "Trốn tìm",
+    "title_template": "Tìm {target} đang trốn",
+    "weight": 1,
+    "offer_text": "{target} trốn họp rồi. Bạn có 60 giây đi tìm. Hỏi mấy người xung quanh coi có ai thấy không.",
+    "win_text": "Tìm ra rồi. Mời về họp tiếp.",
+    "lose_text": "Hết giờ. Người ta trốn giỏi hơn bạn tìm.",
+    "config": {
+     "secs": 60,
+     "countdown_secs": 3
+    },
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "name": "Hide and seek",
+      "title_template": "Find {target}, who is hiding",
+      "offer_text": "{target} skipped the meeting and went into hiding. You have 60 seconds to find them. Ask around to see if anyone spotted them.",
+      "win_text": "Found them. Back to the meeting, please.",
+      "lose_text": "Time's up. They hide better than you seek."
+     }
+    }
+   },
+   {
+    "id": "race",
+    "sort_order": 7,
+    "name": "Chạy đua",
+    "title_template": "Chạy đua với {target} tới Pantry",
+    "weight": 1,
+    "offer_text": "Pantry mới có bánh. Chạy đua với {target} coi ai tới trước. Nói trước, cấp càng thấp chạy càng lẹ.",
+    "win_text": "Tới trước rồi. Bánh hết từ sáng, tui quên nói.",
+    "lose_text": "Chậm rồi. Ngồi nhiều quá mà.",
+    "config": {
+     "speed_top": 0.97,
+     "speed_step": 0.055,
+     "npc_delay_secs": 0.5,
+     "false_start_penalty_secs": 1
+    },
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "name": "Race",
+      "title_template": "Race {target} to the Pantry",
+      "offer_text": "There are new cakes in the Pantry. Race {target} and see who gets there first. Fair warning: the more junior, the faster they run.",
+      "win_text": "You got there first. The cakes were gone this morning, forgot to tell you.",
+      "lose_text": "Too slow. Too much sitting."
+     }
+    }
+   },
+   {
+    "id": "gossip",
+    "sort_order": 8,
+    "name": "Nấu xói",
+    "title_template": "Nấu xói {target} với {partner}",
+    "weight": 1,
+    "offer_text": "Giờ này nấu xói. Qua kiếm {partner} nấu xói {target} một chút. Nhỏ tiếng thôi, người ta đi ngang là phải im liền.",
+    "win_text": "Nấu xong rồi hả. Tui không nghe gì hết nha, tui không biết gì hết.",
+    "lose_text": "Bị nghe rồi. Mai đi làm nhớ mua trà sữa cho người ta.",
+    "config": {
+     "fill_secs": 8,
+     "time_limit_secs": 45,
+     "hear_radius": 2.2,
+     "grace_secs": 0.25,
+     "warn_secs": 0.6
+    },
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "name": "Gossip",
+      "title_template": "Gossip about {target} with {partner}",
+      "offer_text": "Gossip hour. Go find {partner} and have a little gossip about {target}. Keep it down, if they walk past you shut up right away.",
+      "win_text": "All done? I didn't hear a thing, I don't know anything.",
+      "lose_text": "You got overheard. Better buy them a bubble tea tomorrow."
+     }
+    }
+   }
+  ],
+  "lines": [
+   {
+    "id": "hl-001",
+    "action_id": "poptask",
+    "kind": "task",
+    "character_id": null,
+    "text": "Em ơi sửa giúp anh cái banner, 5 phút thôi.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Could you fix this banner for me, just 5 minutes."
+     }
+    }
+   },
+   {
+    "id": "hl-002",
+    "action_id": "poptask",
+    "kind": "task",
+    "character_id": null,
+    "text": "Cái này gấp nha, chiều nay gửi anh.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "This one's urgent, send it to me this afternoon."
+     }
+    }
+   },
+   {
+    "id": "hl-003",
+    "action_id": "poptask",
+    "kind": "task",
+    "character_id": null,
+    "text": "Khách mới đổi ý, làm lại từ đầu giúp chị.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "The client changed their mind, please redo it from scratch."
+     }
+    }
+   },
+   {
+    "id": "hl-004",
+    "action_id": "poptask",
+    "kind": "task",
+    "character_id": null,
+    "text": "Tiện tay làm luôn cái này nha.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Do this too while you're at it."
+     }
+    }
+   },
+   {
+    "id": "hl-005",
+    "action_id": "poptask",
+    "kind": "task",
+    "character_id": null,
+    "text": "Sáng mai demo, tối nay em coi giúp.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Demo is tomorrow morning, can you check it tonight?"
+     }
+    }
+   },
+   {
+    "id": "hl-006",
+    "action_id": "poptask",
+    "kind": "task",
+    "character_id": null,
+    "text": "Nhỏ xíu à, chắc 10 phút là xong.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "It's tiny, should take 10 minutes."
+     }
+    }
+   },
+   {
+    "id": "hl-007",
+    "action_id": "poptask",
+    "kind": "task",
+    "character_id": null,
+    "text": "Sếp mới nhắn, ưu tiên cái này trước.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "The boss just messaged, do this one first."
+     }
+    }
+   },
+   {
+    "id": "hl-008",
+    "action_id": "poptask",
+    "kind": "task",
+    "character_id": null,
+    "text": "Thêm một màn hình nữa thôi, không đáng kể đâu.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Just one more screen, no big deal."
+     }
+    }
+   },
+   {
+    "id": "hl-009",
+    "action_id": "poptask",
+    "kind": "react",
+    "character_id": null,
+    "text": "Ủa, cái này của ai giao vậy?",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Wait, who assigned this?"
+     }
+    }
+   },
+   {
+    "id": "hl-010",
+    "action_id": "poptask",
+    "kind": "react",
+    "character_id": null,
+    "text": "Lại nữa hả?",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Again?"
+     }
+    }
+   },
+   {
+    "id": "hl-011",
+    "action_id": "poptask",
+    "kind": "react",
+    "character_id": null,
+    "text": "Tui đang full việc mà.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "I'm already at full capacity."
+     }
+    }
+   },
+   {
+    "id": "hl-012",
+    "action_id": "poptask",
+    "kind": "react",
+    "character_id": null,
+    "text": "Ghi vô backlog đi rồi tính.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Put it in the backlog and we'll see."
+     }
+    }
+   },
+   {
+    "id": "hl-013",
+    "action_id": "poptask",
+    "kind": "react",
+    "character_id": "product-manager",
+    "text": "Cái này có trong sprint không? Không có thì để sprint sau.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Is this in the sprint? If not, next sprint."
+     }
+    }
+   },
+   {
+    "id": "hl-014",
+    "action_id": "poptask",
+    "kind": "react",
+    "character_id": "frontend-developer",
+    "text": "Tạo ticket đi rồi tui làm.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Make a ticket and I'll do it."
+     }
+    }
+   },
+   {
+    "id": "hl-015",
+    "action_id": "poptask",
+    "kind": "react",
+    "character_id": "backend-developer",
+    "text": "Tạo ticket đi rồi tui làm.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Make a ticket and I'll do it."
+     }
+    }
+   },
+   {
+    "id": "hl-016",
+    "action_id": "poptask",
+    "kind": "react",
+    "character_id": "qa-engineer",
+    "text": "Để tui test lại coi cái task này có bug không.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Let me test whether this task has bugs."
+     }
+    }
+   },
+   {
+    "id": "hl-017",
+    "action_id": "poptask",
+    "kind": "react",
+    "character_id": "client",
+    "text": "Việc này nằm ngoài hợp đồng, tính thêm tiền nha.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "That's outside the contract, it'll cost extra."
+     }
+    }
+   },
+   {
+    "id": "hl-018",
+    "action_id": "poptask",
+    "kind": "react",
+    "character_id": "ceo",
+    "text": "Anh giao việc cho người khác chứ ai giao việc cho anh.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "I give people work, nobody gives me work."
+     }
+    }
+   },
+   {
+    "id": "hl-019",
+    "action_id": "poptask",
+    "kind": "react",
+    "character_id": "intern",
+    "text": "Dạ để em làm, mà làm sao vậy anh chị?",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Sure, I'll do it… but how do I do it?"
+     }
+    }
+   },
+   {
+    "id": "hl-020",
+    "action_id": "fight",
+    "kind": "start",
+    "character_id": null,
+    "text": "Ê, đánh thiệt hả?",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Wait, for real?"
+     }
+    }
+   },
+   {
+    "id": "hl-021",
+    "action_id": "fight",
+    "kind": "start",
+    "character_id": null,
+    "text": "Tui báo HR đó nha.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "I'm telling HR."
+     }
+    }
+   },
+   {
+    "id": "hl-022",
+    "action_id": "fight",
+    "kind": "start",
+    "character_id": null,
+    "text": "Từ từ, tui đang cầm ly cà phê.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Hold on, I'm holding a coffee."
+     }
+    }
+   },
+   {
+    "id": "hl-023",
+    "action_id": "fight",
+    "kind": "start",
+    "character_id": "user",
+    "text": "Người dùng luôn đúng. Thử coi.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "The user is always right. Try me."
+     }
+    }
+   },
+   {
+    "id": "hl-024",
+    "action_id": "fight",
+    "kind": "start",
+    "character_id": "client",
+    "text": "Tui trả tiền mà bạn đánh tui hả?",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "I'm paying you and you're fighting me?"
+     }
+    }
+   },
+   {
+    "id": "hl-025",
+    "action_id": "coffee",
+    "kind": "spill",
+    "character_id": null,
+    "text": "Ủa ly cà phê của tui đâu?",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Hey, where's my coffee?"
+     }
+    }
+   },
+   {
+    "id": "hl-026",
+    "action_id": "coffee",
+    "kind": "spill",
+    "character_id": null,
+    "text": "Đi đứng kiểu gì vậy?",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Watch where you're going!"
+     }
+    }
+   },
+   {
+    "id": "hl-027",
+    "action_id": "coffee",
+    "kind": "spill",
+    "character_id": null,
+    "text": "Ướt hết áo rồi nè.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "My shirt is soaked."
+     }
+    }
+   },
+   {
+    "id": "hl-028",
+    "action_id": "coffee",
+    "kind": "thanks",
+    "character_id": null,
+    "text": "Cảm ơn nha, đúng lúc đang gục.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Thanks, just when I was crashing."
+     }
+    }
+   },
+   {
+    "id": "hl-029",
+    "action_id": "coffee",
+    "kind": "thanks",
+    "character_id": null,
+    "text": "Có đường không? Thôi kệ, cảm ơn.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Any sugar? Never mind, thanks."
+     }
+    }
+   },
+   {
+    "id": "hl-030",
+    "action_id": "hide",
+    "kind": "hint",
+    "character_id": null,
+    "text": "Thấy chạy về phía {room} đó.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Saw them running towards {room}."
+     }
+    }
+   },
+   {
+    "id": "hl-031",
+    "action_id": "hide",
+    "kind": "hint",
+    "character_id": null,
+    "text": "Hình như mới lủi qua {room}.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "I think they just slipped past {room}."
+     }
+    }
+   },
+   {
+    "id": "hl-032",
+    "action_id": "hide",
+    "kind": "hint",
+    "character_id": null,
+    "text": "Tui không nói gì hết nha, mà coi thử {room} đi.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "I didn't say anything, but try {room}."
+     }
+    }
+   },
+   {
+    "id": "hl-033",
+    "action_id": "hide",
+    "kind": "found",
+    "character_id": null,
+    "text": "Suỵt, đừng nói ai tui ở đây.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Shh, don't tell anyone I'm here."
+     }
+    }
+   },
+   {
+    "id": "hl-034",
+    "action_id": "hide",
+    "kind": "found",
+    "character_id": null,
+    "text": "Cho tui trốn thêm 5 phút nữa thôi mà.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Just let me hide five more minutes."
+     }
+    }
+   },
+   {
+    "id": "hl-035",
+    "action_id": "race",
+    "kind": "start",
+    "character_id": null,
+    "text": "Chờ tui cột dây giày đã.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Wait, let me tie my shoes."
+     }
+    }
+   },
+   {
+    "id": "hl-036",
+    "action_id": "race",
+    "kind": "start",
+    "character_id": null,
+    "text": "Tới trước được gì không vậy?",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "What do I win if I get there first?"
+     }
+    }
+   },
+   {
+    "id": "hl-037",
+    "action_id": "gossip",
+    "kind": "caught",
+    "character_id": null,
+    "text": "Hồi nãy em nói gì chị đó Mai?",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "What did you just say about me, Mai?"
+     }
+    }
+   },
+   {
+    "id": "hl-038",
+    "action_id": "gossip",
+    "kind": "caught",
+    "character_id": null,
+    "text": "Tui nghe hết rồi nha.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "I heard everything."
+     }
+    }
+   },
+   {
+    "id": "hl-039",
+    "action_id": "gossip",
+    "kind": "caught",
+    "character_id": null,
+    "text": "Nói tiếp đi, tui đứng đây nghe nè.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Go on, I'm standing right here listening."
+     }
+    }
+   },
+   {
+    "id": "hl-040",
+    "action_id": "gossip",
+    "kind": "say",
+    "character_id": null,
+    "text": "Họp một tiếng mà cuối cùng chốt lại là hẹn họp tiếp.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "An hour-long meeting that ended with scheduling another meeting."
+     }
+    }
+   },
+   {
+    "id": "hl-041",
+    "action_id": "gossip",
+    "kind": "say",
+    "character_id": null,
+    "text": "Nhắn hỏi thì seen, tới lúc gấp thì gọi liền ba cuộc.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Messages get left on seen, then when it's urgent they call three times."
+     }
+    }
+   },
+   {
+    "id": "hl-042",
+    "action_id": "gossip",
+    "kind": "say",
+    "character_id": null,
+    "text": "Nói là góp ý nhẹ thôi mà gửi nguyên cái file 40 comment.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Said it was just light feedback, then sent a file with 40 comments."
+     }
+    }
+   },
+   {
+    "id": "hl-043",
+    "action_id": "gossip",
+    "kind": "say",
+    "character_id": "product-manager",
+    "text": "Mỗi tuần đổi ưu tiên một lần, mà lần nào cũng nói là lần cuối.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Priorities change every week, and every time it's \"the last time\"."
+     }
+    }
+   },
+   {
+    "id": "hl-044",
+    "action_id": "gossip",
+    "kind": "say",
+    "character_id": "product-owner",
+    "text": "Viết ticket có một dòng rồi hỏi sao design không đúng ý.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Writes a one-line ticket, then asks why the design isn't what they wanted."
+     }
+    }
+   },
+   {
+    "id": "hl-045",
+    "action_id": "gossip",
+    "kind": "say",
+    "character_id": "frontend-developer",
+    "text": "Design lệch 2 pixel thì kêu không sao, tới lúc mình nói lệch thì kêu khó làm.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "When the design is off by 2 pixels it's fine, when we say the build is off it's \"hard to do\"."
+     }
+    }
+   },
+   {
+    "id": "hl-046",
+    "action_id": "gossip",
+    "kind": "say",
+    "character_id": "backend-developer",
+    "text": "Hỏi cái gì cũng trả lời là API chưa có.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Whatever you ask, the answer is \"the API isn't ready\"."
+     }
+    }
+   },
+   {
+    "id": "hl-047",
+    "action_id": "gossip",
+    "kind": "say",
+    "character_id": "fullstack-developer",
+    "text": "Cái gì cũng nhận làm được, rồi cái gì cũng trễ.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Says yes to everything, then everything is late."
+     }
+    }
+   },
+   {
+    "id": "hl-048",
+    "action_id": "gossip",
+    "kind": "say",
+    "character_id": "mobile-developer",
+    "text": "Hễ khó là nói iOS không cho làm vậy.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Whenever it's hard, it's \"iOS doesn't allow that\"."
+     }
+    }
+   },
+   {
+    "id": "hl-049",
+    "action_id": "gossip",
+    "kind": "say",
+    "character_id": "qa-engineer",
+    "text": "Log nguyên cái bug vì cái nút lệch nửa pixel.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Logged a whole bug because a button was half a pixel off."
+     }
+    }
+   },
+   {
+    "id": "hl-050",
+    "action_id": "gossip",
+    "kind": "say",
+    "character_id": "tech-lead",
+    "text": "Hỏi làm được không thì nói được, hỏi chừng nào xong thì nói còn tuỳ.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Ask if it can be done: yes. Ask when it'll be done: it depends."
+     }
+    }
+   },
+   {
+    "id": "hl-051",
+    "action_id": "gossip",
+    "kind": "say",
+    "character_id": "design-manager",
+    "text": "Review xong chỉ nói một câu là chưa tới, mà không nói tới đâu.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "After review all they say is \"not there yet\", without saying where \"there\" is."
+     }
+    }
+   },
+   {
+    "id": "hl-052",
+    "action_id": "gossip",
+    "kind": "say",
+    "character_id": "head-of-design",
+    "text": "Coi design 10 giây rồi kêu thử làm thêm ba phương án nữa.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Looks at the design for 10 seconds, then asks for three more options."
+     }
+    }
+   },
+   {
+    "id": "hl-053",
+    "action_id": "gossip",
+    "kind": "say",
+    "character_id": "ceo",
+    "text": "Đi ngang màn hình một cái là đòi đổi màu nút.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Walks past a screen once and wants the button colour changed."
+     }
+    }
+   },
+   {
+    "id": "hl-054",
+    "action_id": "gossip",
+    "kind": "say",
+    "character_id": "cpo",
+    "text": "Lần nào cũng hỏi số liệu đâu, mà có số rồi thì quyết theo cảm giác.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Always asks where the data is, then decides on gut feeling anyway."
+     }
+    }
+   },
+   {
+    "id": "hl-055",
+    "action_id": "gossip",
+    "kind": "say",
+    "character_id": "cto",
+    "text": "Cái gì cũng muốn viết lại từ đầu.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Wants to rewrite everything from scratch."
+     }
+    }
+   },
+   {
+    "id": "hl-056",
+    "action_id": "gossip",
+    "kind": "say",
+    "character_id": "stakeholder",
+    "text": "Không dự buổi nào hết, tới ngày cuối mới vô góp ý.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Skipped every session, shows up on the last day with feedback."
+     }
+    }
+   },
+   {
+    "id": "hl-057",
+    "action_id": "gossip",
+    "kind": "say",
+    "character_id": "business-analyst",
+    "text": "Viết tài liệu 40 trang mà chỗ mình cần thì không có.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Writes a 40-page document and the part we need isn't in it."
+     }
+    }
+   },
+   {
+    "id": "hl-058",
+    "action_id": "gossip",
+    "kind": "say",
+    "character_id": "project-manager",
+    "text": "Ngày nào cũng hỏi xong chưa, hỏi cần giúp gì không thì không thấy.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Asks \"is it done?\" every day, never asks \"do you need help?\"."
+     }
+    }
+   },
+   {
+    "id": "hl-059",
+    "action_id": "gossip",
+    "kind": "say",
+    "character_id": "account-manager",
+    "text": "Khách đòi gì cũng dạ, rồi về nói team ráng giúp.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Says yes to everything the client wants, then asks the team to \"try their best\"."
+     }
+    }
+   },
+   {
+    "id": "hl-060",
+    "action_id": "gossip",
+    "kind": "say",
+    "character_id": "intern",
+    "text": "Hỏi hiểu chưa thì dạ hiểu, xong làm ra một cái khác hẳn.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Says \"yes, I get it\", then makes something completely different."
+     }
+    }
+   },
+   {
+    "id": "hl-061",
+    "action_id": "gossip",
+    "kind": "say",
+    "character_id": "client",
+    "text": "Kêu làm logo to lên, làm xong lại kêu sao nhìn rối quá.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Asked for a bigger logo, then said it looks too cluttered."
+     }
+    }
+   },
+   {
+    "id": "hl-062",
+    "action_id": "gossip",
+    "kind": "say",
+    "character_id": "user",
+    "text": "Nói là thích lắm, mà cài xong xài đúng một lần rồi xoá.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Said they loved it, used it once, then deleted it."
+     }
+    }
+   },
+   {
+    "id": "hl-063",
+    "action_id": "gossip",
+    "kind": "say",
+    "character_id": "ux-researcher",
+    "text": "Hỏi nên làm sao thì trả lời là còn tuỳ, phải phỏng vấn thêm.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Ask what to do and the answer is \"it depends, we need more interviews\"."
+     }
+    }
+   },
+   {
+    "id": "hl-064",
+    "action_id": "gossip",
+    "kind": "say",
+    "character_id": "data-analyst",
+    "text": "Xin một con số thôi mà hẹn sang tuần sau.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Asked for one number and got told \"next week\"."
+     }
+    }
+   },
+   {
+    "id": "hl-065",
+    "action_id": "gossip",
+    "kind": "say",
+    "character_id": "scrum-master",
+    "text": "Ngày nào cũng bắt đứng họp, mà họp đứng 45 phút.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Makes us do a stand-up every day, and the stand-up takes 45 minutes."
+     }
+    }
+   },
+   {
+    "id": "hl-066",
+    "action_id": "gossip",
+    "kind": "say",
+    "character_id": "design-director",
+    "text": "Kêu sáng tạo tự do đi, xong sửa lại y như ý ổng.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Says \"be creative, total freedom\", then changes it to exactly what he wanted."
+     }
+    }
+   },
+   {
+    "id": "hl-067",
+    "action_id": "gossip",
+    "kind": "say",
+    "character_id": "sales",
+    "text": "Hứa với khách cái tính năng mà team chưa ai nghe tới.",
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "text": "Promised the client a feature nobody on the team has heard of."
+     }
+    }
+   }
+  ],
+  "quiz_questions": [
+   {
+    "id": "qz-product-manager-1",
+    "character_id": "product-manager",
+    "question": "Product Manager chịu trách nhiệm chính về điều gì?",
+    "options": [
+     "Quyết định sản phẩm nên giải quyết vấn đề gì và ưu tiên cái nào trước",
+     "Viết code cho các tính năng chính",
+     "Vẽ toàn bộ giao diện của sản phẩm"
+    ],
+    "correct_index": 0,
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "question": "What is a Product Manager mainly responsible for?",
+      "options": [
+       "Deciding which problems the product should solve and what comes first",
+       "Writing the code for the main features",
+       "Designing the entire interface"
+      ]
+     }
+    }
+   },
+   {
+    "id": "qz-product-owner-1",
+    "character_id": "product-owner",
+    "question": "Trong một nhóm Scrum, Product Owner là người quản lý thứ gì?",
+    "options": [
+     "Lương thưởng của cả nhóm",
+     "Product backlog và thứ tự ưu tiên của nó",
+     "Máy chủ và hạ tầng"
+    ],
+    "correct_index": 1,
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "question": "In a Scrum team, what does the Product Owner manage?",
+      "options": [
+       "The team's salaries and bonuses",
+       "The product backlog and its priorities",
+       "Servers and infrastructure"
+      ]
+     }
+    }
+   },
+   {
+    "id": "qz-product-designer-1",
+    "character_id": "product-designer",
+    "question": "So với UI Designer, Product Designer thường gánh thêm phần nào?",
+    "options": [
+     "Chỉ làm ảnh quảng cáo",
+     "Viết API cho backend",
+     "Cả bài toán sản phẩm: từ tìm hiểu vấn đề tới đo kết quả sau khi ra mắt"
+    ],
+    "correct_index": 2,
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "question": "Compared with a UI Designer, what extra does a Product Designer usually take on?",
+      "options": [
+       "Only advertising images",
+       "Writing backend APIs",
+       "The whole product problem: from understanding it to measuring results after launch"
+      ]
+     }
+    }
+   },
+   {
+    "id": "qz-intern-1",
+    "character_id": "intern",
+    "question": "Điều gì giúp một thực tập sinh design tiến bộ nhanh nhất?",
+    "options": [
+     "Hỏi sớm và xin nhận xét thường xuyên",
+     "Giấu bài tới khi thật hoàn hảo mới đưa ra",
+     "Chỉ làm đúng phần được giao, không hỏi thêm"
+    ],
+    "correct_index": 0,
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "question": "What helps a design intern improve fastest?",
+      "options": [
+       "Asking early and asking for feedback often",
+       "Hiding work until it is perfect",
+       "Doing only what was assigned and never asking more"
+      ]
+     }
+    }
+   },
+   {
+    "id": "qz-ds-designer-1",
+    "character_id": "ds-designer",
+    "question": "Design System Designer tạo ra thứ gì cho cả đội dùng chung?",
+    "options": [
+     "Kế hoạch marketing",
+     "Bộ component, token và quy tắc sử dụng",
+     "Bảng lương"
+    ],
+    "correct_index": 1,
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "question": "What does a Design System Designer create for the whole team?",
+      "options": [
+       "A marketing plan",
+       "Components, tokens and usage rules",
+       "The payroll"
+      ]
+     }
+    }
+   },
+   {
+    "id": "qz-ux-design-engineer-1",
+    "character_id": "ux-design-engineer",
+    "question": "UX Design Engineer đứng ở giữa hai công việc nào?",
+    "options": [
+     "Kế toán và nhân sự",
+     "Bán hàng và chăm sóc khách hàng",
+     "Thiết kế và lập trình giao diện"
+    ],
+    "correct_index": 2,
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "question": "A UX Design Engineer sits between which two jobs?",
+      "options": [
+       "Accounting and HR",
+       "Sales and customer care",
+       "Design and front-end development"
+      ]
+     }
+    }
+   },
+   {
+    "id": "qz-motion-designer-1",
+    "character_id": "motion-designer",
+    "question": "Motion Designer trong đội sản phẩm lo phần nào?",
+    "options": [
+     "Chuyển động và hiệu ứng chuyển cảnh trong giao diện",
+     "Thiết kế cơ sở dữ liệu",
+     "Viết điều khoản sử dụng"
+    ],
+    "correct_index": 0,
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "question": "What does a Motion Designer handle in a product team?",
+      "options": [
+       "Motion and transitions in the interface",
+       "Database design",
+       "Writing the terms of service"
+      ]
+     }
+    }
+   },
+   {
+    "id": "qz-frontend-developer-1",
+    "character_id": "frontend-developer",
+    "question": "Frontend Developer biến bản thiết kế thành thứ gì?",
+    "options": [
+     "Báo cáo tài chính",
+     "Giao diện chạy được mà người dùng thao tác trực tiếp",
+     "Kịch bản phỏng vấn người dùng"
+    ],
+    "correct_index": 1,
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "question": "What does a Frontend Developer turn a design into?",
+      "options": [
+       "A financial report",
+       "A working interface that users interact with directly",
+       "A user interview script"
+      ]
+     }
+    }
+   },
+   {
+    "id": "qz-backend-developer-1",
+    "character_id": "backend-developer",
+    "question": "Backend Developer lo phần nào của sản phẩm?",
+    "options": [
+     "Màu sắc và kiểu chữ",
+     "Bài đăng mạng xã hội",
+     "Máy chủ, dữ liệu và API phía sau giao diện"
+    ],
+    "correct_index": 2,
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "question": "Which part of the product does a Backend Developer handle?",
+      "options": [
+       "Colours and typography",
+       "Social media posts",
+       "Servers, data and the APIs behind the interface"
+      ]
+     }
+    }
+   },
+   {
+    "id": "qz-fullstack-developer-1",
+    "character_id": "fullstack-developer",
+    "question": "Fullstack Developer khác gì so với Frontend hay Backend Developer?",
+    "options": [
+     "Làm được cả phần giao diện lẫn phần máy chủ",
+     "Chỉ làm thiết kế, không viết code",
+     "Chỉ kiểm thử sản phẩm"
+    ],
+    "correct_index": 0,
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "question": "How is a Fullstack Developer different from a Frontend or Backend Developer?",
+      "options": [
+       "They can build both the interface and the server side",
+       "They only design and never code",
+       "They only test the product"
+      ]
+     }
+    }
+   },
+   {
+    "id": "qz-business-analyst-1",
+    "character_id": "business-analyst",
+    "question": "Business Analyst thường giúp đội làm rõ điều gì?",
+    "options": [
+     "Bảng màu thương hiệu",
+     "Yêu cầu nghiệp vụ và quy trình mà sản phẩm phải đáp ứng",
+     "Lịch nghỉ phép của nhóm"
+    ],
+    "correct_index": 1,
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "question": "What does a Business Analyst usually help the team clarify?",
+      "options": [
+       "The brand colour palette",
+       "The business requirements and processes the product must support",
+       "The team's holiday schedule"
+      ]
+     }
+    }
+   },
+   {
+    "id": "qz-stakeholder-1",
+    "character_id": "stakeholder",
+    "question": "Stakeholder là ai trong một dự án?",
+    "options": [
+     "Người viết code chính",
+     "Người dùng cuối của sản phẩm",
+     "Người có quyền lợi hoặc tiếng nói với kết quả dự án, dù không trực tiếp làm"
+    ],
+    "correct_index": 2,
+    "is_active": true,
+    "i18n": {
+     "en": {
+      "question": "Who is a stakeholder in a project?",
+      "options": [
+       "The lead developer",
+       "The product's end user",
+       "Someone with an interest in or a say over the outcome, even if they don't do the work"
+      ]
+     }
+    }
+   }
+  ],
+  "badges": [
+   {
+    "id": "kiet-gi-cung-bac",
+    "sort_order": 1,
+    "name": "Kiệt gì cũng bắc",
+    "description": "Giờ ai làm gì mình cũng biết hết rồi, chỉ không biết làm sao để tăng lương thôi",
+    "image_url": null,
+    "rim_color": "#FFC53D",
+    "condition_type": "distinct_characters",
+    "action_id": "read",
+    "threshold": 5,
+    "params": {},
+    "is_hidden": true,
+    "is_active": true,
+    "reward_title": null,
+    "reward_note": null,
+    "reward_url": null,
+    "reward_status": "none",
+    "i18n": {
+     "en": {
+      "name": "Know-it-all",
+      "description": "Now you know what everyone does. You just don't know how to get a raise."
+     }
+    }
+   },
+   {
+    "id": "khach-hang-khong-phai-thuong-de",
+    "sort_order": 2,
+    "name": "Khách hàng không phải thượng đế",
+    "description": "Hạ được người mạnh nhất công ty: người dùng.",
+    "image_url": null,
+    "rim_color": "#FFC53D",
+    "condition_type": "win_vs",
+    "action_id": "fight",
+    "threshold": 1,
+    "params": {
+     "character_id": "user"
+    },
+    "is_hidden": true,
+    "is_active": true,
+    "reward_title": null,
+    "reward_note": null,
+    "reward_url": null,
+    "reward_status": "none",
+    "i18n": {
+     "en": {
+      "name": "The customer is not king",
+      "description": "Took down the strongest person in the company: the user."
+     }
+    }
+   },
+   {
+    "id": "trum-giao-viec",
+    "sort_order": 3,
+    "name": "Trùm giao việc",
+    "description": "Việc gấp nha, chiều nay gửi anh.",
+    "image_url": null,
+    "rim_color": "#FFC53D",
+    "condition_type": "flawless_wins",
+    "action_id": "poptask",
+    "threshold": 1,
+    "params": {},
+    "is_hidden": true,
+    "is_active": true,
+    "reward_title": null,
+    "reward_note": null,
+    "reward_url": null,
+    "reward_status": "none",
+    "i18n": {
+     "en": {
+      "name": "Task-dumping boss",
+      "description": "It's urgent, send it to me this afternoon."
+     }
+    }
+   },
+   {
+    "id": "tu-dien-song",
+    "sort_order": 4,
+    "name": "Từ điển sống",
+    "description": "Nói chuyện toàn jargon, không ai hiểu nhưng ai cũng nể.",
+    "image_url": null,
+    "rim_color": "#FFC53D",
+    "condition_type": "flawless_wins",
+    "action_id": "flashcard",
+    "threshold": 3,
+    "params": {},
+    "is_hidden": true,
+    "is_active": true,
+    "reward_title": null,
+    "reward_note": null,
+    "reward_url": null,
+    "reward_status": "none",
+    "i18n": {
+     "en": {
+      "name": "Walking dictionary",
+      "description": "Speaks only in jargon. Nobody understands, everybody is impressed."
+     }
+    }
+   },
+   {
+    "id": "barista-khong-luong",
+    "sort_order": 5,
+    "name": "Barista không lương",
+    "description": "Kỹ năng không ghi trong JD nhưng dùng nhiều nhất.",
+    "image_url": null,
+    "rim_color": "#FFC53D",
+    "condition_type": "flawless_wins",
+    "action_id": "coffee",
+    "threshold": 5,
+    "params": {},
+    "is_hidden": true,
+    "is_active": true,
+    "reward_title": null,
+    "reward_note": null,
+    "reward_url": null,
+    "reward_status": "none",
+    "i18n": {
+     "en": {
+      "name": "Unpaid barista",
+      "description": "Not in the JD, but the skill you use the most."
+     }
+    }
+   },
+   {
+    "id": "may-thich-tron-hong",
+    "sort_order": 6,
+    "name": "Mày thích trốn hong?",
+    "description": "Trốn họp kiểu gì cũng bị tìm ra.",
+    "image_url": null,
+    "rim_color": "#FFC53D",
+    "condition_type": "win_under_secs",
+    "action_id": "hide",
+    "threshold": 1,
+    "params": {
+     "secs": 15
+    },
+    "is_hidden": true,
+    "is_active": true,
+    "reward_title": null,
+    "reward_note": null,
+    "reward_url": null,
+    "reward_status": "none",
+    "i18n": {
+     "en": {
+      "name": "Think you can hide?",
+      "description": "Skip a meeting however you like, you will be found."
+     }
+    }
+   },
+   {
+    "id": "trum-chay-chot",
+    "sort_order": 7,
+    "name": "Trùm chạy chọt",
+    "description": "Nhanh hơn cả intern lúc 6 giờ chiều.",
+    "image_url": null,
+    "rim_color": "#FFC53D",
+    "condition_type": "win_vs",
+    "action_id": "race",
+    "threshold": 1,
+    "params": {
+     "rank_max": 1
+    },
+    "is_hidden": true,
+    "is_active": true,
+    "reward_title": null,
+    "reward_note": null,
+    "reward_url": null,
+    "reward_status": "none",
+    "i18n": {
+     "en": {
+      "name": "Office sprinter",
+      "description": "Faster than the intern at 6 pm."
+     }
+    }
+   },
+   {
+    "id": "ran-doc-van-phong",
+    "sort_order": 8,
+    "name": "Rắn độc văn phòng",
+    "description": "Skrrrr",
+    "image_url": null,
+    "rim_color": "#FFC53D",
+    "condition_type": "win_streak",
+    "action_id": "gossip",
+    "threshold": 5,
+    "params": {},
+    "is_hidden": true,
+    "is_active": true,
+    "reward_title": null,
+    "reward_note": null,
+    "reward_url": null,
+    "reward_status": "none",
+    "i18n": {
+     "en": {
+      "name": "Office snake",
+      "description": "Skrrrr"
+     }
+    }
+   },
+   {
+    "id": "qua-bao-toi-som",
+    "sort_order": 9,
+    "name": "Quả báo tới sớm",
+    "description": "Hồi nãy em nói gì chị đó Mai?",
+    "image_url": null,
+    "rim_color": "#FFC53D",
+    "condition_type": "fail_count",
+    "action_id": "gossip",
+    "threshold": 3,
+    "params": {
+     "fail_kind": "caught"
+    },
+    "is_hidden": true,
+    "is_active": true,
+    "reward_title": null,
+    "reward_note": null,
+    "reward_url": null,
+    "reward_status": "none",
+    "i18n": {
+     "en": {
+      "name": "Instant karma",
+      "description": "What did you just say about me, Mai?"
+     }
+    }
+   },
+   {
+    "id": "nhan-vien-cua-thang",
+    "sort_order": 10,
+    "name": "Nhân viên của tháng",
+    "description": "Phần thưởng: thêm việc.",
+    "image_url": null,
+    "rim_color": "#FFC53D",
+    "condition_type": "all_actions",
+    "action_id": null,
+    "threshold": null,
+    "params": {},
+    "is_hidden": true,
+    "is_active": true,
+    "reward_title": null,
+    "reward_note": null,
+    "reward_url": null,
+    "reward_status": "none",
+    "i18n": {
+     "en": {
+      "name": "Employee of the month",
+      "description": "Your reward: more work."
+     }
+    }
+   }
+  ]
  }
 }

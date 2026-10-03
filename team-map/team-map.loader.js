@@ -25,11 +25,18 @@
       get('tm_quests?select=*&type=eq.main&is_active=eq.true&order=sort_order'),
       get('tm_quest_steps?select=*&order=sort_order'),
     ]);
-    const ids = new Set();
-    characters.forEach(c => { if (c.term_id != null) ids.add(String(c.term_id)); });
-    quests.forEach(q => (q.rewards || []).forEach(r => { if (r.type === 'term' && r.term_id != null) ids.add(String(r.term_id)); }));
-    const terms = ids.size ? await get(`concepts?select=id,name,url,is_published&id=in.(${[...ids].map(encodeURIComponent).join(',')})`) : [];
-    return { characters, rooms, placements, quests, steps, terms };
+    // cả kho thuật ngữ (vài chục dòng): dùng cho link bài, thẻ thưởng và flashcard của nhiệm vụ theo giờ
+    const terms = await get('concepts?select=id,name,url,is_published,description,category_id');
+    // nhiệm vụ theo giờ: DB chưa chạy migration mới thì bỏ qua, phần còn lại vẫn chạy
+    let hourly = null;
+    try {
+      const [config, actions, lines, quiz, badges] = await Promise.all([
+        get('tm_hourly_config?select=*&id=eq.1'), get('tm_hourly_actions?select=*&order=sort_order'),
+        get('tm_hourly_lines?select=*&is_active=eq.true'), get('tm_quiz_questions?select=*&is_active=eq.true'),
+        get('tm_badges?select=*&is_active=eq.true&order=sort_order')]);
+      hourly = { config:config[0] || null, actions, lines, quiz_questions:quiz, badges };
+    } catch (e) { console.warn('[Team Map] Chưa có dữ liệu nhiệm vụ theo giờ:', e.message || e); }
+    return { characters, rooms, placements, quests, steps, terms, hourly };
   }
 
   async function fetchSeed(){
@@ -37,7 +44,7 @@
     if (!r.ok) throw new Error('Không đọc được seed.json');
     const d = await r.json();
     return { characters:d.characters, rooms:d.rooms, placements:d.placements,
-      quests:d.quests.filter(q => q.type === 'main' && q.is_active !== false), steps:d.quest_steps, terms:[] };
+      quests:d.quests.filter(q => q.type === 'main' && q.is_active !== false), steps:d.quest_steps, terms:[], hourly:d.hourly || null };
   }
 
   // ---------- ghép dữ liệu ----------
@@ -69,7 +76,11 @@
       const links = (c.cta || []).map((b, i) => b && b.url ? { label:(typeof ctaEn[i] === 'string' && ctaEn[i].trim()) || b.label || b.url, url:b.url, primary:!!b.primary } : null).filter(Boolean);
       const r = { id:c.id, title:tr(c, 'title'), group:L.groups[c.group] ? c.group : 'business', url, status: url ? 'pub' : 'todo',
         props:(c.props || []).filter(p => L.props.includes(p)), summary:tr(c, 'summary') || '', doing:tr(c, 'doing') || '', withDesigner:tr(c, 'with_designer') || '',
-        reportsTo: byId[c.reports_to] ? c.reports_to : null, kind:c.kind || 'role' };
+        reportsTo: byId[c.reports_to] ? c.reports_to : null, kind:c.kind || 'role',
+        // nhiệm vụ theo giờ
+        rank: c.rank >= 1 && c.rank <= 8 ? c.rank : 2, relatedTerms:(c.related_term_ids || []).map(String),
+        gossipPartners: Array.isArray(c.gossip_partner_ids) && c.gossip_partner_ids.length ? c.gossip_partner_ids : null,
+        hourlyExclude: Array.isArray(c.hourly_exclude) ? c.hourly_exclude : [] };
       if (ap.dark) r.dark = true;
       if (ap.outfit) r.outfit = ap.outfit;
       if (/^#[0-9a-f]{6}$/i.test(ap.body_color || '')) r.bodyColor = ap.body_color;
@@ -150,8 +161,38 @@
         QUESTS[q.scale].push({ id:q.id, title:tr(q, 'title'), room:q.room_id, giver:q.giver, gather:q.gather || [], offer:tr(q, 'offer_text') || '', done:tr(q, 'done_text') || '', steps, rewards });
       });
 
+    // vị trí của từng nhân vật theo quy mô (kể cả khách, tác giả): { scale: { charId: [roomId, ...] } }, sắp theo id vị trí
+    const PLACE = Object.fromEntries(Object.keys(SCALES).map(k => [k, {}]));
+    placements.slice().sort((a, b) => a.id.localeCompare(b.id)).forEach(p => {
+      const sc = (roomRow[p.room_id] || L.rooms.find(g => g.id === p.room_id) || {}).scale;
+      if (PLACE[sc]) (PLACE[sc][p.character_id] = PLACE[sc][p.character_id] || []).push(p.room_id); });
+    const HOURLY = buildHourly(raw.hourly, termById, warn);
+
     return { data:{ GROUPS:L.groups, ROLES, TERMS, SCALES, LOCKED_ROLES, QUESTS, ROOM_INFO, TV_ROOMS, SCALE_REPORTS, DOTTED:L.dotted,
-      SCREEN_KIND:L.screenKind, PLAYER_ID:player.id, AUTHOR_ID:author ? author.id : null, GUEST_ID:guest ? guest.id : null }, warn };
+      SCREEN_KIND:L.screenKind, PLAYER_ID:player.id, AUTHOR_ID:author ? author.id : null, GUEST_ID:guest ? guest.id : null, PLACE, HOURLY }, warn };
+  }
+
+  // Nhiệm vụ theo giờ: cấu hình, 8 hành động, lời thoại, câu hỏi, huy hiệu (đã chọn ngôn ngữ) + kho thuật ngữ cho flashcard
+  function buildHourly(h, termById, warn){
+    if (!h || !h.actions || !h.actions.length) return null;
+    const cfg = Object.assign({ slot_minutes:60, no_repeat_slots:3, counted_wins_per_slot:1, is_enabled:true }, h.config || {});
+    const trOpts = q => { const en = window.TM_LANG === 'en' && q.i18n && q.i18n.en && q.i18n.en.options;
+      return Array.isArray(en) && en.length === 3 && en.every(x => typeof x === 'string' && x.trim()) ? en : q.options; };
+    const actions = {};
+    h.actions.forEach(a => { actions[a.id] = { id:a.id, sort:a.sort_order || 0, name:tr(a, 'name'), title:tr(a, 'title_template') || '',
+      offer:tr(a, 'offer_text') || '', win:tr(a, 'win_text') || '', lose:tr(a, 'lose_text') || '', weight:Math.max(1, a.weight || 1),
+      config:a.config || {}, active:a.is_active !== false }; });
+    const terms = {};
+    Object.values(termById).forEach(t => { if (t.is_published !== false && t.name) terms[String(t.id)] = { id:String(t.id), name:t.name, desc:t.description || '', cat:t.category_id ?? null, url:t.url || null }; });
+    if (!Object.keys(terms).length) warn.push('Nhiệm vụ theo giờ: không đọc được kho thuật ngữ, bỏ hành động đọc bài / flashcard');
+    return { config:cfg, actions,
+      lines:(h.lines || []).filter(l => l.is_active !== false).map(l => ({ id:l.id, action:l.action_id, kind:l.kind, who:l.character_id || null, text:tr(l, 'text') || '' })),
+      quiz:(h.quiz_questions || []).filter(q => q.is_active !== false && Array.isArray(q.options) && q.options.length === 3)
+        .map(q => ({ id:q.id, who:q.character_id, q:tr(q, 'question') || '', options:trOpts(q), correct:q.correct_index })),
+      badges:(h.badges || []).filter(b => b.is_active !== false).map(b => ({ id:b.id, sort:b.sort_order || 0, name:tr(b, 'name') || b.id, desc:tr(b, 'description') || '',
+        image:b.image_url || null, rim:/^#[0-9a-f]{6}$/i.test(b.rim_color || '') ? b.rim_color : '#FFC53D', type:b.condition_type, action:b.action_id || null,
+        threshold:b.threshold, params:b.params || {}, hidden:b.is_hidden !== false, reward:{ status:b.reward_status || 'none', title:b.reward_title, note:b.reward_note, url:b.reward_url } })),
+      terms };
   }
 
   async function load(){

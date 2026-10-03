@@ -163,6 +163,88 @@ alter table tm_rooms       add column if not exists i18n jsonb not null default 
 alter table tm_quests      add column if not exists i18n jsonb not null default '{}'::jsonb;
 alter table tm_quest_steps add column if not exists i18n jsonb not null default '{}'::jsonb;
 
+-- 1.8 Nhiệm vụ theo giờ của Nhân Lưu (SPEC-hourly): cột thêm cho nhân vật + 5 bảng mới.
+--   rank: cấp bậc 1–8 (trống = 2) · related_term_ids: thuật ngữ cho flashcard
+--   gossip_partner_ids: người nấu xói cùng (trống = tự tính) · hourly_exclude: hành động không ghép với nhân vật này
+alter table tm_characters add column if not exists rank int;
+alter table tm_characters add column if not exists related_term_ids jsonb not null default '[]'::jsonb;
+alter table tm_characters add column if not exists gossip_partner_ids jsonb;
+alter table tm_characters add column if not exists hourly_exclude jsonb not null default '[]'::jsonb;
+alter table tm_characters drop constraint if exists tm_characters_rank_check;
+alter table tm_characters add constraint tm_characters_rank_check check (rank between 1 and 8);
+
+-- một dòng duy nhất (id = 1)
+create table if not exists tm_hourly_config (
+  id                    int primary key default 1 check (id = 1),
+  slot_minutes          int not null default 60 check (slot_minutes between 5 and 1440),
+  no_repeat_slots       int not null default 3 check (no_repeat_slots between 0 and 24),
+  counted_wins_per_slot int not null default 1 check (counted_wins_per_slot between 0 and 100),
+  is_enabled            boolean not null default true,
+  updated_at            timestamptz not null default now()
+);
+insert into tm_hourly_config (id) values (1) on conflict do nothing;
+
+-- 8 hành động, mã cố định trong code (mỗi mã là một mini-game). CMS chỉ sửa nội dung, không thêm / xoá dòng.
+create table if not exists tm_hourly_actions (
+  id             text primary key check (id in ('read','fight','poptask','flashcard','coffee','hide','race','gossip')),
+  sort_order     int  not null default 0,
+  name           text not null,
+  title_template text not null,
+  offer_text     text,
+  win_text       text,
+  lose_text      text,
+  weight         int  not null default 1 check (weight >= 1),
+  config         jsonb not null default '{}'::jsonb,
+  is_active      boolean not null default true,
+  i18n           jsonb not null default '{}'::jsonb,
+  updated_at     timestamptz not null default now()
+);
+
+-- lời thoại trong mini-game. character_id trống = câu dùng chung; gossip/say: character_id = người bị nấu xói
+create table if not exists tm_hourly_lines (
+  id           text primary key,
+  action_id    text not null references tm_hourly_actions(id) on delete cascade,
+  kind         text not null check (kind in ('task','react','start','spill','thanks','hint','found','say','caught')),
+  character_id text references tm_characters(id) on delete cascade,
+  text         text not null,
+  is_active    boolean not null default true,
+  i18n         jsonb not null default '{}'::jsonb,
+  updated_at   timestamptz not null default now()
+);
+
+create table if not exists tm_quiz_questions (
+  id            text primary key,
+  character_id  text not null references tm_characters(id) on delete cascade,
+  question      text not null,
+  options       jsonb not null check (jsonb_typeof(options) = 'array' and jsonb_array_length(options) = 3),
+  correct_index int  not null check (correct_index between 0 and 2),
+  is_active     boolean not null default true,
+  i18n          jsonb not null default '{}'::jsonb,
+  updated_at    timestamptz not null default now()
+);
+
+create table if not exists tm_badges (
+  id             text primary key check (id ~ '^[a-z0-9][a-z0-9-]*$'),
+  sort_order     int  not null default 0,
+  name           text not null,
+  description    text,
+  image_url      text,
+  rim_color      text not null default '#FFC53D' check (rim_color ~ '^#[0-9A-Fa-f]{6}$'),
+  condition_type text not null check (condition_type in ('wins','distinct_characters','flawless_wins','win_streak','win_under_secs','win_vs','fail_count','all_actions')),
+  action_id      text references tm_hourly_actions(id),
+  threshold      int,
+  params         jsonb not null default '{}'::jsonb,
+  is_hidden      boolean not null default true,
+  is_active      boolean not null default true,
+  -- chừa sẵn cho luồng đổi quà (chưa làm)
+  reward_title   text,
+  reward_note    text,
+  reward_url     text,
+  reward_status  text not null default 'none' check (reward_status in ('none','coming','open')),
+  i18n           jsonb not null default '{}'::jsonb,
+  updated_at     timestamptz not null default now()
+);
+
 
 -- ════════════════════════════════════════════════════════
 -- 2. TRIGGER
@@ -178,6 +260,14 @@ drop trigger if exists tm_characters_touch on tm_characters;
 create trigger tm_characters_touch before update on tm_characters for each row execute function tm_touch();
 drop trigger if exists tm_quests_touch on tm_quests;
 create trigger tm_quests_touch before update on tm_quests for each row execute function tm_touch();
+do $$
+declare t text;
+begin
+  foreach t in array array['tm_hourly_config','tm_hourly_actions','tm_hourly_lines','tm_quiz_questions','tm_badges'] loop
+    execute format('drop trigger if exists %I on %I', t || '_touch', t);
+    execute format('create trigger %I before update on %I for each row execute function tm_touch()', t || '_touch', t);
+  end loop;
+end $$;
 
 -- 2.2 Phòng có TV (khớp TV trong team-map.layout.js) — bước "present" chỉ hợp lệ ở các phòng này
 create or replace function tm_tv_rooms() returns text[] language sql immutable as $$
@@ -294,13 +384,30 @@ create trigger tm_steps_check before insert or update on tm_quest_steps
 do $$
 declare t text;
 begin
-  foreach t in array array['tm_rooms','tm_characters','tm_placements','tm_quests','tm_quest_steps'] loop
+  foreach t in array array['tm_rooms','tm_characters','tm_placements','tm_quests','tm_quest_steps',
+                           'tm_hourly_config','tm_hourly_actions','tm_hourly_lines','tm_quiz_questions','tm_badges'] loop
     execute format('alter table %I enable row level security', t);
     execute format('drop policy if exists "public read %s" on %I', t, t);
     execute format('drop policy if exists "admin write %s" on %I', t, t);
     execute format('create policy "public read %s" on %I for select using (true)', t, t);
     execute format('create policy "admin write %s" on %I for all to authenticated using (is_admin()) with check (is_admin())', t, t);
   end loop;
+end $$;
+
+
+-- 3.1 Hình huy hiệu: bucket Storage đọc công khai, chỉ admin được ghi.
+-- (Bỏ qua nếu DB không có schema storage, vd khi chạy thử ngoài Supabase.)
+do $$
+begin
+  if to_regclass('storage.buckets') is null then return; end if;
+  insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+  values ('tm-badges', 'tm-badges', true, 1048576, array['image/png','image/webp','image/jpeg'])
+  on conflict (id) do update set public = true, file_size_limit = excluded.file_size_limit, allowed_mime_types = excluded.allowed_mime_types;
+  execute 'drop policy if exists "tm badges public read" on storage.objects';
+  execute 'drop policy if exists "tm badges admin write" on storage.objects';
+  execute $p$create policy "tm badges public read" on storage.objects for select using (bucket_id = 'tm-badges')$p$;
+  execute $p$create policy "tm badges admin write" on storage.objects for all to authenticated
+             using (bucket_id = 'tm-badges' and is_admin()) with check (bucket_id = 'tm-badges' and is_admin())$p$;
 end $$;
 
 
@@ -338,17 +445,24 @@ declare
 begin
   perform tm_require_admin();
   insert into tm_characters (id, title, kind, "group", term_id, article_url, summary, doing, with_designer,
-                             reports_to, reports_to_small, reports_to_agency, props, appearance, tag, cta, is_active, i18n)
+                             reports_to, reports_to_small, reports_to_agency, props, appearance, tag, cta, is_active, i18n,
+                             rank, related_term_ids, gossip_partner_ids, hourly_exclude)
   values (c.id, c.title, coalesce(c.kind,'role'), c."group", c.term_id, c.article_url, c.summary, c.doing, c.with_designer,
           c.reports_to, c.reports_to_small, c.reports_to_agency, coalesce(c.props,'[]'::jsonb),
-          coalesce(c.appearance,'{"dark":false,"outfit":null}'::jsonb), c.tag, c.cta, coalesce(c.is_active, true), coalesce(c.i18n,'{}'::jsonb))
+          coalesce(c.appearance,'{"dark":false,"outfit":null}'::jsonb), c.tag, c.cta, coalesce(c.is_active, true), coalesce(c.i18n,'{}'::jsonb),
+          c.rank, coalesce(c.related_term_ids,'[]'::jsonb), c.gossip_partner_ids, coalesce(c.hourly_exclude,'[]'::jsonb))
   on conflict (id) do update set
     title = excluded.title, kind = excluded.kind, "group" = excluded."group", term_id = excluded.term_id,
     article_url = excluded.article_url, summary = excluded.summary, doing = excluded.doing,
     with_designer = excluded.with_designer, reports_to = excluded.reports_to,
     reports_to_small = excluded.reports_to_small, reports_to_agency = excluded.reports_to_agency, props = excluded.props, appearance = excluded.appearance,
     tag = excluded.tag, cta = excluded.cta, is_active = excluded.is_active,
-    i18n = case when p -> 'character' ? 'i18n' then excluded.i18n else tm_characters.i18n end;
+    i18n = case when p -> 'character' ? 'i18n' then excluded.i18n else tm_characters.i18n end,
+    -- nhiệm vụ theo giờ: client cũ không gửi các khoá này thì giữ nguyên
+    rank               = case when p -> 'character' ? 'rank'               then excluded.rank               else tm_characters.rank end,
+    related_term_ids   = case when p -> 'character' ? 'related_term_ids'   then excluded.related_term_ids   else tm_characters.related_term_ids end,
+    gossip_partner_ids = case when p -> 'character' ? 'gossip_partner_ids' then excluded.gossip_partner_ids else tm_characters.gossip_partner_ids end,
+    hourly_exclude     = case when p -> 'character' ? 'hourly_exclude'     then excluded.hourly_exclude     else tm_characters.hourly_exclude end;
 
   if p ? 'placements' then
     select coalesce(array_agg(x ->> 'id'), array[]::text[]) into keep
@@ -415,6 +529,8 @@ begin
     update tm_placements t set seat_order = (x ->> 'sort')::int from jsonb_array_elements(p) x where t.id = x ->> 'id';
   elsif p_table = 'tm_quests' then
     update tm_quests t set sort_order = (x ->> 'sort')::int from jsonb_array_elements(p) x where t.id = x ->> 'id';
+  elsif p_table = 'tm_badges' then
+    update tm_badges t set sort_order = (x ->> 'sort')::int from jsonb_array_elements(p) x where t.id = x ->> 'id';
   else
     raise exception 'Bảng không hợp lệ: %', p_table;
   end if;
@@ -454,6 +570,10 @@ begin
       tag              = case when r ? 'tag'              then r ->> 'tag'              else tag end,
       cta              = case when r ? 'cta'              then nullif(r -> 'cta','null'::jsonb) else cta end,
       is_active        = case when r ? 'is_active'        then (r ->> 'is_active')::boolean else is_active end,
+      rank             = case when r ? 'rank'             then (r ->> 'rank')::int else rank end,
+      related_term_ids = case when r ? 'related_term_ids' then coalesce(r -> 'related_term_ids','[]'::jsonb) else related_term_ids end,
+      gossip_partner_ids = case when r ? 'gossip_partner_ids' then nullif(r -> 'gossip_partner_ids','null'::jsonb) else gossip_partner_ids end,
+      hourly_exclude   = case when r ? 'hourly_exclude'   then coalesce(r -> 'hourly_exclude','[]'::jsonb) else hourly_exclude end,
       -- i18n_en: chỉ các ô tiếng Anh có trong file; ô trống (null) = xoá bản dịch đó
       i18n             = case when r ? 'i18n_en' then jsonb_set(i18n, '{en}', jsonb_strip_nulls(coalesce(i18n -> 'en','{}'::jsonb) || (r -> 'i18n_en'))) else i18n end
     where id = r ->> 'id';
@@ -509,6 +629,63 @@ begin
     end if;
   end loop;
   n := n || jsonb_build_object('steps', jsonb_array_length(coalesce(p -> 'steps','[]'::jsonb)));
+
+  -- nhiệm vụ theo giờ: hành động chỉ cập nhật 8 id có sẵn; câu hỏi, lời thoại, huy hiệu upsert theo id
+  for r in select * from jsonb_array_elements(coalesce(p -> 'hourly_actions','[]'::jsonb)) loop
+    update tm_hourly_actions set
+      name           = case when r ? 'name'           then r ->> 'name'           else name end,
+      title_template = case when r ? 'title_template' then r ->> 'title_template' else title_template end,
+      offer_text     = case when r ? 'offer_text'     then r ->> 'offer_text'     else offer_text end,
+      win_text       = case when r ? 'win_text'       then r ->> 'win_text'       else win_text end,
+      lose_text      = case when r ? 'lose_text'      then r ->> 'lose_text'      else lose_text end,
+      weight         = case when r ? 'weight'         then (r ->> 'weight')::int  else weight end,
+      config         = case when r ? 'config'         then r -> 'config'          else config end,
+      is_active      = case when r ? 'is_active'      then (r ->> 'is_active')::boolean else is_active end,
+      i18n           = case when r ? 'i18n_en' then jsonb_set(i18n, '{en}', jsonb_strip_nulls(coalesce(i18n -> 'en','{}'::jsonb) || (r -> 'i18n_en'))) else i18n end
+    where id = r ->> 'id';
+    get diagnostics cnt = row_count;
+    if cnt = 0 then raise exception 'Hành động % không tồn tại (chỉ có 8 hành động cố định)', r ->> 'id'; end if;
+  end loop;
+  n := n || jsonb_build_object('hourly_actions', jsonb_array_length(coalesce(p -> 'hourly_actions','[]'::jsonb)));
+
+  for r in select * from jsonb_array_elements(coalesce(p -> 'quiz','[]'::jsonb)) loop
+    insert into tm_quiz_questions (id, character_id, question, options, correct_index, is_active)
+    values (r ->> 'id', r ->> 'character_id', r ->> 'question', r -> 'options', (r ->> 'correct_index')::int, coalesce((r ->> 'is_active')::boolean, true))
+    on conflict (id) do update set character_id = excluded.character_id, question = excluded.question, options = excluded.options,
+      correct_index = excluded.correct_index, is_active = excluded.is_active;
+    if r ? 'i18n_en' then
+      update tm_quiz_questions set i18n = jsonb_set(i18n, '{en}', jsonb_strip_nulls(coalesce(i18n -> 'en','{}'::jsonb) || (r -> 'i18n_en'))) where id = r ->> 'id';
+    end if;
+  end loop;
+  n := n || jsonb_build_object('quiz', jsonb_array_length(coalesce(p -> 'quiz','[]'::jsonb)));
+
+  for r in select * from jsonb_array_elements(coalesce(p -> 'lines','[]'::jsonb)) loop
+    insert into tm_hourly_lines (id, action_id, kind, character_id, text, is_active)
+    values (r ->> 'id', r ->> 'action_id', r ->> 'kind', r ->> 'character_id', r ->> 'text', coalesce((r ->> 'is_active')::boolean, true))
+    on conflict (id) do update set action_id = excluded.action_id, kind = excluded.kind, character_id = excluded.character_id,
+      text = excluded.text, is_active = excluded.is_active;
+    if r ? 'i18n_en' then
+      update tm_hourly_lines set i18n = jsonb_set(i18n, '{en}', jsonb_strip_nulls(coalesce(i18n -> 'en','{}'::jsonb) || (r -> 'i18n_en'))) where id = r ->> 'id';
+    end if;
+  end loop;
+  n := n || jsonb_build_object('lines', jsonb_array_length(coalesce(p -> 'lines','[]'::jsonb)));
+
+  for r in select * from jsonb_array_elements(coalesce(p -> 'badges','[]'::jsonb)) loop
+    insert into tm_badges (id, sort_order, name, description, image_url, rim_color, condition_type, action_id, threshold, params,
+                           is_hidden, is_active, reward_title, reward_note, reward_url, reward_status)
+    values (r ->> 'id', coalesce((r ->> 'sort_order')::int, 0), r ->> 'name', r ->> 'description', r ->> 'image_url',
+            coalesce(r ->> 'rim_color', '#FFC53D'), r ->> 'condition_type', r ->> 'action_id', (r ->> 'threshold')::int,
+            coalesce(r -> 'params','{}'::jsonb), coalesce((r ->> 'is_hidden')::boolean, true), coalesce((r ->> 'is_active')::boolean, true),
+            r ->> 'reward_title', r ->> 'reward_note', r ->> 'reward_url', coalesce(r ->> 'reward_status', 'none'))
+    on conflict (id) do update set sort_order = excluded.sort_order, name = excluded.name, description = excluded.description,
+      image_url = excluded.image_url, rim_color = excluded.rim_color, condition_type = excluded.condition_type, action_id = excluded.action_id,
+      threshold = excluded.threshold, params = excluded.params, is_hidden = excluded.is_hidden, is_active = excluded.is_active,
+      reward_title = excluded.reward_title, reward_note = excluded.reward_note, reward_url = excluded.reward_url, reward_status = excluded.reward_status;
+    if r ? 'i18n_en' then
+      update tm_badges set i18n = jsonb_set(i18n, '{en}', jsonb_strip_nulls(coalesce(i18n -> 'en','{}'::jsonb) || (r -> 'i18n_en'))) where id = r ->> 'id';
+    end if;
+  end loop;
+  n := n || jsonb_build_object('badges', jsonb_array_length(coalesce(p -> 'badges','[]'::jsonb)));
 
   return n;
 end $$;
