@@ -430,7 +430,7 @@ function onKey(e, down){
   const k = e.key;
   if (!game){
     if (!down) return false;
-    if (k === 'Escape'){ if (!badgesEl.hidden){ closeBadges(); return true; } if (radial){ closeRadial(); return true; } if (picking){ cancelPick(); return true; } return false; }
+    if (k === 'Escape'){ if (viewer){ closeCoin(); return true; } if (!badgesEl.hidden){ closeBadges(); return true; } if (radial){ closeRadial(); return true; } if (picking){ cancelPick(); return true; } return false; }
     // phím số chọn mục trong menu tròn
     if (radial && /^[1-9]$/.test(k) && !e.ctrlKey && !e.metaKey && !e.altKey){ const it = radial.all[+k - 1]; if (it){ pickRadial(it); return true; } }
     return false;
@@ -790,13 +790,13 @@ function viewCoin(b, intro){
     <div class="row">${b.reward.status === 'open' && b.reward.url ? `<a class="btn btn-ghost" href="${esc(b.reward.url)}" target="_blank" rel="noopener">${esc(b.reward.title || L('Nhận quà', 'Get the gift'))}</a>` : ''}
       <button class="btn btn-primary" data-c="save">${L('Lưu ảnh', 'Save image')}</button></div>
     <p class="h-hint">${L('Kéo để xoay đồng xu', 'Drag to spin the coin')}</p></div>`);
-  badgesEl.appendChild(box);
+  badgesEl.appendChild(box); badgesEl.classList.add('h-coin-open');
   viewer = { box, scene:COIN.scene(box.querySelector('canvas'), b, ST.badges[b.id], Object.assign({ intro }, coinOpts)), b };
   box.querySelector('.close').onclick = closeCoin;
   box.addEventListener('click', e => { if (e.target === box) closeCoin(); });
   box.querySelector('[data-c="save"]').onclick = () => saveImage(b);
 }
-function closeCoin(){ if (!viewer) return; viewer.scene.destroy(); viewer.box.remove(); viewer = null; }
+function closeCoin(){ if (!viewer) return; viewer.scene.destroy(); viewer.box.remove(); viewer = null; badgesEl.classList.remove('h-coin-open'); }
 function miniCoin(canvas, b){ const sc = COIN.scene(canvas, b, ST.badges[b.id], Object.assign({ intro:true, mini:true }, coinOpts));
   const stop = new MutationObserver(() => { if (!canvas.isConnected || sheet.hidden){ sc.destroy(); stop.disconnect(); } }); stop.observe(sheet, { attributes:true, childList:true, subtree:true }); }
 
