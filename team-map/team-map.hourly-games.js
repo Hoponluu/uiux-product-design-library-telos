@@ -979,34 +979,17 @@ function viewCoin(b, intro){
   const box = el('div', { className:'h-coinbox' }, `<div class="card h-coincard" role="dialog" aria-modal="true" aria-label="${esc(b.name)}">
     <button class="close" aria-label="${L('Đóng', 'Close')}">×</button><canvas class="h-coin3d" width="360" height="360"></canvas>
     <h2>${esc(b.name)}</h2><p>${esc(b.desc)}</p><small>${L('Đạt ngày', 'Earned on')} ${dateText(ST.badges[b.id])}</small>
-    <div class="h-awline"><span data-awid="${esc(b.id)}">${codeHtml(b.id)}</span>${awardOf(b.id) ? `<button class="btn btn-ghost h-verify" type="button" data-c="verify">${L('Xác minh', 'Verify')}</button>` : ''}</div>
-    <p class="h-verres" hidden></p>
+    <div class="h-awline"><span data-awid="${esc(b.id)}">${codeHtml(b.id)}</span></div>
     ${b.reward.status === 'coming' ? `<p><em class="chip draft">${L('Quà: sắp có', 'Gift: coming soon')}</em></p>` : ''}
     <div class="row">${b.reward.status === 'open' && b.reward.url ? `<a class="btn btn-ghost" href="${esc(b.reward.url)}" target="_blank" rel="noopener">${esc(b.reward.title || L('Nhận quà', 'Get the gift'))}</a>` : ''}
       <button class="btn btn-primary" data-c="save">${L('Lưu ảnh', 'Save image')}</button></div>
     <p class="h-hint">${L('Kéo để xoay đồng xu', 'Drag to spin the coin')}</p></div>`);
   badgesEl.appendChild(box); badgesEl.classList.add('h-coin-open');
   viewer = { box, scene:COIN.scene(box.querySelector('canvas'), b, ST.badges[b.id], Object.assign({ intro, serial:(awardOf(b.id) || {}).code }, coinOpts)), b, codeShown:!!awardOf(b.id) };
-  const vb = box.querySelector('[data-c="verify"]'); if (vb) vb.onclick = () => verifyAward(b, box.querySelector('.h-verres'));
   box.querySelector('.close').onclick = closeCoin;
   box.addEventListener('click', e => { if (e.target === box) closeCoin(); });
   box.querySelector('[data-c="save"]').onclick = () => saveImage(b);
 }
-async function verifyAward(b, out){
-  const a = awardOf(b.id); if (!a || !out) return;
-  out.hidden = false; out.className = 'h-verres'; out.textContent = L('Đang xác minh…', 'Verifying…');
-  try {
-    const r = await rpc('tm_verify_award', { p_code:a.code });
-    const when = new Date(r.checked_at || Date.now()).toLocaleTimeString(E.LANG === 'en' ? 'en-GB' : 'vi-VN');
-    const STATUS = { valid:L('Hợp lệ', 'Valid'), redeemed:L('Đã đổi quà', 'Gift redeemed'), void:L('Đã huỷ', 'Void') };
-    if (r.ok && r.badge_id === b.id){ ST.awards[b.id].status = r.status; persist();
-      out.classList.add(r.status === 'void' ? 'bad' : 'ok');
-      out.textContent = `${r.status === 'void' ? '✗' : '✓'} ${L('Mã thật', 'Genuine ID')} · ${STATUS[r.status] || r.status} · ${L('kiểm tra lúc', 'checked at')} ${when}`; }
-    else { out.classList.add('bad'); out.textContent = `✗ ${L('Không tìm thấy mã', 'ID not found')} · ${when}`; }
-    track('tm_badge_verify', { badge_id:b.id, ok:!!(r.ok && r.badge_id === b.id) });
-  } catch (e) { out.classList.add('bad'); out.textContent = L('Không kết nối được máy chủ, thử lại sau.', 'Could not reach the server, try again later.'); }
-}
-// "Xác minh": hỏi server mã này có thật không và trạng thái (kèm giờ kiểm tra)
 function closeCoin(){ if (!viewer) return; viewer.scene.destroy(); viewer.box.remove(); viewer = null; badgesEl.classList.remove('h-coin-open'); }
 
 // --- "Lưu ảnh": thẻ PNG 1080 × 1350, đồng xu đúng góc đang xoay ---

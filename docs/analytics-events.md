@@ -41,7 +41,6 @@ Mọi sự kiện Team Map tự kèm `tm_scale` (`small` · `large` · `agency`)
 | `tm_pantry_intro` | Lần đầu vào Pantry, thẻ "Chơi gì bây giờ?" hiện ra | `tm_slot` |
 | `tm_badge_event` | Làm một hành động đặc biệt dùng cho huy hiệu | `event` (`chain_course` = bấm "Khám phá khoá học TELOS" ở bảng tổng kết sau khi xong chuỗi quest, `author_link` = bấm link trang cá nhân trong bảng của Nhân Lưu), `tm_slot` |
 | `tm_badge_award` | Server cấp mã cho một huy hiệu vừa đạt | `badge_id`, `tm_slot` |
-| `tm_badge_verify` | Bấm "Xác minh" mã huy hiệu | `badge_id`, `ok`, `tm_slot` |
 | `tm_badges_open` | Mở màn hình Huy hiệu | `unlocked` (số huy hiệu đã có), `tm_slot` |
 | `tm_badge_save` | Lưu ảnh huy hiệu | `badge_id`, `method` (`share` / `download`), `tm_slot` |
 
