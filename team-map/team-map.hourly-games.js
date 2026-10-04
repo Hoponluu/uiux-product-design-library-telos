@@ -582,8 +582,8 @@ GAMES.fight = { start(g){
   speak(c, H.line(D, 'fight', 'start', g.tk.who), 2.2);
   showBar(`<div class="h-title">${L('Đánh nhau với', 'Fight')} ${esc(roleName(g.tk.who))}</div>
     <div class="h-tug"><span>${L('Bạn', 'You')}</span><div class="h-tugbar"><i style="width:${v}%"></i><b></b></div><span>${esc(roleName(g.tk.who))}</span></div>
-    <div class="h-sub">${L('Bấm Space hoặc nút "Đẩy" thật nhanh', 'Press Space or the "Push" button as fast as you can')} · <span class="h-t">${timerHtml(left)}</span></div>`);
-  showAct(L('Đẩy!', 'Push!'));
+    <div class="h-sub">${L('Bấm Space hoặc nút "Chan nóoo!!" thật nhanh', 'Press Space or the "Smash it!!" button as fast as you can')} · <span class="h-t">${timerHtml(left)}</span></div>`);
+  showAct(L('Chan nóoo!!', 'Smash it!!'));
   const push = rate => cf.npc_base + cf.npc_per_rank * g.rank;
   const cloud = dustCloud(pos(E.player), pos(c), [E.player, c]); g.cleanup.push(() => cloud.remove());
   const end = win => { if (done) return; done = true; const fill = bar.querySelector('.h-tugbar i'); if (fill) fill.style.width = (win ? 100 : 0) + '%';
