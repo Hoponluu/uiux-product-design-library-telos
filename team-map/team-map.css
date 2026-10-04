@@ -560,9 +560,5 @@
 .h-awslot{display:block;}
 .h-awline{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin:8px 0 2px;}
 .h-awline .h-awid{font-size:14px;margin:0;}
-.h-verify{padding:6px 12px;font-size:12.5px;}
-.h-verres{font-size:12.5px;margin:6px 0 0;padding:6px 10px;border-radius:8px;background:var(--surface-alt);}
-.h-verres.ok{background:rgba(47,191,143,.14);color:#127A57;}
-.h-verres.bad{background:rgba(200,31,104,.1);color:var(--accent);}
 .h-splash-code{margin:10px 0 0;}
 .h-splash-code .h-awid{background:rgba(255,255,255,.14);color:#FFC53D;font-size:16px;}

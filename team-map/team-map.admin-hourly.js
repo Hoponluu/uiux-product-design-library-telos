@@ -492,7 +492,7 @@ function renderAwards(){
 }
 async function setAwardStatus(serial, to){
   const a = S.awards.find(x => String(x.serial) === String(serial)); if (!a) return;
-  if (to === 'void' && !confirm(`Huỷ mã ${a.code}? Người chơi bấm "Xác minh" sẽ thấy "Đã huỷ".`)) return;
+  if (to === 'void' && !confirm(`Huỷ mã ${a.code}?`)) return;
   try { Object.assign(a, await patchAward(serial, { status:to })); toast(`${a.code}: ${AW_STATUS[to]}`); renderAwards(); } catch (e) { toast('Lỗi: ' + e.message, true); }
 }
 function awardsCsv(){
