@@ -437,11 +437,13 @@ function finish(r){
   } else after();
 }
 function resultSheet(tk, win, got, note){
-  const a = HD.actions[tk.action], w = H.statOf(ST, tk.action).wins, open = isOpen(tk.action);
+  const a = HD.actions[tk.action], w = H.statOf(ST, tk.action).wins, tc = charOf(tk.who), down = tc && tc.ko && tk.action === 'fight';
+  const open = isOpen(tk.action) && !down;
   sheet.innerHTML = `<button class="close" aria-label="${L('Đóng', 'Close')}">×</button><div class="sheet-body">
     <p class="eyebrow">${ICON[tk.action]} ${esc(nameOf(tk.action))}</p><h2>${esc(titleOf(tk))}</h2>
     <div class="chips"><span class="chip ${win ? 'pub' : 'todo'}">${win ? L('Thắng', 'Won') : L('Thua', 'Lost')}</span>${win ? `<span class="chip">${L(`Đã thắng ${w} lần`, `${w} wins so far`)}</span>` : ''}</div>
     <p class="${win ? 'h-win' : 'h-lose'}">${esc(win ? a.win : a.lose)}</p>${note ? `<p class="h-note">${esc(note)}</p>` : ''}
+    ${down ? `<p class="h-note">😵 ${esc(L(`${roleName(tk.who)} đang nằm đất, khoảng 1 phút nữa mới dậy.`, `${roleName(tk.who)} is down for about a minute.`))}</p>` : ''}
     ${got.length ? `<p class="h-gotline">🏅 ${L('Vừa mở', 'Just unlocked')}: <b>${got.map(id => esc((HD.badges.find(x => x.id === id) || {}).name || id)).join(', ')}</b></p>` : ''}
     <div class="row">${got.length ? `<button class="btn btn-primary" data-r="badges">${L('Xem huy hiệu', 'See badges')}</button>` : ''}
       ${open ? `<button class="btn ${got.length ? 'btn-ghost' : 'btn-primary'}" data-r="retry">${win ? L('Chơi tiếp', 'Play again') : L('Chơi lại', 'Try again')}</button>` : ''}
