@@ -55,6 +55,7 @@ function eyeOpen(dx, dy){ return tex(g => { eyeBase(g); g.fillStyle = PUPIL; g.b
 const FACE = {
   open: eyeOpen(0,2), look: eyeOpen(13,-12), side: eyeOpen(-14,4),
   happy: tex(g => { eyeBase(g); g.strokeStyle = PUPIL; g.lineWidth = 12; g.lineCap = 'round'; g.beginPath(); g.arc(64,76,22,Math.PI,0); g.stroke(); }),
+  ko: tex(g => { eyeBase(g); g.strokeStyle = PUPIL; g.lineWidth = 14; g.lineCap = 'round'; g.beginPath(); g.moveTo(40,40); g.lineTo(88,88); g.moveTo(88,40); g.lineTo(40,88); g.stroke(); }),   // bị đánh gục: mắt chữ X
   mO: tex(g => { g.fillStyle = '#F2788F'; g.beginPath(); g.ellipse(32,32,8,11,0,0,7); g.fill(); g.strokeStyle = INK; g.lineWidth = 3; g.stroke(); }, 64),
   mSmile: tex(g => { g.fillStyle = '#E5446D'; g.beginPath(); g.moveTo(12,22); g.quadraticCurveTo(32,58,52,22); g.closePath(); g.fill(); g.strokeStyle = INK; g.lineWidth = 3; g.stroke(); g.fillStyle = '#F7A6B6'; g.beginPath(); g.ellipse(32,38,9,5,0,0,7); g.fill(); }, 64),
   mFlat: tex(g => { g.strokeStyle = INK; g.lineWidth = 4; g.lineCap = 'round'; g.beginPath(); g.moveTo(20,32); g.quadraticCurveTo(32,40,44,30); g.stroke(); }, 64)
