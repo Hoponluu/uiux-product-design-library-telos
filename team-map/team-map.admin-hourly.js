@@ -8,7 +8,7 @@ const KIND_BY_ACTION = { poptask:['task','react'], fight:['start'], coffee:['spi
 const KIND_LABEL = { task:'Chữ trên tờ pop-task', react:'Nhân vật bị ném trúng', start:'Nhân vật lúc bắt đầu', spill:'NPC bị đổ cà phê', thanks:'Nhân vật nhận cà phê',
   hint:'NPC khi được hỏi ({room} = phòng đang trốn)', found:'Nhân vật khi bị tìm ra', say:'Câu nấu xói (nhân vật = người bị nấu xói)', caught:'Người bị nấu xói bắt quả tang' };
 const COND_LABEL = { wins:'Số lần thắng', distinct_characters:'Thắng với N nhân vật khác nhau', flawless_wins:'Số lần thắng sạch', win_streak:'Chuỗi thắng liên tiếp',
-  win_under_secs:'Thắng trong ≤ N giây', win_vs:'Thắng một nhân vật / một khoảng cấp bậc', fail_count:'Số lần thua theo kiểu', all_actions:'Thắng mọi hành động đang bật' };
+  win_under_secs:'Thắng trong ≤ N giây', win_vs:'Thắng một nhân vật / một khoảng cấp bậc', fail_count:'Số lần thua theo kiểu', all_actions:'Thắng mọi hành động đang bật', event:'Hành động đặc biệt (ngoài mini-game)' };
 // nhãn tiếng Việt cho các khoá trong config
 const CFG_LABEL = { options:'Số đáp án', retry_wait_secs:'Chờ trước khi hỏi lại (giây)', duration_secs:'Thời lượng (giây)', start_percent:'Thanh lực ban đầu (%)', tap_gain:'Mỗi lần bấm tăng',
   npc_base:'Lực đẩy cơ bản / giây', npc_per_rank:'Lực đẩy thêm mỗi cấp', max_taps_per_sec:'Tối đa lần bấm / giây', ammo:'Số tờ pop-task', hits_needed:'Số phát cần trúng',
@@ -193,7 +193,8 @@ async function saveLine(){
 // ════════════════════════════════════════════════════════
 const condSummary = b => { const p = b.params || {};
   const extra = b.condition_type === 'win_vs' ? (p.character_id ? ` · ${charName(p.character_id)}` : ` · cấp ${p.rank_min || 1}–${p.rank_max || 8}`)
-    : b.condition_type === 'win_under_secs' ? ` · ≤ ${p.secs}s` : b.condition_type === 'fail_count' ? ` · ${p.fail_kind} × ${b.threshold}` : b.threshold ? ` · ${b.threshold}` : '';
+    : b.condition_type === 'win_under_secs' ? ` · ≤ ${p.secs}s` : b.condition_type === 'fail_count' ? ` · ${p.fail_kind} × ${b.threshold}`
+    : b.condition_type === 'event' ? ` · ${(H.EVENTS[p.event] || [p.event])[0]}` : b.threshold ? ` · ${b.threshold}` : '';
   return `${COND_LABEL[b.condition_type] || b.condition_type}${b.action_id ? ' · ' + actName(b.action_id) : ''}${extra}`; };
 function renderBadges(){
   const list = S.hourly.badges.slice().sort((a, b) => a.sort_order - b.sort_order);
@@ -235,6 +236,7 @@ function openBadge(id){
       <div class="form-group" data-cf="secs"><label>Số giây tối đa</label><input class="form-control" type="number" min="1" name="b_secs" value="${p.secs || 15}"/></div>
       <div class="form-group" data-cf="fail_kind"><label>Kiểu thua</label><select class="form-control" name="b_fail">${['caught','timeout','lose','quit','spill','wrong','slower','out_of_ammo'].map(k => `<option${p.fail_kind === k ? ' selected' : ''}>${k}</option>`).join('')}</select></div>
       <div class="form-group" data-cf="vs"><label>Thắng nhân vật</label><select class="form-control" name="b_vs"><option value="">— Theo cấp bậc —</option>${S.chars.filter(c => c.kind !== 'player' && c.kind !== 'author').map(c => `<option value="${esc(c.id)}"${p.character_id === c.id ? ' selected' : ''}>${esc(c.title)}</option>`).join('')}</select></div>
+      <div class="form-group" data-cf="event"><label>Hành động</label><select class="form-control" name="b_event">${Object.entries(H.EVENTS).map(([k, v]) => `<option value="${k}"${p.event === k ? ' selected' : ''}>${esc(v[0])}</option>`).join('')}</select></div>
       <div class="form-group" data-cf="vs"><label>Cấp từ – đến</label><div class="tm-row"><input class="form-control tm-num" type="number" min="1" max="8" name="b_rmin" value="${p.rank_min ?? ''}"/><input class="form-control tm-num" type="number" min="1" max="8" name="b_rmax" value="${p.rank_max ?? ''}"/></div></div>
     </div>
     <div class="tm-block"><label class="tm-check"><input type="checkbox" name="b_hidden"${!b || b.is_hidden ? ' checked' : ''}/> Ẩn khi chưa mở (chỉ hiện bóng đen và "???")</label>
@@ -253,8 +255,8 @@ function openBadge(id){
     .catch(e => toast(e.message, true));
 }
 function showCondFields(){
-  const root = X.formRoot(), t = X.fv('b_type'), on = { action:t !== 'all_actions', threshold:['wins','distinct_characters','flawless_wins','win_streak','fail_count'].includes(t),
-    secs:t === 'win_under_secs', fail_kind:t === 'fail_count', vs:t === 'win_vs' };
+  const root = X.formRoot(), t = X.fv('b_type'), on = { action:t !== 'all_actions' && t !== 'event', threshold:['wins','distinct_characters','flawless_wins','win_streak','fail_count'].includes(t),
+    secs:t === 'win_under_secs', fail_kind:t === 'fail_count', vs:t === 'win_vs', event:t === 'event' };
   root.querySelectorAll('[data-cf]').forEach(g => { g.hidden = !on[g.dataset.cf]; });
 }
 const refreshPreview = () => { if (preview) preview.update(badgeFromForm()); };
@@ -283,14 +285,14 @@ async function saveBadge(){
   if (!/^[a-z0-9][a-z0-9-]*$/.test(id)) err('[name="b_id"]', 'Id chỉ gồm chữ thường không dấu, số và dấu -');
   else if (!b && S.hourly.badges.some(x => x.id === id)) err('[name="b_id"]', 'Id đã tồn tại');
   if (!HEX.test(fv('b_rim'))) err('[name="b_rim"]', 'Mã màu dạng #RRGGBB');
-  if (t !== 'all_actions' && !fv('b_action')) err('[name="b_action"]', 'Chọn hành động');
+  if (t !== 'all_actions' && t !== 'event' && !fv('b_action')) err('[name="b_action"]', 'Chọn hành động');
   if (fv('b_rurl') && !/^https?:\/\//.test(fv('b_rurl'))) err('[name="b_rurl"]', 'Nhập URL đầy đủ');
   if (t === 'win_vs' && !fv('b_vs') && !fv('b_rmin') && !fv('b_rmax')) err('[name="b_vs"]', 'Chọn nhân vật hoặc khoảng cấp');
   if (bad) return;
-  const params = t === 'win_under_secs' ? { secs:+fv('b_secs') } : t === 'fail_count' ? { fail_kind:fv('b_fail') }
+  const params = t === 'win_under_secs' ? { secs:+fv('b_secs') } : t === 'fail_count' ? { fail_kind:fv('b_fail') } : t === 'event' ? { event:fv('b_event') }
     : t === 'win_vs' ? (fv('b_vs') ? { character_id:fv('b_vs') } : Object.fromEntries([['rank_min', fv('b_rmin')], ['rank_max', fv('b_rmax')]].filter(([, v]) => v !== '').map(([k, v]) => [k, +v]))) : {};
   const row = { name:fv('b_name'), description:fv('b_desc') || null, image_url:F().image || null, rim_color:fv('b_rim'), sort_order:parseInt(fv('b_sort')) || 0,
-    condition_type:t, action_id: t === 'all_actions' ? null : fv('b_action'), threshold: ['wins','distinct_characters','flawless_wins','win_streak','fail_count'].includes(t) ? Math.max(1, parseInt(fv('b_threshold')) || 1) : null,
+    condition_type:t, action_id: t === 'all_actions' || t === 'event' ? null : fv('b_action'), threshold: ['wins','distinct_characters','flawless_wins','win_streak','fail_count'].includes(t) ? Math.max(1, parseInt(fv('b_threshold')) || 1) : null,
     params, is_hidden:fv('b_hidden'), is_active:fv('b_active'), reward_title:fv('b_rtitle') || null, reward_note:fv('b_rnote') || null, reward_url:fv('b_rurl') || null, reward_status:fv('b_rstatus'),
     i18n:X.withEn(b && b.i18n, { name:fv('en_bname'), description:fv('en_bdesc') }) };
   try { if (b) await sbUpdate('tm_badges', b.id, row); else await sbInsert('tm_badges', { id, ...row });
@@ -411,7 +413,8 @@ function sheets(){
       validate:(r, E) => { const cur = S.hourly.badges.find(x => x.id === r.o.id) || {}, m = { ...cur, ...r.o };
         if (r.o.id && !/^[a-z0-9][a-z0-9-]*$/.test(r.o.id)) E('id', 'Id chỉ gồm chữ thường không dấu, số và dấu -');
         if (!m.name) E('name', 'Thiếu tên'); if (!H.CONDITIONS.includes(m.condition_type)) E('condition_type', `Loại không hợp lệ. Hợp lệ: ${H.CONDITIONS.join(', ')}`);
-        if (m.condition_type !== 'all_actions' && !ACTIONS.includes(m.action_id)) E('action_id', 'Cần hành động hợp lệ');
+        if (m.condition_type !== 'all_actions' && m.condition_type !== 'event' && !ACTIONS.includes(m.action_id)) E('action_id', 'Cần hành động hợp lệ');
+        if (m.condition_type === 'event' && !H.EVENTS[(m.params || {}).event]) E('params', `Cần {"event": "..."} với: ${Object.keys(H.EVENTS).join(', ')}`);
         if (m.rim_color && !HEX.test(m.rim_color)) E('rim_color', 'Mã màu dạng #RRGGBB');
         if (m.params && m.params.__bad !== undefined) E('params', 'Tham số không phải JSON hợp lệ');
         if (m.threshold != null && !(Number.isInteger(m.threshold) && m.threshold >= 1)) E('threshold', 'Ngưỡng là số nguyên ≥ 1');

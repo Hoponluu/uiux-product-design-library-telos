@@ -234,7 +234,7 @@ create table if not exists tm_badges (
   description    text,
   image_url      text,
   rim_color      text not null default '#FFC53D' check (rim_color ~ '^#[0-9A-Fa-f]{6}$'),
-  condition_type text not null check (condition_type in ('wins','distinct_characters','flawless_wins','win_streak','win_under_secs','win_vs','fail_count','all_actions')),
+  condition_type text not null check (condition_type in ('wins','distinct_characters','flawless_wins','win_streak','win_under_secs','win_vs','fail_count','all_actions','event')),
   action_id      text references tm_hourly_actions(id),
   threshold      int,
   params         jsonb not null default '{}'::jsonb,
@@ -248,6 +248,9 @@ create table if not exists tm_badges (
   i18n           jsonb not null default '{}'::jsonb,
   updated_at     timestamptz not null default now()
 );
+-- 'event' = hành động đặc biệt ngoài mini-game (params.event: chain_course, author_link). Bảng đã có thì nâng cấp ràng buộc.
+alter table tm_badges drop constraint if exists tm_badges_condition_type_check;
+alter table tm_badges add constraint tm_badges_condition_type_check check (condition_type in ('wins','distinct_characters','flawless_wins','win_streak','win_under_secs','win_vs','fail_count','all_actions','event'));
 
 
 -- ════════════════════════════════════════════════════════
