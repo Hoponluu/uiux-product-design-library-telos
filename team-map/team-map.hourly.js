@@ -2,7 +2,11 @@
 // Dùng chung cho game (team-map.hourly-games.js) và CMS (khối "Đang chạy"), nên hai nơi luôn ra cùng một kết quả.
 (function(){
   const ACTIONS = ['read','fight','poptask','flashcard','coffee','hide','race','gossip'];
-  const CONDITIONS = ['wins','distinct_characters','flawless_wins','win_streak','win_under_secs','win_vs','fail_count','all_actions'];
+  const CONDITIONS = ['wins','distinct_characters','flawless_wins','win_streak','win_under_secs','win_vs','fail_count','all_actions','event'];
+  // hành động đặc biệt ngoài mini-game, dùng cho điều kiện 'event' (params.event)
+  const EVENTS = {
+    chain_course:['Làm xong một chuỗi quest rồi bấm "Khám phá khoá học TELOS"', 'Finish a quest chain, then click "Explore TELOS courses"'],
+    author_link:['Bấm vào trang cá nhân của Nhân Lưu khi nói chuyện với ổng', 'Open Nhân Lưu\'s personal page while talking to him'] };
   const STORE_KEY = 'tm_hourly_v1';
 
   // ---------- số ngẫu nhiên có seed ----------
@@ -124,10 +128,10 @@
   }
 
   // ---------- tiến độ (localStorage) ----------
-  const blank = () => ({ stats:{}, badges:{}, seen:{} });
+  const blank = () => ({ stats:{}, badges:{}, seen:{}, events:{} });
   function load(){
     try { const d = JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); if (!d || typeof d !== 'object') return blank();
-      return { stats:d.stats || {}, badges:d.badges || {}, seen:d.seen || {} }; } catch (e) { return blank(); }
+      return { stats:d.stats || {}, badges:d.badges || {}, seen:d.seen || {}, events:d.events || {} }; } catch (e) { return blank(); }
   }
   function save(st){
     try { localStorage.setItem(STORE_KEY, JSON.stringify(st)); return true; } catch (e) { return false; }
@@ -157,6 +161,7 @@
         : (p.rank_min == null || v.rank >= p.rank_min) && (p.rank_max == null || v.rank <= p.rank_max));
       case 'fail_count': return (s.fails[p.fail_kind || 'lose'] || 0) >= t;
       case 'all_actions': return activeActions.length > 0 && activeActions.every(a => statOf(st, a).wins >= 1);
+      case 'event': return ((st.events || {})[p.event] || 0) >= t;
     }
     return false;
   }
@@ -167,6 +172,6 @@
     return got;
   }
 
-  window.TM_HOURLY = { ACTIONS, CONDITIONS, STORE_KEY, mulberry32, hash, shuffle, slotAt, slotEnds, slotMs, pairs, ALWAYS_OPEN, openAt, targets, suggest, whyNot, partners,
+  window.TM_HOURLY = { ACTIONS, CONDITIONS, EVENTS, STORE_KEY, mulberry32, hash, shuffle, slotAt, slotEnds, slotMs, pairs, ALWAYS_OPEN, openAt, targets, suggest, whyNot, partners,
     roomOfChar, bossOf, present, quizOf, termsOf, fill, line, load, save, blank, record, evaluate, met, statOf };
 })();

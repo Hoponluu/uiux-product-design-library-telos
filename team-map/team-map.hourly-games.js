@@ -320,6 +320,21 @@ function bindPanel(c){
   });
 }
 const readOpened = new Set(); let readRetryAt = 0;
+// ---------- hành động đặc biệt (điều kiện huy hiệu 'event') ----------
+function hitEvent(ev){
+  ST.events[ev] = (ST.events[ev] || 0) + 1; const got = H.evaluate(ST, D); persist(); renderBfab();
+  track('tm_badge_event', { event:ev });
+  got.forEach(id => track('tm_badge_unlock', { badge_id:id }));
+  // link mở tab mới: báo huy hiệu ở trang này, khi quay lại là thấy
+  if (got.length && !game) setTimeout(() => showBadges(got), 300);
+}
+document.addEventListener('click', e => {
+  const a = e.target.closest && e.target.closest('a[href]'); if (!a) return;
+  if (a.classList.contains('tm-course')) return hitEvent('chain_course');   // nút ở bảng tổng kết sau khi xong chuỗi quest
+  // link trong bảng của Nhân Lưu (bảng đang hiện đúng là của ổng: so tiêu đề, vì bảng khách không gọi bindPanel)
+  const au = author(), h2 = $('#panel h2');
+  if (au && a.closest('#panel') && !$('#panel').hidden && h2 && h2.textContent.trim() === au.role.title) hitEvent('author_link');
+}, true);
 // mở bài viết (tab mới trên desktop, xem trước trên mobile) = đã đọc
 document.addEventListener('click', e => {
   const a = e.target.closest && e.target.closest('a[href]'); const tk = pending; if (!a || !tk || tk.action !== 'read') return;
@@ -871,7 +886,8 @@ const COND = {
   win_vs:(b, a) => b.params.character_id ? L(`Thắng "${a}" với ${roleName(b.params.character_id)}`, `Win "${a}" against ${roleName(b.params.character_id)}`)
     : L(`Thắng "${a}" với nhân vật cấp ${b.params.rank_min || 1}–${b.params.rank_max || 8}`, `Win "${a}" against rank ${b.params.rank_min || 1}–${b.params.rank_max || 8}`),
   fail_count:(b, a) => L(`Thua "${a}" kiểu "${b.params.fail_kind}" ${b.threshold} lần`, `Lose "${a}" by "${b.params.fail_kind}" ${b.threshold} times`),
-  all_actions:() => L('Thắng ít nhất một lần ở mọi hành động', 'Win every action at least once')
+  all_actions:() => L('Thắng ít nhất một lần ở mọi hành động', 'Win every action at least once'),
+  event:b => { const e = H.EVENTS[b.params.event]; return e ? L(e[0], e[1]) : ''; }
 };
 const condText = b => (COND[b.type] || (() => ''))(b, b.action && HD.actions[b.action] ? HD.actions[b.action].name : '');
 const dateText = iso => { try { return new Date(iso).toLocaleDateString(E.LANG === 'en' ? 'en-GB' : 'vi-VN'); } catch (e) { return ''; } };
@@ -950,7 +966,7 @@ if (!storeOk) console.info('[Team Map] localStorage không dùng được: huy h
 return { onTalk, onClick, onKey, tick, onWorld, authorCard, panelExtra, bindPanel, playing:() => !!game, flashLocked, radial:openRadial,
   holdsMain:() => !!game || !!pending, sheetOpen:() => !sheet.hidden, closeSheet:() => { if (!game){ cancelPick(); closeSheet(); } closeRadial(); },
   // cho test
-  _state:ST, _koSkip:() => knocked.forEach(k => { k.until = E.t; }), _knocked:() => knocked.map(k => ({ who:k.c.isPlayer ? 'player' : k.c.role.id, left:k.until - E.t, lying:k.c.obj.root.rotation.x < -1.4 })), _splashing:() => splashing, _badgeShow:() => !!badgeShow, _open:() => H.openAt(D, slotNow()), _pending:() => pending, _picking:() => picking, _choose:choose, _radial:() => radial && { who:radial.c.role.id, items:radial.all.map(i => i.k + (i.open === false ? ':locked' : '')) }, _pickRadial:k => { const it = radial && radial.all.find(i => i.k === k); if (it) pickRadial(it); },
+  _state:ST, _hitEvent:hitEvent, _koSkip:() => knocked.forEach(k => { k.until = E.t; }), _knocked:() => knocked.map(k => ({ who:k.c.isPlayer ? 'player' : k.c.role.id, left:k.until - E.t, lying:k.c.obj.root.rotation.x < -1.4 })), _splashing:() => splashing, _badgeShow:() => !!badgeShow, _open:() => H.openAt(D, slotNow()), _pending:() => pending, _picking:() => picking, _choose:choose, _radial:() => radial && { who:radial.c.role.id, items:radial.all.map(i => i.k + (i.open === false ? ':locked' : '')) }, _pickRadial:k => { const it = radial && radial.all.find(i => i.k === k); if (it) pickRadial(it); },
   _pend:tk => { pending = Object.assign({ slot:slotNow(), scale:E.scaleKey, partner:null }, tk); renderCard(); },
   _start:(a, who, partner) => { pending = { slot:slotNow(), scale:E.scaleKey, action:a, who:who || (pending && pending.who), partner:partner || (pending && pending.partner) || null }; start(a); }, _openBadges:openBadges, _game:() => game, _E:E, _H:H };
 };
