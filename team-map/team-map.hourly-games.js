@@ -288,14 +288,30 @@ function renderBfab(){
 bfab.addEventListener('click', () => openBadges());
 
 // ---------- bảng của Nhân Lưu: giới thiệu + gợi ý ----------
-function authorCard(){
-  if (!HD.config.is_enabled) return '';
+// bảng của Nhân Lưu không còn khung gợi ý (đã chuyển sang lần đầu vào Pantry)
+function authorCard(){ return ''; }
+// ---------- lần đầu bước vào Pantry: "Chơi gì bây giờ?" (cách chơi + một gợi ý), tắt / bỏ qua được ----------
+let introOn = false;
+function pantryIntro(){
   const tk = H.suggest(D, E.scaleKey, slotNow()), left = H.slotEnds(HD.config, slotNow()) - Date.now();
-  return `<div class="h-offer"><h4>${L('Chơi gì bây giờ?', 'What to play?')}<span class="h-left">${L(`đổi lượt sau ${fmt(left)}`, `new round in ${fmt(left)}`)}</span></h4>
+  introOn = true; ST.seen.pantry = 1; persist();
+  sheet.innerHTML = `<button class="close" aria-label="${L('Đóng', 'Close')}">×</button><div class="sheet-body h-intro">
+    <p class="eyebrow">☕ ${L('Pantry · nghỉ giải lao', 'Pantry · break time')}</p><h2>${L('Chơi gì bây giờ?', 'What to play?')}</h2>
     <p>${L('Bấm vào một đồng nghiệp: các trò chơi được với người đó hiện quanh họ. Đọc bài và Lật thẻ lúc nào cũng mở, mấy trò còn lại đổi mỗi lượt. Thắng nhiều để mở huy hiệu.',
       'Click a coworker: the games you can play with them appear around them. Reading and Flashcards are always open, the other games change every round. Win to unlock badges.')}</p>
-    ${tk ? `<b>${L('Gợi ý của ổng', 'His suggestion')}: ${esc(titleOf(tk))}</b><p>${esc(H.fill(HD.actions[tk.action].offer, { target:roleName(tk.who), partner:roleName(tk.partner) }))}</p>
-    <div class="row"><button class="btn btn-primary" data-h="suggest">${L('Chơi luôn', 'Play it')}</button></div>` : ''}</div>`;
+    <p class="h-note">🔒 ${L(`Lượt trò chơi mới sau ${fmt(left)}`, `New round of games in ${fmt(left)}`)}</p>
+    ${tk ? `<div class="h-offer"><b>${L('Gợi ý', 'Try this')}: ${esc(titleOf(tk))}</b><p>${esc(H.fill(HD.actions[tk.action].offer, { target:roleName(tk.who), partner:roleName(tk.partner) }))}</p></div>` : ''}
+    <div class="row">${tk ? `<button class="btn btn-primary" data-i="play">${L('Chơi luôn', 'Play it')}</button>` : ''}<button class="btn btn-ghost" data-i="skip">${L('Bỏ qua', 'Skip')}</button></div></div>`;
+  E.closeSheets('hourly'); sheet.hidden = false;
+  const close = () => { introOn = false; closeSheet(); };
+  sheet.querySelector('.close').onclick = close;
+  sheet.querySelectorAll('[data-i]').forEach(b => b.onclick = () => { close(); if (b.dataset.i === 'play') playSuggestion(tk); });
+  track('tm_pantry_intro', {});
+}
+function playSuggestion(tk){
+  if (!tk) return;
+  if (E.mainBusy()) return say(L('Làm xong nhiệm vụ đang dở đã.', 'Finish your current quest first.'));
+  picking = { action:tk.action, step:'who', source:'pantry', who:tk.who, partner:tk.partner, ids:[tk.who] }; confirmPick();
 }
 // trong bảng nhân vật: nút đọc bài (khi đang chọn đọc bài người này)
 function panelExtra(c){
@@ -313,9 +329,6 @@ function bindPanel(c){
   const p = $('#panel');
   p.querySelectorAll('[data-h]').forEach(b => b.onclick = () => {
     const k = b.dataset.h;
-    if (k === 'suggest'){ const tk = H.suggest(D, E.scaleKey, slotNow()); if (!tk) return; E.closePanel();
-      if (E.mainBusy()) return say(L('Làm xong nhiệm vụ đang dở đã.', 'Finish your current quest first.'));
-      picking = { action:tk.action, step:'who', source:'author', who:tk.who, partner:tk.partner, ids:[tk.who] }; return confirmPick(); }
     if (k === 'quiz'){ E.closePanel(); return start('read'); }
   });
 }
@@ -482,7 +495,7 @@ function retry(tk){
   if (tk.action === 'read' || INSTANT.includes(tk.action)) return start(tk.action);
   const c = targetFor(pending); if (c){ renderCard(); goTo(pending); say(objective(pending), 3); }
 }
-function closeSheet(){ sheet.hidden = true; }
+function closeSheet(){ sheet.hidden = true; introOn = false; }
 
 // ---------- hook từ engine ----------
 function onTalk(c){
@@ -505,7 +518,7 @@ function onKey(e, down){
   const k = e.key;
   if (!game){
     if (!down) return false;
-    if (k === 'Escape'){ if (badgeShow){ badgeShow.close(); return true; } if (viewer){ closeCoin(); return true; } if (!badgesEl.hidden){ closeBadges(); return true; } if (radial){ closeRadial(); return true; } if (picking){ cancelPick(); return true; } return false; }
+    if (k === 'Escape'){ if (introOn && !sheet.hidden){ introOn = false; closeSheet(); return true; } if (badgeShow){ badgeShow.close(); return true; } if (viewer){ closeCoin(); return true; } if (!badgesEl.hidden){ closeBadges(); return true; } if (radial){ closeRadial(); return true; } if (picking){ cancelPick(); return true; } return false; }
     // phím số chọn mục trong menu tròn
     if (radial && /^[1-9]$/.test(k) && !e.ctrlKey && !e.metaKey && !e.altKey){ const it = radial.all[+k - 1]; if (it){ pickRadial(it); return true; } }
     return false;
@@ -529,6 +542,9 @@ function tick(dt){
     if (game || c.hidden || Math.hypot(p.x - q.x, p.z - q.z) > 3.4) closeRadial(); else placeRadial(); }
   if (toastT > 0){ toastT -= dt; if (toastT <= 0) toast.hidden = true; }
   tickAcc += dt; if (tickAcc < .5) return; tickAcc = 0;
+  // lần đầu vào Pantry (đợi rảnh tay: không chơi, không có bảng / hộp thoại / sheet nào đang mở)
+  if (!ST.seen.pantry && HD.config.is_enabled && !game && !pending && !picking && !radial && !splashing && !badgeShow && splashEl.hidden && sheet.hidden && badgesEl.hidden && $('#panel').hidden && $('#dialog').hidden && $('#welcome').hidden){
+    const pp = E.player.obj.root.position, r = E.roomAt(pp.x, pp.z); if (r && r.kind === 'lounge') pantryIntro(); }
   // hết lượt: hành động đang chọn / đang đi tới bị khoá thì huỷ (trò đang chơi vẫn chơi tiếp tới hết)
   if (!game && picking && !isOpen(picking.action)){ cancelPick(); say(L('Hết lượt, hành động này vừa khoá.', 'Round over, this action just locked.'), 3); }
   if (!game && pending && !isOpen(pending.action)){ pending = null; E.player.path = []; E.player.onArrive = null; renderCard(); say(L('Hết lượt, hành động này vừa khoá.', 'Round over, this action just locked.'), 3); }
@@ -966,7 +982,7 @@ if (!storeOk) console.info('[Team Map] localStorage không dùng được: huy h
 return { onTalk, onClick, onKey, tick, onWorld, authorCard, panelExtra, bindPanel, playing:() => !!game, flashLocked, radial:openRadial,
   holdsMain:() => !!game || !!pending, sheetOpen:() => !sheet.hidden, closeSheet:() => { if (!game){ cancelPick(); closeSheet(); } closeRadial(); },
   // cho test
-  _state:ST, _hitEvent:hitEvent, _koSkip:() => knocked.forEach(k => { k.until = E.t; }), _knocked:() => knocked.map(k => ({ who:k.c.isPlayer ? 'player' : k.c.role.id, left:k.until - E.t, lying:k.c.obj.root.rotation.x < -1.4 })), _splashing:() => splashing, _badgeShow:() => !!badgeShow, _open:() => H.openAt(D, slotNow()), _pending:() => pending, _picking:() => picking, _choose:choose, _radial:() => radial && { who:radial.c.role.id, items:radial.all.map(i => i.k + (i.open === false ? ':locked' : '')) }, _pickRadial:k => { const it = radial && radial.all.find(i => i.k === k); if (it) pickRadial(it); },
+  _state:ST, _pantryIntro:pantryIntro, _hitEvent:hitEvent, _koSkip:() => knocked.forEach(k => { k.until = E.t; }), _knocked:() => knocked.map(k => ({ who:k.c.isPlayer ? 'player' : k.c.role.id, left:k.until - E.t, lying:k.c.obj.root.rotation.x < -1.4 })), _splashing:() => splashing, _badgeShow:() => !!badgeShow, _open:() => H.openAt(D, slotNow()), _pending:() => pending, _picking:() => picking, _choose:choose, _radial:() => radial && { who:radial.c.role.id, items:radial.all.map(i => i.k + (i.open === false ? ':locked' : '')) }, _pickRadial:k => { const it = radial && radial.all.find(i => i.k === k); if (it) pickRadial(it); },
   _pend:tk => { pending = Object.assign({ slot:slotNow(), scale:E.scaleKey, partner:null }, tk); renderCard(); },
   _start:(a, who, partner) => { pending = { slot:slotNow(), scale:E.scaleKey, action:a, who:who || (pending && pending.who), partner:partner || (pending && pending.partner) || null }; start(a); }, _openBadges:openBadges, _game:() => game, _E:E, _H:H };
 };
