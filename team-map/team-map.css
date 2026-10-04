@@ -433,10 +433,6 @@
 .h-def{margin:0 0 12px;padding:10px 12px;border-left:3px solid var(--accent);background:var(--surface-alt);border-radius:0 8px 8px 0;font-size:13.5px;line-height:1.55;}
 .h-lose{color:var(--ink);font-size:14px;line-height:1.55;}
 .h-note{color:var(--ink-faint);font-size:12.5px;}
-.h-got{display:grid;gap:10px;margin-top:10px;}
-.h-gotb{display:flex;gap:12px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--surface-alt);}
-.h-gotb p{margin:4px 0 0;font-size:12.5px;color:var(--ink-soft);}
-.h-coin-mini{width:80px;height:80px;flex:none;}
 .h-offer{margin-top:14px;padding:12px;border:1px solid var(--chip-yellow);border-radius:12px;background:rgba(255,197,61,.08);}
 .h-offer h4{display:flex;justify-content:space-between;align-items:center;gap:8px;font-family:var(--font-caption);font-weight:500;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 6px;}
 .h-offer b{display:block;font-family:var(--font-display);font-size:15px;margin-bottom:4px;}
@@ -519,19 +515,37 @@
 .qmark.hq.pick{background:#E92F7C;color:#fff;width:22px;height:22px;line-height:22px;font-size:18px;}
 .h-partners{margin:8px 0 4px;} .h-partners .chip{cursor:pointer;border:1px solid var(--line);font:inherit;font-size:12.5px;}
 .h-win{font-size:13.5px;color:var(--ink-soft);}
-/* ---------- màn hình báo thua (full màn hình, ~2 giây) ---------- */
+/* ---------- màn hình thông báo full màn hình: thua (đỏ), thắng (xanh thương hiệu), mở huy hiệu (xanh + vàng, có nút đóng) ---------- */
 #h-splash{position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;text-align:center;color:#fff;
-  background:radial-gradient(120% 90% at 50% 40%,rgba(200,31,104,.94),rgba(60,8,40,.97) 70%);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);pointer-events:auto;opacity:0;transition:opacity .2s ease;}
+  background:radial-gradient(120% 90% at 50% 40%,rgba(200,31,104,.94),rgba(60,8,40,.97) 70%);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);
+  pointer-events:auto;opacity:0;transition:opacity .2s ease;overflow-y:auto;}
 #h-splash[hidden]{display:none;}
 #h-splash.in{opacity:1;}
 #h-splash.out{opacity:0;}
-.h-splash-in{max-width:min(900px,100%);}
+#h-splash.hs-win{background:radial-gradient(120% 90% at 50% 40%,rgba(53,198,232,.95),rgba(11,122,147,.96) 45%,rgba(6,52,70,.98) 85%);}
+#h-splash.hs-badge{background:radial-gradient(110% 85% at 50% 38%,rgba(11,122,147,.96),rgba(10,40,64,.97) 60%,rgba(23,11,61,.98));}
+.h-splash-in{max-width:min(900px,100%);margin:auto;}
 .h-splash-ico{font-size:clamp(64px,14vw,120px);line-height:1;margin-bottom:8px;}
-#h-splash h2{font-family:var(--font-display);font-weight:800;font-size:clamp(40px,10vw,104px);line-height:1.02;letter-spacing:-.01em;margin:0 0 14px;text-shadow:0 6px 0 rgba(0,0,0,.18);}
-#h-splash.in h2,#h-splash.in .h-splash-ico{animation:h-shake .5s cubic-bezier(.36,.07,.19,.97) both;}
+#h-splash h2{font-family:var(--font-display);font-weight:800;font-size:clamp(40px,10vw,104px);line-height:1.02;letter-spacing:-.01em;margin:0 0 14px;text-shadow:0 6px 0 rgba(0,0,0,.18);overflow-wrap:anywhere;}
+#h-splash.hs-lose.in h2,#h-splash.hs-lose.in .h-splash-ico{animation:h-shake .5s cubic-bezier(.36,.07,.19,.97) both;}
+#h-splash.hs-win.in h2,#h-splash.hs-win.in .h-splash-ico{animation:h-pop .55s cubic-bezier(.3,1.5,.6,1) both;}
 .h-splash-sub{font-size:clamp(17px,3.6vw,26px);font-weight:700;margin:0 0 10px;color:#FFE3EF;}
 .h-splash-txt{font-size:clamp(15px,2.8vw,20px);line-height:1.5;margin:0 auto;max-width:36ch;color:#FFD6E6;}
+#h-splash.hs-win .h-splash-sub,#h-splash.hs-badge .h-splash-sub{color:#E6FAFF;}
+#h-splash.hs-win .h-splash-txt,#h-splash.hs-badge .h-splash-txt{color:#D2F3FB;}
+.h-splash-chip{display:inline-block;margin:-4px 0 12px;padding:6px 14px;border-radius:999px;background:#FFC53D;color:#1C1033;font-weight:800;font-size:clamp(14px,2.6vw,18px);}
 .h-splash-bar{position:absolute;left:0;bottom:0;height:6px;width:100%;background:#FFC53D;transform-origin:left;animation:h-countdown linear forwards;}
+/* mở huy hiệu */
+#h-splash.hs-badge h2{font-size:clamp(30px,6.5vw,60px);color:#FFC53D;margin:6px 0 10px;}
+.h-splash-eye{font-family:var(--font-caption);text-transform:uppercase;letter-spacing:.1em;font-size:clamp(13px,2.4vw,16px);color:#9FE7F7;margin:0 0 4px;}
+.h-splash-coin{display:block;width:min(240px,62vw,36vh);height:auto;aspect-ratio:1/1;margin:0 auto;cursor:grab;touch-action:none;}
+.h-splash-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px;}
+.h-splash-btn{min-width:150px;min-height:48px;padding:12px 22px;border-radius:999px;border:0;background:#FFC53D;color:#1C1033;font:800 15px/1 var(--font-body);cursor:pointer;}
+.h-splash-btn.ghost{background:transparent;color:#fff;box-shadow:inset 0 0 0 2px rgba(255,255,255,.7);}
+.h-splash-btn:focus-visible,.h-splash-x:focus-visible{outline:3px solid #fff;outline-offset:2px;}
+.h-splash-x{position:absolute;top:max(14px,env(safe-area-inset-top));right:14px;width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.16);color:#fff;font-size:26px;line-height:44px;cursor:pointer;}
+.h-gotline{font-size:13.5px;margin:8px 0 0;color:var(--ink-soft);}
 @keyframes h-shake{0%{transform:scale(.6);opacity:0}30%{transform:scale(1.08);opacity:1}45%{transform:translateX(-10px) rotate(-2deg)}60%{transform:translateX(10px) rotate(2deg)}75%{transform:translateX(-5px)}100%{transform:none}}
+@keyframes h-pop{0%{transform:scale(.5) translateY(20px);opacity:0}60%{transform:scale(1.1);opacity:1}100%{transform:none}}
 @keyframes h-countdown{from{transform:scaleX(1)}to{transform:scaleX(0)}}
-@media (prefers-reduced-motion: reduce){#h-splash{transition:none;}#h-splash.in h2,#h-splash.in .h-splash-ico{animation:none;}.h-splash-bar{animation:none;display:none;}}
+@media (prefers-reduced-motion: reduce){#h-splash{transition:none;}#h-splash.in h2,#h-splash.in .h-splash-ico{animation:none !important;}.h-splash-bar{animation:none;display:none;}}
