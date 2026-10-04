@@ -54,10 +54,10 @@ function renderHourly(){
       : '<p class="tm-note">Đang tắt toàn bộ tính năng.</p>';
   } catch (e) { running = `<p class="tm-warn">Không tính được: ${esc(e.message)}</p>`; }
   X.body().innerHTML = `<div class="toolbar"><h2>Hành động</h2></div>
-    <p class="tm-note">Người chơi chọn hành động trên thanh công cụ, chọn người rồi chơi; lần thắng nào cũng tính vào huy hiệu. <b>Đọc bài</b> và <b>Lật flashcard</b> luôn mở; mỗi lượt mở thêm một số hành động vui (theo trọng số), mọi người chơi thấy giống nhau. Lưu là có hiệu lực ở lần tải trang sau.</p>
+    <p class="tm-note">Người chơi bấm vào một nhân vật: các hành động chơi được với người đó hiện thành vòng quanh họ (hành động đang khoá có ổ khoá); lần thắng nào cũng tính vào huy hiệu. <b>Đọc bài</b> và <b>Lật flashcard</b> luôn mở; mỗi lượt mở thêm một số hành động vui (theo trọng số), mọi người chơi thấy giống nhau. Lưu là có hiệu lực ở lần tải trang sau.</p>
     <div class="tm-hgrid">
       <div class="export-card"><h3>Cấu hình</h3>
-        <label class="tm-check"><input type="checkbox" data-hc="is_enabled"${C.is_enabled ? ' checked' : ''}/> Bật thanh hành động</label>
+        <label class="tm-check"><input type="checkbox" data-hc="is_enabled"${C.is_enabled ? ' checked' : ''}/> Bật các hành động (menu tròn quanh nhân vật)</label>
         <div class="form-row">
           <div class="form-group"><label>Độ dài một lượt (phút)</label><input class="form-control" type="number" min="5" max="1440" data-hc="slot_minutes" value="${C.slot_minutes}"/></div>
           <div class="form-group"><label>Số hành động vui mở mỗi lượt (0–6)</label><input class="form-control" type="number" min="0" max="6" data-hc="open_count" value="${C.open_count ?? 4}"/><div class="form-hint">6 = mở hết</div></div>
@@ -88,7 +88,7 @@ function openAction(id){
       ${X.enInput('en_name', 'Tên (tiếng Anh)', en.name)}${X.enInput('en_title', 'Mẫu tên nhiệm vụ (tiếng Anh)', en.title_template)}
       ${X.enInput('en_offer', 'Lời giao (tiếng Anh)', en.offer_text, 2)}${X.enInput('en_win', 'Lời thắng (tiếng Anh)', en.win_text, 2)}${X.enInput('en_lose', 'Lời thua (tiếng Anh)', en.lose_text, 2)}
     </details>
-    <div class="tm-block"><label class="tm-check"><input type="checkbox" name="h_active"${a.is_active ? ' checked' : ''}/> Hiện trên thanh hành động</label></div>`,
+    <div class="tm-block"><label class="tm-check"><input type="checkbox" name="h_active"${a.is_active ? ' checked' : ''}/> Hiện trong menu tròn quanh nhân vật</label></div>`,
     `<button class="btn-cancel" data-act="close">Huỷ</button><button class="btn-save" data-act="h-act-save">Lưu</button>`);
 }
 async function saveAction(){

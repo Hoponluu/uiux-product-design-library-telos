@@ -32,8 +32,9 @@ Mọi sự kiện Team Map tự kèm `tm_scale` (`small` · `large` · `agency`)
 | `tm_article_missing` | Bấm "Bài viết sắp ra mắt" | `character_title` — gợi ý nên viết bài nào trước |
 | `tm_locked_room_open` | Mở "Phòng ban khác" | |
 | `tm_list_view` | Mở "Xem dạng danh sách" hoặc đổi tab trong đó | `list_tab` (`rooms` / `report`) |
-| `tm_action_open` | Bấm một hành động trên thanh công cụ (mở danh sách chọn người) | `action_id`, `source` (`toolbar`, `key` = phím 1–8, `panel` = lối tắt nấu xói, `result` = "Chọn người khác"), `tm_slot` |
-| `tm_action_pick` | Chọn xong người (và người nghe, với nấu xói) | `action_id`, `character_id`, `source` (như trên, thêm `author` = "Chơi luôn" từ gợi ý của Nhân Lưu), `tm_slot` |
+| `tm_radial_open` | Bấm vào một nhân vật, menu tròn các trò chơi hiện ra | `character_id`, `actions` (số trò hợp lệ với người này), `open` (số trò đang mở), `tm_slot` |
+| `tm_action_open` | Chọn một trò trong menu tròn | `action_id`, `source` (`radial`, `radial-with` = "Rủ họ nấu xói"), `tm_slot` |
+| `tm_action_pick` | Đã chốt người (và người nghe, với nấu xói) | `action_id`, `character_id`, `source` (như trên, thêm `author` = "Chơi luôn" từ gợi ý của Nhân Lưu), `tm_slot` |
 | `tm_hourly_start` | Một mini-game bắt đầu | `action_id`, `character_id`, `tm_slot` |
 | `tm_hourly_result` | Kết thúc một mini-game | `action_id`, `character_id`, `win`, `flawless`, `fail_kind`, `tm_slot` |
 | `tm_badge_unlock` | Mở khoá một huy hiệu | `badge_id`, `tm_slot` |

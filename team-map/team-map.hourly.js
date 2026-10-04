@@ -124,10 +124,10 @@
   }
 
   // ---------- tiến độ (localStorage) ----------
-  const blank = () => ({ stats:{}, badges:{} });
+  const blank = () => ({ stats:{}, badges:{}, seen:{} });
   function load(){
     try { const d = JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); if (!d || typeof d !== 'object') return blank();
-      return { stats:d.stats || {}, badges:d.badges || {} }; } catch (e) { return blank(); }
+      return { stats:d.stats || {}, badges:d.badges || {}, seen:d.seen || {} }; } catch (e) { return blank(); }
   }
   function save(st){
     try { localStorage.setItem(STORE_KEY, JSON.stringify(st)); return true; } catch (e) { return false; }
