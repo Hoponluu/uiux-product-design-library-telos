@@ -549,3 +549,8 @@
 @keyframes h-pop{0%{transform:scale(.5) translateY(20px);opacity:0}60%{transform:scale(1.1);opacity:1}100%{transform:none}}
 @keyframes h-countdown{from{transform:scaleX(1)}to{transform:scaleX(0)}}
 @media (prefers-reduced-motion: reduce){#h-splash{transition:none;}#h-splash.in h2,#h-splash.in .h-splash-ico{animation:none !important;}.h-splash-bar{animation:none;display:none;}}
+/* đánh nhau: chữ bật ra trong đám bụi */
+.lbl.h-powlbl{z-index:3;pointer-events:none;}
+.h-pow{font:900 22px/1 var(--font-display);color:#fff;-webkit-text-stroke:2px #1C1033;paint-order:stroke;text-shadow:0 3px 0 #E92F7C;animation:h-powin .6s ease-out both;white-space:nowrap;}
+@keyframes h-powin{0%{transform:scale(.3) rotate(-12deg);opacity:0}25%{transform:scale(1.25) rotate(6deg);opacity:1}100%{transform:translateY(-14px) scale(1);opacity:0}}
+@media (prefers-reduced-motion: reduce){.h-pow{animation:none;}}
