@@ -600,7 +600,7 @@ function updateLabels(){
     L.el.hidden = false; L.el.style.transform = `translate(${s.x|0}px,${s.y|0}px) translate(-50%,-100%)`;
   });
   const bTarget = near || null;
-  if (bTarget && !bTarget.hidden && !(HX && HX.playing()) && $('#dialog').hidden && $('#panel').hidden){
+  if (bTarget && !bTarget.hidden && !bTarget.ko && !(HX && HX.playing()) && $('#dialog').hidden && $('#panel').hidden){
     const rp = bTarget.obj.root.position, s = project(new THREE.Vector3(rp.x, 1.62, rp.z));
     const html = `<small>${bTarget.role.title}</small><span class="b-long">${bTarget.role.doing}<br></span><span class="b-key" style="color:var(--ink-faint)">${L('Bấm <kbd>F</kbd> hoặc click để nói chuyện', 'Press <kbd>F</kbd> or click to talk')}</span><span class="b-touch">${L('Chạm để nói chuyện', 'Tap to talk')}</span>`;
     if (bubble.dataset.k !== bTarget.id){ bubble.innerHTML = html; bubble.dataset.k = bTarget.id; }
@@ -620,6 +620,7 @@ function interact(){
 }
 function faceEach(a, b){ const pa = a.obj.root.position, pb = b.obj.root.position; a.heading = Math.atan2(pb.x-pa.x, pb.z-pa.z); b.heading = Math.atan2(pa.x-pb.x, pa.z-pb.z); }
 function talk(c){
+  if (c.ko){ if (HX) HX.onTalk(c); return; }   // đang bất tỉnh (bị đánh gục): giữ nguyên mặt, không quay người, không mở bảng
   if (c.sitting){ const pa = player.obj.root.position, pb = c.obj.root.position; player.heading = Math.atan2(pb.x-pa.x, pb.z-pa.z); } else faceEach(player, c);
   if (!c.busy && !c.guest && !c.fixed){ if (c.ai && c.ai.conv) endConv(c.ai.conv, c); c.path = []; c.onArrive = null; c.ai = { s:'pause', t:5 }; } setFace(c.obj, 'happy', 'mSmile'); c.faceT = 3; setFace(player.obj, 'look', 'mO'); player.faceT = 2;
   if (!c.roamer && !c.guest){ met[scaleKey].add(c.role.id); updateMet(); }
