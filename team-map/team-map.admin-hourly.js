@@ -19,6 +19,7 @@ const CFG_LABEL = { options:'Số đáp án', retry_wait_secs:'Chờ trước kh
   pause_secs:'Nhân vật đứng lại (giây)', aim_assist:'Bấm cách nhân vật bao xa vẫn tự nhắm (m)' };
 const RANKS = { 1:'Thực tập', 2:'Nhân viên', 3:'Lead / PM', 4:'Manager', 5:'Head / Director', 6:'C-level / Stakeholder', 7:'Client', 8:'User' };
 const HEX = /^#[0-9a-f]{6}$/i;
+const toLocalInput = iso => { const d = new Date(iso), z = n => String(n).padStart(2, '0'); return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())}T${z(d.getHours())}:${z(d.getMinutes())}`; };
 const charName = id => { const c = X.charOf(id); return c ? c.title : id; };
 const actName = id => (S.hourly.actions.find(a => a.id === id) || {}).name || id;
 const termName = id => { const t = allConcepts.find(x => String(x.id) === String(id)); return t ? t.name : `#${id}`; };
@@ -61,6 +62,9 @@ function renderHourly(){
         <div class="form-row">
           <div class="form-group"><label>Độ dài một lượt (phút)</label><input class="form-control" type="number" min="5" max="1440" data-hc="slot_minutes" value="${C.slot_minutes}"/></div>
           <div class="form-group"><label>Số hành động vui mở mỗi lượt (0–6)</label><input class="form-control" type="number" min="0" max="6" data-hc="open_count" value="${C.open_count ?? 4}"/><div class="form-hint">6 = mở hết</div></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Cấp mã huy hiệu từ</label><input class="form-control" type="datetime-local" data-hc="award_start" value="${C.award_start ? toLocalInput(C.award_start) : ''}"/><div class="form-hint">Huy hiệu đạt từ lúc này mới có mã (giờ theo máy bạn)</div></div>
         </div>
         <button class="btn-save" data-act="h-cfg-save">Lưu cấu hình</button></div>
       <div class="export-card"><h3>Các lượt sắp tới</h3><p class="tm-note">Hành động vui mở ở lượt hiện tại và 7 lượt kế tiếp, tính bằng đúng hàm game dùng (theo dữ liệu đã lưu).</p>${running}</div>
@@ -109,6 +113,7 @@ async function saveAction(){
 async function saveConfig(){
   const v = k => X.body().querySelector(`[data-hc="${k}"]`), num = k => parseInt(v(k).value);
   const p = { is_enabled:v('is_enabled').checked, slot_minutes:num('slot_minutes'), open_count:num('open_count') };
+  if (v('award_start') && v('award_start').value) p.award_start = new Date(v('award_start').value).toISOString();
   if (!(p.slot_minutes >= 5 && p.slot_minutes <= 1440)) return toast('Độ dài lượt từ 5 đến 1440 phút', true);
   if (!(p.open_count >= 0 && p.open_count <= 6)) return toast('Số hành động mở từ 0 đến 6', true);
   try { await sbUpdate('tm_hourly_config', 1, p); toast('Đã lưu cấu hình'); await X.reload(); } catch (e) { toast('Lỗi: ' + e.message, true); }
@@ -442,9 +447,66 @@ function charValidate(r, E){ const o = r.o;
   (o.hourly_exclude || []).forEach(a => { if (!ACTIONS.includes(a)) E('hourly_exclude', `Không có hành động "${a}"`); }); }
 
 // ---------- sự kiện ----------
+// ════════════════════════════════════════════════════════
+// TAB "MÃ HUY HIỆU": mỗi lần người chơi đạt huy hiệu được cấp một mã (dùng khi đổi quà)
+// ════════════════════════════════════════════════════════
+const AW_STATUS = { valid:'Hợp lệ', redeemed:'Đã đổi quà', void:'Đã huỷ' };
+async function loadAwards(){
+  try { S.awards = await sbGet('tm_badge_awards', 'select=*&order=serial.desc&limit=5000'); S.awardsErr = null; }
+  catch (e) { S.awards = []; S.awardsErr = e.message; }
+}
+async function patchAward(serial, data){
+  // (H ở file này là logic hourly, nên tự dựng header: key công khai + token của admin đang đăng nhập)
+  const r = await fetch(`${SB_CONFIG.url}/rest/v1/tm_badge_awards?serial=eq.${encodeURIComponent(serial)}`, { method:'PATCH',
+    headers:{ ...SB_CONFIG.headers(await accessToken()), 'Content-Type':'application/json', Prefer:'return=representation' }, body:JSON.stringify(data) });
+  if (!r.ok) await sbFail(r);
+  const rows = await r.json(); if (!rows.length) throw new Error('Không có quyền ghi'); return rows[0];
+}
+function renderAwards(){
+  if (!S.awards){ X.body().innerHTML = '<p class="tm-note">Đang tải mã huy hiệu…</p>'; loadAwards().then(renderAwards); return; }
+  const f = S.f; f.awQ = f.awQ || ''; f.awBadge = f.awBadge || ''; f.awStatus = f.awStatus || '';
+  const all = S.awards, day = Date.now() - 864e5, q = f.awQ.trim().toUpperCase();
+  const list = all.filter(a => (!f.awBadge || a.badge_id === f.awBadge) && (!f.awStatus || a.status === f.awStatus) && (!q || a.code.includes(q)));
+  const C = S.hourly.config, when = d => new Date(d).toLocaleString('vi-VN', { hour:'2-digit', minute:'2-digit', second:'2-digit', day:'2-digit', month:'2-digit', year:'numeric' });
+  X.body().innerHTML = `<div class="toolbar"><h2>Mã huy hiệu <span class="tm-count">(${list.length} / ${all.length})</span></h2>
+      <input class="form-control tm-w-auto" data-awf="awQ" placeholder="Tìm mã, vd TL-000123…" value="${esc(f.awQ)}"/>
+      <select class="form-control tm-w-auto" data-awf="awBadge"><option value="">Mọi huy hiệu</option>${S.hourly.badges.map(b => `<option value="${esc(b.id)}"${f.awBadge === b.id ? ' selected' : ''}>${esc(b.name)}</option>`).join('')}</select>
+      <select class="form-control tm-w-auto" data-awf="awStatus"><option value="">Mọi trạng thái</option>${Object.entries(AW_STATUS).map(([k, v]) => `<option value="${k}"${f.awStatus === k ? ' selected' : ''}>${v}</option>`).join('')}</select>
+      <button class="btn-edit" data-act="aw-reload">Tải lại</button><button class="btn-edit" data-act="aw-csv">Xuất CSV</button></div>
+    ${S.awardsErr ? `<p class="tm-warn">Không tải được: ${esc(S.awardsErr)}. Đã chạy supabase_team_map_badge_awards.sql chưa?</p>` : ''}
+    <p class="tm-note">Mỗi lần người chơi đạt huy hiệu (từ <b>${esc(when(C.award_start))}</b>, đổi trong tab Hành động) được cấp một mã và lưu ở đây.
+      Mã gồm số thứ tự + 4 ký tự kiểm tra do server tính, nên mã tự chế sẽ không có trong bảng này. Khi đổi quà: tìm mã, đối chiếu huy hiệu và ngày đạt,
+      đổi xong bấm "Đã đổi quà" để một mã không đổi được hai lần.</p>
+    <div class="tm-awstats"><div><b>${all.length}</b><span>mã đã cấp</span></div><div><b>${all.filter(a => Date.parse(a.created_at) > day).length}</b><span>trong 24 giờ</span></div>
+      <div><b>${all.filter(a => a.status === 'redeemed').length}</b><span>đã đổi quà</span></div><div><b>${all.filter(a => a.status === 'void').length}</b><span>đã huỷ</span></div></div>
+    <div class="table-wrap"><table><thead><tr><th>Mã</th><th>Huy hiệu</th><th>Thời gian</th><th>Trạng thái</th><th>Ghi chú</th><th></th></tr></thead><tbody>
+    ${list.slice(0, 500).map(a => { const b = S.hourly.badges.find(x => x.id === a.badge_id);
+      return `<tr><td><code>${esc(a.code)}</code></td><td>${esc(b ? b.name : a.badge_id)}</td><td class="tm-nowrap">${esc(when(a.created_at))}</td>
+        <td><span class="badge ${a.status === 'valid' ? 'badge-pub' : a.status === 'redeemed' ? 'badge-sub' : 'badge-draft'}">${AW_STATUS[a.status]}</span></td>
+        <td><input class="form-control tm-awnote" data-awnote="${a.serial}" value="${esc(a.note || '')}" placeholder="vd: đổi quà 12/10, SĐT…"/></td>
+        <td class="td-actions">${a.status !== 'redeemed' ? `<button class="btn-edit" data-act="aw-status" data-serial="${a.serial}" data-to="redeemed">Đã đổi quà</button>` : ''}
+          ${a.status !== 'void' ? `<button class="btn-del" data-act="aw-status" data-serial="${a.serial}" data-to="void">Huỷ</button>` : ''}
+          ${a.status !== 'valid' ? `<button class="btn-edit" data-act="aw-status" data-serial="${a.serial}" data-to="valid">Khôi phục</button>` : ''}</td></tr>`; }).join('')
+      || '<tr><td colspan="6" class="empty-state">Chưa có mã nào</td></tr>'}</tbody></table></div>
+    ${list.length > 500 ? '<p class="tm-note">Đang hiện 500 mã mới nhất, dùng ô tìm / lọc để thu hẹp.</p>' : ''}`;
+}
+async function setAwardStatus(serial, to){
+  const a = S.awards.find(x => String(x.serial) === String(serial)); if (!a) return;
+  if (to === 'void' && !confirm(`Huỷ mã ${a.code}? Người chơi bấm "Xác minh" sẽ thấy "Đã huỷ".`)) return;
+  try { Object.assign(a, await patchAward(serial, { status:to })); toast(`${a.code}: ${AW_STATUS[to]}`); renderAwards(); } catch (e) { toast('Lỗi: ' + e.message, true); }
+}
+function awardsCsv(){
+  const rows = [['code','badge','created_at','status','note']].concat(S.awards.map(a => [a.code, a.badge_id, a.created_at, a.status, a.note || '']));
+  const csv = '\ufeff' + rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const el = document.createElement('a'); el.href = URL.createObjectURL(new Blob([csv], { type:'text/csv' })); el.download = `ma-huy-hieu-${new Date().toISOString().slice(0, 10)}.csv`; document.body.appendChild(el); el.click(); el.remove();
+}
+
 function onClick(act, b){
   const id = b.dataset.id;
   switch (act){
+    case 'aw-reload': S.awards = null; renderAwards(); return true;
+    case 'aw-csv': awardsCsv(); return true;
+    case 'aw-status': setAwardStatus(b.dataset.serial, b.dataset.to); return true;
     case 'h-cfg-save': return saveConfig(), true;
     case 'h-act-edit': return openAction(id), true;
     case 'h-act-save': return saveAction(), true;
@@ -470,6 +532,7 @@ function onClick(act, b){
 }
 function onInput(e){
   const t = e.target;
+  if (t.dataset.awf && t.tagName === 'INPUT'){ S.f[t.dataset.awf] = t.value; const pos = t.selectionStart; renderAwards(); const n = X.body().querySelector(`[data-awf="${t.dataset.awf}"]`); if (n){ n.focus(); n.setSelectionRange(pos, pos); } return true; }
   if (t.dataset.hsearch){ const q = t.value.trim().toLowerCase(); X.formRoot().querySelectorAll(`[data-hlist="${t.dataset.hsearch}"] .tm-chip`).forEach(ch => { ch.hidden = q && !ch.dataset.name.includes(q); }); return true; }
   if (t.dataset.hrel !== undefined){ const n = X.formRoot().querySelectorAll('[data-hrel]:checked').length; X.formRoot().querySelector('[data-relc]').textContent = n; return true; }
   if (!S.hform || S.hform.kind !== 'h-badge') return false;
@@ -481,6 +544,9 @@ function onInput(e){
 function onChange(e){
   const t = e.target;
   if (t.dataset.hf){ S.f[t.dataset.hf] = t.value; renderLines(); return true; }
+  if (t.dataset.awf && t.tagName === 'SELECT'){ S.f[t.dataset.awf] = t.value; renderAwards(); return true; }
+  if (t.dataset.awnote){ const a = S.awards.find(x => String(x.serial) === t.dataset.awnote);
+    patchAward(t.dataset.awnote, { note:t.value.trim() || null }).then(r => { Object.assign(a, r); toast('Đã lưu ghi chú'); }).catch(e => toast('Lỗi: ' + e.message, true)); return true; }
   if (t.name === 'b_type'){ showCondFields(); return true; }
   if (t.name === 'b_file'){ uploadImage(t); return true; }
   if (t.name === 'l_act'){ const sel = X.formRoot().querySelector('[name="l_kind"]'); sel.innerHTML = KIND_BY_ACTION[t.value].map(k => `<option value="${k}">${k} · ${esc(KIND_LABEL[k])}</option>`).join(''); return true; }
@@ -488,6 +554,6 @@ function onChange(e){
 }
 function onClose(){ if (preview){ preview.destroy(); preview = null; } S.hform = null; }
 
-return { load, tabs:{ hourly:'Hành động', hlines:'Câu hỏi và lời thoại', badges:'Huy hiệu' }, render:{ hourly:renderHourly, hlines:renderLines, badges:renderBadges },
+return { load, tabs:{ hourly:'Hành động', hlines:'Câu hỏi và lời thoại', badges:'Huy hiệu', awards:'Mã huy hiệu' }, render:{ hourly:renderHourly, hlines:renderLines, badges:renderBadges, awards:renderAwards },
   onClick, onInput, onChange, onClose, charSection, charValues, sheets, charCols, charCells, charFrom, charValidate };
 };

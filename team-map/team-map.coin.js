@@ -17,6 +17,7 @@
     if (o.drawLogo) o.drawLogo(g, 176, 120, 160, '#1C1033');
     g.fillStyle = '#1C1033'; g.textAlign = 'center'; g.font = '700 34px "Be Vietnam Pro", sans-serif'; g.fillText('TELOS ACADEMY', 256, 340);
     g.font = '500 28px "Be Vietnam Pro", sans-serif'; g.fillText(iso && o.dateText ? o.dateText(iso) : '', 256, 384);
+    if (o.serial){ g.font = '700 30px "JetBrains Mono", ui-monospace, monospace'; g.fillText(o.serial, 256, 430); }   // mã huy hiệu ở mặt sau
     const front = make(logoFace(b.rim, 512, o.drawLogo)), backT = make(back);
     backT.wrapS = THREE.RepeatWrapping; backT.repeat.x = -1;   // nhìn từ phía sau: lật ngang để chữ không ngược
     if (b.image){ const ld = new THREE.TextureLoader(); ld.setCrossOrigin('anonymous');
