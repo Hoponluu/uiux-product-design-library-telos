@@ -27,6 +27,46 @@ const INSTANT = ['flashcard', 'coffee', 'hide'];
 const ST = H.load();
 const storeOk = H.save(ST);   // false: trình duyệt chặn lưu (chế độ riêng tư…) → vẫn chơi được, chỉ không lưu
 const persist = () => { H.save(ST); };
+
+// ---------- mã huy hiệu (dùng khi đổi quà) ----------
+// Huy hiệu đạt từ award_start được server cấp một mã TL-xxxxxx-XXXX (lưu trong DB). Mỗi huy hiệu gửi kèm một request id ngẫu nhiên
+// để gửi lại khi mất mạng vẫn nhận đúng mã cũ, không sinh trùng.
+ST.awards = ST.awards || {};
+const awardStart = () => { const t = Date.parse(HD.config.award_start || ''); return isNaN(t) ? null : t; };
+const awardOf = id => ST.awards[id] && ST.awards[id].code ? ST.awards[id] : null;
+// huy hiệu cần mã: đã đạt sau award_start, chưa có mã
+const needsAward = id => { const st = awardStart(), at = Date.parse(ST.badges[id] || ''); return st != null && !isNaN(at) && at >= st && !awardOf(id) && !(ST.awards[id] || {}).fail; };
+const uuid = () => crypto.randomUUID ? crypto.randomUUID() : '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, c => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
+let awardBusy = false, awardRetryAt = 0;
+async function rpc(fn, body){
+  const C = window.SB_CONFIG; if (!C || !C.url) throw new Error('no backend');
+  const r = await fetch(`${C.url}/rest/v1/rpc/${fn}`, { method:'POST', headers:Object.assign({ 'Content-Type':'application/json' }, C.headers()), body:JSON.stringify(body) });
+  if (!r.ok) throw new Error('HTTP ' + r.status); return r.json();
+}
+async function requestAwards(){
+  if (awardBusy || Date.now() < awardRetryAt) return;
+  const ids = HD.badges.filter(b => ST.badges[b.id] && needsAward(b.id)).map(b => b.id); if (!ids.length) return;
+  awardBusy = true;
+  try {
+    for (const id of ids){
+      const req = (ST.awards[id] = ST.awards[id] || {}).req || (ST.awards[id].req = uuid()); persist();
+      const r = await rpc('tm_award_badge', { p_badge:id, p_request:req, p_meta:{ lang:E.LANG, scale:E.scaleKey } });
+      if (r && r.ok){ Object.assign(ST.awards[id], { code:r.code, at:r.created_at, status:r.status }); track('tm_badge_award', { badge_id:id }); }
+      else if (r && r.reason === 'not_started') break;
+      else if (r && r.reason === 'unknown_badge') ST.awards[id].fail = r.reason;
+    }
+    persist(); refreshAwardUI();
+  } catch (e) { awardRetryAt = Date.now() + 60000; }   // mất mạng: thử lại sau
+  awardBusy = false;
+}
+// hiển thị mã: chip trong lưới, dòng trong thẻ đồng xu, thông báo mở huy hiệu
+const codeHtml = id => { const a = awardOf(id); if (a) return `<code class="h-awid">${esc(a.code)}</code>`;
+  return needsAward(id) ? `<code class="h-awid wait">${L('Đang cấp mã…', 'Issuing ID…')}</code>` : ''; };
+function refreshAwardUI(){
+  document.querySelectorAll('[data-awid]').forEach(x => { x.innerHTML = codeHtml(x.dataset.awid); });
+  if (viewer && awardOf(viewer.b.id) && !viewer.codeShown){ viewer.codeShown = true; viewer.scene.destroy(); const cv = viewer.box.querySelector('canvas');
+    viewer.scene = COIN.scene(cv, viewer.b, ST.badges[viewer.b.id], Object.assign({ serial:awardOf(viewer.b.id).code }, coinOpts)); }
+}
 const slotNow = () => H.slotAt(HD.config);
 const roleName = id => (D.ROLES[id] || {}).title || id;
 const titleOf = tk => H.fill(HD.actions[tk.action].title, { target:roleName(tk.who), partner:roleName(tk.partner) });
@@ -335,7 +375,7 @@ function bindPanel(c){
 const readOpened = new Set(); let readRetryAt = 0;
 // ---------- hành động đặc biệt (điều kiện huy hiệu 'event') ----------
 function hitEvent(ev){
-  ST.events[ev] = (ST.events[ev] || 0) + 1; const got = H.evaluate(ST, D); persist(); renderBfab();
+  ST.events[ev] = (ST.events[ev] || 0) + 1; const got = H.evaluate(ST, D); persist(); renderBfab(); if (got.length) setTimeout(requestAwards, 50);
   track('tm_badge_event', { event:ev });
   got.forEach(id => track('tm_badge_unlock', { badge_id:id }));
   // link mở tab mới: báo huy hiệu ở trang này, khi quay lại là thấy
@@ -430,7 +470,7 @@ function showBadges(ids, then){
     showSplash('badge', `<button class="h-splash-x" type="button" data-bs="close" aria-label="${L('Đóng', 'Close')}">×</button>
       <div class="h-splash-in"><p class="h-splash-eye">🏅 ${L('Mở huy hiệu mới', 'New badge unlocked')}${ids.length > 1 ? ` · ${i + 1}/${ids.length}` : ''}</p>
       <canvas class="h-splash-coin" width="440" height="440"></canvas>
-      <h2>${esc(b.name)}</h2><p class="h-splash-txt">${esc(b.desc)}</p>
+      <h2>${esc(b.name)}</h2><p class="h-splash-txt">${esc(b.desc)}</p><p class="h-splash-code" data-awid="${esc(b.id)}">${codeHtml(b.id)}</p>
       <div class="h-splash-row"><button class="btn h-splash-btn" type="button" data-bs="view">${L('Xem huy hiệu', 'See badges')}</button>
         <button class="btn h-splash-btn ghost" type="button" data-bs="next">${i < ids.length - 1 ? L('Huy hiệu tiếp', 'Next badge') : L('Đóng', 'Close')}</button></div></div>`);
     coin = COIN.scene(splashEl.querySelector('.h-splash-coin'), b, ST.badges[b.id], Object.assign({ intro:true }, coinOpts));
@@ -452,7 +492,7 @@ function finish(r){
     secs: r.secs != null ? r.secs : E.t - g.t0, fail_kind: r.win ? null : (r.fail_kind || 'lose') };
   endGame();
   H.record(ST, ev);
-  const got = H.evaluate(ST, D);
+  const got = H.evaluate(ST, D); if (got.length) setTimeout(requestAwards, 50);
   pending = null;
   persist(); renderBfab();
   track('tm_hourly_result', { action_id:ev.action_id, character_id:ev.character_id, win:ev.win, flawless:ev.flawless, fail_kind:ev.fail_kind || '' });
@@ -542,6 +582,7 @@ function tick(dt){
     if (game || c.hidden || Math.hypot(p.x - q.x, p.z - q.z) > 3.4) closeRadial(); else placeRadial(); }
   if (toastT > 0){ toastT -= dt; if (toastT <= 0) toast.hidden = true; }
   tickAcc += dt; if (tickAcc < .5) return; tickAcc = 0;
+  requestAwards();
   // lần đầu vào Pantry (đợi rảnh tay: không chơi, không có bảng / hộp thoại / sheet nào đang mở)
   if (!ST.seen.pantry && HD.config.is_enabled && !game && !pending && !picking && !radial && !splashing && !badgeShow && splashEl.hidden && sheet.hidden && badgesEl.hidden && $('#panel').hidden && $('#dialog').hidden && $('#welcome').hidden){
     const pp = E.player.obj.root.position, r = E.roomAt(pp.x, pp.z); if (r && r.kind === 'lounge') pantryIntro(); }
@@ -923,7 +964,7 @@ function openBadges(focus){
       if (!got && b.hidden) return `<div class="h-badge locked"><div class="coin2d dark"></div><b>???</b><span>${L('Huy hiệu ẩn', 'Hidden badge')}</span></div>`;
       return `<button class="h-badge${got ? '' : ' dim'}" data-b="${got ? 'view' : ''}" data-id="${esc(b.id)}"${got ? '' : ' disabled'}>
         <div class="coin2d" style="--rim:${b.rim}"><img src="${esc(coinImg(b))}" alt="" crossorigin="anonymous" loading="lazy"></div>
-        <b>${esc(b.name)}</b><span>${got ? esc(b.desc) : esc(condText(b))}</span>${got ? `<small>${dateText(got)}</small>` : ''}
+        <b>${esc(b.name)}</b><span>${got ? esc(b.desc) : esc(condText(b))}</span>${got ? `<small>${dateText(got)}</small><span class="h-awslot" data-awid="${esc(b.id)}">${codeHtml(b.id)}</span>` : ''}
         ${b.reward.status === 'coming' ? `<em class="chip draft">${L('Quà: sắp có', 'Gift: coming soon')}</em>` : ''}</button>`; }).join('')}</div></div>`;
   badgesEl.hidden = false;
   badgesEl.querySelectorAll('[data-b]').forEach(x => x.onclick = () => { if (x.dataset.b === 'close') closeBadges(); else if (x.dataset.b === 'view') viewCoin(HD.badges.find(b => b.id === x.dataset.id)); });
@@ -938,16 +979,34 @@ function viewCoin(b, intro){
   const box = el('div', { className:'h-coinbox' }, `<div class="card h-coincard" role="dialog" aria-modal="true" aria-label="${esc(b.name)}">
     <button class="close" aria-label="${L('Đóng', 'Close')}">×</button><canvas class="h-coin3d" width="360" height="360"></canvas>
     <h2>${esc(b.name)}</h2><p>${esc(b.desc)}</p><small>${L('Đạt ngày', 'Earned on')} ${dateText(ST.badges[b.id])}</small>
+    <div class="h-awline"><span data-awid="${esc(b.id)}">${codeHtml(b.id)}</span>${awardOf(b.id) ? `<button class="btn btn-ghost h-verify" type="button" data-c="verify">${L('Xác minh', 'Verify')}</button>` : ''}</div>
+    <p class="h-verres" hidden></p>
     ${b.reward.status === 'coming' ? `<p><em class="chip draft">${L('Quà: sắp có', 'Gift: coming soon')}</em></p>` : ''}
     <div class="row">${b.reward.status === 'open' && b.reward.url ? `<a class="btn btn-ghost" href="${esc(b.reward.url)}" target="_blank" rel="noopener">${esc(b.reward.title || L('Nhận quà', 'Get the gift'))}</a>` : ''}
       <button class="btn btn-primary" data-c="save">${L('Lưu ảnh', 'Save image')}</button></div>
     <p class="h-hint">${L('Kéo để xoay đồng xu', 'Drag to spin the coin')}</p></div>`);
   badgesEl.appendChild(box); badgesEl.classList.add('h-coin-open');
-  viewer = { box, scene:COIN.scene(box.querySelector('canvas'), b, ST.badges[b.id], Object.assign({ intro }, coinOpts)), b };
+  viewer = { box, scene:COIN.scene(box.querySelector('canvas'), b, ST.badges[b.id], Object.assign({ intro, serial:(awardOf(b.id) || {}).code }, coinOpts)), b, codeShown:!!awardOf(b.id) };
+  const vb = box.querySelector('[data-c="verify"]'); if (vb) vb.onclick = () => verifyAward(b, box.querySelector('.h-verres'));
   box.querySelector('.close').onclick = closeCoin;
   box.addEventListener('click', e => { if (e.target === box) closeCoin(); });
   box.querySelector('[data-c="save"]').onclick = () => saveImage(b);
 }
+async function verifyAward(b, out){
+  const a = awardOf(b.id); if (!a || !out) return;
+  out.hidden = false; out.className = 'h-verres'; out.textContent = L('Đang xác minh…', 'Verifying…');
+  try {
+    const r = await rpc('tm_verify_award', { p_code:a.code });
+    const when = new Date(r.checked_at || Date.now()).toLocaleTimeString(E.LANG === 'en' ? 'en-GB' : 'vi-VN');
+    const STATUS = { valid:L('Hợp lệ', 'Valid'), redeemed:L('Đã đổi quà', 'Gift redeemed'), void:L('Đã huỷ', 'Void') };
+    if (r.ok && r.badge_id === b.id){ ST.awards[b.id].status = r.status; persist();
+      out.classList.add(r.status === 'void' ? 'bad' : 'ok');
+      out.textContent = `${r.status === 'void' ? '✗' : '✓'} ${L('Mã thật', 'Genuine ID')} · ${STATUS[r.status] || r.status} · ${L('kiểm tra lúc', 'checked at')} ${when}`; }
+    else { out.classList.add('bad'); out.textContent = `✗ ${L('Không tìm thấy mã', 'ID not found')} · ${when}`; }
+    track('tm_badge_verify', { badge_id:b.id, ok:!!(r.ok && r.badge_id === b.id) });
+  } catch (e) { out.classList.add('bad'); out.textContent = L('Không kết nối được máy chủ, thử lại sau.', 'Could not reach the server, try again later.'); }
+}
+// "Xác minh": hỏi server mã này có thật không và trạng thái (kèm giờ kiểm tra)
 function closeCoin(){ if (!viewer) return; viewer.scene.destroy(); viewer.box.remove(); viewer = null; badgesEl.classList.remove('h-coin-open'); }
 
 // --- "Lưu ảnh": thẻ PNG 1080 × 1350, đồng xu đúng góc đang xoay ---
@@ -961,7 +1020,9 @@ async function saveImage(b){
   g.textAlign = 'center'; g.fillStyle = '#FFC53D'; g.font = '600 34px Oswald, "Be Vietnam Pro", sans-serif'; g.fillText(L('HUY HIỆU · PRODUCT MAP', 'BADGE · PRODUCT MAP'), W/2, 120);
   g.fillStyle = '#FFFFFF'; g.font = '700 64px "Be Vietnam Pro", sans-serif'; wrap(g, b.name, W/2, 960, 900, 74, 2);
   g.fillStyle = '#D9D2F2'; g.font = '500 38px "Be Vietnam Pro", sans-serif'; wrap(g, b.desc, W/2, 1080, 880, 50, 3);
-  g.fillStyle = '#BEB3DA'; g.font = '500 30px "Be Vietnam Pro", sans-serif'; g.fillText(`${L('Đạt ngày', 'Earned on')} ${dateText(ST.badges[b.id])}`, W/2, 1215);
+  const aw = awardOf(b.id);
+  g.fillStyle = '#BEB3DA'; g.font = '500 30px "Be Vietnam Pro", sans-serif'; g.fillText(`${L('Đạt ngày', 'Earned on')} ${dateText(ST.badges[b.id])}`, W/2, aw ? 1188 : 1215);
+  if (aw){ g.fillStyle = '#FFC53D'; g.font = '700 34px "JetBrains Mono", ui-monospace, monospace'; g.fillText(`ID ${aw.code}`, W/2, 1236); }
   E.drawLogo(g, 70, Hh - 120, 64, '#F4F0FB'); g.textAlign = 'left'; g.fillStyle = '#F4F0FB'; g.font = '700 30px "Be Vietnam Pro", sans-serif'; g.fillText('TELOS ACADEMY', 150, Hh - 78);
   g.textAlign = 'right'; g.fillStyle = '#BEB3DA'; g.font = '500 28px "Be Vietnam Pro", sans-serif'; g.fillText('uiux-library.nhanluu.com', W - 70, Hh - 78);
   let blob; try { blob = await new Promise(r => c.toBlob(r, 'image/png')); } catch (e) { blob = null; }
@@ -982,7 +1043,7 @@ if (!storeOk) console.info('[Team Map] localStorage không dùng được: huy h
 return { onTalk, onClick, onKey, tick, onWorld, authorCard, panelExtra, bindPanel, playing:() => !!game, flashLocked, radial:openRadial,
   holdsMain:() => !!game || !!pending, sheetOpen:() => !sheet.hidden, closeSheet:() => { if (!game){ cancelPick(); closeSheet(); } closeRadial(); },
   // cho test
-  _state:ST, _pantryIntro:pantryIntro, _hitEvent:hitEvent, _koSkip:() => knocked.forEach(k => { k.until = E.t; }), _knocked:() => knocked.map(k => ({ who:k.c.isPlayer ? 'player' : k.c.role.id, left:k.until - E.t, lying:k.c.obj.root.rotation.x < -1.4 })), _splashing:() => splashing, _badgeShow:() => !!badgeShow, _open:() => H.openAt(D, slotNow()), _pending:() => pending, _picking:() => picking, _choose:choose, _radial:() => radial && { who:radial.c.role.id, items:radial.all.map(i => i.k + (i.open === false ? ':locked' : '')) }, _pickRadial:k => { const it = radial && radial.all.find(i => i.k === k); if (it) pickRadial(it); },
+  _state:ST, _requestAwards:requestAwards, _pantryIntro:pantryIntro, _hitEvent:hitEvent, _koSkip:() => knocked.forEach(k => { k.until = E.t; }), _knocked:() => knocked.map(k => ({ who:k.c.isPlayer ? 'player' : k.c.role.id, left:k.until - E.t, lying:k.c.obj.root.rotation.x < -1.4 })), _splashing:() => splashing, _badgeShow:() => !!badgeShow, _open:() => H.openAt(D, slotNow()), _pending:() => pending, _picking:() => picking, _choose:choose, _radial:() => radial && { who:radial.c.role.id, items:radial.all.map(i => i.k + (i.open === false ? ':locked' : '')) }, _pickRadial:k => { const it = radial && radial.all.find(i => i.k === k); if (it) pickRadial(it); },
   _pend:tk => { pending = Object.assign({ slot:slotNow(), scale:E.scaleKey, partner:null }, tk); renderCard(); },
   _start:(a, who, partner) => { pending = { slot:slotNow(), scale:E.scaleKey, action:a, who:who || (pending && pending.who), partner:partner || (pending && pending.partner) || null }; start(a); }, _openBadges:openBadges, _game:() => game, _E:E, _H:H };
 };
