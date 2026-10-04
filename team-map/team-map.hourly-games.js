@@ -543,7 +543,7 @@ function tick(dt){
   if (toastT > 0){ toastT -= dt; if (toastT <= 0) toast.hidden = true; }
   tickAcc += dt; if (tickAcc < .5) return; tickAcc = 0;
   // lần đầu vào Pantry (đợi rảnh tay: không chơi, không có bảng / hộp thoại / sheet nào đang mở)
-  if (!ST.seen.pantry && HD.config.is_enabled && !game && !pending && !picking && !radial && sheet.hidden && badgesEl.hidden && $('#panel').hidden && $('#dialog').hidden && $('#welcome').hidden){
+  if (!ST.seen.pantry && HD.config.is_enabled && !game && !pending && !picking && !radial && !splashing && !badgeShow && splashEl.hidden && sheet.hidden && badgesEl.hidden && $('#panel').hidden && $('#dialog').hidden && $('#welcome').hidden){
     const pp = E.player.obj.root.position, r = E.roomAt(pp.x, pp.z); if (r && r.kind === 'lounge') pantryIntro(); }
   // hết lượt: hành động đang chọn / đang đi tới bị khoá thì huỷ (trò đang chơi vẫn chơi tiếp tới hết)
   if (!game && picking && !isOpen(picking.action)){ cancelPick(); say(L('Hết lượt, hành động này vừa khoá.', 'Round over, this action just locked.'), 3); }
