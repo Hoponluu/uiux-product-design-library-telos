@@ -519,3 +519,19 @@
 .qmark.hq.pick{background:#E92F7C;color:#fff;width:22px;height:22px;line-height:22px;font-size:18px;}
 .h-partners{margin:8px 0 4px;} .h-partners .chip{cursor:pointer;border:1px solid var(--line);font:inherit;font-size:12.5px;}
 .h-win{font-size:13.5px;color:var(--ink-soft);}
+/* ---------- màn hình báo thua (full màn hình, ~2 giây) ---------- */
+#h-splash{position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;text-align:center;color:#fff;
+  background:radial-gradient(120% 90% at 50% 40%,rgba(200,31,104,.94),rgba(60,8,40,.97) 70%);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);pointer-events:auto;opacity:0;transition:opacity .2s ease;}
+#h-splash[hidden]{display:none;}
+#h-splash.in{opacity:1;}
+#h-splash.out{opacity:0;}
+.h-splash-in{max-width:min(900px,100%);}
+.h-splash-ico{font-size:clamp(64px,14vw,120px);line-height:1;margin-bottom:8px;}
+#h-splash h2{font-family:var(--font-display);font-weight:800;font-size:clamp(40px,10vw,104px);line-height:1.02;letter-spacing:-.01em;margin:0 0 14px;text-shadow:0 6px 0 rgba(0,0,0,.18);}
+#h-splash.in h2,#h-splash.in .h-splash-ico{animation:h-shake .5s cubic-bezier(.36,.07,.19,.97) both;}
+.h-splash-sub{font-size:clamp(17px,3.6vw,26px);font-weight:700;margin:0 0 10px;color:#FFE3EF;}
+.h-splash-txt{font-size:clamp(15px,2.8vw,20px);line-height:1.5;margin:0 auto;max-width:36ch;color:#FFD6E6;}
+.h-splash-bar{position:absolute;left:0;bottom:0;height:6px;width:100%;background:#FFC53D;transform-origin:left;animation:h-countdown linear forwards;}
+@keyframes h-shake{0%{transform:scale(.6);opacity:0}30%{transform:scale(1.08);opacity:1}45%{transform:translateX(-10px) rotate(-2deg)}60%{transform:translateX(10px) rotate(2deg)}75%{transform:translateX(-5px)}100%{transform:none}}
+@keyframes h-countdown{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+@media (prefers-reduced-motion: reduce){#h-splash{transition:none;}#h-splash.in h2,#h-splash.in .h-splash-ico{animation:none;}.h-splash-bar{animation:none;display:none;}}

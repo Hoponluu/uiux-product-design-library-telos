@@ -58,8 +58,11 @@ const sheet = el('aside', { id:'h-sheet', className:'card', hidden:true });
 const toast = el('div', { id:'h-toast', className:'card', hidden:true });
 const shade = el('div', { id:'h-shade', hidden:true });
 const badgesEl = el('div', { id:'badges', hidden:true });
+const splashEl = el('div', { id:'h-splash', hidden:true });
 $('.topbar').insertBefore(bfab, $('#btn-list'));
 [radialEl, card, bar, act, sheet, toast, shade, badgesEl].forEach(x => app.appendChild(x));
+document.body.appendChild(splashEl);
+splashEl.setAttribute('role', 'alert');
 radialEl.setAttribute('role', 'menu');
 
 const fmt = ms => { const s = Math.max(0, Math.ceil(ms / 1000)), m = Math.floor(s / 60); return `${m}:${String(s % 60).padStart(2, '0')}`; };
@@ -355,6 +358,21 @@ function endGame(){
   bar.hidden = true; act.hidden = true; shade.hidden = true; app.classList.remove('h-playing');
   E.player.frozenUntil = 0;
 }
+// ---------- màn hình báo thua: phủ kín màn hình, chữ to, đứng yên ~2 giây rồi tự tắt ----------
+const LOSE_TITLE = {
+  caught:['🙊', 'BỊ BẮT QUẢ TANG!', 'BUSTED!'], spill:['☕', 'ĐỔ CÀ PHÊ RỒI!', 'COFFEE SPILLED!'], cold:['🥶', 'CÀ PHÊ NGUỘI RỒI!', 'THE COFFEE WENT COLD!'],
+  out_of_ammo:['📝', 'HẾT TASK ĐỂ NÉM!', 'OUT OF TASKS!'], slower:['🐢', 'VỀ SAU RỒI!', 'TOO SLOW!'], wrong:['❌', 'SAI RỒI!', 'WRONG!'],
+  timeout:['⏰', 'HẾT GIỜ!', 'TIME\'S UP!'], lose:['💥', 'THUA RỒI!', 'YOU LOST!'] };
+let splashing = false;
+function splash(kind, sub, text, then, ms = 2000){
+  const t = LOSE_TITLE[kind] || LOSE_TITLE.lose;
+  splashing = true; E.player.frozenUntil = Infinity; E.player.path = [];
+  splashEl.innerHTML = `<div class="h-splash-in"><div class="h-splash-ico" aria-hidden="true">${t[0]}</div>
+    <h2>${esc(L(t[1], t[2]))}</h2>${sub ? `<p class="h-splash-sub">${esc(sub)}</p>` : ''}${text ? `<p class="h-splash-txt">${esc(text)}</p>` : ''}</div><i class="h-splash-bar" style="animation-duration:${ms}ms"></i>`;
+  splashEl.hidden = false; splashEl.classList.remove('out'); void splashEl.offsetWidth; splashEl.classList.add('in');
+  setTimeout(() => { splashEl.classList.add('out');
+    setTimeout(() => { splashEl.hidden = true; splashEl.classList.remove('in', 'out'); splashing = false; if (E.player.frozenUntil === Infinity) E.player.frozenUntil = 0; then && then(); }, 250); }, ms);
+}
 // kết quả: ghi tiến độ, chấm huy hiệu, Nhân Lưu khen (thắng)
 function finish(r){
   if (!game) return; const g = game, tk = g.tk, a = HD.actions[tk.action];
@@ -368,6 +386,11 @@ function finish(r){
   track('tm_hourly_result', { action_id:ev.action_id, character_id:ev.character_id, win:ev.win, flawless:ev.flawless, fail_kind:ev.fail_kind || '' });
   got.forEach(id => track('tm_badge_unlock', { badge_id:id }));
   if (r.win && got.length) praise(a.win, () => resultSheet(tk, true, got));
+  else if (!r.win && ev.fail_kind !== 'quit'){
+    const k = tk.action === 'coffee' && ev.fail_kind === 'timeout' ? 'cold' : ev.fail_kind;
+    const sub = tk.action === 'fight' ? L(`Đánh thua ${roleName(tk.who)}`, `Lost the fight to ${roleName(tk.who)}`) : titleOf(tk);
+    splash(k, sub, a.lose, () => resultSheet(tk, false, got, r.note));
+  }
   else resultSheet(tk, r.win, got, r.note);
 }
 // mở huy hiệu: Nhân Lưu tự đi tới chỗ người chơi rồi nói câu thắng
@@ -435,19 +458,20 @@ function onKey(e, down){
     if (radial && /^[1-9]$/.test(k) && !e.ctrlKey && !e.metaKey && !e.altKey){ const it = radial.all[+k - 1]; if (it){ pickRadial(it); return true; } }
     return false;
   }
+  if (splashing) return true;
   if (k === 'Escape'){ if (down) quit(); return true; }
   if (k === ' ' || k === 'Spacebar'){ e.preventDefault(); if (down && e.repeat) return true; game.onAct && game.onAct(down, true); return true; }
   if (game.onKey) return game.onKey(e, down);
   return false;
 }
 // nút to trên màn hình: chạm = Space
-const actDown = e => { e.preventDefault(); if (game && game.onAct) game.onAct(true, false); };
+const actDown = e => { e.preventDefault(); if (game && game.onAct && !splashing) game.onAct(true, false); };
 const actUp = e => { if (game && game.onAct && act.dataset.hold) game.onAct(false, false); };
 act.addEventListener('pointerdown', actDown); act.addEventListener('pointerup', actUp); act.addEventListener('pointercancel', actUp); act.addEventListener('pointerleave', actUp);
 
 let tickAcc = 0;
 function tick(dt){
-  if (game && game.tick) game.tick(dt);
+  if (game && game.tick && !splashing) game.tick(dt);
   if (radial){ const c = radial.c, p = E.player.obj.root.position, q = c.obj.root.position;
     if (game || c.hidden || Math.hypot(p.x - q.x, p.z - q.z) > 3.4) closeRadial(); else placeRadial(); }
   if (toastT > 0){ toastT -= dt; if (toastT <= 0) toast.hidden = true; }
@@ -622,7 +646,10 @@ GAMES.coffee = { start(g){
     <div class="h-count">${L('Ly', 'Cup')} <b>${Math.min(cups + (holding ? 0 : 1), cf.max_cups)}/${cf.max_cups}</b></div>`);
   hud();
   g.marker = () => holding ? c : null;
-  const lose = why => { holding = false; drop(cup); cup = null; if (cups >= cf.max_cups){ done = true; finish({ win:false, fail_kind:why }); } else hud(); };
+  const lose = why => { holding = false; drop(cup); cup = null;
+    if (cups >= cf.max_cups){ done = true; finish({ win:false, fail_kind:why }); return; }
+    hud(); const left = cf.max_cups - cups;
+    splash(why === 'spill' ? 'spill' : 'cold', L(`Còn ${left} ly. Quay lại Pantry lấy ly mới.`, `${left} cup${left > 1 ? 's' : ''} left. Grab a new one at the Pantry.`), ''); };
   g.tick = dt => { if (done) return;
     const p = pos(E.player);
     if (!holding){ if (cups >= cf.max_cups) return;
@@ -632,7 +659,7 @@ GAMES.coffee = { start(g){
     left -= dt; setBar('.h-t', timerHtml(left));
     const hit = E.chars.find(o => o !== E.player && o !== c && !o.hidden && dist(o, E.player) < cf.spill_radius);
     if (hit){ spills++; speak(hit, H.line(D, 'coffee', 'spill', hit.role.id), 2.4); E.setFace(hit.obj, 'look', 'mO'); hit.faceT = 1.5; puddle(p); return lose('spill'); }
-    if (left <= 0){ say(L('Hết giờ, cà phê nguội rồi. Quay lại Pantry lấy ly mới.', 'Too slow, the coffee went cold. Grab a new cup at the Pantry.')); return lose('timeout'); }
+    if (left <= 0) return lose('timeout');
     if (dist(c, E.player) < 1.3){ done = true; drop(cup); cup = null; E.faceEach(E.player, c); speak(c, H.line(D, 'coffee', 'thanks', g.tk.who), 2.6);
       E.setFace(c.obj, 'happy', 'mSmile'); c.faceT = 2; setTimeout(() => finish({ win:true, flawless:spills === 0 && cups === 1 }), 900); }
   };
@@ -832,7 +859,7 @@ if (!storeOk) console.info('[Team Map] localStorage không dùng được: huy h
 return { onTalk, onClick, onKey, tick, onWorld, authorCard, panelExtra, bindPanel, playing:() => !!game, flashLocked, radial:openRadial,
   holdsMain:() => !!game || !!pending, sheetOpen:() => !sheet.hidden, closeSheet:() => { if (!game){ cancelPick(); closeSheet(); } closeRadial(); },
   // cho test
-  _state:ST, _open:() => H.openAt(D, slotNow()), _pending:() => pending, _picking:() => picking, _choose:choose, _radial:() => radial && { who:radial.c.role.id, items:radial.all.map(i => i.k + (i.open === false ? ':locked' : '')) }, _pickRadial:k => { const it = radial && radial.all.find(i => i.k === k); if (it) pickRadial(it); },
+  _state:ST, _splashing:() => splashing, _open:() => H.openAt(D, slotNow()), _pending:() => pending, _picking:() => picking, _choose:choose, _radial:() => radial && { who:radial.c.role.id, items:radial.all.map(i => i.k + (i.open === false ? ':locked' : '')) }, _pickRadial:k => { const it = radial && radial.all.find(i => i.k === k); if (it) pickRadial(it); },
   _pend:tk => { pending = Object.assign({ slot:slotNow(), scale:E.scaleKey, partner:null }, tk); renderCard(); },
   _start:(a, who, partner) => { pending = { slot:slotNow(), scale:E.scaleKey, action:a, who:who || (pending && pending.who), partner:partner || (pending && pending.partner) || null }; start(a); }, _openBadges:openBadges, _game:() => game, _E:E, _H:H };
 };
