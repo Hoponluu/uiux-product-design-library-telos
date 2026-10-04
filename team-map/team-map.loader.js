@@ -175,7 +175,7 @@
   // Nhiệm vụ theo giờ: cấu hình, 8 hành động, lời thoại, câu hỏi, huy hiệu (đã chọn ngôn ngữ) + kho thuật ngữ cho flashcard
   function buildHourly(h, termById, warn){
     if (!h || !h.actions || !h.actions.length) return null;
-    const cfg = Object.assign({ slot_minutes:60, no_repeat_slots:3, counted_wins_per_slot:1, is_enabled:true }, h.config || {});
+    const cfg = Object.assign({ slot_minutes:30, open_count:4, is_enabled:true }, h.config || {});
     const trOpts = q => { const en = window.TM_LANG === 'en' && q.i18n && q.i18n.en && q.i18n.en.options;
       return Array.isArray(en) && en.length === 3 && en.every(x => typeof x === 'string' && x.trim()) ? en : q.options; };
     const actions = {};

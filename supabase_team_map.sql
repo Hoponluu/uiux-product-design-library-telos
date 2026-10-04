@@ -183,6 +183,10 @@ create table if not exists tm_hourly_config (
   updated_at            timestamptz not null default now()
 );
 insert into tm_hourly_config (id) values (1) on conflict do nothing;
+-- chơi tự do: mỗi lượt mở open_count hành động vui (Đọc bài, Lật flashcard luôn mở). no_repeat_slots, counted_wins_per_slot không còn dùng.
+alter table tm_hourly_config add column if not exists open_count int not null default 4;
+alter table tm_hourly_config drop constraint if exists tm_hourly_config_open_count_check;
+alter table tm_hourly_config add constraint tm_hourly_config_open_count_check check (open_count between 0 and 6);
 
 -- 8 hành động, mã cố định trong code (mỗi mã là một mini-game). CMS chỉ sửa nội dung, không thêm / xoá dòng.
 create table if not exists tm_hourly_actions (

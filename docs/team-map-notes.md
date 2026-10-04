@@ -110,21 +110,29 @@ Menu là dãy tab `#tab-pill` trong `TELOS_Knowledge_Graph.html` (Graph view, A-
 
 Lưu ý: bản dịch dựa trên nội dung seed gốc. Nếu đã sửa nội dung tiếng Việt trong CMS sau khi seed, nên xem lại bản tiếng Anh của các dòng đó trong CMS.
 
-## 13. Nhiệm vụ theo giờ & huy hiệu (SPEC-hourly)
+## 13. Hành động tự do, mini-game & huy hiệu (SPEC-hourly, bản chơi tự do)
 
-- **Nguồn dữ liệu:** `team-map/seed-hourly.json` (gốc, theo SPEC) + `team-map/i18n-hourly-en.json` (tiếng Anh). `python3 scripts/gen_team_map_hourly_seed.py` sinh `supabase_team_map_hourly_seed.sql` và ghép phần `hourly` vào `seed.json` (dùng khi chưa kết nối được DB).
-- **Bảng mới:** `tm_hourly_config` (1 dòng), `tm_hourly_actions` (8 hành động cố định, chỉ sửa được, không thêm/xoá), `tm_hourly_lines`, `tm_quiz_questions`, `tm_badges`. Cột mới ở `tm_characters`: `rank` (1–8), `related_term_ids`, `gossip_partner_ids`, `hourly_exclude`. Tất cả có cột `i18n` cho bản EN.
-- **Xoay vòng:** mỗi khung giờ (mặc định 60 phút) chọn một cặp (hành động, nhân vật) theo công thức cố định từ thời gian, nên mọi người chơi cùng quy mô thấy cùng nhiệm vụ, không cần server. Không lặp lại trong K khung gần nhất và không trùng hành động hai khung liền nhau. Code: `team-map/team-map.hourly.js`.
-- **Mini-game:** `team-map/team-map.hourly-games.js` (8 game, HUD, bảng huy hiệu). Đồng xu 3D + xuất PNG 1080×1350: `team-map/team-map.coin.js`. Nút "🏅 Huy hiệu" ở thanh trên cùng; huy hiệu ẩn hiện "???" tới khi mở được.
-- **Tiến độ:** `localStorage['tm_hourly_v1']` (nhiệm vụ đang nhận, thống kê thắng/thua, huy hiệu). Mỗi khung giờ chỉ tính tối đa `counted_wins_per_slot` lần thắng; lần thua luôn được tính. Trình duyệt chặn lưu trữ thì game vẫn chơi được, màn hình Huy hiệu báo là sẽ không giữ lại.
+- **Chơi tự do (thay cho "mỗi giờ một nhiệm vụ"):** thanh công cụ 8 hành động ở đáy màn hình (desktop, phím tắt 1–8) hoặc nút **⚔ Chơi** ở dock (mobile, mở dạng bottom sheet). Chọn hành động → chọn người (bấm vào người có dấu • trên bản đồ hoặc chọn trong danh sách, có mức khó ★ theo cấp bậc) → nhân vật tự đi tới và chơi. **Đọc bài** và **Lật flashcard** luôn mở. Mỗi lượt (mặc định **30 phút**) mở thêm **4 trong 6** hành động vui, chọn theo trọng số và cố định theo thời gian, nên mọi người chơi thấy cùng một nhóm; hai lượt liền nhau không trùng y hệt. Hết lượt thì hành động đang chọn bị huỷ, trò đang chơi vẫn chơi tiếp tới hết. **Lần thắng nào cũng được tính** vào huy hiệu.
+- **Nấu xói:** bước 1 chọn người bị nấu xói (bắt buộc), bước 2 người nghe được chọn sẵn là người hợp lệ gần nhất (không bao giờ là sếp trực tiếp của người bị nấu xói), có chip để đổi, bấm "Bắt đầu". Lối tắt: mở bảng thông tin một đồng nghiệp → "Nấu xói ai đó với người này" (chỉ còn chọn người bị nấu xói).
+- **Nhân Lưu** không giao việc nữa: bảng của ổng giải thích thanh công cụ và gợi ý một cặp (cố định trong lượt), có nút "Chơi luôn". Ổng chỉ đi tới khen khi bạn mở được huy hiệu.
+- **Ném pop-task (đã làm dễ hơn):** 10 tờ, cần trúng 3; Space / nút "Ném" (hoặc bấm vào người, hoặc bấm sàn trong vòng `aim_assist` m quanh người) là tự nhắm đón đầu theo hướng đi; tờ giấy trúng khi bay ngang qua người ở nửa sau đường bay (bán kính 1 m); nhân vật đi chậm hơn (×0,7), đứng lại giữa các lần đi, trúng thì khựng lại; có vòng vàng = tầm ném, vòng xanh dưới chân người = đang trong tầm. Thử nghiệm: trúng 3/3 khi nhân vật vẫn đi lại.
+- **Nguồn dữ liệu:** `team-map/seed-hourly.json` + `team-map/i18n-hourly-en.json`. `python3 scripts/gen_team_map_hourly_seed.py` sinh `supabase_team_map_hourly_seed.sql` và ghép phần `hourly` vào `seed.json`. **Khác bản gốc của SPEC:** `config.slot_minutes` = 30, thêm `config.open_count` = 4, tham số mới của poptask.
+- **Bảng:** `tm_hourly_config` (thêm cột `open_count`; `no_repeat_slots`, `counted_wins_per_slot` không còn dùng), `tm_hourly_actions`, `tm_hourly_lines`, `tm_quiz_questions`, `tm_badges`. Cột ở `tm_characters`: `rank`, `related_term_ids`, `gossip_partner_ids`, `hourly_exclude`.
+- **Code:** logic thuần `team-map/team-map.hourly.js` (`openAt`, `targets`, `suggest`, `whyNot`…), giao diện + 8 game `team-map/team-map.hourly-games.js`, đồng xu 3D `team-map/team-map.coin.js`.
+- **Tiến độ:** `localStorage['tm_hourly_v1']` (thống kê thắng/thua, huy hiệu). Trình duyệt chặn lưu trữ thì vẫn chơi được, màn hình Huy hiệu báo là sẽ không giữ lại.
 - **Ảnh huy hiệu:** Storage bucket công khai `tm-badges` (do `supabase_team_map.sql` tạo, tối đa 1 MB, png/webp/jpeg). Tải lên trong CMS → tab Huy hiệu; nên dùng ảnh vuông. Chưa có ảnh thì đồng xu dùng logo Telos.
-- **CMS:** 3 tab mới "Nhiệm vụ theo giờ" (cấu hình, 8 hành động, xem trước 6 khung giờ tới của mỗi quy mô), "Câu hỏi & lời thoại", "Huy hiệu" (kèm xem trước đồng xu 3D). Form nhân vật có thêm cấp bậc, thuật ngữ liên quan, người hay buôn chuyện cùng, loại trừ hành động, và dòng giải thích vì sao nhân vật đủ / chưa đủ điều kiện. Excel có thêm sheet `Hanh dong`, `Cau hoi`, `Loi thoai`, `Huy hieu` và các cột mới ở sheet `Nhan vat`.
-- **Nhiệm vụ hằng ngày cũ** (`type = daily`) được ẩn khỏi CMS và game vì nhiệm vụ theo giờ thay thế nó. Dữ liệu cũ vẫn nằm trong DB.
-- **Khác SPEC:** sau khi tự gắn thuật ngữ liên quan từ thẻ thưởng của nhiệm vụ chính (theo SPEC), nhân vật nào còn dưới 4 thuật ngữ được bù thêm theo nhóm vai trò (`GROUP_TERMS` trong script seed) để game Lật thẻ / Đọc bài có đủ dữ liệu. Sửa lại trong CMS nếu muốn. Game Lật thẻ dùng mô tả trong bảng `concepts` (tên thuật ngữ được che đi); thuật ngữ chưa có mô tả thì hiện gợi ý 2 chữ cái đầu.
-- **Cần chủ dự án xem lại:** 12 câu hỏi trắc nghiệm (tab Câu hỏi & lời thoại) và tải ảnh cho 10 huy hiệu.
-- **Debug:** mở `localhost:.../team-map.html#debug` để có `window.__tmHX` (bắt đầu game bất kỳ, xem khung giờ hiện tại). Chỉ có hiệu lực trên localhost.
+- **CMS:** tab **Hành động** (bật/tắt, độ dài lượt, số hành động vui mở mỗi lượt, bảng 8 lượt sắp tới, số người chọn được cho từng hành động ở từng quy mô; 8 hành động với tham số mini-game), "Câu hỏi và lời thoại", "Huy hiệu". Form nhân vật có nhóm "Hành động & mini-game": cấp bậc, thuật ngữ liên quan, người nấu xói cùng, loại trừ hành động, và dòng giải thích vì sao đủ / chưa đủ điều kiện. Excel: sheet `Hanh dong`, `Cau hoi`, `Loi thoai`, `Huy hieu` + các cột mới ở `Nhan vat`.
+- **Nhiệm vụ hằng ngày cũ** (`type = daily`) được ẩn khỏi CMS và game.
+- **Khác SPEC:** nhân vật còn dưới 4 thuật ngữ liên quan được bù theo nhóm vai trò (`GROUP_TERMS` trong script seed). Game Lật thẻ dùng mô tả trong `concepts` (tên được che); thuật ngữ chưa có mô tả hiện gợi ý 2 chữ cái đầu.
+- **Cần chủ dự án xem lại:** 12 câu hỏi trắc nghiệm và ảnh cho 10 huy hiệu.
+- **Debug:** `localhost:.../team-map.html#debug` có `window.__tmHX` (chỉ trên localhost).
 
-### Bật nhiệm vụ theo giờ trên DB đang chạy
+### Chuyển sang chơi tự do trên DB đang chạy
+1. SQL Editor: chạy lại `supabase_team_map.sql` (thêm cột `open_count`).
+2. Chạy `supabase_team_map_free_play.sql`: đặt lượt 30 phút, mở 4 hành động vui, cập nhật tham số Ném pop-task. Không đụng nội dung khác đã sửa trong CMS.
+3. Deploy.
+
+### Cài mới phần hành động trên DB chưa có
 1. SQL Editor: chạy lại `supabase_team_map.sql` (thêm cột, bảng, bucket `tm-badges`, cập nhật hàm lưu / import).
 2. Chạy `supabase_team_map_hourly_seed.sql`. Chạy lại an toàn: không ghi đè `rank` đã đặt, giữ ảnh huy hiệu đã tải lên. Bảng cuối liệt kê id bị bỏ qua và nhân vật còn dưới 4 thuật ngữ liên quan. Xem nhân vật nào đủ điều kiện cho từng hành động trong CMS (form nhân vật, tab "Nhiệm vụ theo giờ" → Đang chạy).
 3. Deploy.

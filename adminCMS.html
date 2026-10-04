@@ -82,7 +82,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans
 .btn-export:hover { background: #241775; color: #fff; }
 
 /* ── TABLE ── */
-.table-wrap { background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; overflow: hidden; }
+.table-wrap { background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; overflow-x: auto; overflow-y: hidden; }
+/* bảng rộng hơn khung: cuộn ngang, cột Sửa / Xoá luôn dính mép phải */
+.table-wrap table:has(td.td-actions) th:last-child, .table-wrap td.td-actions { position: sticky; right: 0; background: #fff; box-shadow: -6px 0 8px -6px rgba(0,0,0,0.12); }
+.table-wrap table:has(td.td-actions) thead th:last-child { background: #f7f7f7; }
+.table-wrap tr:hover td.td-actions { background: #fcfcfc; }
+#tm-body .table-wrap th, #tm-body .table-wrap td { padding-left: 10px; padding-right: 10px; }
 table { width: 100%; border-collapse: collapse; }
 thead { background: rgba(0,0,0,0.03); }
 th { padding: 11px 16px; text-align: left; font-size: 11px; font-weight: 600; color: rgba(0,0,0,0.45); text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid rgba(0,0,0,0.07); white-space: nowrap; }
@@ -199,6 +204,7 @@ select.form-control { cursor: pointer; }
 @media (max-width: 900px) { .tm-hgrid { grid-template-columns: 1fr; } }
 .tm-runcard { margin-top: 10px; } .tm-runcard h4 { margin: 0 0 6px; font-size: 13px; }
 .tm-runtable { width: 100%; border-collapse: collapse; font-size: 12.5px; } .tm-runtable td { padding: 4px 6px; border-bottom: 1px solid rgba(0,0,0,0.06); }
+.tm-runcount { margin: 4px 0 0; padding-left: 18px; font-size: 12px; line-height: 1.6; color: rgba(0,0,0,0.65); }
 .tm-runtable tr.tm-now td { font-weight: 700; color: #241775; background: rgba(255,197,61,0.15); }
 .tm-actions { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 10px; }
 .tm-actcard { border: 1px solid rgba(0,0,0,0.08); border-radius: 10px; padding: 10px 12px; background: #fff; }

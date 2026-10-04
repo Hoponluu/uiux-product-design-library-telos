@@ -1,9 +1,8 @@
-// Team Map — nhiệm vụ theo giờ (SPEC-hourly): phần logic thuần, không đụng tới giao diện.
+// Team Map — hành động tự do + huy hiệu (SPEC-hourly, bản chơi tự do): phần logic thuần, không đụng tới giao diện.
 // Dùng chung cho game (team-map.hourly-games.js) và CMS (khối "Đang chạy"), nên hai nơi luôn ra cùng một kết quả.
 (function(){
   const ACTIONS = ['read','fight','poptask','flashcard','coffee','hide','race','gossip'];
   const CONDITIONS = ['wins','distinct_characters','flawless_wins','win_streak','win_under_secs','win_vs','fail_count','all_actions'];
-  const KEEP_SLOTS = 48;       // số lượt giữ trong localStorage
   const STORE_KEY = 'tm_hourly_v1';
 
   // ---------- số ngẫu nhiên có seed ----------
@@ -69,34 +68,49 @@
     return out;
   }
 
-  // ---------- chọn cặp theo giờ ----------
-  // Danh sách đã nhân theo trọng số, xáo theo chu kỳ (seed = cycle). Luật "không lặp N lượt" và "không trùng hành động
-  // lượt trước" được áp tuần tự trong từng khối BLOCK lượt cố định, nên kết quả của một lượt không phụ thuộc lúc tính.
-  // Đầu khối so với đuôi khối trước (tính không kèm khối trước nữa) để không lặp qua ranh giới khối.
-  const BLOCK = 168, cache = new Map();
-  function sequence(D, scale, list, b, cross){
-    const H = D.HOURLY, K = Math.max(0, H.config.no_repeat_slots | 0);
-    const arr = []; list.forEach(p => { for (let i = 0; i < H.actions[p.action].weight; i++) arr.push(p); });
-    const N = arr.length, distinct = list.length, actionsN = new Set(list.map(p => p.action)).size, key = p => p.action + ':' + p.who;
-    const hist = cross ? sequence(D, scale, list, b - 1, false).slice(-Math.max(K, 1)) : [], out = [];
+  // ---------- hành động mở theo lượt (chơi tự do) ----------
+  // Hành động học luôn mở. Mỗi lượt (mặc định 30 phút) mở open_count hành động vui, chọn theo trọng số với seed = số lượt,
+  // nên mọi người chơi thấy cùng một nhóm. Hai lượt liền nhau không mở y hệt nhau: tính tuần tự trong từng khối BLOCK lượt,
+  // đầu khối so với lượt cuối của khối trước (tính không kèm khối trước nữa), nên kết quả không phụ thuộc lúc tính.
+  const ALWAYS_OPEN = ['read', 'flashcard'];
+  const BLOCK = 96, cache = new Map();
+  const funActions = D => ACTIONS.filter(a => !ALWAYS_OPEN.includes(a) && D.HOURLY.actions[a] && D.HOURLY.actions[a].active).sort();
+  function draw(D, list, n, seed){
+    const rnd = mulberry32(seed), pool = list.slice(), out = [];
+    while (out.length < n && pool.length){
+      const total = pool.reduce((t, a) => t + Math.max(1, D.HOURLY.actions[a].weight | 0), 0); let x = rnd() * total, k = 0;
+      for (; k < pool.length - 1; k++){ x -= Math.max(1, D.HOURLY.actions[pool[k]].weight | 0); if (x < 0) break; }
+      out.push(pool.splice(k, 1)[0]);
+    }
+    return out.sort();
+  }
+  function block(D, list, n, b, cross){
+    let prev = cross ? block(D, list, n, b - 1, false).slice(-1)[0] : null; const out = [];
     for (let s = b * BLOCK; s < (b + 1) * BLOCK; s++){
-      const sh = shuffle(arr, mulberry32(Math.floor(s / N) * 2654435761 + hash(scale))), i = ((s % N) + N) % N;
-      const recent = hist.slice(-Math.min(K, distinct - 1)).map(key), last = hist[hist.length - 1];
-      // lượt 1: không lặp + khác hành động lượt trước · lượt 2: chỉ không lặp · không được thì lấy phần tử gốc
-      const scan = strict => { for (let k = 0; k < N; k++){ const c = sh[(i + k) % N];
-        if (K && recent.includes(key(c))) continue; if (strict && last && actionsN > 1 && c.action === last.action) continue; return c; } return null; };
-      const c = scan(true) || scan(false) || sh[i];
-      hist.push(c); out.push(c);
+      let set = draw(D, list, n, s * 2654435761 + 97);
+      for (let t = 1; prev && n < list.length && t < 6 && set.join() === prev.join(); t++) set = draw(D, list, n, s * 2654435761 + 97 + t * 7919);
+      out.push(set); prev = set;
     }
     return out;
   }
-  function pick(D, scale, slot){
-    const list = pairs(D, scale); if (!list.length) return null;
-    const b = Math.floor(slot / BLOCK), sig = scale + '|' + b + '|' + D.HOURLY.config.no_repeat_slots + '|' + list.map(p => p.action + ':' + p.who + '*' + D.HOURLY.actions[p.action].weight).join(',');
-    let seq = cache.get(sig); if (!seq){ seq = sequence(D, scale, list, b, true); if (cache.size > 24) cache.clear(); cache.set(sig, seq); }
-    const chosen = seq[slot - b * BLOCK];
-    const out = { slot, scale, action:chosen.action, who:chosen.who, partner:null };
-    if (out.action === 'gossip'){ const ps = partners(D, scale, out.who); out.partner = ps[Math.floor(mulberry32(slot * 7919 + hash(out.who))() * ps.length)]; }
+  // danh sách hành động đang mở ở lượt slot (đã sắp xếp; luôn gồm hành động học đang bật)
+  function openAt(D, slot){
+    const HD = D.HOURLY; if (!HD || !HD.config.is_enabled) return [];
+    const list = funActions(D), n = Math.max(0, Math.min(list.length, HD.config.open_count == null ? 4 : HD.config.open_count | 0));
+    const b = Math.floor(slot / BLOCK), sig = b + '|' + n + '|' + list.map(a => a + '*' + HD.actions[a].weight).join(',');
+    let seq = cache.get(sig); if (!seq){ seq = block(D, list, n, b, true); if (cache.size > 24) cache.clear(); cache.set(sig, seq); }
+    const always = ALWAYS_OPEN.filter(a => HD.actions[a] && HD.actions[a].active);
+    return always.concat(seq[slot - b * BLOCK]);
+  }
+  // người hợp lệ cho một hành động ở quy mô (sắp theo id)
+  const targets = (D, scale, action) => Object.keys(D.PLACE[scale] || {}).filter(id => !whyNot(D, scale, action, id)).sort();
+  // gợi ý của Nhân Lưu: một cặp hợp lệ trong các hành động đang mở, cố định trong lượt
+  function suggest(D, scale, slot){
+    const list = []; openAt(D, slot).forEach(a => targets(D, scale, a).forEach(id => list.push({ action:a, who:id })));
+    if (!list.length) return null;
+    const rnd = mulberry32(slot * 7919 + hash(scale)), p = list[Math.floor(rnd() * list.length)];
+    const out = { slot, scale, action:p.action, who:p.who, partner:null };
+    if (p.action === 'gossip'){ const ps = partners(D, scale, p.who); out.partner = ps[Math.floor(rnd() * ps.length)]; }
     return out;
   }
 
@@ -110,25 +124,22 @@
   }
 
   // ---------- tiến độ (localStorage) ----------
-  const blank = () => ({ accepted:null, slots:{}, stats:{}, badges:{} });
+  const blank = () => ({ stats:{}, badges:{} });
   function load(){
     try { const d = JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); if (!d || typeof d !== 'object') return blank();
-      return Object.assign(blank(), d, { slots:d.slots || {}, stats:d.stats || {}, badges:d.badges || {} }); } catch (e) { return blank(); }
+      return { stats:d.stats || {}, badges:d.badges || {} }; } catch (e) { return blank(); }
   }
   function save(st){
-    const keys = Object.keys(st.slots).sort((a, b) => parseInt(b) - parseInt(a));
-    keys.slice(KEEP_SLOTS).forEach(k => delete st.slots[k]);
     try { localStorage.setItem(STORE_KEY, JSON.stringify(st)); return true; } catch (e) { return false; }
   }
   const statOf = (st, a) => st.stats[a] = Object.assign({ wins:0, flawless:0, streak:0, best_secs:null, characters:[], vs:[], fails:{} }, st.stats[a] || {});
 
   // Ghi một kết quả mini-game. ev = { action_id, character_id, rank, scale, slot, win, flawless, secs, fail_kind }.
-  // Trả về { counted } — thắng vượt hạn mức của lượt thì không tính vào huy hiệu.
-  function record(st, ev, cfg){
-    const s = statOf(st, ev.action_id), sk = ev.slot + ':' + ev.scale, slot = st.slots[sk] = st.slots[sk] || { wins:0 };
+  // Chơi tự do: lần thắng nào cũng được tính.
+  function record(st, ev){
+    const s = statOf(st, ev.action_id);
     if (!ev.win){ const k = ev.fail_kind || 'lose'; s.fails[k] = (s.fails[k] || 0) + 1; s.streak = 0; return { counted:true }; }
-    if (slot.wins >= (cfg.counted_wins_per_slot ?? 1)) return { counted:false };
-    slot.wins++; s.wins++; if (ev.flawless) s.flawless++; s.streak++;
+    s.wins++; if (ev.flawless) s.flawless++; s.streak++;
     if (!s.characters.includes(ev.character_id)) s.characters.push(ev.character_id);
     if (!s.vs.some(v => v.c === ev.character_id)) s.vs.push({ c:ev.character_id, rank:ev.rank });
     if (ev.secs != null && (s.best_secs == null || ev.secs < s.best_secs)) s.best_secs = Math.round(ev.secs * 10) / 10;
@@ -156,6 +167,6 @@
     return got;
   }
 
-  window.TM_HOURLY = { ACTIONS, CONDITIONS, STORE_KEY, mulberry32, hash, shuffle, slotAt, slotEnds, slotMs, pairs, pick, whyNot, partners,
+  window.TM_HOURLY = { ACTIONS, CONDITIONS, STORE_KEY, mulberry32, hash, shuffle, slotAt, slotEnds, slotMs, pairs, ALWAYS_OPEN, openAt, targets, suggest, whyNot, partners,
     roomOfChar, bossOf, present, quizOf, termsOf, fill, line, load, save, blank, record, evaluate, met, statOf };
 })();
