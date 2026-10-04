@@ -34,10 +34,11 @@ Mọi sự kiện Team Map tự kèm `tm_scale` (`small` · `large` · `agency`)
 | `tm_list_view` | Mở "Xem dạng danh sách" hoặc đổi tab trong đó | `list_tab` (`rooms` / `report`) |
 | `tm_radial_open` | Bấm vào một nhân vật, menu tròn các trò chơi hiện ra | `character_id`, `actions` (số trò hợp lệ với người này), `open` (số trò đang mở), `tm_slot` |
 | `tm_action_open` | Chọn một trò trong menu tròn | `action_id`, `source` (`radial`, `radial-with` = "Rủ họ nấu xói"), `tm_slot` |
-| `tm_action_pick` | Đã chốt người (và người nghe, với nấu xói) | `action_id`, `character_id`, `source` (như trên, thêm `author` = "Chơi luôn" từ gợi ý của Nhân Lưu), `tm_slot` |
+| `tm_action_pick` | Đã chốt người (và người nghe, với nấu xói) | `action_id`, `character_id`, `source` (như trên, thêm `pantry` = "Chơi luôn" từ thẻ gợi ý lần đầu vào Pantry), `tm_slot` |
 | `tm_hourly_start` | Một mini-game bắt đầu | `action_id`, `character_id`, `tm_slot` |
 | `tm_hourly_result` | Kết thúc một mini-game | `action_id`, `character_id`, `win`, `flawless`, `fail_kind`, `tm_slot` |
 | `tm_badge_unlock` | Mở khoá một huy hiệu | `badge_id`, `tm_slot` |
+| `tm_pantry_intro` | Lần đầu vào Pantry, thẻ "Chơi gì bây giờ?" hiện ra | `tm_slot` |
 | `tm_badge_event` | Làm một hành động đặc biệt dùng cho huy hiệu | `event` (`chain_course` = bấm "Khám phá khoá học TELOS" ở bảng tổng kết sau khi xong chuỗi quest, `author_link` = bấm link trang cá nhân trong bảng của Nhân Lưu), `tm_slot` |
 | `tm_badges_open` | Mở màn hình Huy hiệu | `unlocked` (số huy hiệu đã có), `tm_slot` |
 | `tm_badge_save` | Lưu ảnh huy hiệu | `badge_id`, `method` (`share` / `download`), `tm_slot` |
