@@ -25,6 +25,10 @@
   }
   function make(b, iso, o){
     const geo = new THREE.CylinderGeometry(1, 1, .12, 64); geo.rotateX(Math.PI / 2);
+    // UV của hai mặt tròn tính lại theo mặt phẳng XY sau khi xoay: ảnh đứng thẳng (UV gốc của nắp trụ bị lệch 90°)
+    const pos = geo.attributes.position, nor = geo.attributes.normal, uv = geo.attributes.uv;
+    for (let i = 0; i < pos.count; i++) if (Math.abs(nor.getZ(i)) > .9) uv.setXY(i, pos.getX(i) / 2 + .5, pos.getY(i) / 2 + .5);
+    uv.needsUpdate = true;
     const tx = textures(b, iso, o);
     const side = new THREE.MeshStandardMaterial({ color:b.rim, metalness:.75, roughness:.32 });
     const front = new THREE.MeshStandardMaterial({ map:tx.front, metalness:.15, roughness:.45 });
