@@ -72,7 +72,10 @@ function say(text, secs = 3){ toast.textContent = text; toast.hidden = false; to
 // ---------- nhãn 3D (◆ trên đầu người cần gặp, • trên đầu người chọn được, bong bóng thoại, ? cảnh báo) ----------
 const tags = [];
 function tag(cls, getter){ const T = E.addLabel('', cls, new THREE.Vector3(), { custom:() => getter(T) }); tags.push(T); return T; }
-const above = (c, h) => { const p = c.obj.root.position; return new THREE.Vector3(p.x, h, p.z); };
+const above = (c, h) => { const p = c.obj.root.position;
+  // đang nằm ngửa: thân nằm phía sau hướng mặt, nên lấy chỗ đầu (cách chân ~1m) và hạ thấp xuống
+  if (c.ko){ const y = c.obj.root.rotation.y; return new THREE.Vector3(p.x - Math.sin(y) * .95, Math.min(h, 1.45), p.z - Math.cos(y) * .95); }
+  return new THREE.Vector3(p.x, h, p.z); };
 let bubbles = [];
 function speak(c, text, secs = 2.6){
   if (!c || !text) return;
@@ -437,11 +440,13 @@ function finish(r){
   } else after();
 }
 function resultSheet(tk, win, got, note){
-  const a = HD.actions[tk.action], w = H.statOf(ST, tk.action).wins, open = isOpen(tk.action);
+  const a = HD.actions[tk.action], w = H.statOf(ST, tk.action).wins, tc = charOf(tk.who), down = tc && tc.ko && tk.action === 'fight';
+  const open = isOpen(tk.action) && !down;
   sheet.innerHTML = `<button class="close" aria-label="${L('Đóng', 'Close')}">×</button><div class="sheet-body">
     <p class="eyebrow">${ICON[tk.action]} ${esc(nameOf(tk.action))}</p><h2>${esc(titleOf(tk))}</h2>
     <div class="chips"><span class="chip ${win ? 'pub' : 'todo'}">${win ? L('Thắng', 'Won') : L('Thua', 'Lost')}</span>${win ? `<span class="chip">${L(`Đã thắng ${w} lần`, `${w} wins so far`)}</span>` : ''}</div>
     <p class="${win ? 'h-win' : 'h-lose'}">${esc(win ? a.win : a.lose)}</p>${note ? `<p class="h-note">${esc(note)}</p>` : ''}
+    ${down ? `<p class="h-note">😵 ${esc(L(`${roleName(tk.who)} đang nằm đất, khoảng 1 phút nữa mới dậy.`, `${roleName(tk.who)} is down for about a minute.`))}</p>` : ''}
     ${got.length ? `<p class="h-gotline">🏅 ${L('Vừa mở', 'Just unlocked')}: <b>${got.map(id => esc((HD.badges.find(x => x.id === id) || {}).name || id)).join(', ')}</b></p>` : ''}
     <div class="row">${got.length ? `<button class="btn btn-primary" data-r="badges">${L('Xem huy hiệu', 'See badges')}</button>` : ''}
       ${open ? `<button class="btn ${got.length ? 'btn-ghost' : 'btn-primary'}" data-r="retry">${win ? L('Chơi tiếp', 'Play again') : L('Chơi lại', 'Try again')}</button>` : ''}
@@ -467,7 +472,7 @@ function closeSheet(){ sheet.hidden = true; }
 // ---------- hook từ engine ----------
 function onTalk(c){
   if (game) return game.onTalk ? game.onTalk(c) : true;
-  if (c.ko){ speak(c, L('Để tui nằm chút… 😵', 'Let me lie here a bit… 😵'), 2.2); return true; }
+  if (c.ko){ speak(c, koLine(), 2.6); const k = knocked.find(x => x.c === c); if (k) k.say = 7 + Math.random() * 6; return true; }
   if (picking){ if (!c.roamer) choose(c.role.id, 'map'); return true; }
   const tk = pending; if (!tk || !here(tk)) return false;
   if (tk.action === 'read'){ if (c.role.id !== tk.who) return false; E.openPanel(c); return true; }
@@ -611,17 +616,23 @@ function dustCloud(a, b, people){
 }
 // ---------- bị đánh gục: ngã ngửa ra đất, mắt chữ X, tự ngồi dậy sau một lúc ----------
 const KO_NPC_SECS = 60, KO_PLAYER_SECS = 5;
+const KO_LINES = [['Để tui nằm chút… 😵', 'Let me lie here a bit… 😵'], ['Để yên cho tao xỉu… 😵', 'Let me pass out in peace… 😵'],
+  ['Kệ, nằm đây giả bộ xỉu khỏi mắc công trả task', 'Might as well play dead, no tasks to hand in']];
+const koLine = () => { const l = rnd(KO_LINES); return L(l[0], l[1]); };
 let knocked = [];
 function knockOut(c, secs){
   const r = c.obj.root; c.ko = true; c.path = []; c.onArrive = null; c.sitting = false; c.frozenUntil = Infinity;
   if (!c.isPlayer){ c.busy = true; c.ai = { s:'hourly' }; }
   r.rotation.order = 'YXZ'; c.obj.ring.visible = false; E.setFace(c.obj, 'ko', 'mO'); c.faceT = 0;
-  knocked = knocked.filter(k => k.c !== c); knocked.push({ c, until:E.t + secs, fall:0, rise:0 });
+  knocked = knocked.filter(k => k.c !== c); knocked.push({ c, until:E.t + secs, fall:0, rise:0, say:2.5 + Math.random() * 3 });
 }
 function koTick(dt){
   knocked = knocked.filter(k => {
     const r = k.c.obj.root, ease = x => 1 - Math.pow(1 - Math.min(1, x), 3);
-    if (E.t < k.until){ k.fall = Math.min(1, k.fall + dt / .35); const e = ease(k.fall); r.rotation.x = -Math.PI / 2 * e; r.position.y = .52 * e; return true; }
+    if (E.t < k.until){ k.fall = Math.min(1, k.fall + dt / .35); const e = ease(k.fall); r.rotation.x = -Math.PI / 2 * e; r.position.y = .52 * e;
+      // thỉnh thoảng lầm bầm một câu trong lúc xỉu (chỉ đồng nghiệp, khi không có mini-game đang chạy)
+      if (!k.c.isPlayer && !game){ k.say -= dt; if (k.say <= 0){ k.say = 7 + Math.random() * 6; speak(k.c, koLine(), 3); } }
+      return true; }
     k.rise = Math.min(1, k.rise + dt / .6); const e = 1 - ease(k.rise); r.rotation.x = -Math.PI / 2 * e; r.position.y = .52 * e;
     if (k.rise < 1) return true;
     getUp(k.c); return false;
