@@ -417,6 +417,14 @@ li.dragging { opacity: 0.45; }
         <textarea class="form-control" id="c-desc" placeholder="Mô tả ngắn xuất hiện trong tooltip và flashcard..."></textarea>
       </div>
       <div class="form-group">
+        <label>Tên (EN) <small style="font-weight:400;color:#888">— trang /en/glossary, để trống thì dùng tên tiếng Việt</small></label>
+        <input class="form-control" id="c-name-en" type="text" placeholder="VD: Website Layout"/>
+      </div>
+      <div class="form-group">
+        <label>Mô tả (EN)</label>
+        <textarea class="form-control" id="c-desc-en" placeholder="Short English description for /en/glossary/<slug>"></textarea>
+      </div>
+      <div class="form-group">
         <label>URL bài viết</label>
         <input class="form-control" id="c-url" type="url" placeholder="https://academy.telos.vn/..."/>
       </div>
@@ -460,6 +468,10 @@ li.dragging { opacity: 0.45; }
           <label>Slug *</label>
           <input class="form-control" id="cat-slug" type="text" placeholder="VD: cong-cu"/>
         </div>
+      </div>
+      <div class="form-group">
+        <label>Tên (EN)</label>
+        <input class="form-control" id="cat-name-en" type="text" placeholder="VD: UX tools"/>
       </div>
       <div class="form-group">
         <label>Parent category</label>
@@ -726,6 +738,8 @@ function openConceptModal(concept = null) {
   document.getElementById('c-name').value      = concept?.name || '';
   document.getElementById('c-slug').value      = concept?.slug || '';
   document.getElementById('c-desc').value      = concept?.description || '';
+  document.getElementById('c-name-en').value   = concept?.name_en || '';
+  document.getElementById('c-desc-en').value   = concept?.description_en || '';
   document.getElementById('c-url').value       = concept?.url || '';
   document.getElementById('c-size').value      = concept?.node_size || 8;
   document.getElementById('c-published').value = concept ? String(concept.is_published) : 'true';
@@ -771,6 +785,8 @@ async function saveConcept() {
     name, slug,
     category_id:  catId,
     description:  document.getElementById('c-desc').value.trim() || null,
+    name_en:      document.getElementById('c-name-en').value.trim() || null,
+    description_en: document.getElementById('c-desc-en').value.trim() || null,
     url:          document.getElementById('c-url').value.trim() || null,
     node_size:    parseInt(document.getElementById('c-size').value) || 8,
     is_published: document.getElementById('c-published').value === 'true',
@@ -849,6 +865,7 @@ function openCatModal(cat = null) {
   document.getElementById('cat-id').value    = cat?.id || '';
   document.getElementById('cat-name').value  = cat?.name || '';
   document.getElementById('cat-slug').value  = cat?.slug || '';
+  document.getElementById('cat-name-en').value = cat?.name_en || '';
   document.getElementById('cat-color').value = cat?.color || '#241775';
   document.getElementById('cat-order').value = cat?.sort_order ?? 0;
 
@@ -887,6 +904,7 @@ async function saveCat() {
     name, slug,
     parent_id:  parentId,
     depth,
+    name_en:    document.getElementById('cat-name-en').value.trim() || null,
     color:      document.getElementById('cat-color').value || null,
     sort_order: parseInt(document.getElementById('cat-order').value) || 0,
   };
