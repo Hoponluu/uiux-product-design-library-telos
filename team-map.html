@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Product Company Map Simulation - Một game nhập vai làm UI/UX Designer để hiểu một ngày làm việc của các phòng ban Product</title>
+<title>Game nhập vai UI/UX Designer: một ngày ở công ty Product | TELOS</title>
 <meta name="description" content="Một game nhập vai làm UI/UX Designer để hiểu một ngày làm việc của các phòng ban Product: designer ngồi ở đâu, làm việc với ai, báo cáo cho ai.">
 <meta name="author" content="Nhân Lưu — TELOS Academy">
 <meta name="robots" content="index, follow">
@@ -187,6 +187,70 @@ body.dark #header-logo { filter: brightness(0) invert(1); }
   #tm-shell { top: 56px; bottom: 64px; z-index: 300; } /* popup của game (bottom sheet) được phép đè lên bottom bar */
 }
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": [
+        "VideoGame",
+        "WebApplication"
+      ],
+      "@id": "https://uiux-library.nhanluu.com/team-map#game",
+      "name": "Product Company Map Simulation",
+      "url": "https://uiux-library.nhanluu.com/team-map",
+      "description": "Một game nhập vai làm UI/UX Designer để hiểu một ngày làm việc của các phòng ban Product: designer ngồi ở đâu, làm việc với ai, báo cáo cho ai.",
+      "inLanguage": "vi",
+      "image": "https://uiux-library.nhanluu.com/team-map/og-image.jpg",
+      "applicationCategory": "GameApplication",
+      "operatingSystem": "Web browser",
+      "gamePlatform": "Web browser",
+      "genre": [
+        "Role-playing",
+        "Educational"
+      ],
+      "playMode": "SinglePlayer",
+      "isAccessibleForFree": true,
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "VND"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "Nhân Lưu",
+        "url": "https://nhanluu.com"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "@id": "https://academy.telos.vn/#organization",
+        "name": "TELOS Academy",
+        "url": "https://academy.telos.vn"
+      },
+      "isPartOf": {
+        "@id": "https://uiux-library.nhanluu.com/#website"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Thư viện thuật ngữ UI/UX",
+          "item": "https://uiux-library.nhanluu.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Product Company Map",
+          "item": "https://uiux-library.nhanluu.com/team-map"
+        }
+      ]
+    }
+  ]
+}
+</script>
 </head>
 <body>
 
@@ -254,7 +318,6 @@ body.dark #header-logo { filter: brightness(0) invert(1); }
 
 <!-- TEAM MAP -->
 <main id="tm-shell">
-  <h1 hidden>Product Company Map Simulation - Một game nhập vai làm UI/UX Designer để hiểu một ngày làm việc của các phòng ban Product</h1>
   <div id="app">
     <div id="tm-loading" role="status"><div><i></i>Đang dựng văn phòng…</div></div>
     <canvas id="stage" aria-label="Mô hình 3D văn phòng Product & Tech" role="img"></canvas>
