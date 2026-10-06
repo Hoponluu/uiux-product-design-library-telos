@@ -6,8 +6,7 @@
 
 <!-- ── Primary SEO ───────────────────────────────────────── -->
 <title>Thư viện thuật ngữ UI/UX Product | by Nhân Lưu</title>
-<meta name="description" content="Tra cứu 60+ thuật ngữ UI/UX Product Design bằng tiếng Việt — từ UX Research, Interaction Design đến Design System và vai trò Product Designer. Miễn phí, có giải thích rõ ràng và link bài viết chi tiết.">
-<meta name="keywords" content="thuật ngữ UI UX, UI UX là gì, UX design tiếng việt, thuật ngữ product design, design system là gì, UX research, interaction design, TELOS Academy, thư viện thiết kế">
+<meta name="description" content="Tra cứu 90+ thuật ngữ UI/UX Product Design bằng tiếng Việt — từ UX Research, Interaction Design đến Design System và vai trò Product Designer. Miễn phí, có giải thích rõ ràng và link bài viết chi tiết.">
 <meta name="author" content="Nhân Lưu — TELOS Academy">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://uiux-library.nhanluu.com/">
@@ -28,7 +27,7 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://uiux-library.nhanluu.com/">
 <meta property="og:title" content="Thư viện thuật ngữ UI/UX Product | by Nhân Lưu">
-<meta property="og:description" content="Tra cứu 60+ thuật ngữ UI/UX Product Design bằng tiếng Việt. Knowledge Graph 3D, tra cứu A-Z, Flashcard và UI Challenge Generator — miễn phí.">
+<meta property="og:description" content="Tra cứu 90+ thuật ngữ UI/UX Product Design bằng tiếng Việt. Knowledge Graph 3D, tra cứu A-Z, Flashcard và UI Challenge Generator — miễn phí.">
 <meta property="og:image" content="https://uiux-library.nhanluu.com/Thumb.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -39,7 +38,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:url" content="https://uiux-library.nhanluu.com/">
 <meta name="twitter:title" content="Thư viện thuật ngữ UI/UX Product | by Nhân Lưu">
-<meta name="twitter:description" content="Tra cứu 60+ thuật ngữ UI/UX Product Design bằng tiếng Việt. Knowledge Graph 3D, A-Z, Flashcard, UI Challenge — miễn phí.">
+<meta name="twitter:description" content="Tra cứu 90+ thuật ngữ UI/UX Product Design bằng tiếng Việt. Knowledge Graph 3D, A-Z, Flashcard, UI Challenge — miễn phí.">
 <meta name="twitter:image" content="https://uiux-library.nhanluu.com/Thumb.png">
 
 <!-- ── JSON-LD Structured Data ───────────────────────────── -->
@@ -59,7 +58,7 @@
         "@id": "https://academy.telos.vn/#organization",
         "name": "TELOS Academy",
         "url": "https://academy.telos.vn",
-        "logo": { "@type": "ImageObject", "url": "https://academy.telos.vn/wp-content/uploads/telos-logo.png" }
+        "logo": { "@type": "ImageObject", "url": "https://academy.telos.vn/wp-content/uploads/2026/05/telos_academy_logo.svg" }
       },
       "author": {
         "@type": "Person",
@@ -277,6 +276,8 @@ a.tab-btn { text-decoration: none; }
   border: none; cursor: pointer; font-family: inherit; text-align: center; text-decoration: none;
 }
 #modal-btn:hover { background: #3A2FBE; }
+#modal-term { display: block; margin-top: 14px; text-align: center; font-size: 14px; font-weight: 500; color: #241775; text-decoration: none; }
+body.dark #modal-term { color: #C9C0FF; }
 #modal-btn-none {
   display: block; width: 100%; background: rgba(0,0,0,0.05); color: rgba(0,0,0,0.4);
   font-size: 14px; padding: 14px; border-radius: 12px;
@@ -298,7 +299,7 @@ a.tab-btn { text-decoration: none; }
   color: rgba(0,0,0,0.3); font-size: 11px; line-height: 1.9; text-align: right; z-index: 100;
 }
 #graph-title {
-  position: fixed; top: 58px; left: 24px;
+  position: fixed; top: 58px; left: 24px; margin: 0; line-height: normal;
   color: rgba(0,0,0,0.75); font-size: 14px; font-weight: 600; z-index: 100;
 }
 #graph-title span { display: block; font-size: 11px; font-weight: 400; color: rgba(0,0,0,0.4); margin-top: 2px; }
@@ -502,7 +503,11 @@ body.dark .loading-text { color: rgba(255,255,255,0.35); }
   padding: 2px 7px; border-radius: 20px; margin-bottom: 7px; letter-spacing: 0.02em;
 }
 .gl-desc { font-size: 12px; color: rgba(0,0,0,0.52); line-height: 1.55; }
-.gl-no-url { font-size: 11px; color: rgba(0,0,0,0.25); margin-top: 6px; }
+.gl-no-url { font-size: 11px; color: rgba(0,0,0,0.25); }
+.gl-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; }
+.gl-more { margin-left: auto; font-size: 11.5px; font-weight: 500; color: #241775; text-decoration: none; opacity: 0.75; }
+.gl-more:hover { opacity: 1; text-decoration: underline; text-underline-offset: 3px; }
+body.dark .gl-more { color: #C9C0FF; }
 .gl-no-results { text-align: center; padding: 60px 20px; color: rgba(0,0,0,0.35); font-size: 14px; }
 
 /* Dark mode glossary */
@@ -720,11 +725,6 @@ body.dark .ascii-cell.fg { color: rgba(255,255,255,0.82); }
 </head>
 <body>
 
-<!-- SEO: hidden glossary for crawlers (populated by JS after API load) -->
-<div id="seo-glossary" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;">
-  <h1>Thư viện thuật ngữ UI/UX Product Design</h1>
-  <p>Tập hợp 60+ thuật ngữ UI/UX được giải thích bằng tiếng Việt bởi TELOS Academy.</p>
-</div>
 <noscript>
   <div style="max-width:680px;margin:80px auto;padding:32px;font-family:sans-serif;">
     <h1>Thư viện thuật ngữ UI/UX — TELOS Academy</h1>
@@ -806,7 +806,7 @@ body.dark .ascii-cell.fg { color: rgba(255,255,255,0.82); }
 
 <!-- GRAPH PANEL -->
 <div id="panel-graph">
-  <div id="graph-title">Thuật ngữ UI/UX Product</div>
+  <h1 id="graph-title">Thuật ngữ UI/UX Product</h1>
   <div id="legend">
     <div class="legend-item"><div class="legend-dot" style="background:#EF4A81"></div>Tiêu chí Product</div>
     <div class="legend-item"><div class="legend-dot" style="background:#40B0E0"></div>Công cụ UX</div>
@@ -1060,7 +1060,8 @@ body.dark .ascii-cell.fg { color: rgba(255,255,255,0.82); }
     <div id="modal-title"></div>
     <div id="modal-desc"></div>
     <a id="modal-btn" target="_blank" href="#"></a>
-    <div id="modal-btn-none" style="display:none">Chưa có bài viết</div>
+    <div id="modal-btn-none" style="display:none">Sắp có bài viết</div>
+    <a id="modal-term" href="#">Xem chi tiết thuật ngữ →</a>
   </div>
 </div>
 
@@ -1183,10 +1184,12 @@ window.addEventListener('DOMContentLoaded', async () => {
     allConcepts = concepts;
     allCats = categories;
     const { nodes, links } = buildGraphData(categories, concepts);
+    // Dựng nội dung chữ trước đồ thị 3D: danh sách A–Z (tab ẩn) + JSON-LD vẫn có
+    // khi WebGL / CDN lỗi, và Google đọc được toàn bộ thuật ngữ.
+    renderGlossary('');
+    injectConceptsJsonLd(concepts, categories);
     document.getElementById('loading').classList.add('hidden');
     initGraph(nodes, links);
-    injectSeoContent(concepts, categories);
-    injectConceptsJsonLd(concepts, categories);
   } catch(err) {
     document.querySelector('.loading-text').textContent = 'Không tải được dữ liệu. Vui lòng thử lại.';
     console.error(err);
@@ -1197,6 +1200,17 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (['glossary','flashcard','challenge','about'].includes(startTab)) {
     const btn = document.querySelector(`.tab-btn[onclick*="'${startTab}'"]`);
     if (btn) switchTab(startTab, btn);
+  }
+  // ?term=<slug> (nút "Xem trên đồ thị 3D" ở trang thuật ngữ): bay tới nút đó trên đồ thị
+  const startTerm = new URLSearchParams(location.search).get('term');
+  if (startTerm && !startTab && graphInstance) focusTerm(startTerm);
+  // ?q=… (khai báo trong SearchAction): mở tab A–Z và tìm luôn
+  const startQ = (new URLSearchParams(location.search).get('q') || '').trim();
+  if (startQ && allConcepts.length) {
+    const btn = document.querySelector(`.tab-btn[onclick*="'glossary'"]`);
+    if (btn) switchTab('glossary', btn);
+    document.getElementById('gl-search').value = startQ.slice(0, 80);
+    onGlSearch();
   }
 });
 
@@ -1304,6 +1318,7 @@ function initGraph(nodes, links) {
       track('term_open', { term_name: n.label, term_group: n.group || '', has_article: !!n.url, click_source: 'graph' });
       if (window.innerWidth < 768) openModal(n);
       else if (n.url){ track('article_click', { link_url: n.url, link_text: n.label, click_source: 'graph' }); window.open(n.url, '_blank'); }
+      else if (n.type === 'article') location.href = '/thuat-ngu/' + encodeURIComponent(n.id);   // chưa có bài → trang thuật ngữ
     })
     .onNodeHover(n => {
       const tip = document.getElementById('tooltip');
@@ -1312,11 +1327,11 @@ function initGraph(nodes, links) {
         tip.innerHTML =
           `<div class="tip-title">${n.label}</div>` +
           (n.desc ? `<div class="tip-desc">${n.desc}</div>` : '') +
-          (n.url ? `<div class="tip-link">Nhấp để mở bài viết →</div>` : `<div class="tip-none">Chưa có bài viết</div>`);
+          (n.url ? `<div class="tip-link">Nhấp để mở bài viết →</div>` : n.type === 'article' ? `<div class="tip-none">Sắp có bài viết · nhấp để xem định nghĩa →</div>` : '');
       } else {
         tip.style.opacity = '0';
       }
-      container.style.cursor = (n && n.url) ? 'pointer' : 'default';
+      container.style.cursor = (n && (n.url || n.type === 'article')) ? 'pointer' : 'default';
     });
 
   container.addEventListener('mousemove', e => {
@@ -1398,6 +1413,20 @@ function initGraph(nodes, links) {
   graphInstance.controls().addEventListener('change', updateLabels);
 }
 
+function focusTerm(slug) {
+  const n = gNodes.find(x => x.id === slug && x.type === 'article');
+  if (!n) return;
+  let tries = 0;
+  (function go() {
+    if (n.x === undefined && tries++ < 40) return setTimeout(go, 150);
+    const r = Math.hypot(n.x || 0, n.y || 0, n.z || 0) || 1, k = 1 + 110 / r;
+    graphInstance.cameraPosition({ x: (n.x || 0) * k, y: (n.y || 0) * k, z: (n.z || 0) * k }, n, 1600);
+    const el = labelEls[n.id];
+    if (el) { el.style.fontSize = '13px'; el.style.fontWeight = '700'; el.style.color = isDark ? '#C9C0FF' : '#241775'; }
+    if (window.innerWidth < 768) setTimeout(() => openModal(n), 1700);
+  })();
+}
+
 window.addEventListener('resize', () => {
   if (!graphInstance) return;
   const c = document.getElementById('graph-3d');
@@ -1416,6 +1445,8 @@ function openModal(n) {
   desc.style.display=n.desc?'block':'none';
   if (n.url){btn.href=n.url;btn.textContent='Xem full bài viết →';btn.style.display='block';btnNone.style.display='none';}
   else{btn.style.display='none';btnNone.style.display='block';}
+  const more=document.getElementById('modal-term');
+  more.style.display=n.type==='article'?'block':'none'; more.href='/thuat-ngu/'+encodeURIComponent(n.id);
   document.getElementById('node-modal-backdrop').classList.add('open');
   requestAnimationFrame(() => document.getElementById('node-modal').classList.add('open'));
 }
@@ -1606,7 +1637,7 @@ function renderGlossary(q = glQuery) {
         <div class="gl-cat-badge" style="background:${style.bg};color:${style.color}">${catLabel}</div>
         <div class="gl-card-name">${nameEl}</div>
         ${descHL ? `<div class="gl-desc">${descHL}</div>` : ''}
-        ${!con.url ? '<div class="gl-no-url">Chưa có bài viết</div>' : ''}
+        <div class="gl-foot">${!con.url ? '<span class="gl-no-url">Sắp có bài viết</span>' : ''}<a class="gl-more" href="/thuat-ngu/${con.slug}">Chi tiết →</a></div>
       </div>`;
     }).join('');
 
@@ -1816,25 +1847,8 @@ function copyIt() {
 }
 
 // ════════════════════════════════════════════════════════
-// SEO: inject noscript fallback + dynamic JSON-LD
+// SEO: dynamic JSON-LD (danh sách thuật ngữ)
 // ════════════════════════════════════════════════════════
-function injectSeoContent(concepts, categories) {
-  const catMap = {};
-  categories.forEach(c => { catMap[c.id] = c.name; });
-
-  const rows = concepts
-    .filter(c => c.is_published)
-    .sort((a, b) => a.name.localeCompare(b.name, 'vi'))
-    .map(c => {
-      const cat = catMap[c.category_id] || '';
-      const link = c.url ? ` — <a href="${c.url}" rel="noopener">Đọc thêm</a>` : '';
-      return `<dt><strong>${c.name}</strong> <em>(${cat})</em></dt><dd>${c.description || ''}${link}</dd>`;
-    }).join('');
-
-  const el = document.getElementById('seo-glossary');
-  if (el) el.innerHTML = `<dl>${rows}</dl>`;
-}
-
 function injectConceptsJsonLd(concepts, categories) {
   const catMap = {};
   categories.forEach(c => { catMap[c.id] = c.name; });

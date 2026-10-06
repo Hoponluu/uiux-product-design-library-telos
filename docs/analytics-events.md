@@ -1,6 +1,6 @@
 # Google Analytics — custom event
 
-Cả thư viện (`/`) và Team Map (`/team-map`) dùng chung GA4 property `G-PFSCQRQZM6`. Trang admin không gắn GA.
+Thư viện (`/`), trang thuật ngữ (`/thuat-ngu/…`, `/en/glossary/…`) và Team Map (`/team-map`) dùng chung GA4 property `G-PFSCQRQZM6`. Trang admin không gắn GA.
 Lượt xem trang (`page_view`) GA tự ghi nhận. Các sự kiện dưới đây đo những gì người học làm **bên trong** trang.
 
 ## Trang chủ thư viện
@@ -13,6 +13,17 @@ Lượt xem trang (`page_view`) GA tự ghi nhận. Các sự kiện dưới đ�
 | `search` | Gõ tìm trong A-Z (từ 2 ký tự, sau 1,5 giây ngừng gõ) | `search_term`, `click_source` |
 | `flashcard_start` / `flashcard_complete` | Bắt đầu / xong một lượt Flashcard | `score`, `total` |
 | `challenge_roll` / `challenge_copy` | Random / copy đề UI Challenge | `locked` (số tiêu chí đang giữ) |
+
+## Trang thuật ngữ (`/thuat-ngu/<slug>`, `/en/glossary/<slug>`)
+
+Mọi sự kiện kèm `click_source: term_page` và `term_slug`.
+
+| Sự kiện | Khi nào | Tham số thêm |
+| --- | --- | --- |
+| `article_click` | Bấm "Đọc bài viết đầy đủ" (academy.telos.vn) | `link_url`, `link_text` |
+| `term_graph_click` | Bấm "Xem trên đồ thị 3D" (mở `/?term=<slug>`) | `link_url` |
+| `term_map_click` | Bấm "Gặp … trong Product Map" ở trang vai trò | `link_url` |
+| `course_click` | Bấm "Khám phá khoá học TELOS" | `link_url` |
 
 ## Team Map
 

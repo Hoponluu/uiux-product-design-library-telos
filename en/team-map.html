@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Product Company Map Simulation - A role-playing game where you are a UI/UX Designer and live a day with every Product department</title>
+<title>UI/UX Designer role-playing game: a day at a Product company | TELOS</title>
 <meta name="description" content="A role-playing game where you are a UI/UX Designer and live a day with every Product department: where designers sit, who they work with and who they report to.">
 <meta name="author" content="Nhân Lưu — TELOS Academy">
 <meta name="robots" content="index, follow">
@@ -188,6 +188,70 @@ body.dark #header-logo { filter: brightness(0) invert(1); }
   #tm-shell { top: 56px; bottom: 64px; z-index: 300; } /* popup của game (bottom sheet) được phép đè lên bottom bar */
 }
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": [
+        "VideoGame",
+        "WebApplication"
+      ],
+      "@id": "https://uiux-library.nhanluu.com/en/team-map#game",
+      "name": "Product Company Map Simulation",
+      "url": "https://uiux-library.nhanluu.com/en/team-map",
+      "description": "A role-playing game where you are a UI/UX Designer and live a day with every Product department: where designers sit, who they work with and who they report to.",
+      "inLanguage": "en",
+      "image": "https://uiux-library.nhanluu.com/team-map/og-image.jpg",
+      "applicationCategory": "GameApplication",
+      "operatingSystem": "Web browser",
+      "gamePlatform": "Web browser",
+      "genre": [
+        "Role-playing",
+        "Educational"
+      ],
+      "playMode": "SinglePlayer",
+      "isAccessibleForFree": true,
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "VND"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "Nhân Lưu",
+        "url": "https://nhanluu.com"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "@id": "https://academy.telos.vn/#organization",
+        "name": "TELOS Academy",
+        "url": "https://academy.telos.vn"
+      },
+      "isPartOf": {
+        "@id": "https://uiux-library.nhanluu.com/#website"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "UI/UX Glossary",
+          "item": "https://uiux-library.nhanluu.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Product Company Map",
+          "item": "https://uiux-library.nhanluu.com/en/team-map"
+        }
+      ]
+    }
+  ]
+}
+</script>
 </head>
 <body>
 
@@ -255,7 +319,6 @@ body.dark #header-logo { filter: brightness(0) invert(1); }
 
 <!-- TEAM MAP -->
 <main id="tm-shell">
-  <h1 hidden>Product Company Map Simulation - A role-playing game where you are a UI/UX Designer and live a day with every Product department</h1>
   <div id="app">
     <div id="tm-loading" role="status"><div><i></i>Building the office…</div></div>
     <canvas id="stage" aria-label="3D model of a Product & Tech office" role="img"></canvas>

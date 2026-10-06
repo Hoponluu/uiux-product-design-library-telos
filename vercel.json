@@ -1,26 +1,103 @@
 {
   "redirects": [
-    { "source": "/TELOS_Knowledge_Graph.html", "destination": "/", "permanent": true },
-    { "source": "/adminCMS.html", "destination": "/adminCMS", "permanent": true },
-    { "source": "/team-map.html", "destination": "/team-map", "permanent": true },
-    { "source": "/en/team-map.html", "destination": "/en/team-map", "permanent": true }
+    {
+      "source": "/TELOS_Knowledge_Graph.html",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/adminCMS.html",
+      "destination": "/adminCMS",
+      "permanent": true
+    },
+    {
+      "source": "/team-map.html",
+      "destination": "/team-map",
+      "permanent": true
+    },
+    {
+      "source": "/en/team-map.html",
+      "destination": "/en/team-map",
+      "permanent": true
+    }
   ],
   "rewrites": [
-    { "source": "/adminCMS", "destination": "/adminCMS.html" },
-    { "source": "/team-map", "destination": "/team-map.html" },
-    { "source": "/en/team-map", "destination": "/en/team-map.html" },
-    { "source": "/", "destination": "/TELOS_Knowledge_Graph.html" }
+    {
+      "source": "/adminCMS",
+      "destination": "/adminCMS.html"
+    },
+    {
+      "source": "/team-map",
+      "destination": "/team-map.html"
+    },
+    {
+      "source": "/en/team-map",
+      "destination": "/en/team-map.html"
+    },
+    {
+      "source": "/thuat-ngu",
+      "destination": "/api/term?lang=vi"
+    },
+    {
+      "source": "/thuat-ngu/:slug",
+      "destination": "/api/term?lang=vi&slug=:slug"
+    },
+    {
+      "source": "/en/glossary",
+      "destination": "/api/term?lang=en"
+    },
+    {
+      "source": "/en/glossary/:slug",
+      "destination": "/api/term?lang=en&slug=:slug"
+    },
+    {
+      "source": "/sitemap.xml",
+      "destination": "/api/sitemap"
+    },
+    {
+      "source": "/",
+      "destination": "/TELOS_Knowledge_Graph.html"
+    }
   ],
   "headers": [
     {
+      "source": "/adminCMS(.html)?",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
+    },
+    {
       "source": "/sitemap.xml",
-      "headers": [{ "key": "Content-Type", "value": "application/xml; charset=utf-8" }]
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/xml; charset=utf-8"
+        }
+      ]
     },
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "DENY" }
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        }
       ]
     }
   ]
