@@ -73,7 +73,7 @@ function coursePanel(c){
     <div class="jx-col">${c.description ? `<p>${esc(c.description)}</p>` : ''}</div><div class="jx-col">${c.outcome ? `<p class="jx-out">${esc(c.outcome)}</p>` : ''}</div>`;
   const url = safeUrl(c.course_url), img = safeUrl(c.course_image_url), know = (c.knowledge || []).filter(Boolean);
   return `<div class="jx-col">${img ? `<a class="jx-thumb" href="${esc(url || '#')}" target="_blank" rel="noopener" data-ga="journey_course_click" data-cp="${esc(c.id)}"><img src="${esc(img)}" alt="${esc(c.course_title || c.name)}" width="1200" height="630" onload="this.parentNode.classList.add('ok')" onerror="this.parentNode.hidden=true"></a>` : ''}
-    ${url ? `<a class="gx-btn" href="${esc(url)}" target="_blank" rel="noopener" data-ga="journey_course_click" data-cp="${esc(c.id)}">Xem khóa học tại TELOS ↗</a>` : ''}</div>
+    ${url ? `<a class="gx-btn" href="${esc(url)}" target="_blank" rel="noopener" data-ga="journey_course_click" data-cp="${esc(c.id)}" aria-label="Tìm hiểu thêm về ${esc(c.course_title || c.name)} tại TELOS Academy">Tìm hiểu thêm ↗</a>` : ''}</div>
     <div class="jx-col"><p class="jx-k">${c.kind === 'branch' ? 'Nhánh rẽ · ' : ''}Khóa học${c.sessions ? ` · ${esc(c.sessions)} buổi` : ''}</p>
     <h2>${esc(c.course_title || c.name)}</h2>${c.description ? `<p>${esc(c.description)}</p>` : ''}</div>
     <div class="jx-col jx-col-list">${know.length ? `<h3>Bạn sẽ học</h3><ul>${know.map(k => `<li>${esc(k)}</li>`).join('')}</ul>` : ''}${c.outcome ? `<p class="jx-out"><b>Học xong bạn sẽ:</b> ${esc(c.outcome)}</p>` : ''}</div>`;
