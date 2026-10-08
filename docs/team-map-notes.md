@@ -140,17 +140,19 @@ Lưu ý: bản dịch dựa trên nội dung seed gốc. Nếu đã sửa nội 
 2. Chạy `supabase_team_map_hourly_seed.sql`. Chạy lại an toàn: không ghi đè `rank` đã đặt, giữ ảnh huy hiệu đã tải lên. Bảng cuối liệt kê id bị bỏ qua và nhân vật còn dưới 4 thuật ngữ liên quan. Xem nhân vật nào đủ điều kiện cho từng hành động trong CMS (form nhân vật, tab "Nhiệm vụ theo giờ" → Đang chạy).
 3. Deploy.
 
-## 14. Trang Hành trình UI/UX (/hanh-trinh-ui-ux) — docs/SPEC-journey.md, bản 2 (2D)
+## 14. Trang Hành trang học tập (/hanh-trinh-ui-ux) — docs/SPEC-journey.md, bản 2 (2D)
+
+Tab trên menu tên **"Hành trang học tập"** (đường dẫn giữ nguyên `/hanh-trinh-ui-ux`).
 
 Spec gốc là game 3D có phần lộ trình dạng chữ bên dưới. Theo góp ý của chủ dự án, bản hiện tại đổi thành:
 
-- **Game 2D đi theo nấc, gọn trong một khung:** bản đồ trạm (desktop: một hàng ngang; mobile: cột dọc vừa màn hình), 6 trạm chính, 2 nhánh rẽ vẽ thành vòng nhỏ. Bấm **Đi tiếp** (hoặc phím →, hoặc bấm trạm kế tiếp) → nhân vật nhảy tới trạm kế và **tự biến hình** (không còn nút "Biến hình"). Mốc nghề có pháo giấy + "Lên cấp: …"; trạm cuối có hào quang.
-- **Ngã rẽ:** trạm có nhánh ngay sau (UI → Web, Design System → Code) thì thanh hành động hỏi **"Có, rẽ nhánh" / "Không, đi tiếp"** (phím Y / N). Nhánh bỏ qua chuyển màu xám.
+- **Game 2D đi theo nấc, bản đồ phủ cả màn hình:** màn > 1000px bản đồ cao 100% màn hình (trừ header), tiêu đề + HUD nổi phía trên, hai bảng nổi ghim ở góc dưới trái / phải, thanh "Đi tiếp" ở giữa đáy. Màn 701–1000px: bản đồ cao 60vh, hai bảng bên dưới. Mobile: bản đồ dọc. 6 trạm chính trên một hàng ngang; 2 nhánh rẽ là làn bo tròn, **nhánh thứ nhất phía trên, nhánh thứ hai phía dưới** đường chính (mobile: cả hai bên phải).
+- **Màu ô trạm:** Figma (và Product Design & Manage) xanh dương TELOS `#241775`, UI + UX vàng `#FFC845`, Design System + A.I. trắng viền xanh, hai nhánh rẽ hồng `#EF4A81` (bảng màu lấy từ academy.telos.vn; map theo id trong `TONE` ở `api/_lib/journey.js`, trạm chính mới thêm mặc định trắng viền xanh). Trạm chưa tới thì nhạt, đã qua có dấu ✓. Ô xuất phát là 🐔. Bấm **Đi tiếp** (hoặc phím →, hoặc bấm trạm kế tiếp) → nhân vật nhảy tới trạm kế và **tự biến hình** (không còn nút "Biến hình"). Mốc nghề có pháo giấy + "Lên cấp: …"; trạm cuối có hào quang.
+- **Nhánh rẽ là trạm bắt buộc:** Đi tiếp từ UI là sang Web, từ Design System là sang Code (không còn hỏi Có / Không, không bỏ qua được). Nhánh đang tắt trong CMS thì không xuất hiện trên đường.
 - **Không còn phần chữ bên dưới**, chỉ có game. Meta, OG, JSON-LD (`ItemList` 8 `Course`, có ảnh khoá học) vẫn giữ; server vẫn render sẵn bản đồ + hai bảng ở trạm xuất phát.
-- **Hai bảng** dưới bản đồ: **Vai trò** (chức danh, câu mô tả hình thái, mô tả vai trò, "Kiến thức cần có", link "Tìm hiểu vai trò này" sang trang thuật ngữ) và **Khóa học** (thumbnail của khoá trên academy.telos.vn, số buổi, tóm tắt, "Bạn sẽ học", "Học xong bạn sẽ", nút "Xem khóa học tại TELOS"). Bấm một trạm khác trên bản đồ để xem trước / xem lại nội dung trạm đó.
+- **Hai bảng** (cao bằng nhau, nội dung dài thì cuộn bên trong): **Vai trò** (chức danh, câu mô tả hình thái, mô tả vai trò, "Kiến thức cần có", link "Tìm hiểu vai trò này" sang trang thuật ngữ) và **Khóa học** (thumbnail nhỏ của khoá trên academy.telos.vn cạnh tên khoá, số buổi, tóm tắt, "Bạn sẽ học", "Học xong bạn sẽ", nút "Xem khóa học tại TELOS"). Bấm một trạm khác trên bản đồ để xem trước / xem lại nội dung trạm đó.
 - **Không lưu tiến độ:** mỗi lần mở trang là đi lại từ đầu (không còn `tm_journey_v1`). Có nút "Đi lại từ đầu". Tới văn phòng → chọn nơi làm việc → Team Map nhận hình thái qua tham số URL (`?tu=hanh-trinh&quy-mo=&hinh-thai=&nhanh=`); mở Team Map không có tham số thì dùng nhân vật mặc định.
 - **Thử thách** (nếu bật ở trạm): làm 4 thẻ flashcard trước khi vào trạm, đúng ≥ 3 mới qua; trượt thì đứng lại và xem trước nội dung trạm.
-- **Ảnh trước và sau** (PNG 1080 × 1350): nút trong bảng Vai trò ở trạm vừa biến hình.
 - **Nhân vật** dựng bằng `team-map/team-map.mascot.js` (dùng chung với Team Map) trong một canvas nhỏ; máy không có WebGL thì dùng emoji, game vẫn chơi được.
 - **Dữ liệu** (`tm_journey_checkpoints`): ngoài các cột cũ có thêm `role_summary`, `role_skills` (danh sách), `role_link`, `course_image_url`. Seed điền sẵn ảnh thumbnail 8 khoá (lấy từ `og:image` của trang khoá học) và nội dung bảng Vai trò; chạy lại `supabase_team_map_journey.sql` chỉ điền ô còn trống.
 - **CMS → Team Map → Hành trình:** form có nhóm Checkpoint (thêm ô ảnh khoá học có xem trước), **Vai trò** (mô tả, kiến thức cần có kéo đổi thứ tự, link), Biến hình, Thử thách. "Cài đặt trang": title, description, ảnh OG, 3 thẻ nơi làm việc, mã nhúng. Excel sheet `Hanh trinh` có thêm 4 cột tương ứng.

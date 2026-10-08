@@ -1,6 +1,6 @@
 // Trang Hành trình UI/UX — game 2D đi theo nấc (docs/SPEC-journey.md, bản 2).
-// Bấm "Đi tiếp" → nhân vật bước tới trạm kế và tự biến hình; trạm có nhánh rẽ ngay sau thì hỏi Có / Không.
-// Không lưu tiến độ: mỗi lần mở trang là đi lại từ đầu. Hai bảng: Vai trò (kiến thức cần có) + Khóa học (thumbnail TELOS).
+// Bấm "Đi tiếp" → nhân vật bước tới trạm kế và tự biến hình; nhánh rẽ (một trên, một dưới đường chính) là trạm bắt buộc, đi qua luôn.
+// Không lưu tiến độ: mỗi lần mở trang là đi lại từ đầu. Bản đồ phủ cả màn hình; hai bảng Vai trò + Khóa học nổi ở góc dưới trái / phải.
 // Nhân vật dựng bằng team-map.mascot.js (chung với Team Map), hình thái tính bằng journey.form.js.
 (function(){
 'use strict';
@@ -44,10 +44,10 @@ async function fresh(){
 }
 
 // ---------- trạng thái (chỉ trong phiên này) ----------
-let ST, FORM, busy = false, lastBefore = {};
+let ST, FORM, busy = false;
 function reset(){
-  ST = { pos:'start', visited:['start'], decided:{}, view:null, challenge_passed:[] };
-  FORM = JF.form(CPS, ST.visited, COMBOS); lastBefore = {};
+  ST = { pos:'start', visited:['start'], view:null, challenge_passed:[] };
+  FORM = JF.form(CPS, ST.visited, COMBOS);
 }
 reset();
 
@@ -62,15 +62,29 @@ function layout(){
   const W = board.clientWidth; vertical = W < 640;
   const list = order(), main = list.filter(c => c.kind !== 'branch');
   board.querySelectorAll('.jx-node').forEach(n => { n.hidden = !list.includes(BY[n.dataset.cp]); });   // nhánh đang tắt
+  // nhánh rẽ xen kẽ: nhánh thứ nhất phía trên, nhánh thứ hai phía dưới đường chính… cho hai bên cân nhau
+  const brs = list.filter(c => c.kind === 'branch'), mid = b => { const a = POS[b.branch_after], z = POS[main[main.indexOf(BY[b.branch_after]) + 1].id]; return [(a[0] + z[0]) / 2, (a[1] + z[1]) / 2]; };
   if (!vertical){
-    const H = 272, pad = Math.max(56, W * .055), y = 182;
-    board.style.height = H + 'px';
+    // bản đồ cao theo khung (CSS); chừa chỗ cho tiêu đề ở trên và hai bảng nổi ở dưới
+    board.style.height = '';
+    const H = board.clientHeight, pad = Math.max(56, W * .055);
+    const pn = document.querySelector('.jx-panels'), br = board.getBoundingClientRect();
+    const floating = pn && getComputedStyle(pn).position === 'absolute';   // màn rộng: hai bảng nổi đè lên đáy bản đồ
+    const top = Math.min(110, H * .16), bottom = floating ? Math.min(H - 40, pn.getBoundingClientRect().top - br.top - 8) : H - 40;
+    const gap = (W - pad * 2) / (main.length - 1);   // khoảng cách hai trạm: làn rẽ không cao quá ~0.6 lần, khỏi thành gai nhọn
+    const y = (top + bottom) / 2 + 12, d = Math.max(56, Math.min(120, gap * .6, (bottom - top) / 2 - 34));
     main.forEach((c, i) => { POS[c.id] = [pad + i * (W - pad * 2) / (main.length - 1), y]; });
-    list.filter(c => c.kind === 'branch').forEach(b => { const a = POS[b.branch_after], z = POS[main[main.indexOf(BY[b.branch_after]) + 1].id]; POS[b.id] = [(a[0] + z[0]) / 2, 80]; });
+    brs.forEach((b, k) => { const m = mid(b); POS[b.id] = [m[0], y + (k % 2 ? d : -d)]; });
+    // nhãn đặt phía ngoài làn rẽ: nhánh trên → nhãn trên chấm; nhánh dưới → hai trạm hai đầu đưa nhãn lên trên
+    board.querySelectorAll('.jx-node').forEach(n => n.classList.remove('lbl-up'));
+    const up = id => { const n = board.querySelector(`.jx-node[data-cp="${id}"]`); if (n) n.classList.add('lbl-up'); };
+    brs.forEach((b, k) => { if (k % 2 === 0) return up(b.id); up(b.branch_after); up(main[main.indexOf(BY[b.branch_after]) + 1].id); });
   } else {
-    const step = 54, top = 40, x = Math.min(116, W * .3);
+    // mobile: nhãn nằm bên phải chấm nên cả hai nhánh đặt bên phải đường chính
+    const step = 56, top = 40, x = Math.min(116, W * .3);
+    board.querySelectorAll('.jx-node').forEach(n => n.classList.remove('lbl-up'));
     let i = 0; list.forEach(c => { if (c.kind === 'branch') return; POS[c.id] = [x, top + i * step]; i++; });
-    list.filter(c => c.kind === 'branch').forEach(b => { const a = POS[b.branch_after], z = POS[main[main.indexOf(BY[b.branch_after]) + 1].id]; POS[b.id] = [Math.min(W - 150, x + 110), (a[1] + z[1]) / 2]; });
+    brs.forEach(b => { POS[b.id] = [Math.min(W - 150, x + 110), mid(b)[1]]; });
     board.style.height = (top * 2 + (main.length - 1) * step) + 'px';
   }
   board.querySelectorAll('.jx-node').forEach(n => { const p = POS[n.dataset.cp]; if (!p) return; n.style.left = p[0] + 'px'; n.style.top = p[1] + 'px'; });
@@ -84,8 +98,11 @@ function drawTrack(){
   const doneIdx = Math.max(0, ...main.map((c, i) => ST.visited.includes(c.id) ? i : 0));   // đoạn đã đi trên đường chính
   const done = 'M' + pts.slice(0, doneIdx + 1).map(p => p.join(',')).join(' L');
   const forks = list.filter(c => c.kind === 'branch').map(b => { const a = POS[b.branch_after], m = POS[b.id], z = POS[main[main.indexOf(BY[b.branch_after]) + 1].id];
-    const d = vertical ? `M${a[0]},${a[1]} Q${m[0]},${a[1]} ${m[0]},${m[1]} Q${m[0]},${z[1]} ${z[0]},${z[1]}` : `M${a[0]},${a[1]} Q${a[0]},${m[1]} ${m[0]},${m[1]} Q${z[0]},${m[1]} ${z[0]},${z[1]}`;
-    const cls = ST.visited.includes(b.id) ? 'done' : ST.decided[b.id] === false ? 'skip' : '';
+    // ngang: làn rẽ bo tròn từ trạm này sang trạm kia, đoạn giữa chạy ngang qua chấm nhánh
+    const k = (z[0] - a[0]) * .2, y = a[1];
+    const d = vertical ? `M${a[0]},${a[1]} Q${m[0]},${a[1]} ${m[0]},${m[1]} Q${m[0]},${z[1]} ${z[0]},${z[1]}`
+      : `M${a[0]},${y} C${a[0] + k},${y} ${a[0] + k},${m[1]} ${a[0] + 2 * k},${m[1]} L${z[0] - 2 * k},${m[1]} C${z[0] - k},${m[1]} ${z[0] - k},${y} ${z[0]},${y}`;
+    const cls = ST.visited.includes(b.id) ? 'done' : '';
     return `<path class="jx-fork ${cls}" d="${d}"/>`; }).join('');
   svg.innerHTML = `<path class="jx-road" d="${line}"/>${forks}${doneIdx ? `<path class="jx-road-done" d="${done}"/>` : ''}`;
 }
@@ -121,16 +138,10 @@ function applyForm(pop){
 if ('IntersectionObserver' in window) new IntersectionObserver(es => es.forEach(e => { visible = e.isIntersecting; })).observe(board);
 
 // ---------- đi tiếp ----------
-// { id } để bước tới, { fork:nhánh } để hỏi Có / Không, null khi đã tới đích
+// { id } trạm kế tiếp trên đường (nhánh rẽ nằm sẵn trong thứ tự, không bỏ qua được); null khi đã tới đích
 function nextTarget(){
-  const c = BY[ST.pos], ms = mains();
-  if (!c || c.kind === 'finish') return null;
-  const nextMain = afterId => { const i = ms.findIndex(m => m.id === afterId); return ms[i + 1] ? ms[i + 1].id : (finishCp() || {}).id; };
-  if (c.kind === 'start') return { id:ms[0].id };
-  if (c.kind === 'branch') return { id:nextMain(c.branch_after) };
-  const b = branchAfter(c.id);
-  if (b && ST.decided[b.id] === undefined) return { fork:b };
-  return { id:nextMain(c.id) };
+  const list = order(), i = list.findIndex(c => c.id === ST.pos);
+  return i >= 0 && list[i + 1] ? { id:list[i + 1].id } : null;
 }
 async function go(id){
   if (busy || !BY[id]) return; const c = BY[id];
@@ -144,19 +155,13 @@ async function go(id){
   busy = false; render();
   if (c.kind === 'finish') openWork();
 }
-function choose(yes){
-  const t = nextTarget(); if (!t || !t.fork || busy) return;
-  ST.decided[t.fork.id] = !!yes; track('journey_branch', { cp_id:t.fork.id, choice:yes ? 'yes' : 'no' });
-  if (yes) go(t.fork.id); else { const n = nextTarget(); if (n && n.id) go(n.id); }
-}
-function next(){ const t = nextTarget(); if (!t) return openWork(); if (t.fork) return; go(t.id); }
+function next(){ const t = nextTarget(); if (!t) return openWork(); go(t.id); }
 
 // ---------- biến hình (tự động khi tới trạm) ----------
 function confetti(){ const box = $('#jx-confetti'); const cols = ['#E92F7C', '#35C6E8', '#FFC53D', '#8A3FFC', '#2FBF8F'];
   for (let i = 0; i < 60; i++){ const c = document.createElement('i'); c.style.left = Math.random() * 100 + '%'; c.style.background = cols[i % cols.length]; c.style.animationDuration = (1.4 + Math.random() * 1.4) + 's'; c.style.animationDelay = Math.random() * .4 + 's'; box.appendChild(c); }
   setTimeout(() => { box.innerHTML = ''; }, 3400); }
 async function transform(c){
-  lastBefore[c.id] = FORM;
   ST.visited.push(c.id); FORM = JF.form(CPS, ST.visited, COMBOS);
   track('journey_transform', { cp_id:c.id, form_title:FORM.title, milestone:!!c.is_milestone });
   if (!reduce){ token.classList.remove('glow'); void token.offsetWidth; token.classList.add('glow'); if (AV){ AV.spin = 30; await sleep(900); AV.spin = 0; } else await sleep(500); }
@@ -166,14 +171,12 @@ async function transform(c){
 
 // ---------- hiển thị ----------
 const preloaded = {};
-const nextTargetAfterNo = b => { const ms = mains(), i = ms.findIndex(m => m.id === b.branch_after); return ms[i + 1] || finishCp(); };
 function render(){
   const list = order(), t = nextTarget(), ms = mains(), mv = ms.filter(m => ST.visited.includes(m.id)).length;
   const brs = list.filter(c => c.kind === 'branch'), bv = brs.filter(b => ST.visited.includes(b.id)).length;
   board.querySelectorAll('.jx-node').forEach(n => { const id = n.dataset.cp;
     n.classList.toggle('is-done', ST.visited.includes(id)); n.classList.toggle('is-here', ST.pos === id);
-    n.classList.toggle('is-next', !!t && (t.id === id || (!!t.fork && t.fork.id === id)));
-    n.classList.toggle('is-skip', ST.decided[id] === false); n.classList.toggle('is-view', ST.view === id); });
+    n.classList.toggle('is-next', !!t && t.id === id); n.classList.toggle('is-view', ST.view === id); });
   drawTrack();
   hud.innerHTML = `<span class="jx-h-k">Hình thái hiện tại</span><span class="jx-h-t">${esc(FORM.title)}</span>${FORM.sub ? `<span class="jx-h-s">${esc(FORM.sub)}</span>` : ''}
     <span class="jx-bar-p"><i style="width:${Math.round(mv / Math.max(1, ms.length) * 100)}%"></i></span><span class="jx-h-p">Đã qua ${mv}/${ms.length} trạm${brs.length ? ` · ${bv}/${brs.length} nhánh` : ''}</span>`;
@@ -183,15 +186,14 @@ function render(){
     msg = `Đang xem ${ST.visited.includes(v.id) ? 'lại' : 'trước'} <b>${esc(v.name)}</b>. Bạn đang ở <b>${esc(BY[ST.pos].name)}</b>.`;
     acts = `<button class="gx-btn gx-btn-ghost" type="button" data-act="back">Về trạm hiện tại</button>`; }
   else if (!t){ msg = 'Bạn đã tới tòa văn phòng. Chọn nơi làm việc đầu tiên để bắt đầu ngày đầu đi làm.'; acts = `<button class="gx-btn" type="button" data-act="work">Chọn nơi làm việc</button>`; }
-  else if (t.fork){ const b = t.fork;
-    msg = `Ngã rẽ: học thêm <b>${esc(b.course_title || b.name)}</b>${b.sessions ? ` (${esc(b.sessions)} buổi)` : ''} để thành <b>${esc(b.form_title)}</b>? Nhánh tuỳ chọn, đi xong quay lại đường chính.`;
-    acts = `<button class="gx-btn" type="button" data-act="yes">Có, rẽ nhánh</button><button class="gx-btn gx-btn-ghost" type="button" data-act="no">Không, đi tiếp</button>`; }
   else { const n = BY[t.id];
-    msg = ST.pos === 'start' ? `Bấm <b>Đi tiếp</b> để bước tới trạm đầu tiên: <b>${esc(n.name)}</b>.` : n.kind === 'finish' ? 'Qua đủ các trạm rồi. Đi tiếp tới tòa văn phòng.' : `Trạm tiếp theo: <b>${esc(n.name)}</b>${n.course_title ? ` · ${esc(n.course_title)}` : ''}.`;
+    msg = ST.pos === 'start' ? `Bấm <b>Đi tiếp</b> để bước tới trạm đầu tiên: <b>${esc(n.name)}</b>.` : n.kind === 'finish' ? 'Qua đủ các trạm rồi. Đi tiếp tới tòa văn phòng.'
+      : `${n.kind === 'branch' ? 'Rẽ nhánh' : 'Trạm tiếp theo'}: <b>${esc(n.name)}</b>${n.course_title ? ` · ${esc(n.course_title)}` : ''}.`;
     acts = `<button class="gx-btn" type="button" data-act="next">${n.kind === 'finish' ? 'Tới văn phòng →' : 'Đi tiếp →'}</button>`; }
   bar.innerHTML = `<p class="jx-msg">${msg}</p><div class="jx-acts">${acts}${resetBtn}</div>`;
   // tải sẵn ảnh khóa học của trạm kế tiếp (và nhánh) để tới nơi là có ảnh ngay
-  if (t) [t.id && BY[t.id], t.fork, t.fork && BY[(nextTargetAfterNo(t.fork) || {}).id]].forEach(c => { const u = c && safeUrl(c.course_image_url); if (u && !preloaded[u]){ preloaded[u] = new Image(); preloaded[u].src = u; } });
+  const nx = t && order()[order().findIndex(c => c.id === t.id) + 1];
+  if (t) [BY[t.id], nx].forEach(c => { const u = c && safeUrl(c.course_image_url); if (u && !preloaded[u]){ preloaded[u] = new Image(); preloaded[u].src = u; } });
   panels(BY[ST.view || ST.pos]);
 }
 function panels(c){
@@ -203,14 +205,13 @@ function panels(c){
     ${c.form_description ? `<p class="jx-quote">${esc(c.form_description)}</p>` : ''}
     ${c.role_summary ? `<p>${esc(c.role_summary)}</p>` : ''}
     ${skills.length ? `<h3>Kiến thức cần có</h3><ul class="jx-skills">${skills.map(k => `<li>${esc(k)}</li>`).join('')}</ul>` : ''}
-    <div class="jx-row">${link ? `<a class="jx-link" href="${esc(link)}" target="_blank" rel="noopener">Tìm hiểu vai trò này →</a>` : ''}
-      ${here && AV ? `<button class="gx-btn gx-btn-ghost" type="button" data-act="save">Lưu ảnh trước và sau</button>` : ''}</div>`;
+    ${link ? `<a class="jx-link" href="${esc(link)}" target="_blank" rel="noopener">Tìm hiểu vai trò này →</a>` : ''}`;
   if (c.kind === 'start'){ coursePanel.innerHTML = `<p class="jx-k">Bắt đầu</p><h2>${esc(c.name)}</h2>${c.description ? `<p>${esc(c.description)}</p>` : ''}${c.outcome ? `<p class="jx-out">${esc(c.outcome)}</p>` : ''}`; return; }
   if (c.kind === 'finish'){ coursePanel.innerHTML = `<p class="jx-k">Đích</p><h2>${esc(c.name)}</h2>${c.description ? `<p>${esc(c.description)}</p>` : ''}`; return; }
   const url = safeUrl(c.course_url), img = safeUrl(c.course_image_url), know = (c.knowledge || []).filter(Boolean);
-  coursePanel.innerHTML = `${img ? `<a class="jx-thumb" href="${esc(url || '#')}" target="_blank" rel="noopener" data-ga="journey_course_click" data-cp="${esc(c.id)}"><img src="${esc(img)}" alt="${esc(c.course_title || c.name)}" width="1200" height="630" onload="this.parentNode.classList.add('ok')" onerror="this.parentNode.hidden=true"></a>` : ''}
-    <p class="jx-k">${c.kind === 'branch' ? 'Nhánh tuỳ chọn · ' : ''}Khóa học${c.sessions ? ` · ${esc(c.sessions)} buổi` : ''}</p>
-    <h2>${esc(c.course_title || c.name)}</h2>
+  coursePanel.innerHTML = `<div class="jx-chead">${img ? `<a class="jx-thumb" href="${esc(url || '#')}" target="_blank" rel="noopener" data-ga="journey_course_click" data-cp="${esc(c.id)}"><img src="${esc(img)}" alt="${esc(c.course_title || c.name)}" width="1200" height="630" onload="this.parentNode.classList.add('ok')" onerror="this.parentNode.hidden=true"></a>` : ''}
+    <div><p class="jx-k">${c.kind === 'branch' ? 'Nhánh rẽ · ' : ''}Khóa học${c.sessions ? ` · ${esc(c.sessions)} buổi` : ''}</p>
+    <h2>${esc(c.course_title || c.name)}</h2></div></div>
     ${c.description ? `<p>${esc(c.description)}</p>` : ''}
     ${know.length ? `<h3>Bạn sẽ học</h3><ul>${know.map(k => `<li>${esc(k)}</li>`).join('')}</ul>` : ''}
     ${c.outcome ? `<p class="jx-out"><b>Học xong bạn sẽ:</b> ${esc(c.outcome)}</p>` : ''}
@@ -258,34 +259,6 @@ function challenge(id){
   });
 }
 
-// ---------- ảnh trước và sau (PNG 1080 × 1350) ----------
-function saveImage(id){
-  const c = BY[id]; if (!c || !M || !window.THREE) return;
-  const i = ST.visited.indexOf(id), before = lastBefore[id] || JF.form(CPS, ST.visited.slice(0, Math.max(0, i)), COMBOS), after = JF.form(CPS, ST.visited.slice(0, i + 1), COMBOS);
-  const Wd = 1080, Ht = 1350, cv = document.createElement('canvas'); cv.width = Wd; cv.height = Ht; const g = cv.getContext('2d');
-  const gr = g.createLinearGradient(0, 0, Wd, Ht); gr.addColorStop(0, '#241775'); gr.addColorStop(1, '#4B33B8'); g.fillStyle = gr; g.fillRect(0, 0, Wd, Ht);
-  const shot = f => { const r = new THREE.WebGLRenderer({ antialias:true, alpha:true, preserveDrawingBuffer:true }); r.setSize(440, 560, false); r.setPixelRatio(1);
-    const sc = new THREE.Scene(); sc.add(new THREE.HemisphereLight(0xffffff, 0xa79cd0, .75)); const l = new THREE.DirectionalLight(0xffffff, .6); l.position.set(3, 6, 5); sc.add(l);
-    const m = M.buildMascot({ props:f.props }, { isPlayer:true, arrange:true }); m.ring.visible = false; if (f.halo) M.addHalo(m); m.root.rotation.y = -.35; sc.add(m.root);
-    const cm = new THREE.PerspectiveCamera(30, 440 / 560, .1, 50); cm.position.set(0, 1.45, 5.4); cm.lookAt(0, 1.0, 0); r.render(sc, cm);
-    const out = document.createElement('canvas'); out.width = 440; out.height = 560; out.getContext('2d').drawImage(r.domElement, 0, 0); r.dispose(); if (r.forceContextLoss) r.forceContextLoss(); return out; };
-  const fit = (t, px, w, wt) => { let s = px; do { g.font = `${wt} ${s}px -apple-system, "Segoe UI", sans-serif`; s -= 2; } while (g.measureText(t).width > w && s > 14); };
-  const rr = (x, y, w, h, rad) => { g.beginPath(); g.moveTo(x + rad, y); g.arcTo(x + w, y, x + w, y + h, rad); g.arcTo(x + w, y + h, x, y + h, rad); g.arcTo(x, y + h, x, y, rad); g.arcTo(x, y, x + w, y, rad); g.closePath(); };
-  const card = (x, im, lab, f) => { g.fillStyle = 'rgba(255,255,255,.96)'; rr(x, 330, 460, 720, 36); g.fill(); g.drawImage(im, x + 10, 360, 440, 560);
-    g.fillStyle = '#E92F7C'; g.font = '700 26px -apple-system, "Segoe UI", sans-serif'; g.textAlign = 'center'; g.fillText(lab, x + 230, 952);
-    g.fillStyle = '#1C1033'; fit(f.title, 40, 420, '800'); g.fillText(f.title, x + 230, 1000); if (f.sub){ g.fillStyle = '#6B5FA5'; fit(f.sub, 24, 420, '600'); g.fillText(f.sub, x + 230, 1034); } };
-  g.textAlign = 'center'; g.fillStyle = 'rgba(255,255,255,.7)'; g.font = '700 28px -apple-system, "Segoe UI", sans-serif'; g.fillText('HÀNH TRÌNH UI/UX · TELOS ACADEMY', Wd / 2, 110);
-  g.fillStyle = '#FFFFFF'; fit(`Lên đời: ${after.title}`, 62, 980, '800'); g.fillText(`Lên đời: ${after.title}`, Wd / 2, 200);
-  if (c.course_title){ g.fillStyle = 'rgba(255,255,255,.82)'; fit(`Sau ${c.course_title}`, 30, 960, '500'); g.fillText(`Sau ${c.course_title}`, Wd / 2, 258); }
-  card(60, shot(before), 'TRƯỚC', before); card(560, shot(after), 'SAU', after);
-  g.fillStyle = '#FFC53D'; g.font = '800 64px -apple-system, "Segoe UI", sans-serif'; g.fillText('→', Wd / 2, 700);
-  g.fillStyle = '#FFFFFF'; g.font = '800 44px -apple-system, "Segoe UI", sans-serif'; g.textAlign = 'left'; g.fillText('TELOS', 70, 1250);
-  g.fillStyle = 'rgba(255,255,255,.75)'; g.font = '500 26px -apple-system, "Segoe UI", sans-serif'; g.textAlign = 'right'; g.fillText('uiux-library.nhanluu.com/hanh-trinh-ui-ux', Wd - 70, 1250);
-  const a = document.createElement('a'); a.download = `hanh-trinh-${id}.png`; a.href = cv.toDataURL('image/png'); document.body.appendChild(a); a.click(); a.remove();
-  track('journey_save_image', { cp_id:id });
-  window.__jxLastImage = { w:cv.width, h:cv.height, before:before.title, after:after.title };
-}
-
 // ---------- đích: chọn nơi làm việc → Team Map ----------
 function openWork(){
   const web = ST.visited.includes('web');
@@ -313,16 +286,12 @@ document.addEventListener('click', e => {
   const n = e.target.closest('.jx-node');
   if (n){ if (busy) return; const id = n.dataset.cp, t = nextTarget();
     if (t && t.id === id) return next();                  // bấm trạm kế tiếp = đi tiếp
-    if (t && t.fork && t.fork.id === id) return choose(true);
     ST.view = id === ST.pos ? null : id; track('journey_view', { cp_id:id }); render(); return; }   // trạm khác: xem nội dung
   const b = e.target.closest('[data-act]'); if (!b) return;
   switch (b.dataset.act){
     case 'next': return next();
-    case 'yes': return choose(true);
-    case 'no': return choose(false);
     case 'back': ST.view = null; return render();
     case 'work': return openWork();
-    case 'save': return saveImage(ST.pos);
     case 'close': return closeModal();
     case 'reset': if (busy) return; reset(); applyForm(false); placeToken(false); render(); track('journey_reset'); return;
   }
@@ -331,10 +300,7 @@ document.addEventListener('keydown', e => {
   if (/INPUT|TEXTAREA|SELECT/.test((e.target && e.target.tagName) || '')) return;
   if (!modal.hidden){ if (e.key === 'Escape') closeModal(); else if (sheet.onKey && sheet.onKey(e)) e.preventDefault(); return; }
   if (!visible || busy) return;
-  const t = nextTarget();
-  if (t && t.fork && /^[yY]$/.test(e.key)){ e.preventDefault(); choose(true); }
-  else if (t && t.fork && /^[nN]$/.test(e.key)){ e.preventDefault(); choose(false); }
-  else if (e.key === 'ArrowRight' && !(t && t.fork)){ e.preventDefault(); next(); }
+  if (e.key === 'ArrowRight'){ e.preventDefault(); next(); }
 });
 
 // ---------- khởi động ----------
@@ -343,5 +309,5 @@ fresh().then(changed => { if (changed && ST.visited.length === 1){ reset(); appl
 
 // cho test / debug
 window.__jx = { get state(){ return ST; }, get form(){ return FORM; }, get busy(){ return busy; }, get avatar(){ return AV && { props:AV.m.props, halo:!!AV.m.halo }; },
-  nextTarget, next, choose, go, pos:id => POS[id], get vertical(){ return vertical; } };
+  nextTarget, next, go, pos:id => POS[id], get vertical(){ return vertical; } };
 })();
