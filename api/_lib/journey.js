@@ -1,4 +1,4 @@
-// Trang Hành trang học tập (/hanh-trinh-ui-ux) — docs/SPEC-journey.md (bản 2: game 2D đi theo nấc, bản đồ phủ màn hình, hai bảng nổi ở góc dưới).
+// Trang Hành trang học tập (/hanh-trinh-ui-ux) — docs/SPEC-journey.md (bản 2: game 2D đi theo nấc; bấm trạm để đi, bản đồ phủ màn hình, hai bảng Vai trò / Khóa học dàn cột ở đáy).
 // Render phía server mỗi request từ tm_journey_checkpoints + tm_journey_settings (CDN cache vài phút): meta, JSON-LD,
 // bản đồ trạm và hai bảng Vai trò / Khóa học ở trạm xuất phát. Supabase lỗi thì dùng seed đi kèm repo.
 // Game (journey/journey.js) đọc cùng dữ liệu (nhúng trong trang) rồi tự tải lại bản mới nhất từ Supabase.
@@ -32,11 +32,14 @@ async function load(){
     if (Array.isArray(cps) && cps.length){ checkpoints = cps; source = 'db'; }
     if (Array.isArray(st) && st[0]) settings = Object.assign({}, DEFAULTS, Object.fromEntries(Object.entries(st[0]).filter(([, v]) => v !== '' && v != null)));
   } catch (e) { console.error('[journey]', e.message); }
+  checkpoints = checkpoints.map(c => Object.assign({}, c, { name:cleanName(c.name) }));
   const data = { checkpoints, settings, source };
   if (source === 'db') cache = { at:Date.now(), data };
   return data;
 }
 
+// tên nhánh cũ có tiền tố "Rẽ trái: / Rẽ phải:" — bỏ đi khi hiển thị (DB chưa chạy lại SQL vẫn hiện đúng)
+const cleanName = n => { const t = String(n == null ? '' : n).replace(/^\s*rẽ\s+(trái|phải)\s*:\s*/i, ''); return t ? t.charAt(0).toUpperCase() + t.slice(1) : t; };
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));
 const safeUrl = u => /^https?:\/\//i.test(String(u || '')) ? u : null;
 
@@ -57,24 +60,23 @@ const tone = c => c.kind === 'branch' ? 'pink' : c.kind === 'main' ? (TONE[c.id]
 // Bảng "Vai trò" và "Khóa học" của một trạm (server render trạng thái ban đầu; journey.js vẽ lại khi đi tới trạm khác)
 function rolePanel(c){
   const skills = (c.role_skills || []).filter(Boolean), link = c.role_link && /^(\/|https?:\/\/)/.test(c.role_link) ? c.role_link : null;
-  return `<p class="jx-k">${c.kind === 'start' ? 'Bạn bắt đầu là' : c.kind === 'finish' ? 'Bạn vào văn phòng là' : 'Vai trò sau trạm này'}</p>
+  return `<div class="jx-col"><p class="jx-k">${c.kind === 'start' ? 'Bạn bắt đầu là' : c.kind === 'finish' ? 'Bạn vào văn phòng là' : 'Vai trò sau trạm này'}</p>
     <h2 class="jx-role-t">${esc(c.form_title)}</h2>
     ${c.form_description ? `<p class="jx-quote">${esc(c.form_description)}</p>` : ''}
     ${c.role_summary ? `<p>${esc(c.role_summary)}</p>` : ''}
-    ${skills.length ? `<h3>Kiến thức cần có</h3><ul class="jx-skills">${skills.map(k => `<li>${esc(k)}</li>`).join('')}</ul>` : ''}
-    ${link ? `<a class="jx-link" href="${esc(link)}" target="_blank" rel="noopener">Tìm hiểu vai trò này →</a>` : ''}`;
+</div>
+    <div class="jx-col">${skills.length ? `<h3>Kiến thức cần có</h3><ul class="jx-skills">${skills.map(k => `<li>${esc(k)}</li>`).join('')}</ul>` : ''}
+    ${link ? `<a class="jx-link" href="${esc(link)}" target="_blank" rel="noopener">Tìm hiểu vai trò này →</a>` : ''}</div>`;
 }
 function coursePanel(c){
-  if (c.kind === 'start') return `<p class="jx-k">Bắt đầu</p><h2>${esc(c.name)}</h2>${c.description ? `<p>${esc(c.description)}</p>` : ''}${c.outcome ? `<p class="jx-out">${esc(c.outcome)}</p>` : ''}`;
-  if (c.kind === 'finish') return `<p class="jx-k">Đích</p><h2>${esc(c.name)}</h2>${c.description ? `<p>${esc(c.description)}</p>` : ''}`;
+  if (c.kind === 'start' || c.kind === 'finish') return `<div class="jx-col"><p class="jx-k">${c.kind === 'start' ? 'Bắt đầu' : 'Đích'}</p><h2>${esc(c.name)}</h2></div>
+    <div class="jx-col">${c.description ? `<p>${esc(c.description)}</p>` : ''}</div><div class="jx-col">${c.outcome ? `<p class="jx-out">${esc(c.outcome)}</p>` : ''}</div>`;
   const url = safeUrl(c.course_url), img = safeUrl(c.course_image_url), know = (c.knowledge || []).filter(Boolean);
-  return `<div class="jx-chead">${img ? `<a class="jx-thumb" href="${esc(url || '#')}" target="_blank" rel="noopener" data-ga="journey_course_click" data-cp="${esc(c.id)}"><img src="${esc(img)}" alt="${esc(c.course_title || c.name)}" width="1200" height="630" onload="this.parentNode.classList.add('ok')" onerror="this.parentNode.hidden=true"></a>` : ''}
-    <div><p class="jx-k">${c.kind === 'branch' ? 'Nhánh rẽ · ' : ''}Khóa học${c.sessions ? ` · ${esc(c.sessions)} buổi` : ''}</p>
-    <h2>${esc(c.course_title || c.name)}</h2></div></div>
-    ${c.description ? `<p>${esc(c.description)}</p>` : ''}
-    ${know.length ? `<h3>Bạn sẽ học</h3><ul>${know.map(k => `<li>${esc(k)}</li>`).join('')}</ul>` : ''}
-    ${c.outcome ? `<p class="jx-out"><b>Học xong bạn sẽ:</b> ${esc(c.outcome)}</p>` : ''}
-    ${url ? `<a class="gx-btn" href="${esc(url)}" target="_blank" rel="noopener" data-ga="journey_course_click" data-cp="${esc(c.id)}">Xem khóa học tại TELOS ↗</a>` : ''}`;
+  return `<div class="jx-col">${img ? `<a class="jx-thumb" href="${esc(url || '#')}" target="_blank" rel="noopener" data-ga="journey_course_click" data-cp="${esc(c.id)}"><img src="${esc(img)}" alt="${esc(c.course_title || c.name)}" width="1200" height="630" onload="this.parentNode.classList.add('ok')" onerror="this.parentNode.hidden=true"></a>` : ''}
+    ${url ? `<a class="gx-btn" href="${esc(url)}" target="_blank" rel="noopener" data-ga="journey_course_click" data-cp="${esc(c.id)}">Xem khóa học tại TELOS ↗</a>` : ''}</div>
+    <div class="jx-col"><p class="jx-k">${c.kind === 'branch' ? 'Nhánh rẽ · ' : ''}Khóa học${c.sessions ? ` · ${esc(c.sessions)} buổi` : ''}</p>
+    <h2>${esc(c.course_title || c.name)}</h2>${c.description ? `<p>${esc(c.description)}</p>` : ''}</div>
+    <div class="jx-col jx-col-list">${know.length ? `<h3>Bạn sẽ học</h3><ul>${know.map(k => `<li>${esc(k)}</li>`).join('')}</ul>` : ''}${c.outcome ? `<p class="jx-out"><b>Học xong bạn sẽ:</b> ${esc(c.outcome)}</p>` : ''}</div>`;
 }
 
 function render(d, opts = {}){
@@ -157,7 +159,7 @@ ${shell}
 <section class="jx-game" id="jx-game" aria-label="Game hành trang học tập">
   <header class="jx-head">
     <div><p class="jx-eyebrow">TELOS Academy · Từ Newbie tới Product Designer</p><h1>Hành trình trở thành Product Designer</h1></div>
-    <div class="jx-hud" id="jx-hud"><span class="jx-h-t">${esc(start.form_title)}</span><span class="jx-h-p">Đã qua 0/${list.filter(c => c.kind === 'main').length} trạm</span></div>
+    <button class="jx-reset" id="jx-reset" type="button" data-act="reset" hidden>↺ Đi lại từ đầu</button>
   </header>
   <div class="jx-board" id="jx-board">
     <svg class="jx-track" id="jx-track" aria-hidden="true"></svg>
@@ -165,8 +167,9 @@ ${shell}
     <div class="jx-token" id="jx-token" aria-hidden="true"><canvas id="jx-avatar" width="220" height="260"></canvas><span class="jx-emoji">🧑‍💻</span><span class="jx-tag" id="jx-tag">${esc(start.form_title)}</span></div>
     <div class="jx-confetti" id="jx-confetti" aria-hidden="true"></div>
     <div class="jx-banner" id="jx-banner" hidden></div>
+    <div class="jx-hint" id="jx-hint" aria-hidden="true">Bấm để đi tiếp</div>
   </div>
-  <div class="jx-bar" id="jx-bar" aria-live="polite"><p class="jx-msg">Bấm <b>Đi tiếp</b> để bước tới trạm đầu tiên.</p><div class="jx-acts"><button class="gx-btn" type="button" data-act="next">Đi tiếp →</button></div></div>
+  <p class="jx-sr" id="jx-live" aria-live="polite">Bấm vào trạm kế tiếp trên bản đồ để đi.</p>
   <div class="jx-panels">
     <article class="jx-panel jx-role" id="jx-role">${rolePanel(start)}</article>
     <article class="jx-panel jx-course" id="jx-course">${coursePanel(start)}</article>

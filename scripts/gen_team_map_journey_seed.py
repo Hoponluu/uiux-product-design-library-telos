@@ -116,6 +116,10 @@ from (values
 ) as v(id, role_summary, role_skills, role_link, course_image_url)
 where c.id = v.id;
 
+-- bản 3: tên nhánh bỏ chữ "Rẽ trái: / Rẽ phải:" (chỉ đổi khi vẫn còn tên cũ, tên đã sửa trong CMS giữ nguyên)
+update tm_journey_checkpoints set name = 'Làm web' where id = 'web' and name = 'Rẽ trái: làm web';
+update tm_journey_checkpoints set name = 'Biết code' where id = 'code' and name = 'Rẽ phải: biết code';
+
 insert into tm_journey_settings (id, seo_title, seo_description, intro_text, workplaces)
 values (1, {q(SEO_TITLE)}, {q(SEO_DESC)}, {q(INTRO)}, {j(SEED['workplaces'])})
 on conflict (id) do nothing;

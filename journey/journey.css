@@ -1,24 +1,33 @@
 /* Trang Hành trang học tập (/hanh-trinh-ui-ux) — bản 2D đi theo nấc. Header dùng chung lấy từ /glossary/glossary.css.
-   Màn rộng (> 1000px): bản đồ phủ cả chiều cao màn hình, tiêu đề + HUD nổi phía trên, hai bảng nổi ở góc dưới trái / phải.
-   Màn vừa: bản đồ cao 60vh, hai bảng bằng nhau bên dưới. Mobile: bản đồ dọc. */
+   Không có thanh nút: bấm trạm kế tiếp để đi (nhãn "Bấm để đi tiếp" dưới trạm đó).
+   Màn rộng (> 1000px): bản đồ phủ cả chiều cao màn hình, tiêu đề nổi phía trên, hai bảng Vai trò (2 cột) + Khóa học (3 cột) ghim ở đáy, không cuộn.
+   Màn vừa: bản đồ cao 60vh, hai bảng bên dưới. Mobile: bản đồ dọc, bảng một cột. */
 :root { --jx-pink: #E92F7C; --jx-cyan: #35C6E8; --jx-brand: #241775; --jx-ink: #1C1033;
   --jx-t-blue: #241775; --jx-t-yellow: #FFC845; --jx-t-pink: #EF4A81; }   /* bảng màu TELOS (academy.telos.vn) */
 #jx { padding: 80px 0 0; }
 .jx-embed #jx { padding-top: 0; }
 .jx-game { max-width: 1180px; margin: 0 auto; padding: 22px 20px 48px; color: var(--jx-ink); position: relative; }
-.jx-panels { --jx-panel-h: 360px; }
 
 /* đầu trang + HUD */
 .jx-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
 .jx-eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--jx-pink); margin: 0 0 4px; }
 .jx-head h1 { font-size: clamp(22px, 3vw, 30px); line-height: 1.2; margin: 0; letter-spacing: -.01em; }
-.jx-hud { flex-shrink: 0; background: #fff; border: 1px solid rgba(36,23,117,.1); border-radius: 14px; padding: 9px 14px; min-width: 220px; box-shadow: 0 2px 10px rgba(36,23,117,.06); }
-.jx-hud .jx-h-k { display: block; font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: rgba(28,16,51,.5); }
-.jx-hud .jx-h-t { display: block; font-size: 15px; font-weight: 700; }
-.jx-hud .jx-h-s { display: block; font-size: 12px; color: #6B5FA5; }
-.jx-hud .jx-bar-p { height: 5px; border-radius: 5px; background: rgba(36,23,117,.1); margin: 7px 0 4px; overflow: hidden; }
-.jx-hud .jx-bar-p i { display: block; height: 100%; background: linear-gradient(90deg, var(--jx-pink), var(--jx-cyan)); transition: width .5s; }
-.jx-hud .jx-h-p { display: block; font-size: 12px; color: rgba(28,16,51,.6); }
+
+.jx-reset { flex-shrink: 0; background: rgba(255,255,255,.85); border: 1px solid rgba(36,23,117,.12); border-radius: 999px; font: inherit; font-size: 13px; font-weight: 600;
+  color: rgba(28,16,51,.7); cursor: pointer; padding: 7px 14px; }
+.jx-reset:hover { color: var(--jx-brand); border-color: var(--jx-brand); }
+.jx-reset[hidden] { display: none; }
+.jx-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; margin: 0; }
+/* nhãn "Bấm để đi tiếp" dưới trạm kế tiếp */
+.jx-hint { position: absolute; transform: translateX(-50%); z-index: 4; pointer-events: none; white-space: nowrap; font-size: 12px; font-weight: 700; color: #fff;
+  background: var(--jx-pink); padding: 4px 10px; border-radius: 999px; box-shadow: 0 4px 12px rgba(233,47,124,.35); animation: jxNudge 1.2s ease-in-out infinite; }
+.jx-hint::before { content: ''; position: absolute; left: 50%; top: -4px; width: 8px; height: 8px; background: inherit; transform: translateX(-50%) rotate(45deg); border-radius: 1px; }
+.jx-hint[hidden] { display: none; }
+.jx-hint.side { transform: translate(-100%, -50%); animation-name: jxNudgeX; }
+.jx-hint.side::before { left: auto; right: -4px; top: 50%; transform: translateY(-50%) rotate(45deg); }
+@keyframes jxNudgeX { 50% { margin-left: -4px; } }
+@keyframes jxNudge { 50% { margin-top: 4px; } }
+.jx-node.is-next { cursor: pointer; }
 
 /* bản đồ trạm */
 .jx-board { position: relative; height: 272px; border-radius: 22px; overflow: hidden; background:
@@ -76,39 +85,42 @@
   font-size: clamp(16px, 2.4vw, 22px); font-weight: 800; padding: 9px 22px; border-radius: 999px; box-shadow: 0 8px 24px rgba(36,23,117,.3); white-space: nowrap; animation: jxBanner .7s cubic-bezier(.2,1.5,.4,1); pointer-events: none; }
 @keyframes jxBanner { from { transform: translateX(-50%) scale(.2); opacity: 0; } }
 
-/* thanh hành động */
-.jx-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 14px 0; padding: 12px 16px; background: #fff; border: 1px solid rgba(36,23,117,.1); border-radius: 16px; flex-wrap: wrap; }
-.jx-msg { margin: 0; font-size: 14.5px; line-height: 1.5; flex: 1 1 280px; }
-.jx-acts { display: flex; gap: 8px; flex-wrap: wrap; }
-.jx-acts .gx-btn { min-height: 42px; }
-.jx-reset { background: none; border: 0; font: inherit; font-size: 13px; color: rgba(28,16,51,.55); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; padding: 0 4px; }
-
 /* hai bảng */
-.jx-panels { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: stretch; }
-.jx-panel { background: #fff; border: 1px solid rgba(0,0,0,.07); border-radius: 18px; padding: 18px 20px; box-shadow: 0 1px 4px rgba(0,0,0,.04); min-width: 0;
-  height: var(--jx-panel-h); overflow-y: auto; box-sizing: border-box; overscroll-behavior: contain; scrollbar-width: thin; }   /* hai bảng luôn bằng nhau, dài thì cuộn bên trong */
-.jx-panel h2 { font-size: 20px; line-height: 1.25; margin: 0 0 8px; }
-.jx-panel h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: rgba(28,16,51,.5); margin: 16px 0 8px; }
-.jx-panel p { font-size: 14.5px; line-height: 1.6; margin: 0 0 10px; color: rgba(28,16,51,.8); }
-.jx-panel ul { margin: 0 0 10px; padding-left: 18px; font-size: 14px; line-height: 1.55; color: rgba(28,16,51,.85); }
-.jx-panel li { margin-bottom: 4px; }
+.jx-panels { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 16px; }
+/* mỗi bảng chia cột: Vai trò 2 cột, Khóa học 3 cột — đủ chỗ cho cả nội dung, không cần cuộn */
+.jx-panel { background: #fff; border: 1px solid rgba(0,0,0,.07); border-radius: 18px; padding: 14px 18px; box-shadow: 0 1px 4px rgba(0,0,0,.04); min-width: 0; box-sizing: border-box;
+  display: grid; gap: 4px 22px; align-content: start; }
+.jx-role { grid-template-columns: 1fr 1fr; }
+.jx-course { grid-template-columns: 140px 1fr 1.9fr; }
+.jx-col-list ul { columns: 2; column-gap: 22px; }   /* "Bạn sẽ học" chia 2 cột */
+.jx-col-list li { break-inside: avoid; }
+.jx-col { min-width: 0; }
+.jx-col:empty { display: none; }
+.jx-panel h2 { font-size: 18px; line-height: 1.25; margin: 0 0 6px; }
+.jx-panel h3 { font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: rgba(28,16,51,.5); margin: 2px 0 8px; }
+.jx-panel p { font-size: 13px; line-height: 1.5; margin: 0 0 6px; color: rgba(28,16,51,.8); }
+.jx-panel ul { margin: 0; padding-left: 16px; font-size: 13px; line-height: 1.42; color: rgba(28,16,51,.85); }
+.jx-panel li { margin-bottom: 3px; }
+.jx-panel .gx-btn { font-size: 13.5px; }
+.jx-peek { display: inline-block; font-size: 11.5px; font-weight: 700; color: var(--jx-brand); background: rgba(36,23,117,.08); padding: 3px 9px; border-radius: 999px; margin-bottom: 8px; }
 .jx-k { font-size: 11px !important; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--jx-pink) !important; margin: 0 0 6px !important; }
 .jx-role { background: linear-gradient(160deg, #FFF5F9, #fff 40%); }
 .jx-role-t { color: var(--jx-brand); }
 .jx-quote { font-style: italic; color: #6B5FA5 !important; }
 .jx-skills li::marker { color: var(--jx-pink); }
 .jx-now { display: inline-block; font-size: 12px; font-weight: 600; color: #4B3F86; background: rgba(36,23,117,.07); padding: 4px 10px; border-radius: 999px; margin-bottom: 10px; }
-.jx-link { display: inline-block; margin-top: 4px; font-size: 14px; font-weight: 600; color: var(--jx-brand); text-underline-offset: 3px; }
+.jx-link { display: inline-block; margin-top: 8px; font-size: 14px; font-weight: 600; color: var(--jx-brand); text-underline-offset: 3px; }
 .jx-panel .jx-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-.jx-chead { display: flex; gap: 14px; align-items: center; margin-bottom: 6px; }
+.jx-course .jx-thumb { margin-bottom: 10px; }
+.jx-course .gx-btn { padding-left: 12px; padding-right: 12px; min-height: 0; white-space: normal; text-align: center; line-height: 1.3; }
 .jx-chead h2 { margin: 0; }
-.jx-thumb { display: block; flex: 0 0 132px; width: 132px; border-radius: 10px; overflow: hidden; aspect-ratio: 1200 / 630; background: #F3F0FC; }
+.jx-thumb { display: block; flex: 0 0 auto; width: 140px; border-radius: 10px; overflow: hidden; aspect-ratio: 1200 / 630; background: #F3F0FC; }
 .jx-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .3s; color: transparent; }   /* ẩn chữ alt khi đang tải */
 .jx-thumb { background: linear-gradient(100deg, #F3F0FC 30%, #FBFAFF 50%, #F3F0FC 70%) 0 0 / 200% 100%; animation: jxShimmer 1.4s linear infinite; }
 .jx-thumb.ok { animation: none; background: #F3F0FC; }
 @keyframes jxShimmer { to { background-position: -200% 0; } }
 .jx-thumb:hover img { transform: scale(1.03); }
-.jx-out { padding: 10px 12px; border-radius: 12px; background: linear-gradient(135deg, #FFF0F6, #E9F9FD); }
+.jx-out { margin: 8px 0 0 !important; padding: 8px 12px; border-radius: 12px; background: linear-gradient(135deg, #FFF0F6, #E9F9FD); }
 .jx-noscript { font-size: 14px; }
 
 /* modal: thử thách, chọn nơi làm việc */
@@ -135,33 +147,32 @@
 .jx-fade.on { opacity: 1; }
 .jx-toast { position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%); z-index: 750; background: var(--jx-ink); color: #fff; font-size: 13.5px; padding: 9px 16px; border-radius: 999px; max-width: 90vw; text-align: center; }
 
-/* màn rộng: bản đồ phủ màn hình, mọi thứ khác nổi lên trên */
+/* màn rộng: bản đồ phủ màn hình, tiêu đề nổi trên, dải hai bảng ghim ở đáy */
 @media (min-width: 1001px) {
-  .jx-game { max-width: none; height: max(600px, calc(100dvh - 80px)); padding: 0; }
-  .jx-embed .jx-game { height: max(600px, 100dvh); }
+  .jx-game { max-width: none; height: max(700px, calc(100dvh - 80px)); padding: 0; }   /* màn thấp hơn thì trang cuộn một chút, bản đồ không bị bóp */
+  .jx-embed .jx-game { height: max(700px, 100dvh); }
   .jx-board { position: absolute; inset: 0; height: auto !important; border-radius: 0; border: 0; }
-  .jx-head { position: absolute; left: 24px; right: 24px; top: 18px; z-index: 6; pointer-events: none; align-items: flex-start; }
+  .jx-head { position: absolute; left: 24px; right: 24px; top: 16px; z-index: 6; pointer-events: none; align-items: flex-start; }
   .jx-head > * { pointer-events: auto; }
-  .jx-hud { box-shadow: 0 6px 20px rgba(36,23,117,.1); }
-  .jx-panels { position: absolute; left: 16px; right: 16px; bottom: 16px; z-index: 6; display: flex; justify-content: space-between; pointer-events: none;
-    --jx-panel-h: clamp(220px, 40vh, 380px); }
-  .jx-panel { width: min(400px, 30vw); pointer-events: auto; box-shadow: 0 12px 34px rgba(36,23,117,.16); background: rgba(255,255,255,.97); backdrop-filter: blur(6px); }
-  .jx-bar { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 7; margin: 0; width: calc(100% - 2 * min(400px, 30vw) - 64px); max-width: 520px;
-    box-sizing: border-box; flex-direction: column; align-items: stretch; text-align: center; box-shadow: 0 12px 34px rgba(36,23,117,.16); }
-  .jx-bar .jx-msg { flex: none; }
-  .jx-bar .jx-acts { justify-content: center; }
+  .jx-panels { position: absolute; left: 16px; right: 16px; bottom: 16px; z-index: 6; margin: 0; grid-template-columns: 42fr 58fr; align-items: stretch; }
+  .jx-panel { box-shadow: 0 10px 30px rgba(36,23,117,.14); background: rgba(255,255,255,.97); backdrop-filter: blur(6px); }
+}
+@media (min-width: 1001px) and (max-height: 820px) {
+  .jx-token { width: 84px; height: 99px; }
+  .jx-head h1 { font-size: 24px; }
+  .jx-eyebrow { margin-bottom: 2px; }
 }
 @media (min-width: 701px) and (max-width: 1000px) {
   .jx-board { height: 60vh !important; min-height: 380px; }
-  .jx-panels { --jx-panel-h: 420px; }
+  .jx-course { grid-template-columns: 1fr 1.4fr; }
+  .jx-course .jx-col-list { grid-column: 1 / -1; }
 }
 
 /* mobile: bản đồ dọc, hai bảng xếp chồng */
 @media (max-width: 700px) {
   #jx { padding-top: 56px; }
   .jx-game { padding: 14px 14px 96px; }
-  .jx-head { flex-direction: column; align-items: stretch; gap: 10px; }
-  .jx-hud { min-width: 0; }
+  .jx-head { flex-direction: column; align-items: flex-start; gap: 10px; }
   .jx-node { flex-direction: row; transform: translate(-20px, -50%); width: auto; max-width: 62%; gap: 10px; }
   .jx-lbl { text-align: left; }
   .jx-token { width: 70px; height: 82px; transform: translate(-100%, -58%); }
@@ -169,13 +180,13 @@
   .jx-dot { width: 34px; height: 34px; font-size: 17px; }
   .jx-start .jx-dot, .jx-finish .jx-dot { width: 38px; height: 38px; }
   .jx-branch .jx-dot { width: 28px; height: 28px; }
-  .jx-panels { grid-template-columns: 1fr; }
-  .jx-panel { height: auto; overflow: visible; }
+  .jx-role, .jx-course { grid-template-columns: 1fr; gap: 10px; }
+  .jx-col-list ul { columns: 1; }
+  .jx-course > .jx-col:first-child { display: flex; align-items: center; gap: 12px; }
+  .jx-course .jx-thumb { width: 120px; margin: 0; }
   .jx-thumb { flex-basis: 104px; width: 104px; }
-  .jx-bar { position: sticky; bottom: 72px; z-index: 6; box-shadow: 0 6px 20px rgba(36,23,117,.15); }
-  .jx-embed .jx-bar { bottom: 8px; }
 }
-@media (prefers-reduced-motion: reduce) { .jx-token { transition: none; } .jx-token.hop, .jx-banner, .jx-node.is-next .jx-dot { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .jx-token { transition: none; } .jx-token.hop, .jx-banner, .jx-node.is-next .jx-dot, .jx-hint { animation: none; } }
 
 /* Dark mode */
 body.dark .jx-game { color: rgba(255,255,255,.9); }
@@ -186,15 +197,16 @@ body.dark .jx-t-line .jx-dot { border-color: #8D82FF; color: #C9C0FF; }
 body.dark .jx-t-blue .jx-dot { border-color: #8D82FF; }
 body.dark .jx-node.is-here .jx-dot { box-shadow: 0 0 0 4px #1C1A38, 0 0 0 7px var(--jx-pink); }
 body.dark .jx-lbl { color: rgba(255,255,255,.75); }
-body.dark .jx-hud, body.dark .jx-bar, body.dark .jx-panel { background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.09); box-shadow: none; }
-body.dark .jx-hud .jx-h-k, body.dark .jx-hud .jx-h-p, body.dark .jx-panel h3 { color: rgba(255,255,255,.5); }
-body.dark .jx-hud .jx-h-s, body.dark .jx-quote { color: #B9AEFF !important; }
-body.dark .jx-panel p, body.dark .jx-panel ul, body.dark .jx-msg { color: rgba(255,255,255,.78); }
+body.dark .jx-panel { background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.09); box-shadow: none; }
+body.dark .jx-panel h3 { color: rgba(255,255,255,.5); }
+body.dark .jx-quote { color: #B9AEFF !important; }
+body.dark .jx-panel p, body.dark .jx-panel ul { color: rgba(255,255,255,.78); }
 body.dark .jx-role-t, body.dark .jx-link { color: #C9C0FF; }
 body.dark .jx-now { background: rgba(255,255,255,.08); color: #C9C0FF; }
 body.dark .jx-out { background: linear-gradient(135deg, rgba(233,47,124,.14), rgba(53,198,232,.12)); }
 body.dark .jx-sheet { background: #1C1A38; color: rgba(255,255,255,.9); }
 body.dark .jx-opts button, body.dark .jx-work button { background: rgba(255,255,255,.04); color: rgba(255,255,255,.9); border-color: rgba(255,255,255,.14); }
 body.dark .jx-def { background: rgba(123,107,245,.12); color: rgba(255,255,255,.88); }
-body.dark .jx-reset { color: rgba(255,255,255,.55); }
-@media (min-width: 1001px) { body.dark .jx-panel, body.dark .jx-bar, body.dark .jx-hud { background: rgba(28,26,56,.94); } }
+body.dark .jx-reset { color: rgba(255,255,255,.7); background: rgba(28,26,56,.9); border-color: rgba(255,255,255,.14); }
+body.dark .jx-peek { background: rgba(255,255,255,.1); color: #C9C0FF; }
+@media (min-width: 1001px) { body.dark .jx-panel { background: rgba(28,26,56,.94); } }
