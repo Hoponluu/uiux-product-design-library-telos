@@ -38,6 +38,7 @@ if (!document.getElementById('tmj-style')){ const st = document.createElement('s
 .tmj-seg button{border:0;background:none;padding:7px 14px;border-radius:999px;cursor:pointer;font:inherit;font-size:13px}
 .tmj-seg button.active{background:#241775;color:#fff}
 .tmj-note{font-size:12.5px;color:#666;background:#F7F5FC;border-radius:10px;padding:10px 12px;margin:0 0 14px}
+.tmj-thumb{display:block;max-width:100%;width:320px;aspect-ratio:1200/630;object-fit:cover;border-radius:10px;border:1px solid #eee;margin:-6px 0 12px}
 .tmj-og{max-width:360px;border-radius:10px;border:1px solid #eee;display:block;margin:6px 0}
 .tmj-work{display:grid;grid-template-columns:110px 1fr 2fr;gap:8px;align-items:center;margin-bottom:6px}
 @media(max-width:820px){.tmj-form{grid-template-columns:1fr}.tmj-prev{position:static}}
@@ -62,7 +63,7 @@ function render(){
   if (!S.journey) return;
   const view = S.jview || 'cps';
   X.body().innerHTML = `<div class="tmj-seg"><button class="${view === 'cps' ? 'active' : ''}" data-act="jv" data-v="cps">Checkpoint</button><button class="${view === 'set' ? 'active' : ''}" data-act="jv" data-v="set">Cài đặt trang</button></div>
-    <p class="tmj-note">Trang <a href="/hanh-trinh-ui-ux" target="_blank" rel="noopener">/hanh-trinh-ui-ux</a> render phần lộ trình dạng chữ ở server mỗi lần có người mở (cache tối đa ~2 phút), nên sửa ở đây là Google cũng thấy bản mới, không cần xuất bản lại. Game 3D đọc dữ liệu mới ngay ở lần tải trang sau.</p>
+    <p class="tmj-note">Trang <a href="/hanh-trinh-ui-ux" target="_blank" rel="noopener">/hanh-trinh-ui-ux</a> là game 2D đi theo nấc: tới trạm là biến hình, hiện hai bảng "Vai trò" (mô tả + kiến thức cần có) và "Khóa học" (ảnh thumbnail + nội dung khóa). Sửa ở đây là game đọc bản mới ở lần tải trang sau.</p>
     <div id="tmj-body"></div>`;
   view === 'set' ? renderSettings() : renderList();
 }
@@ -80,7 +81,7 @@ function renderList(){
 // ---------- form checkpoint ----------
 function openCp(id){
   const c = S.journey.cps.find(x => x.id === id); if (!c) return;
-  S.jform = { id, c, know:(c.knowledge || []).slice(), props:new Set(c.form_props || []), terms:new Set((c.challenge_term_ids || []).map(String)), tq:'' };
+  S.jform = { id, c, know:(c.knowledge || []).slice(), skills:(c.role_skills || []).slice(), props:new Set(c.form_props || []), terms:new Set((c.challenge_term_ids || []).map(String)), tq:'' };
   const se = c.kind === 'start' || c.kind === 'finish';
   const inp = (name, label, val, attrs = '') => `<div class="form-group"><label>${label}</label><input class="form-control" name="${name}" value="${esc(val ?? '')}" ${attrs}/></div>`;
   const ta = (name, label, val) => `<div class="form-group"><label>${label}</label><textarea class="form-control" name="${name}" rows="3">${esc(val ?? '')}</textarea></div>`;
@@ -88,11 +89,17 @@ function openCp(id){
   const html = `<div class="tmj-form"><div>
     <fieldset><legend>Checkpoint · ${esc(KIND[c.kind])}${c.branch_after ? ` (rẽ sau ${esc(c.branch_after)})` : ''}</legend>
       ${inp('j_name', 'Tên checkpoint *', c.name)}
-      ${se ? '' : `<div class="form-row">${inp('j_course_title', 'Khóa học tương ứng', c.course_title)}${inp('j_sessions', 'Số buổi', c.sessions, 'type="number" min="1" max="200"')}</div>${inp('j_course_url', 'Link khóa học', c.course_url, 'placeholder="https://academy.telos.vn/..."')}`}
+      ${se ? '' : `<div class="form-row">${inp('j_course_title', 'Khóa học tương ứng', c.course_title)}${inp('j_sessions', 'Số buổi', c.sessions, 'type="number" min="1" max="200"')}</div>${inp('j_course_url', 'Link khóa học', c.course_url, 'placeholder="https://academy.telos.vn/..."')}
+      ${inp('j_course_image', 'Ảnh khóa học (thumbnail trên TELOS)', c.course_image_url, 'placeholder="https://academy.telos.vn/wp-content/uploads/..."')}<img class="tmj-thumb" data-jthumb src="${esc(c.course_image_url || '')}" alt=""${c.course_image_url ? '' : ' hidden'}>`}
       ${ta('j_description', 'Mô tả nội dung', c.description)}
       ${se ? '' : `<div class="form-group"><label>Kiến thức sẽ học <small style="font-weight:400;color:#888">— mỗi dòng một ý, kéo ⋮⋮ để đổi thứ tự</small></label><ul class="tmj-know" data-jknow></ul><button class="btn-cancel" type="button" data-act="jk-add">+ Thêm dòng</button></div>`}
       ${ta('j_outcome', 'Học xong bạn sẽ', c.outcome)}
       ${c.kind === 'branch' ? `<div class="form-group">${ck('j_active', 'Hiển thị nhánh này trên bản đồ và phần chữ', c.is_active !== false)}</div>` : ''}
+    </fieldset>
+    <fieldset><legend>Vai trò (bảng "Vai trò" trong game)</legend>
+      ${ta('j_role_summary', 'Mô tả vai trò', c.role_summary)}
+      <div class="form-group"><label>Kiến thức cần có <small style="font-weight:400;color:#888">— mỗi dòng một ý, kéo ⋮⋮ để đổi thứ tự</small></label><ul class="tmj-know" data-jskills></ul><button class="btn-cancel" type="button" data-act="js-add">+ Thêm dòng</button></div>
+      ${inp('j_role_link', 'Link tìm hiểu vai trò', c.role_link, 'placeholder="/thuat-ngu/uiux-designer hoặc https://..."')}
     </fieldset>
     <fieldset><legend>Biến hình</legend>
       ${inp('j_form_title', 'Nhân vật biến thành (chức danh) *', c.form_title)}
@@ -108,13 +115,19 @@ function openCp(id){
   </div>
   <div class="tmj-prev"><canvas data-jprev width="480" height="600"></canvas><b data-jprev-title></b><p>Kéo để xoay · hình thái người chơi thấy khi tới trạm này</p></div></div>`;
   X.openModal(`Checkpoint: ${c.name}`, html, `<button class="btn-cancel" data-act="close">Huỷ</button><button class="btn-save" data-act="jcp-save">Lưu</button>`);
-  renderKnow(); renderTerms(); startPreview();
+  renderKnow(); renderSkills(); renderTerms(); startPreview();
 }
 function renderKnow(){
   const ul = X.formRoot().querySelector('[data-jknow]'); if (!ul) return;
   ul.innerHTML = F().know.map((k, i) => `<li draggable="true" data-id="${i}"><span class="tmj-grip" title="Kéo để đổi thứ tự">⋮⋮</span><input class="form-control" data-jk="${i}" value="${esc(k)}"/><button class="btn-del" type="button" data-act="jk-del" data-i="${i}" title="Xoá dòng">×</button></li>`).join('')
     || '<li style="color:#999;font-size:13px">Chưa có dòng nào</li>';
   X.sortable(ul, ids => { F().know = ids.map(i => F().know[+i]); renderKnow(); });
+}
+function renderSkills(){
+  const ul = X.formRoot().querySelector('[data-jskills]'); if (!ul) return;
+  ul.innerHTML = F().skills.map((k, i) => `<li draggable="true" data-id="${i}"><span class="tmj-grip" title="Kéo để đổi thứ tự">⋮⋮</span><input class="form-control" data-jsk="${i}" value="${esc(k)}"/><button class="btn-del" type="button" data-act="js-del" data-i="${i}" title="Xoá dòng">×</button></li>`).join('')
+    || '<li style="color:#999;font-size:13px">Chưa có dòng nào</li>';
+  X.sortable(ul, ids => { F().skills = ids.map(i => F().skills[+i]); renderSkills(); });
 }
 function renderTerms(){
   const root = X.formRoot(), box = root.querySelector('[data-jterms]'); if (!box) return;
@@ -160,12 +173,16 @@ async function saveCp(){
   const root = X.formRoot(), fv = X.fv, c = F().c; X.clearErrs(root); let bad = false; const err = (s, m) => { bad = true; X.setErr(root, s, m); };
   const se = c.kind === 'start' || c.kind === 'finish';
   const o = { name:fv('j_name'), description:fv('j_description') || '', outcome:fv('j_outcome') || null, form_title:fv('j_form_title'), form_description:fv('j_form_description') || '',
-    form_props:PROPS().filter(p => F().props.has(p)) };
+    form_props:PROPS().filter(p => F().props.has(p)),
+    role_summary:fv('j_role_summary') || null, role_skills:F().skills.map(k => k.trim()).filter(Boolean), role_link:fv('j_role_link') || null };
+  if (o.role_link && !/^(\/|https?:\/\/)\S+$/i.test(o.role_link)) err('[name="j_role_link"]', 'Link bắt đầu bằng / (trang trong thư viện) hoặc https://');
   if (!o.name) err('[name="j_name"]', 'Nhập tên checkpoint');
   if (!o.form_title) err('[name="j_form_title"]', 'Nhập chức danh nhân vật biến thành');
   if (!se){
     const ses = fv('j_sessions'), url = fv('j_course_url');
-    Object.assign(o, { course_title:fv('j_course_title') || null, course_url:url || null, sessions:ses === '' ? null : Number(ses),
+    const img = fv('j_course_image');
+    if (img && !URL_RE.test(img)) err('[name="j_course_image"]', 'Cần URL ảnh đầy đủ (https://...)');
+    Object.assign(o, { course_image_url:img || null, course_title:fv('j_course_title') || null, course_url:url || null, sessions:ses === '' ? null : Number(ses),
       knowledge:F().know.map(k => k.trim()).filter(Boolean), is_milestone:root.querySelector('[name="j_milestone"]').checked,
       require_challenge:root.querySelector('[name="j_challenge"]').checked, challenge_term_ids:[...F().terms] });
     if (url && !URL_RE.test(url)) err('[name="j_course_url"]', 'Cần URL đầy đủ (https://...)');
@@ -188,7 +205,6 @@ function renderSettings(){
   document.getElementById('tmj-body').innerHTML = `<div style="max-width:760px">
     <div class="form-group"><label>Tiêu đề trang (title) <small data-jcount="seo_title"></small></label><input class="form-control" name="js_title" value="${esc(s.seo_title)}" data-jlen="70"/></div>
     <div class="form-group"><label>Mô tả (meta description) <small data-jcount="seo_desc"></small></label><textarea class="form-control" name="js_desc" rows="3" data-jlen="160">${esc(s.seo_description)}</textarea></div>
-    <div class="form-group"><label>Đoạn mở đầu dưới tiêu đề h1</label><textarea class="form-control" name="js_intro" rows="3">${esc(s.intro_text)}</textarea></div>
     <div class="form-group"><label>Ảnh chia sẻ (1200 × 630, PNG/JPEG/WebP, tối đa 2 MB)</label>
       ${S.jset.og ? `<img class="tmj-og" src="${esc(S.jset.og)}" alt="">` : '<p style="font-size:13px;color:#888;margin:4px 0">Chưa có, đang dùng ảnh chung của thư viện.</p>'}
       <input type="file" accept="image/png,image/jpeg,image/webp" data-act="js-og"/> <span data-jogstate style="font-size:12px;color:#666"></span></div>
@@ -221,7 +237,7 @@ async function uploadOg(input){
 }
 async function saveSettings(){
   const v = n => (document.querySelector(`[name="${n}"]`) || {}).value || '';
-  const o = { seo_title:v('js_title').trim(), seo_description:v('js_desc').trim(), intro_text:v('js_intro').trim(), og_image_url:S.jset.og || null,
+  const o = { seo_title:v('js_title').trim(), seo_description:v('js_desc').trim(), og_image_url:S.jset.og || null,
     workplaces:S.jset.work.map(w => Object.assign({}, w, { label:(w.label || '').trim() || w.scale, note:(w.note || '').trim() })) };
   if (!o.seo_title) return toast('Nhập tiêu đề trang', true);
   try {
@@ -242,13 +258,15 @@ function sheets(){
     cols:[['id','id',10],['_kind','Loại',11],['_sort','Thứ tự',8],['name','Tên checkpoint',26],['course_title','Tên khóa học',36],['course_url','Link khóa học',44],['sessions','Số buổi',9],
       ['form_title','Nhân vật biến thành',24],['form_description','Mô tả hình thái',44,{ wrap:1 }],['form_props','Đồ nghề',26],['is_milestone','Mốc nghề',10,{ list:[YES, NO] }],
       ['description','Mô tả',60,{ wrap:1 }],['knowledge','Kiến thức (mỗi dòng một ý)',70,{ wrap:1 }],['outcome','Học xong bạn sẽ',50,{ wrap:1 }],
+      ['course_image_url','Ảnh khóa học',44],['role_summary','Mô tả vai trò',50,{ wrap:1 }],['role_skills','Kiến thức cần có (mỗi dòng một ý)',60,{ wrap:1 }],['role_link','Link vai trò',30],
       ['require_challenge','Bắt buộc thử thách',12,{ list:[YES, NO] }],['challenge_term_ids','Thuật ngữ thử thách (id)',40,{ wrap:1 }],['is_active','Hiển thị',10,{ list:[YES, NO] }]],
     rows:() => ordered(), cur:() => S.journey.cps,
     toCells:c => ({ id:c.id, _kind:KIND[c.kind] || c.kind, _sort:c.sort_order, name:c.name, course_title:c.course_title || '', course_url:c.course_url || '', sessions:c.sessions ?? '',
       form_title:c.form_title, form_description:c.form_description || '', form_props:joinList(c.form_props), is_milestone:c.is_milestone ? YES : NO, description:c.description || '',
-      knowledge:joinKnow(c.knowledge), outcome:c.outcome || '', require_challenge:c.require_challenge ? YES : NO, challenge_term_ids:joinList(c.challenge_term_ids), is_active:c.is_active === false ? NO : YES }),
+      knowledge:joinKnow(c.knowledge), outcome:c.outcome || '', course_image_url:c.course_image_url || '', role_summary:c.role_summary || '', role_skills:joinKnow(c.role_skills), role_link:c.role_link || '', require_challenge:c.require_challenge ? YES : NO, challenge_term_ids:joinList(c.challenge_term_ids), is_active:c.is_active === false ? NO : YES }),
     fromCells:(v, has) => { const o = { id:v.id };
-      ['name','course_title','course_url','form_title','outcome'].forEach(k => { if (has(k)) o[k] = v[k] || null; });
+      ['name','course_title','course_url','form_title','outcome','course_image_url','role_summary','role_link'].forEach(k => { if (has(k)) o[k] = v[k] || null; });
+      if (has('role_skills')) o.role_skills = splitKnow(v.role_skills);
       ['form_description','description'].forEach(k => { if (has(k)) o[k] = v[k] || ''; });
       if (has('sessions')) o.sessions = v.sessions === '' || v.sessions == null ? null : Number(v.sessions);
       if (has('form_props')) o.form_props = splitList(v.form_props);
@@ -262,6 +280,8 @@ function sheets(){
       if ('name' in o && !o.name) E('name', 'Thiếu tên checkpoint');
       if ('form_title' in o && !o.form_title) E('form_title', 'Thiếu chức danh nhân vật biến thành');
       if (o.course_url && !URL_RE.test(o.course_url)) E('course_url', 'Cần URL đầy đủ (https://...)');
+      if (o.course_image_url && !URL_RE.test(o.course_image_url)) E('course_image_url', 'Cần URL ảnh đầy đủ (https://...)');
+      if (o.role_link && !/^(\/|https?:\/\/)\S+$/i.test(o.role_link)) E('role_link', 'Link bắt đầu bằng / hoặc https://');
       if ('sessions' in o && o.sessions !== null && !(Number.isInteger(o.sessions) && o.sessions >= 1 && o.sessions <= 200)) E('sessions', 'Số buổi là số nguyên 1–200');
       (o.form_props || []).forEach(p => { if (!PROPS().includes(p)) E('form_props', `Đồ nghề không hợp lệ "${p}"`); });
       const ids = new Set(terms().map(t => String(t.id))); (o.challenge_term_ids || []).forEach(t => { if (!ids.has(String(t))) E('challenge_term_ids', `Không có thuật ngữ id "${t}"`); });
@@ -277,6 +297,8 @@ function onClick(act, b){
     case 'jcp-save': saveCp(); return true;
     case 'jk-add': F().know.push(''); renderKnow(); { const ins = X.formRoot().querySelectorAll('[data-jk]'); if (ins.length) ins[ins.length - 1].focus(); } return true;
     case 'jk-del': F().know.splice(+b.dataset.i, 1); renderKnow(); return true;
+    case 'js-add': F().skills.push(''); renderSkills(); { const ins = X.formRoot().querySelectorAll('[data-jsk]'); if (ins.length) ins[ins.length - 1].focus(); } return true;
+    case 'js-del': F().skills.splice(+b.dataset.i, 1); renderSkills(); return true;
     case 'js-save': saveSettings(); return true;
     case 'js-copy': { const t = document.querySelector('[data-jembed]'); t.select(); try { navigator.clipboard.writeText(t.value); } catch (e) { document.execCommand('copy'); } toast('Đã copy mã nhúng'); return true; }
   }
@@ -285,6 +307,8 @@ function onClick(act, b){
 function onInput(e){
   const t = e.target;
   if (t.dataset.jk !== undefined && F()){ F().know[+t.dataset.jk] = t.value; return true; }
+  if (t.dataset.jsk !== undefined && F()){ F().skills[+t.dataset.jsk] = t.value; return true; }
+  if (t.name === 'j_course_image'){ const im = X.formRoot().querySelector('[data-jthumb]'); if (im){ im.src = t.value.trim(); im.hidden = !URL_RE.test(t.value.trim()); } return true; }
   if (t.dataset.jtermQ !== undefined && F()){ F().tq = t.value; renderTerms(); return true; }
   if (t.dataset.jw !== undefined && S.jset){ S.jset.work[+t.dataset.jw][t.dataset.k] = t.value; return true; }
   if (t.dataset.jlen){ counters(); return true; }

@@ -29,13 +29,13 @@ Mọi sự kiện kèm `click_source: term_page` và `term_slug`.
 
 | Sự kiện | Khi nào | Tham số |
 | --- | --- | --- |
-| `journey_station_open` | Bước vào một trạm, bảng thông tin mở | `cp_id` |
-| `journey_transform` | Biến hình xong ở một trạm | `cp_id`, `form_title`, `milestone` |
+| `journey_transform` | Tới một trạm và biến hình | `cp_id`, `form_title`, `milestone` |
+| `journey_branch` | Trả lời câu hỏi ngã rẽ | `cp_id` (nhánh), `choice` (`yes` / `no`) |
+| `journey_view` | Bấm một trạm khác trên bản đồ để xem nội dung | `cp_id` |
 | `journey_challenge` | Làm xong thử thách flashcard | `cp_id`, `pass`, `correct` |
 | `journey_save_image` | Lưu ảnh trước và sau | `cp_id` |
-| `journey_course_click` | Bấm link khóa học (trong game hoặc phần chữ) | `cp_id`, `link_url`, `click_source` (`journey_game` / `journey_text`) |
-| `journey_fly` | Bấm "Xem trên bản đồ" ở phần chữ | `cp_id` |
-| `journey_skip_game` | Bấm "Bỏ qua game, đọc lộ trình" | |
+| `journey_course_click` | Bấm ảnh / nút xem khóa học | `cp_id`, `link_url`, `click_source` |
+| `journey_reset` | Bấm "Đi lại từ đầu" | |
 | `journey_finish` | Chọn nơi làm việc đầu tiên, sang Team Map | `workplace`, `form_id`, `branches` |
 | `tm_journey_arrive` | Team Map mở từ trang hành trình (`?tu=hanh-trinh`) | `form_id`, `branches`, `from_scale` |
 | `tm_journey_default` | Team Map: bấm "Dùng lại nhân vật mặc định" | |
@@ -75,7 +75,7 @@ Mọi sự kiện Team Map tự kèm `tm_scale` (`small` · `large` · `agency`)
 Tham số tuỳ chỉnh chỉ hiện trong báo cáo sau khi đăng ký thành **custom dimension**:
 
 GA → Admin → Data display → **Custom definitions** → *Create custom dimension*, phạm vi **Event**, tạo lần lượt cho:
-`tab_name`, `term_name`, `click_source`, `tm_scale`, `tm_lang`, `quest_id`, `quest_title`, `character_title`, `character_kind`, `has_article`, `list_tab`, `start_action`, `action_id`, `character_id`, `badge_id`, `fail_kind`, `method`, `source`, `event`, `cp_id`, `form_title`, `workplace`, `form_id`, `branches`.
+`tab_name`, `term_name`, `click_source`, `tm_scale`, `tm_lang`, `quest_id`, `quest_title`, `character_title`, `character_kind`, `has_article`, `list_tab`, `start_action`, `action_id`, `character_id`, `badge_id`, `fail_kind`, `method`, `source`, `event`, `cp_id`, `form_title`, `workplace`, `form_id`, `branches`, `choice`.
 (`link_url`, `search_term` GA đã có sẵn.) Với `score`, `quest_index` có thể tạo **custom metric** nếu cần tính trung bình.
 
 Link sang academy.telos.vn từ phần xem trước có gắn `utm_source=uiux-library&utm_medium=product-map&utm_content=<click_source>`, xem được trong GA của trang academy.

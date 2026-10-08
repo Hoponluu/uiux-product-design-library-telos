@@ -34,18 +34,15 @@ const { mat, tex, box, cyl, ball, setFace } = window.TM_MASCOT;
 function makeChar(role, isPlayer){ return window.TM_MASCOT.buildMascot(role, { isPlayer, ringColor: GROUPS[role.group] ? GROUPS[role.group].color : null }); }
 
 // ---------- người chơi đi từ trang Hành trình (/hanh-trinh-ui-ux) — docs/SPEC-journey.md mục 5.7 ----------
-// Tham số URL (?tu=hanh-trinh&quy-mo=…&hinh-thai=…&nhanh=web,code) hoặc tiến độ tm_journey_v1 đã đi tới cửa văn phòng.
-const JOURNEY_OFF = 'tm_journey_default';   // người chơi chọn "Dùng lại nhân vật mặc định"
+// Chỉ qua tham số URL (?tu=hanh-trinh&quy-mo=…&hinh-thai=…&nhanh=web,code); trang hành trình không lưu tiến độ.
 const JOURNEY = (() => {
   const J = window.TM_JOURNEY, data = D.JOURNEY; if (!J || !data) return null;
-  const q = new URLSearchParams(location.search), fromUrl = q.get('tu') === 'hanh-trinh' && !!q.get('hinh-thai');
-  let visited = null;
-  if (fromUrl){ visited = [q.get('hinh-thai')].concat((q.get('nhanh') || '').split(',').map(x => x.trim()).filter(Boolean)); try { localStorage.removeItem(JOURNEY_OFF); } catch (e) {} }
-  else { let off = false; try { off = localStorage.getItem(JOURNEY_OFF) === '1'; } catch (e) {} const st = J.read(); if (!off && st.finished_at) visited = st.visited; }
-  if (!visited) return null;
+  const q = new URLSearchParams(location.search);
+  if (q.get('tu') !== 'hanh-trinh' || !q.get('hinh-thai')) return null;
+  const visited = [q.get('hinh-thai')].concat((q.get('nhanh') || '').split(',').map(x => x.trim()).filter(Boolean));
   const by = Object.fromEntries(data.checkpoints.map(c => [c.id, c]));
   if (!visited.some(id => by[id] && by[id].kind === 'main')) return null;
-  return { form:J.form(data.checkpoints, visited, data.combos), arrived:fromUrl, scale:fromUrl ? q.get('quy-mo') : null, key:fromUrl ? q.toString() : null };
+  return { form:J.form(data.checkpoints, visited, data.combos), arrived:true, scale:q.get('quy-mo'), key:q.toString() };
 })();
 let journeyOn = !!JOURNEY;
 const playerTitle = () => journeyOn ? JOURNEY.form.title + (JOURNEY.form.sub ? ' · ' + JOURNEY.form.sub : '') : ROLES[PLAYER_ID].title;
@@ -1062,7 +1059,6 @@ function bindJourneyMenu(){
   const b = $('#nav-journey-default'); if (!b) return;
   b.hidden = !journeyOn;
   b.onclick = () => {
-    try { localStorage.setItem(JOURNEY_OFF, '1'); } catch (e) {}
     journeyOn = false; b.hidden = true; track('tm_journey_default');
     if (player){ window.TM_MASCOT.setProps(player.obj, ROLES[PLAYER_ID].props || []); if (player.obj.halo){ player.obj.root.remove(player.obj.halo); player.obj.halo = null; }
       player.label.el.innerHTML = `${L('Bạn', 'You')} · ${escapeHtml(playerTitle())}`; }

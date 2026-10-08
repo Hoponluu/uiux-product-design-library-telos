@@ -2,7 +2,6 @@
 // window.TM_JOURNEY.form(checkpoints, visitedIds, combos) → { id, title, sub, props, halo, mains, branches }
 (function(){
 'use strict';
-const KEY = 'tm_journey_v1';
 
 function form(cps, visited, combos){
   const by = {}; cps.forEach(c => { by[c.id] = c; });
@@ -25,12 +24,5 @@ function form(cps, visited, combos){
   return { id:top.id, title:top.form_title, sub, props, halo:!!(last && mains.includes(last.id)), mains, branches, mainsAll:mainsAll.map(c => c.id) };
 }
 
-// tiến độ lưu trên trình duyệt (bọc try/catch: chặn localStorage thì vẫn chạy, chỉ không lưu)
-function read(){
-  try { const v = JSON.parse(localStorage.getItem(KEY) || 'null'); if (v && Array.isArray(v.visited)) return { visited:v.visited, challenge_passed:v.challenge_passed || [], finished_at:v.finished_at || null, workplace:v.workplace || null }; } catch (e) {}
-  return { visited:[], challenge_passed:[], finished_at:null, workplace:null };
-}
-function write(st){ try { localStorage.setItem(KEY, JSON.stringify(st)); return true; } catch (e) { return false; } }
-
-window.TM_JOURNEY = { form, read, write, KEY };
+window.TM_JOURNEY = { form };
 })();

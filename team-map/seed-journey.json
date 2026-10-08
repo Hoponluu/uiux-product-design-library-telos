@@ -21,7 +21,15 @@
    "branch_after": null,
    "require_challenge": false,
    "challenge_term_ids": [],
-   "is_active": true
+   "is_active": true,
+   "role_summary": "Người mới tò mò về UI/UX. Chưa cần biết vẽ hay biết code, chỉ cần muốn hiểu vì sao có app dùng sướng còn có app dùng muốn ném điện thoại.",
+   "role_skills": [
+    "Tò mò về cách mọi người dùng sản phẩm số",
+    "Dùng máy tính thành thạo, tự tìm được tài liệu",
+    "Sẵn sàng làm bài tập và nhận góp ý"
+   ],
+   "role_link": null,
+   "course_image_url": null
   },
   {
    "id": "figma",
@@ -51,7 +59,17 @@
    "branch_after": null,
    "require_challenge": false,
    "challenge_term_ids": [],
-   "is_active": true
+   "is_active": true,
+   "role_summary": "Dùng Figma nhanh và gọn: dựng được giao diện, tổ chức file sạch và làm prototype để người khác bấm thử.",
+   "role_skills": [
+    "Frame, constraint và cách tổ chức layer, page",
+    "Component, instance, variants và properties",
+    "Autolayout để dựng layout co giãn",
+    "Style màu, chữ và Variable cơ bản",
+    "Prototype và các tương tác thường gặp"
+   ],
+   "role_link": null,
+   "course_image_url": "https://academy.telos.vn/wp-content/uploads/2025/05/Thumb-figma.png"
   },
   {
    "id": "ui",
@@ -81,7 +99,17 @@
    "branch_after": null,
    "require_challenge": false,
    "challenge_term_ids": [],
-   "is_active": true
+   "is_active": true,
+   "role_summary": "Thiết kế giao diện đẹp, nhất quán và giải thích được vì sao chọn màu này, cỡ chữ kia.",
+   "role_skills": [
+    "Typography: cỡ chữ, line height, ghép font",
+    "Màu sắc: hệ màu, contrast, palette, dark mode",
+    "Grid, alignment và hệ thống khoảng cách",
+    "Component phổ biến: button, form, card, modal",
+    "Bàn giao giao diện cho developer"
+   ],
+   "role_link": "/thuat-ngu/ui-designer",
+   "course_image_url": "https://academy.telos.vn/wp-content/uploads/2025/05/Thumb-ui.png"
   },
   {
    "id": "ux",
@@ -111,7 +139,17 @@
    "branch_after": null,
    "require_challenge": false,
    "challenge_term_ids": [],
-   "is_active": true
+   "is_active": true,
+   "role_summary": "Mốc nghề đầu tiên: đi tìm vấn đề thật của người dùng trước khi vẽ, và kiểm chứng giải pháp sau khi vẽ.",
+   "role_skills": [
+    "Phỏng vấn và quan sát người dùng",
+    "Persona, Journey Map, Jobs-to-be-Done",
+    "10 nguyên lý Heuristic của Nielsen",
+    "Kiến trúc thông tin, user flow, wireframe",
+    "Usability Testing và A/B Testing"
+   ],
+   "role_link": "/thuat-ngu/uiux-designer",
+   "course_image_url": "https://academy.telos.vn/wp-content/uploads/2025/05/Thumb-ux.jpg"
   },
   {
    "id": "ds",
@@ -141,7 +179,17 @@
    "branch_after": null,
    "require_challenge": false,
    "challenge_term_ids": [],
-   "is_active": true
+   "is_active": true,
+   "role_summary": "Làm việc có hệ thống trong sản phẩm lớn: dựng và dùng Design System để team thiết kế và code nói cùng một ngôn ngữ.",
+   "role_skills": [
+    "Tư duy hệ thống, phân biệt UI Kit, Style Guide, Design System",
+    "Design token và cách đặt tên",
+    "Thư viện component có variants, slot, pattern",
+    "Viết guideline, quản lý phiên bản",
+    "Phối hợp với developer khi đưa vào code"
+   ],
+   "role_link": "/thuat-ngu/design-system-designer",
+   "course_image_url": "https://academy.telos.vn/wp-content/uploads/2025/05/Quangcao04-1.png"
   },
   {
    "id": "ai",
@@ -172,7 +220,17 @@
    "branch_after": null,
    "require_challenge": false,
    "challenge_term_ids": [],
-   "is_active": true
+   "is_active": true,
+   "role_summary": "Dùng AI làm trợ lý trong từng bước của quy trình mà vẫn giữ phán đoán của designer.",
+   "role_skills": [
+    "AI làm được gì và không làm được gì trong UX",
+    "Viết prompt cho research, ý tưởng và prototype",
+    "Kiểm soát hallucination khi tổng hợp insight",
+    "Dùng AI để audit accessibility và Design System",
+    "Dùng AI có trách nhiệm"
+   ],
+   "role_link": null,
+   "course_image_url": "https://academy.telos.vn/wp-content/uploads/2026/02/Screenshot-2026-07-01-173738.png"
   },
   {
    "id": "pdm",
@@ -203,7 +261,17 @@
    "branch_after": null,
    "require_challenge": false,
    "challenge_term_ids": [],
-   "is_active": true
+   "is_active": true,
+   "role_summary": "Trả lời được cả câu hỏi có nên làm không và làm xong đo bằng gì, không chỉ là thiết kế thế nào. Nối thiết kế với kinh doanh.",
+   "role_skills": [
+    "Tư duy sản phẩm và vai trò PM, PO, Designer",
+    "Nghiên cứu thị trường, đối thủ, Product-Market Fit",
+    "Ưu tiên tính năng: Kano, MoSCoW, RICE",
+    "Business Model, Go-to-Market, AARRR, North Star Metric",
+    "Viết PRD, User Story, Acceptance Criteria"
+   ],
+   "role_link": "/thuat-ngu/product-designer",
+   "course_image_url": "https://academy.telos.vn/wp-content/uploads/2025/10/SocialIMage.png"
   },
   {
    "id": "web",
@@ -232,7 +300,17 @@
    "branch_after": "ui",
    "require_challenge": false,
    "challenge_term_ids": [],
-   "is_active": true
+   "is_active": true,
+   "role_summary": "Nhận được dự án website, landing page và làm tốt ở agency.",
+   "role_skills": [
+    "Các loại website và quy trình làm web",
+    "Responsive và HTML, CSS cơ bản",
+    "Landing page và các trang thông tin",
+    "Luồng thương mại điện tử: sản phẩm, giỏ hàng, thanh toán",
+    "Bàn giao file web cho developer"
+   ],
+   "role_link": null,
+   "course_image_url": "https://academy.telos.vn/wp-content/uploads/2025/05/Thumb-web.png"
   },
   {
    "id": "code",
@@ -261,7 +339,17 @@
    "branch_after": "ds",
    "require_challenge": false,
    "challenge_term_ids": [],
-   "is_active": true
+   "is_active": true,
+   "role_summary": "Tự dựng được thứ mình vẽ và nói chuyện với developer không bị lạc.",
+   "role_skills": [
+    "HTML và cách trình duyệt hiển thị một trang",
+    "CSS, responsive, TailwindCSS theo design system",
+    "JavaScript và animation cơ bản",
+    "Git cơ bản",
+    "Chuyển Figma sang HTML và deploy lên mạng"
+   ],
+   "role_link": "/thuat-ngu/design-engineer",
+   "course_image_url": "https://academy.telos.vn/wp-content/uploads/2025/05/Thumb-code.png"
   },
   {
    "id": "finish",
@@ -281,7 +369,11 @@
    "branch_after": null,
    "require_challenge": false,
    "challenge_term_ids": [],
-   "is_active": true
+   "is_active": true,
+   "role_summary": "Đi hết con đường: sẵn sàng cho ngày đầu đi làm ở vị trí Product Designer.",
+   "role_skills": [],
+   "role_link": "/thuat-ngu/product-designer",
+   "course_image_url": null
   }
  ],
  "branch_combos": [
