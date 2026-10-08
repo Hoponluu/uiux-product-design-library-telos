@@ -21,16 +21,24 @@ SITE = 'https://uiux-library.nhanluu.com'
 
 TITLE_VI = 'Product Company Map Simulation - Một game nhập vai làm UI/UX Designer để hiểu một ngày làm việc của các phòng ban Product'
 TITLE_EN = 'Product Company Map Simulation - A role-playing game where you are a UI/UX Designer and live a day with every Product department'
+SHORT_VI = 'Game nhập vai UI/UX Designer: một ngày ở công ty Product | TELOS'
+SHORT_EN = 'UI/UX Designer role-playing game: a day at a Product company | TELOS'
 DESC_VI = 'Một game nhập vai làm UI/UX Designer để hiểu một ngày làm việc của các phòng ban Product: designer ngồi ở đâu, làm việc với ai, báo cáo cho ai.'
 DESC_EN = 'A role-playing game where you are a UI/UX Designer and live a day with every Product department: where designers sit, who they work with and who they report to.'
 
 # (chuỗi trong team-map.html, chuỗi tiếng Anh, số lần xuất hiện)
 REPLACE = [
     ('<html lang="vi"', '<html lang="en"', 1),
-    (f'<title>{TITLE_VI}</title>', f'<title>{TITLE_EN}</title>', 1),
+    (f'<title>{SHORT_VI}</title>', f'<title>{SHORT_EN}</title>', 1),
     (f'content="{TITLE_VI}"', f'content="{TITLE_EN}"', 2),
     (f'content="{DESC_VI}"', f'content="{DESC_EN}"', 3),
-    (f'<h1 hidden>{TITLE_VI}</h1>', f'<h1 hidden>{TITLE_EN}</h1>', 1),
+    # JSON-LD (VideoGame + BreadcrumbList)
+    (f'"@id": "{SITE}/team-map#game"', f'"@id": "{SITE}/en/team-map#game"', 1),
+    (f'"url": "{SITE}/team-map"', f'"url": "{SITE}/en/team-map"', 1),
+    (f'"description": "{DESC_VI}"', f'"description": "{DESC_EN}"', 1),
+    ('"inLanguage": "vi"', '"inLanguage": "en"', 1),
+    ('"name": "Thư viện thuật ngữ UI/UX"', '"name": "UI/UX Glossary"', 1),
+    (f'"item": "{SITE}/team-map"', f'"item": "{SITE}/en/team-map"', 1),
     (f'<link rel="canonical" href="{SITE}/team-map">', f'<link rel="canonical" href="{SITE}/en/team-map">', 1),
     (f'<meta property="og:url" content="{SITE}/team-map">', f'<meta property="og:url" content="{SITE}/en/team-map">', 1),
     ('<meta property="og:locale" content="vi_VN">\n<meta property="og:locale:alternate" content="en_US">',
@@ -42,6 +50,9 @@ REPLACE = [
     ('aria-label="Công cụ trong thư viện"', 'aria-label="Library tools"', 1),
     ('<span class="tb-label">Về dự án</span>', '<span class="tb-label">About</span>', 1),
     ('<a class="tab-btn active" href="/team-map" aria-current="page">', '<a class="tab-btn active" href="/en/team-map" aria-current="page">', 1),
+    ('<a class="tab-btn" href="/hanh-trinh-ui-ux">', '<a class="tab-btn" href="/hanh-trinh-ui-ux" hreflang="vi">', 1),
+    ('<span class="tb-label">Hành trình</span>', '<span class="tb-label">Learning path</span>', 1),
+    ('<span>Dùng lại nhân vật mặc định</span>', '<span>Use the default character</span>', 1),
     ('aria-label="Đóng menu"', 'aria-label="Close menu"', 1),
     ('<span id="nav-mode-label">Chế độ tối</span>', '<span id="nav-mode-label">Dark mode</span>', 1),
     ("dark ? 'Chế độ sáng' : 'Chế độ tối'", "dark ? 'Light mode' : 'Dark mode'", 1),

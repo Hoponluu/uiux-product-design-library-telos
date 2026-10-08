@@ -701,6 +701,15 @@ body.dark .ascii-cell { color: rgba(255,255,255,0.16); }
 body.dark .ascii-cell.fg { color: rgba(255,255,255,0.82); }
 
 /* ── MOBILE BOTTOM BAR ───────────────────────────────────── */
+/* ── TABLET: 7 tab vẫn vừa giữa logo và nút menu ── */
+@media (min-width: 641px) and (max-width: 1000px) {
+  .tab-btn { padding: 10px 12px; font-size: 13px; }
+}
+@media (min-width: 641px) and (max-width: 780px) {
+  .tab-btn { padding: 8px 11px; }
+  .tb-icon { display: block; font-size: 18px; }
+  .tb-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
 @media (max-width: 640px) {
   #tabs { height: 56px; }
   #tab-pill {
@@ -711,6 +720,7 @@ body.dark .ascii-cell.fg { color: rgba(255,255,255,0.82); }
     padding: 0; gap: 0; justify-content: space-around;
   }
   .tab-btn { flex: 1; padding: 8px 4px; border-radius: 0; font-size: 10px; font-weight: 500; gap: 3px; }
+  .tb-label { white-space: normal; line-height: 1.15; text-align: center; font-size: 9.5px; }
   .tab-btn:hover { background: transparent; }
   .tab-btn.active { background: transparent; color: #241775; }
   .tb-icon { display: block; }
@@ -778,6 +788,9 @@ body.dark .ascii-cell.fg { color: rgba(255,255,255,0.82); }
   </button>
   <a class="tab-btn" href="/team-map">
     <span class="tb-icon">🏢</span><span class="tb-label">Product Map</span>
+  </a>
+  <a class="tab-btn" href="/hanh-trinh-ui-ux">
+    <span class="tb-icon">🧭</span><span class="tb-label">Hành trình</span>
   </a>
   <button class="tab-btn" onclick="switchTab('about',this)">
     <span class="tb-icon">ℹ️</span><span class="tb-label">Về dự án</span>

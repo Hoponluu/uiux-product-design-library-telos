@@ -88,7 +88,7 @@ function tabs(lang){
   const t = (href, icon, label, active) => `<a class="tab-btn${active ? ' active' : ''}" href="${href}"${active ? ' aria-current="page"' : ''}><span class="tb-icon">${icon}</span><span class="tb-label">${label}</span></a>`;
   if (lang === 'en') return [t('/', '🗺', 'Graph view'), t('/en/glossary', '🔤', 'A-Z', true), t('/en/team-map', '🏢', 'Product Map')].join('');
   return [t('/', '🗺', 'Graph view'), t('/?tab=glossary', '🔤', 'A-Z', true), t('/?tab=flashcard', '🃏', 'Flashcard Quiz'),
-    t('/?tab=challenge', '🎲', 'UI Challenge'), t('/team-map', '🏢', 'Product Map'), t('/?tab=about', 'ℹ️', 'Về dự án')].join('');
+    t('/?tab=challenge', '🎲', 'UI Challenge'), t('/team-map', '🏢', 'Product Map'), t('/hanh-trinh-ui-ux', '🧭', 'Hành trình'), t('/?tab=about', 'ℹ️', 'Về dự án')].join('');
 }
 
 function page({ lang, title, desc, path, alt, body, ld, noindex, ogType, term }){
@@ -287,6 +287,7 @@ const STATIC = [
   { loc:'/', pr:'1.0', alt:null },
   { loc:'/team-map', pr:'0.8', alt:{ vi:'/team-map', en:'/en/team-map' } },
   { loc:'/en/team-map', pr:'0.7', alt:{ vi:'/team-map', en:'/en/team-map' } },
+  { loc:'/hanh-trinh-ui-ux', pr:'0.9', alt:null },
   { loc:'/thuat-ngu', pr:'0.9', alt:{ vi:'/thuat-ngu', en:'/en/glossary' } },
   { loc:'/en/glossary', pr:'0.8', alt:{ vi:'/thuat-ngu', en:'/en/glossary' } },
 ];

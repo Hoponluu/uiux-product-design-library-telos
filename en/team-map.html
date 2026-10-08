@@ -158,6 +158,8 @@ a.tab-btn { text-decoration: none; }
 }
 .nav-dark-toggle:hover { color: rgba(255,255,255,0.7); }
 .nav-dark-icon { font-size: 18px; }
+#nav-journey-default[hidden] { display: none; }
+#nav-journey-default:not([hidden]) + .nav-dark-toggle { margin-top: 18px; }
 
 /* ── DARK MODE (header) ── */
 body.dark { background: #090B1E; }
@@ -172,6 +174,15 @@ body.dark #header-logo svg path { fill: #fafafa; }
 body.dark #header-logo { filter: brightness(0) invert(1); }
 
 /* ── MOBILE BOTTOM BAR ── */
+/* ── TABLET: 7 tab vẫn vừa giữa logo và nút menu ── */
+@media (min-width: 641px) and (max-width: 1000px) {
+  .tab-btn { padding: 10px 12px; font-size: 13px; }
+}
+@media (min-width: 641px) and (max-width: 780px) {
+  .tab-btn { padding: 8px 11px; }
+  .tb-icon { display: block; font-size: 18px; }
+  .tb-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
 @media (max-width: 640px) {
   #tabs { height: 56px; }
   #tab-pill {
@@ -182,6 +193,7 @@ body.dark #header-logo { filter: brightness(0) invert(1); }
     padding: 0; gap: 0; justify-content: space-around;
   }
   .tab-btn { flex: 1; padding: 8px 4px; border-radius: 0; font-size: 10px; font-weight: 500; gap: 3px; }
+  .tb-label { white-space: normal; line-height: 1.15; text-align: center; font-size: 9.5px; }
   .tab-btn:hover { background: transparent; }
   .tab-btn.active { background: transparent; color: #241775; }
   .tb-icon { display: block; }
@@ -292,6 +304,9 @@ body.dark #header-logo { filter: brightness(0) invert(1); }
   <a class="tab-btn active" href="/en/team-map" aria-current="page">
     <span class="tb-icon">🏢</span><span class="tb-label">Product Map</span>
   </a>
+  <a class="tab-btn" href="/hanh-trinh-ui-ux" hreflang="vi">
+    <span class="tb-icon">🧭</span><span class="tb-label">Learning path</span>
+  </a>
   <a class="tab-btn" href="/?tab=about">
     <span class="tb-icon">ℹ️</span><span class="tb-label">About</span>
   </a>
@@ -310,6 +325,7 @@ body.dark #header-logo { filter: brightness(0) invert(1); }
     <a class="nav-link" href="https://nhanluu.com/portfolio/" target="_blank" rel="noopener">PORTFOLIO</a>
     <a class="nav-link" href="https://nhanluu.com/blog/" target="_blank" rel="noopener">BLOG</a>
     <a class="nav-link" href="https://nhanluu.com/contact/" target="_blank" rel="noopener">CONTACT</a>
+    <button class="nav-dark-toggle" id="nav-journey-default" type="button" hidden><span class="nav-dark-icon">🎒</span><span>Use the default character</span></button>
     <button class="nav-dark-toggle" onclick="toggleMode()">
       <span class="nav-dark-icon" id="nav-mode-icon">🌙</span>
       <span id="nav-mode-label">Dark mode</span>
@@ -387,6 +403,8 @@ body.dark #header-logo { filter: brightness(0) invert(1); }
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="/team-map/team-map.mascot.js"></script>
+<script src="/journey/journey.form.js"></script>
 <script src="/supabase.config.js"></script>
 <script src="/team-map/team-map.layout.js"></script>
 <script src="/team-map/team-map.loader.js"></script>
