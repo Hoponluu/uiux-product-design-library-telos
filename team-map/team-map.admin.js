@@ -98,6 +98,7 @@
     ]);
     Object.assign(S, { chars, rooms, pls, quests, steps, loaded:true });
     if (AH) await AH.load();
+    if (AJ) await AJ.load();
   }
   async function reload(){ await load(); render(); }
 
@@ -118,11 +119,11 @@
   const TABS = { chars:'Nhân vật', rooms:'Phòng ban', quests:'Nhiệm vụ', io:'Import / Export' };
   function render(){
     S.loading = null;
-    const tabs = Object.assign({}, TABS, AH && S.hourly ? AH.tabs : {}); if (!tabs[S.tab]) S.tab = 'chars';
+    const tabs = Object.assign({}, TABS, AH && S.hourly ? AH.tabs : {}, AJ && S.journey ? AJ.tabs : {}); if (!tabs[S.tab]) S.tab = 'chars';
     panel().innerHTML = `<div class="tm-subtabs">${Object.entries(tabs).map(([k, v]) =>
       `<button class="tm-sub${S.tab === k ? ' active' : ''}" data-act="tab" data-tab="${k}">${v}</button>`).join('')}
       <span class="tm-sub-note">Lưu là lên ngay · game cập nhật ở lần tải trang sau</span></div><div id="tm-body"></div>`;
-    (({ chars:renderChars, rooms:renderRooms, quests:renderQuests, io:renderIO })[S.tab] || AH.render[S.tab])();
+    (({ chars:renderChars, rooms:renderRooms, quests:renderQuests, io:renderIO })[S.tab] || (AJ && AJ.render[S.tab]) || AH.render[S.tab])();
   }
   const body = () => document.getElementById('tm-body');
 
@@ -145,7 +146,7 @@
     m.classList.add('open'); m.querySelector('.modal').scrollTop = 0;
     return m;
   }
-  function closeModal(){ const m = document.getElementById('tm-modal'); if (m) m.classList.remove('open'); S.form = null; if (AH) AH.onClose(); }
+  function closeModal(){ const m = document.getElementById('tm-modal'); if (m) m.classList.remove('open'); S.form = null; if (AH) AH.onClose(); if (AJ) AJ.onClose(); }
 
   // Hỏi lại ngay trong trang (không dùng confirm() của trình duyệt)
   function ask(title, msg, okLabel = 'Xoá', danger = true){
@@ -650,7 +651,10 @@
   // Nhiệm vụ theo giờ (team-map.admin-hourly.js): 3 tab, nhóm trường trong form nhân vật, 4 sheet Excel
   const AH = window.TM_ADMIN_HOURLY ? window.TM_ADMIN_HOURLY({ S, esc, toast, body:() => body(), openModal, closeModal, formRoot, fv, clearErrs, setErr, ask, sortable,
     reload:() => reload(), render:() => render(), charOf, enOf, withEn, enInput, enBadge, SCALE_NAME, toSlug, YES, NO, joinList, splitList, enCols, enCells, enFrom }) : null;
-  const allSheets = () => [...SHEETS, ...(AH && S.hourly ? AH.sheets() : [])];
+  // Trang Hành trình (team-map.admin-journey.js): tab "Hành trình", sheet Excel "Hanh trinh"
+  const AJ = window.TM_ADMIN_JOURNEY ? window.TM_ADMIN_JOURNEY({ S, esc, toast, body:() => body(), openModal, closeModal, formRoot, fv, clearErrs, setErr, ask, sortable,
+    reload:() => reload(), render:() => render(), YES, NO, joinList, splitList }) : null;
+  const allSheets = () => [...SHEETS, ...(AH && S.hourly ? AH.sheets() : []), ...(AJ && S.journey ? AJ.sheets() : [])];
 
   const SHEETS = [
     { name:'Nhan vat', key:'characters', title:'Nhân vật', required:['id','title','kind','group'],
@@ -982,7 +986,10 @@
     if (!Object.keys(p).length) return toast('Không có thay đổi nào để áp dụng');
     btn.disabled = true; btn.textContent = 'Đang ghi...';
     try {
-      await sbRpc('tm_import', { p });
+      // sheet Hành trình ghi bằng RPC riêng (tm_import_journey), sau khi phần Team Map đã ghi xong
+      const journey = p.journey; delete p.journey;
+      if (Object.keys(p).length) await sbRpc('tm_import', { p });
+      if (journey) await sbRpc('tm_import_journey', { p:journey });
       const sum = allSheets().filter(d => imp.sheets[d.key]).map(d => { const s = imp.sheets[d.key]; return `${d.title}: ${s.added.length} thêm · ${s.updated.length} cập nhật`; });
       S.imp = { done:sum, file:imp.file }; await load(); renderIO(); toast('Đã áp dụng import');
     } catch(e) { toast('Lỗi, chưa ghi gì vào DB: ' + e.message, true); btn.disabled = false; btn.textContent = 'Áp dụng'; }
@@ -1061,7 +1068,7 @@
       case 'exp': return exportXlsx(b);
       case 'imp-apply': return applyImport(b);
       case 'imp-cancel': S.imp = null; return renderIO();
-      default: if (AH) AH.onClick(b.dataset.act, b);
+      default: if (AJ && AJ.onClick(b.dataset.act, b)) return; if (AH) AH.onClick(b.dataset.act, b);
     }
   }
 
@@ -1073,6 +1080,7 @@
 
   function onInput(e){
     const t = e.target;
+    if (AJ && AJ.onInput(e)) return;
     if (AH && AH.onInput(e)) return;
     if (t.dataset.f === 'q'){ S.f.q = t.value; renderChars(); const el = body().querySelector('[data-f="q"]'); el.focus(); el.setSelectionRange(el.value.length, el.value.length); return; }
     if (t.dataset.comboQ){ const name = t.dataset.comboQ;
@@ -1092,6 +1100,7 @@
 
   function onChange(e){
     const t = e.target, F = S.form;
+    if (AJ && AJ.onChange(e)) return;
     if (AH && AH.onChange(e)) return;
     if (t.dataset.act === 'imp-file' && t.files[0]) return importFile(t.files[0]);
     if (t.dataset.f && t.dataset.f !== 'q'){ S.f[t.dataset.f] = t.type === 'checkbox' ? t.checked : t.value; return S.tab === 'quests' ? renderQuests() : renderChars(); }

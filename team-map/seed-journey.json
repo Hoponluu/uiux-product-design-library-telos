@@ -1,0 +1,315 @@
+{
+ "version": 1,
+ "checkpoints": [
+  {
+   "id": "start",
+   "kind": "start",
+   "sort_order": 0,
+   "name": "Xuất phát",
+   "course_title": null,
+   "course_url": null,
+   "sessions": null,
+   "form_title": "Newbie",
+   "form_description": "Chưa biết gì, nhưng có ba lô và một tấm bản đồ.",
+   "form_props": [
+    "backpack"
+   ],
+   "is_milestone": false,
+   "description": "Ai cũng bắt đầu từ đây. Bạn chưa cần biết vẽ, chưa cần biết code, chỉ cần tò mò vì sao có app dùng sướng và có app dùng muốn ném điện thoại.",
+   "knowledge": [],
+   "outcome": "Đi theo con đường trước mặt. Mỗi trạm là một lớp học, đi qua là bạn lên đời.",
+   "branch_after": null,
+   "require_challenge": false,
+   "challenge_term_ids": [],
+   "is_active": true
+  },
+  {
+   "id": "figma",
+   "kind": "main",
+   "sort_order": 1,
+   "name": "Làm quen công cụ",
+   "course_title": "Khóa Học Figma Dành Cho Designer/Developer",
+   "course_url": "https://academy.telos.vn/khoa-hoc-thiet-ke-giao-dien-voi-figma/",
+   "sessions": 8,
+   "form_title": "Tập sự Figma",
+   "form_description": "Đã cầm được cây bút, biết frame với autolayout là gì.",
+   "form_props": [
+    "backpack",
+    "pencil"
+   ],
+   "is_milestone": false,
+   "description": "Figma là bàn làm việc của designer. Trạm đầu tiên giúp bạn dùng công cụ cho nhanh và gọn, để những trạm sau chỉ còn phải lo chuyện thiết kế.",
+   "knowledge": [
+    "Giao diện Figma, frame, constraint, màu, effect và xử lý ảnh",
+    "Component, instance, variants và properties",
+    "Autolayout: thứ tự, hug và fill, dựng bảng và khung chat",
+    "Style màu và chữ, Light/Dark mode, làm quen Variable",
+    "Sitemap, flow, wireframe và dựng một màn hình hoàn chỉnh",
+    "Prototype, interaction, overlay và dùng AI hỗ trợ trong Figma"
+   ],
+   "outcome": "Dựng được giao diện và prototype bằng Figma, có bài thực hành đầu tiên cho portfolio.",
+   "branch_after": null,
+   "require_challenge": false,
+   "challenge_term_ids": [],
+   "is_active": true
+  },
+  {
+   "id": "ui",
+   "kind": "main",
+   "sort_order": 2,
+   "name": "Nhìn ra cái đẹp",
+   "course_title": "Khóa Học Nền Tảng Về UI Design",
+   "course_url": "https://academy.telos.vn/khoa-hoc-nen-tang-ve-ui-design/",
+   "sessions": 8,
+   "form_title": "UI Designer tập sự",
+   "form_description": "Có bảng màu trên tay và bắt đầu thấy lệch 2 pixel là khó chịu.",
+   "form_props": [
+    "palette",
+    "tablet"
+   ],
+   "is_milestone": false,
+   "description": "Biết dùng Figma chưa có nghĩa là thiết kế đẹp. Trạm này dạy nguyên lý thị giác đằng sau một giao diện chỉn chu, để bạn giải thích được vì sao mình chọn màu này, cỡ chữ kia.",
+   "knowledge": [
+    "Typography: cỡ chữ, line height, độ dài dòng, cách chọn và ghép font",
+    "Màu sắc: các hệ màu, contrast, tạo palette, semantic color, dark mode",
+    "Box model, grid, alignment và hệ thống khoảng cách",
+    "Component thường gặp: button, form, card, modal, menu",
+    "Xây UI Library và viết tài liệu ngay trong Figma",
+    "Làm việc với developer, kiểm tra layout bằng Chrome DevTools"
+   ],
+   "outcome": "Áp dụng màu, chữ, lưới và khoảng cách có lý do, bàn giao được cho developer.",
+   "branch_after": null,
+   "require_challenge": false,
+   "challenge_term_ids": [],
+   "is_active": true
+  },
+  {
+   "id": "ux",
+   "kind": "main",
+   "sort_order": 3,
+   "name": "Hiểu người dùng",
+   "course_title": "Khóa Học Nhập Môn Về UX Design",
+   "course_url": "https://academy.telos.vn/khoa-hoc-nhap-mon-ve-ux-design/",
+   "sessions": 8,
+   "form_title": "UI/UX Designer Junior",
+   "form_description": "Mốc nghề đầu tiên: đội mũ, cầm kính lúp, túi đầy sticky note.",
+   "form_props": [
+    "cap",
+    "magnifier"
+   ],
+   "is_milestone": true,
+   "description": "Đẹp mà khó dùng thì vẫn hỏng. Trạm này dạy bạn đi tìm vấn đề thật của người dùng trước khi vẽ, và kiểm chứng giải pháp sau khi vẽ.",
+   "knowledge": [
+    "Design Thinking, Double Diamond, Lean UX và MVP",
+    "Lên kế hoạch và phỏng vấn người dùng",
+    "Persona, Empathy Map, User Journey Map và Jobs-to-be-Done",
+    "10 nguyên lý Heuristics của Nielsen",
+    "Problem Statement, How Might We, RICE và MoSCoW",
+    "Kiến trúc thông tin, user flow, wireframe, Usability Testing và A/B Testing"
+   ],
+   "outcome": "Đi trọn một quy trình UX cơ bản và bảo vệ được quyết định thiết kế bằng lý lẽ.",
+   "branch_after": null,
+   "require_challenge": false,
+   "challenge_term_ids": [],
+   "is_active": true
+  },
+  {
+   "id": "ds",
+   "kind": "main",
+   "sort_order": 4,
+   "name": "Làm việc có hệ thống",
+   "course_title": "Khóa Học UI Design System",
+   "course_url": "https://academy.telos.vn/khoa-hoc-ui-design-system/",
+   "sessions": 12,
+   "form_title": "UI/UX Designer",
+   "form_description": "Mang theo hộp component, đi tới đâu dựng tới đó, không vẽ lại từ đầu nữa.",
+   "form_props": [
+    "cap",
+    "blocks"
+   ],
+   "is_milestone": true,
+   "description": "Sản phẩm càng lớn thì thiết kế càng dễ rời rạc. Trạm này dạy bạn dựng một hệ thống dùng chung để cả team thiết kế và code nói cùng một ngôn ngữ.",
+   "knowledge": [
+    "Tư duy hệ thống, phân biệt UI Kit, Style Guide và Design System",
+    "Foundation: màu, typography, spacing, layout, icon, radius, elevation",
+    "Token và cách đặt tên",
+    "Kiến trúc thư viện Figma: foundation, component, pattern, template",
+    "Component phức tạp, slot, pattern và product rules",
+    "Viết guideline, bàn giao, quản lý phiên bản và Design System cho AI đọc được"
+   ],
+   "outcome": "Có một bộ Design System trên Figma kèm tài liệu, đủ để đưa vào portfolio.",
+   "branch_after": null,
+   "require_challenge": false,
+   "challenge_term_ids": [],
+   "is_active": true
+  },
+  {
+   "id": "ai",
+   "kind": "main",
+   "sort_order": 5,
+   "name": "Có trợ lý AI",
+   "course_title": "Khóa Học A.I. Dành Cho UI/UX Designer",
+   "course_url": "https://academy.telos.vn/khoa-hoc-a-i-danh-cho-ui-ux-designer/",
+   "sessions": 8,
+   "form_title": "AI-powered Designer",
+   "form_description": "Có một con robot nhỏ bay theo, làm phụ những việc lặt vặt.",
+   "form_props": [
+    "cap",
+    "blocks",
+    "robot"
+   ],
+   "is_milestone": false,
+   "description": "AI không thay designer, nhưng designer biết dùng AI sẽ đi nhanh hơn. Trạm này dạy bạn đưa AI vào từng bước của quy trình và biết khi nào không nên tin nó.",
+   "knowledge": [
+    "AI Literacy: AI làm được gì và không làm được gì trong UX",
+    "Phân tích phỏng vấn và tổng hợp insight bằng AI, kiểm soát hallucination",
+    "Viết prompt, tạo prototype và concept bằng AI",
+    "Testing và lấy feedback cùng AI",
+    "Dùng AI để audit Design System và accessibility",
+    "Nguyên tắc dùng AI có trách nhiệm"
+   ],
+   "outcome": "Dùng AI làm trợ lý xuyên suốt quy trình, có thêm một case study cho portfolio.",
+   "branch_after": null,
+   "require_challenge": false,
+   "challenge_term_ids": [],
+   "is_active": true
+  },
+  {
+   "id": "pdm",
+   "kind": "main",
+   "sort_order": 6,
+   "name": "Nghĩ như người làm sản phẩm",
+   "course_title": "Khóa Học Product Design & Manage",
+   "course_url": "https://academy.telos.vn/khoa-hoc-product-design-va-manage/",
+   "sessions": 12,
+   "form_title": "Product Designer",
+   "form_description": "Hình thái cuối: áo blazer, biểu đồ trong tay, cắm cờ ở đích.",
+   "form_props": [
+    "blazer",
+    "chart",
+    "flag"
+   ],
+   "is_milestone": true,
+   "description": "Product Designer không chỉ trả lời câu hỏi thiết kế thế nào, mà cả câu hỏi có nên làm không và làm xong thì đo bằng gì. Trạm cuối nối thiết kế với kinh doanh.",
+   "knowledge": [
+    "Tư duy sản phẩm và vai trò PM, PO, Designer",
+    "Nghiên cứu thị trường, đối thủ, Product-Market Fit",
+    "Story Mapping và các khung ưu tiên Kano, MoSCoW, RICE",
+    "Prototype, kiểm thử và xử lý trạng thái ngoại lệ",
+    "Business Model Canvas, Go-to-Market, AARRR và North Star Metric",
+    "Viết PRD, User Story, Acceptance Criteria và bàn giao cho dev"
+   ],
+   "outcome": "Có một case study sản phẩm hoàn chỉnh, từ nghiên cứu tới chiến lược ra mắt.",
+   "branch_after": null,
+   "require_challenge": false,
+   "challenge_term_ids": [],
+   "is_active": true
+  },
+  {
+   "id": "web",
+   "kind": "branch",
+   "sort_order": 1,
+   "name": "Rẽ trái: làm web",
+   "course_title": "Khóa Học Web Design Chuyên Sâu",
+   "course_url": "https://academy.telos.vn/khoa-hoc-web-design-chuyen-sau/",
+   "sessions": 8,
+   "form_title": "Web Designer",
+   "form_description": "Đeo thêm một khung trình duyệt bên cạnh.",
+   "form_props": [
+    "browser"
+   ],
+   "is_milestone": false,
+   "description": "Ngã rẽ cho bạn nào muốn nhận dự án website, landing page hay làm ở agency. Đi xong thì quay lại đường chính.",
+   "knowledge": [
+    "Các loại website và quy trình thiết kế, lập trình web",
+    "Sitemap, user flow và information architecture cho web",
+    "HTML, CSS, JS mà web designer cần biết, nguyên lý responsive",
+    "Landing page và các trang thông tin",
+    "Khối thương mại điện tử: danh sách, chi tiết sản phẩm, giỏ hàng, thanh toán",
+    "Khối tài khoản người dùng và bàn giao file cho developer"
+   ],
+   "outcome": "Có một dự án website thực tế cho portfolio.",
+   "branch_after": "ui",
+   "require_challenge": false,
+   "challenge_term_ids": [],
+   "is_active": true
+  },
+  {
+   "id": "code",
+   "kind": "branch",
+   "sort_order": 2,
+   "name": "Rẽ phải: biết code",
+   "course_title": "Khóa Học Code For Designer",
+   "course_url": "https://academy.telos.vn/khoa-hoc-code-for-designer/",
+   "sessions": 8,
+   "form_title": "Designer biết code",
+   "form_description": "Kẹp thêm cái laptop có dấu </>.",
+   "form_props": [
+    "codeLaptop"
+   ],
+   "is_milestone": false,
+   "description": "Ngã rẽ cho bạn muốn tự dựng được thứ mình vẽ, và nói chuyện với developer không bị lạc. Học sau Design System thì component trong Figma khớp ngay với component trong code.",
+   "knowledge": [
+    "HTML và cách trình duyệt hiển thị một trang",
+    "Git cơ bản",
+    "CSS: selector, layout, responsive",
+    "TailwindCSS và cấu hình theo design system",
+    "CSS animation và JavaScript cơ bản",
+    "Chuyển Figma sang HTML, tên miền, hosting và deploy"
+   ],
+   "outcome": "Tự dựng và đưa lên mạng một trang web cá nhân có responsive và animation.",
+   "branch_after": "ds",
+   "require_challenge": false,
+   "challenge_term_ids": [],
+   "is_active": true
+  },
+  {
+   "id": "finish",
+   "kind": "finish",
+   "sort_order": 7,
+   "name": "Đi làm",
+   "course_title": null,
+   "course_url": null,
+   "sessions": null,
+   "form_title": "Product Designer",
+   "form_description": "Tới cửa văn phòng. Ngày đầu đi làm bắt đầu.",
+   "form_props": [],
+   "is_milestone": false,
+   "description": "Bạn đã đi hết con đường. Chọn nơi làm việc đầu tiên rồi bước vào văn phòng.",
+   "knowledge": [],
+   "outcome": null,
+   "branch_after": null,
+   "require_challenge": false,
+   "challenge_term_ids": [],
+   "is_active": true
+  }
+ ],
+ "branch_combos": [
+  {
+   "id": "web-full",
+   "requires": [
+    "web",
+    "code"
+   ],
+   "title_suffix": "Web Designer full"
+  }
+ ],
+ "workplaces": [
+  {
+   "scale": "small",
+   "label": "Startup",
+   "note": "Ít người, làm đủ thứ, học nhanh nhất."
+  },
+  {
+   "scale": "large",
+   "label": "Công ty sản phẩm",
+   "note": "Vài trăm người, có squad và chapter, quy trình rõ."
+  },
+  {
+   "scale": "agency",
+   "label": "Agency",
+   "note": "Làm cho khách hàng, nhiều dự án, nhiều deadline.",
+   "suggest_if": "web"
+  }
+ ]
+}

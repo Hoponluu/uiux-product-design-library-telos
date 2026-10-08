@@ -140,13 +140,34 @@ Lưu ý: bản dịch dựa trên nội dung seed gốc. Nếu đã sửa nội 
 2. Chạy `supabase_team_map_hourly_seed.sql`. Chạy lại an toàn: không ghi đè `rank` đã đặt, giữ ảnh huy hiệu đã tải lên. Bảng cuối liệt kê id bị bỏ qua và nhân vật còn dưới 4 thuật ngữ liên quan. Xem nhân vật nào đủ điều kiện cho từng hành động trong CMS (form nhân vật, tab "Nhiệm vụ theo giờ" → Đang chạy).
 3. Deploy.
 
-## 14. Các bước triển khai
+## 14. Trang Hành trình UI/UX (/hanh-trinh-ui-ux) — docs/SPEC-journey.md
+
+- **Trang riêng, URL riêng** `/hanh-trinh-ui-ux` (tab "Hành trình" cạnh "Product Map" trên mọi trang). Trên cùng là game 3D, ngay dưới là **lộ trình dạng chữ** (h1, mỗi checkpoint một `section id="<mã>"`, nhánh rẽ đặt ngay sau trạm rẽ ra, có nhãn "Nhánh tuỳ chọn"). Bấm "Xem trên bản đồ" ở phần chữ → cuộn lên và camera bay tới trạm đó.
+- **Giữ phần chữ khớp với CMS — đã chọn cách (b) của SPEC 4.2:** repo đã có Vercel Function (trang thuật ngữ), nên `api/journey.js` render cả trang ở server mỗi request từ `tm_journey_checkpoints` + `tm_journey_settings` (CDN cache 2 phút). Sửa trong CMS là HTML cho Google cập nhật theo, không cần nút "Xuất bản lại". Supabase lỗi thì dùng `team-map/seed-journey.json`. Game đọc dữ liệu nhúng sẵn trong trang rồi tải lại bản mới nhất từ Supabase.
+- **SEO:** title / description / canonical / OG + Twitter (ảnh 1200 × 630 upload trong CMS, chưa có thì dùng `Thumb.png`), JSON-LD `ItemList` gồm 8 `Course` (theo thứ tự đường chính, nhánh sau trạm rẽ ra, provider TELOS Academy `sameAs` academy.telos.vn) + `BreadcrumbList`. Có trong `sitemap.xml`.
+- **Nhúng:** `?embed=1` ẩn header / menu thư viện, mọi link mở tab mới (`<base target="_blank">`), `noindex`. `vercel.json` cho phép đóng khung riêng trang này (`frame-ancestors *`), các trang khác vẫn `X-Frame-Options: DENY`. CMS → Hành trình → Cài đặt trang có mã `<iframe>` để copy.
+- **Bản đồ** (cố định trong code `journey/journey.js`): con đường uốn khúc từ Nhà tới tòa văn phòng, 6 trạm chính, 2 vòng rẽ (Web sau trạm UI, Code sau trạm Design System) nhập lại ngay đoạn đó. Mỗi trạm: vòng tròn, cổng chữ U có biển tên (luôn quay về camera), bục số buổi. Cổng trạm kế chỉ mở khi đã ghé trạm trước (thanh chắn sọc + biển "Ghé trạm trước đã"); nhánh luôn mở. Điều khiển giống Team Map: WASD / mũi tên, bấm đường để tới (A* trên lưới), kéo hoặc Q/E để xoay, cuộn / chụm hai ngón để zoom.
+- **Tới trạm:** bảng thông tin (tên, khóa học, số buổi, mô tả, "Bạn sẽ học", "Học xong bạn sẽ", hình thái sẽ đạt) + "Xem khóa học" + "Biến hình". Trạm bật "Bắt buộc vượt thử thách" → "Làm thử thách": 4 thẻ flashcard từ `challenge_term_ids` (thiếu thì bù ngẫu nhiên), xem định nghĩa (đã che tên) chọn 1 trong 3, đúng ≥ 3 là qua.
+- **Biến hình:** camera tiến gần, nền tối, nhân vật xoay với vệt sáng hồng / cyan ~1,5 giây, chớp sáng, đổi đồ nghề, nhãn chức danh bật lên. Mốc nghề: pháo giấy + "Lên cấp: …". Trạm cuối: hào quang quanh chân, giữ mãi. Sau đó có "Lưu ảnh trước và sau" (PNG 1080 × 1350: hai hình thái cạnh nhau, chức danh, khóa học, TELOS, URL). `prefers-reduced-motion`: chỉ đổi đồ nghề + chức danh.
+- **Hình thái** (`journey/journey.form.js`, dùng chung với Team Map): đồ nghề + chức danh của trạm chính cao nhất đã ghé, cộng đồ của các nhánh; phụ đề là tên nhánh, đủ hai nhánh thì "Web Designer full" (`branch_combos` trong seed). Mỗi vị trí có giới hạn (2 món trên tay, 1 đầu, 1 mặt, 1 sau lưng, 1 món bay); trùng vị trí thì món của trạm ghé sau thắng. HUD góc trên: chức danh + "Đã qua X/6 trạm · Y/2 nhánh".
+- **Đích:** đủ 6 trạm chính thì cửa văn phòng sáng "Ngày đầu đi làm" (chưa đủ thì ghi còn thiếu trạm nào). Chọn nơi làm việc (Startup / Công ty sản phẩm / Agency; đã đi nhánh Web thì Agency có nhãn "Hợp với bạn") → cửa mở, màn hình mờ → `/team-map?tu=hanh-trinh&quy-mo=<scale>&hinh-thai=<id>&nhanh=web,code`.
+- **Team Map nhận người từ hành trình:** đọc tham số URL (không có thì đọc `tm_journey_v1` nếu đã đi tới cửa văn phòng), mở đúng quy mô, nhân vật chính mang đồ nghề + chức danh của hình thái (kể cả hào quang), lời chào "Chào mừng ngày đầu đi làm, …" một lần mỗi lần đến, Nhân Lưu đi tới chỗ người chơi. Menu (☰) có "Dùng lại nhân vật mặc định". Bảng của Nhân Lưu có nút "Xem lộ trình học".
+- **Nhân vật dùng chung:** phần dựng mascot + đồ nghề đã tách khỏi engine ra `team-map/team-map.mascot.js` (`TM_MASCOT.buildMascot`, `setProps`, `resolveProps`, `addHalo`). Team Map chụp lại ba quy mô trước / sau khi tách: giống nhau (chỉ lệch khử răng cưa ở mép). Đồ nghề mới: `blocks`, `robot` (bay cạnh vai, nhấp nhô), `browser` (sau lưng), `codeLaptop` (tay trái) — CMS nhân vật cũng chọn được.
+- **Tiến độ:** `localStorage['tm_journey_v1']` = `{ visited, challenge_passed, finished_at, workplace }`. Chặn localStorage thì vẫn chơi được, chỉ không lưu.
+- **Không có WebGL** (hoặc không tải được Three.js): ẩn khung game, chỉ còn phần chữ, không báo lỗi. Khung 3D khởi tạo khi cuộn tới và ngừng vẽ khi cuộn khỏi màn hình.
+- **Bảng:** `tm_journey_checkpoints` (10 id cố định: `start, figma, ui, ux, ds, ai, pdm, web, code, finish`), `tm_journey_settings` (một dòng: SEO, ảnh OG, đoạn mở đầu, 3 thẻ nơi làm việc). Anon đọc, admin ghi.
+- **CMS → Team Map → tab Hành trình:** danh sách theo thứ tự bản đồ (nhánh thụt vào), form chia 3 nhóm Checkpoint / Biến hình / Thử thách, "Kiến thức sẽ học" là danh sách thêm / xoá / kéo đổi thứ tự, xem trước nhân vật 3D xoay được. Trạm xuất phát / đích chỉ hiện các trường có nghĩa; chỉ nhánh mới ẩn được. "Cài đặt trang": title, description, đoạn mở đầu, ảnh OG (upload vào bucket `tm-badges/journey/`), 3 thẻ nơi làm việc, mã nhúng.
+- **Excel:** sheet `Hanh trinh` (cột `Loại`, `Thứ tự` chỉ để xem; kiến thức mỗi dòng một ý trong cùng ô). Chỉ cập nhật 10 id có sẵn, id lạ là lỗi. Ghi bằng RPC `tm_import_journey` sau phần Team Map.
+- **Seed:** `team-map/seed-journey.json` → `python3 scripts/gen_team_map_journey_seed.py` sinh `supabase_team_map_journey.sql`. **Khác SPEC:** seed chỉ chèn dòng còn thiếu (`on conflict do nothing`), chạy lại không ghi đè nội dung đã sửa trong CMS.
+- **Debug:** `window.__jx` trên trang hành trình; Team Map `#debug` (localhost) có thêm `window.__tmE`.
+
+## 15. Các bước triển khai
 
 1. Supabase → SQL Editor: chạy `supabase_team_map.sql`.
 2. Authentication → Users → **Add user** (email + mật khẩu) cho admin. Sau đó chạy:
    `insert into admin_users (email) values ('email-cua-ban@...');`
 3. Authentication → Sign In / Providers: tắt **Allow new users to sign up**.
-4. Chạy `supabase_team_map_seed.sql` (đầy đủ mọi quy mô, gồm cả agency và bản tiếng Anh), rồi `supabase_team_map_hourly_seed.sql` (nhiệm vụ theo giờ & huy hiệu). Kết quả cuối là bảng báo cáo: nhân vật nào đã gắn thuật ngữ, thẻ thưởng nào chưa khớp.
+4. Chạy `supabase_team_map_seed.sql` (đầy đủ mọi quy mô, gồm cả agency và bản tiếng Anh), rồi `supabase_team_map_hourly_seed.sql` (nhiệm vụ theo giờ & huy hiệu), rồi `supabase_team_map_journey.sql` (trang Hành trình). Kết quả cuối là bảng báo cáo: nhân vật nào đã gắn thuật ngữ, thẻ thưởng nào chưa khớp.
 5. Deploy. Đăng nhập `/adminCMS` bằng email + mật khẩu vừa tạo.
 6. **Bỏ hẳn service_role key cũ** (key này đã nằm công khai trong lịch sử git nên phải coi như đã lộ):
    1. Supabase → **Settings → API Keys** → lấy **publishable key** (`sb_publishable_...`).

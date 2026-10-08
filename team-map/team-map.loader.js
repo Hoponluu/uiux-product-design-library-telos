@@ -195,7 +195,18 @@
       terms };
   }
 
+  // Trang Hành trình (/hanh-trinh-ui-ux): các trạm để dựng lại hình thái của người chơi khi sang Team Map.
+  // Tải song song, lỗi thì dùng seed-journey.json; không ảnh hưởng phần còn lại của Team Map.
+  async function loadJourney(){
+    let checkpoints = null;
+    try { const d = await get('tm_journey_checkpoints?select=id,kind,sort_order,branch_after,form_title,form_props,is_active&order=sort_order'); if (Array.isArray(d) && d.length) checkpoints = d; } catch (e) {}
+    let combos = [];
+    try { const r = await fetch('/team-map/seed-journey.json'); if (r.ok){ const s = await r.json(); combos = s.branch_combos || []; if (!checkpoints) checkpoints = s.checkpoints; } } catch (e) {}
+    return checkpoints ? { checkpoints, combos } : null;
+  }
+
   async function load(){
+    const journey = loadJourney();
     let source = 'supabase', out;
     try {
       const raw = await fetchRaw();
@@ -208,6 +219,7 @@
     }
     out.warn.forEach(w => console.warn('[Team Map]', w));
     out.data.SOURCE = source;
+    out.data.JOURNEY = await journey.catch(() => null);
     return out.data;
   }
 

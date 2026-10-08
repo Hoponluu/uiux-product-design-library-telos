@@ -52,7 +52,7 @@ window.TM_LAYOUT = {
     business:    {"name":"Business", "color":"#8B7FE0"}
   },
   screenKind: {"design":"figma", "engineering":"code", "data":"chart", "product":"board", "delivery":"board", "business":"chart"},
-  props: ["briefcase", "flag", "laptop", "glasses", "pointer", "chart", "headset", "clipboard", "cards", "cap", "tablet", "palette", "pencil", "backpack", "monocle", "play", "database", "phone", "magnifier", "scroll", "gear", "pie", "flask", "timer", "calendar", "megaphone", "blazer", "necklace", "laptopCarry", "phoneUse"],
+  props: ["briefcase", "flag", "laptop", "glasses", "pointer", "chart", "headset", "clipboard", "cards", "cap", "tablet", "palette", "pencil", "backpack", "monocle", "play", "database", "phone", "magnifier", "scroll", "gear", "pie", "flask", "timer", "calendar", "megaphone", "blazer", "necklace", "laptopCarry", "phoneUse", "blocks", "robot", "browser", "codeLaptop"],
   roleCategoryByGroup: { design:'vt-design', product:'vt-product', engineering:'vt-engineering', business:'vt-business', data:'vt-cross', delivery:'vt-cross' }
 };
 })();
