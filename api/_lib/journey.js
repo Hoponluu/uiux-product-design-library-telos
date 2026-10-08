@@ -1,4 +1,4 @@
-// Trang Hành trình UI/UX (/hanh-trinh-ui-ux) — docs/SPEC-journey.md (bản 2: game 2D đi theo nấc, không còn phần chữ bên dưới).
+// Trang Hành trang học tập (/hanh-trinh-ui-ux) — docs/SPEC-journey.md (bản 2: game 2D đi theo nấc, bản đồ phủ màn hình, hai bảng nổi ở góc dưới).
 // Render phía server mỗi request từ tm_journey_checkpoints + tm_journey_settings (CDN cache vài phút): meta, JSON-LD,
 // bản đồ trạm và hai bảng Vai trò / Khóa học ở trạm xuất phát. Supabase lỗi thì dùng seed đi kèm repo.
 // Game (journey/journey.js) đọc cùng dữ liệu (nhúng trong trang) rồi tự tải lại bản mới nhất từ Supabase.
@@ -11,7 +11,7 @@ const TTL = 2 * 60 * 1000;
 const SEED = require('../../team-map/seed-journey.json');
 const DEFAULTS = {
   seo_title:'Lộ trình học UI/UX Designer và Product Designer | TELOS Academy',
-  seo_description:'Lộ trình từ con số 0 tới Product Designer tại TELOS Academy: Figma, UI, UX, Design System, A.I. và Product Design & Manage, cùng hai nhánh Web Design và Code for Designer. Chơi thử dạng game 3D hoặc đọc từng chặng.',
+  seo_description:'Lộ trình từ con số 0 tới Product Designer tại TELOS Academy: Figma, UI, UX, Design System, A.I. và Product Design & Manage, cùng hai nhánh Web Design và Code for Designer. Chơi thử dạng game, mỗi trạm là một khoá học.',
   intro_text:'Sáu trạm chính và hai nhánh tuỳ chọn, mỗi trạm là một khoá học tại TELOS Academy. Đi qua trạm nào, bạn biết mình sẽ học gì, học xong làm được gì, và lên đời thành phiên bản nào của một designer.',
   og_image_url:null, workplaces:SEED.workplaces,
 };
@@ -49,6 +49,11 @@ function ordered(cps){
   return out.concat(on.filter(c => c.kind === 'finish'));
 }
 
+// Màu ô trạm: Figma (và trạm cuối) xanh dương TELOS, UI + UX vàng, Design System + A.I. trắng viền xanh, nhánh rẽ hồng.
+// Trạm chính mới tạo trong CMS mà chưa có ở đây thì dùng kiểu trắng viền xanh.
+const TONE = { figma:'blue', ui:'yellow', ux:'yellow', ds:'line', ai:'line', pdm:'blue' };
+const tone = c => c.kind === 'branch' ? 'pink' : c.kind === 'main' ? (TONE[c.id] || 'line') : 'plain';
+
 // Bảng "Vai trò" và "Khóa học" của một trạm (server render trạng thái ban đầu; journey.js vẽ lại khi đi tới trạm khác)
 function rolePanel(c){
   const skills = (c.role_skills || []).filter(Boolean), link = c.role_link && /^(\/|https?:\/\/)/.test(c.role_link) ? c.role_link : null;
@@ -63,9 +68,9 @@ function coursePanel(c){
   if (c.kind === 'start') return `<p class="jx-k">Bắt đầu</p><h2>${esc(c.name)}</h2>${c.description ? `<p>${esc(c.description)}</p>` : ''}${c.outcome ? `<p class="jx-out">${esc(c.outcome)}</p>` : ''}`;
   if (c.kind === 'finish') return `<p class="jx-k">Đích</p><h2>${esc(c.name)}</h2>${c.description ? `<p>${esc(c.description)}</p>` : ''}`;
   const url = safeUrl(c.course_url), img = safeUrl(c.course_image_url), know = (c.knowledge || []).filter(Boolean);
-  return `${img ? `<a class="jx-thumb" href="${esc(url || '#')}" target="_blank" rel="noopener" data-ga="journey_course_click" data-cp="${esc(c.id)}"><img src="${esc(img)}" alt="${esc(c.course_title || c.name)}" width="1200" height="630" onload="this.parentNode.classList.add('ok')" onerror="this.parentNode.hidden=true"></a>` : ''}
-    <p class="jx-k">${c.kind === 'branch' ? 'Nhánh tuỳ chọn · ' : ''}Khóa học${c.sessions ? ` · ${esc(c.sessions)} buổi` : ''}</p>
-    <h2>${esc(c.course_title || c.name)}</h2>
+  return `<div class="jx-chead">${img ? `<a class="jx-thumb" href="${esc(url || '#')}" target="_blank" rel="noopener" data-ga="journey_course_click" data-cp="${esc(c.id)}"><img src="${esc(img)}" alt="${esc(c.course_title || c.name)}" width="1200" height="630" onload="this.parentNode.classList.add('ok')" onerror="this.parentNode.hidden=true"></a>` : ''}
+    <div><p class="jx-k">${c.kind === 'branch' ? 'Nhánh rẽ · ' : ''}Khóa học${c.sessions ? ` · ${esc(c.sessions)} buổi` : ''}</p>
+    <h2>${esc(c.course_title || c.name)}</h2></div></div>
     ${c.description ? `<p>${esc(c.description)}</p>` : ''}
     ${know.length ? `<h3>Bạn sẽ học</h3><ul>${know.map(k => `<li>${esc(k)}</li>`).join('')}</ul>` : ''}
     ${c.outcome ? `<p class="jx-out"><b>Học xong bạn sẽ:</b> ${esc(c.outcome)}</p>` : ''}
@@ -82,13 +87,14 @@ function render(d, opts = {}){
       itemListElement:courses.map((c, i) => ({ '@type':'ListItem', position:i + 1, item:{ '@type':'Course', name:c.course_title, description:c.description || c.name,
         ...(safeUrl(c.course_url) ? { url:c.course_url } : {}), ...(safeUrl(c.course_image_url) ? { image:c.course_image_url } : {}),
         provider:{ '@type':'Organization', name:'TELOS Academy', sameAs:'https://academy.telos.vn' } } })) },
-    { '@type':'BreadcrumbList', itemListElement:[{ '@type':'ListItem', position:1, name:'Thư viện UI/UX', item:SITE + '/' }, { '@type':'ListItem', position:2, name:'Hành trình UI/UX', item:SITE + PATH }] },
+    { '@type':'BreadcrumbList', itemListElement:[{ '@type':'ListItem', position:1, name:'Thư viện UI/UX', item:SITE + '/' }, { '@type':'ListItem', position:2, name:'Hành trang học tập', item:SITE + PATH }] },
   ] };
   // dữ liệu cho game (đọc trong journey/journey.js)
   const boot = { checkpoints:d.checkpoints, settings:{ workplaces:s.workplaces || SEED.workplaces }, combos:SEED.branch_combos, embed };
   // các trạm trên bản đồ (journey.js đặt vị trí + vẽ đường)
-  const nodes = list.map(c => `<button class="jx-node jx-${esc(c.kind)}" type="button" data-cp="${esc(c.id)}" aria-label="${esc(c.name)}${c.course_title ? ' · ' + esc(c.course_title) : ''}">
-      <span class="jx-dot">${c.kind === 'start' ? '🏠' : c.kind === 'finish' ? '🏢' : ''}</span><span class="jx-lbl">${esc(c.name)}</span></button>`).join('');
+  let n = 0;
+  const nodes = list.map(c => `<button class="jx-node jx-${esc(c.kind)} jx-t-${tone(c)}" type="button" data-cp="${esc(c.id)}" aria-label="${esc(c.name)}${c.course_title ? ' · ' + esc(c.course_title) : ''}">
+      <span class="jx-dot">${c.kind === 'start' ? '🐔' : c.kind === 'finish' ? '🏢' : c.kind === 'main' ? ++n : '+'}</span><span class="jx-lbl">${esc(c.name)}</span></button>`).join('');
 
   const tab = (href, icon, label, active) => `<a class="tab-btn${active ? ' active' : ''}" href="${href}"${active ? ' aria-current="page"' : ''}><span class="tb-icon">${icon}</span><span class="tb-label">${label}</span></a>`;
   const shell = embed ? '' : `<div id="tabs">
@@ -96,7 +102,7 @@ function render(d, opts = {}){
   <button id="menu-btn" onclick="openNav()" aria-label="Menu" title="Menu"><span class="mdot mdot-l"></span><span class="mdot mdot-c"></span><span class="mdot mdot-r"></span></button>
 </div>
 <nav id="tab-pill" aria-label="Công cụ trong thư viện">${[tab('/', '🗺', 'Graph view'), tab('/?tab=glossary', '🔤', 'A-Z'), tab('/?tab=flashcard', '🃏', 'Flashcard Quiz'),
-    tab('/?tab=challenge', '🎲', 'UI Challenge'), tab('/team-map', '🏢', 'Product Map'), tab(PATH, '🧭', 'Hành trình', true), tab('/?tab=about', 'ℹ️', 'Về dự án')].join('')}</nav>
+    tab('/?tab=challenge', '🎲', 'UI Challenge'), tab('/team-map', '🏢', 'Product Map'), tab(PATH, '🧭', 'Hành trang học tập', true), tab('/?tab=about', 'ℹ️', 'Về dự án')].join('')}</nav>
 <div id="nav-overlay" role="dialog" aria-modal="true" aria-label="Navigation">
   <div id="nav-backdrop" onclick="closeNav()"></div>
   <nav id="nav-panel">
@@ -148,7 +154,7 @@ document.documentElement.classList.remove('no-js');try{if(localStorage.getItem('
 <script>if(document.documentElement.classList.contains('jx-dark'))document.body.classList.add('dark')</script>
 ${shell}
 <main id="jx">
-<section class="jx-game" id="jx-game" aria-label="Game hành trình">
+<section class="jx-game" id="jx-game" aria-label="Game hành trang học tập">
   <header class="jx-head">
     <div><p class="jx-eyebrow">TELOS Academy · Từ Newbie tới Product Designer</p><h1>Hành trình trở thành Product Designer</h1></div>
     <div class="jx-hud" id="jx-hud"><span class="jx-h-t">${esc(start.form_title)}</span><span class="jx-h-p">Đã qua 0/${list.filter(c => c.kind === 'main').length} trạm</span></div>

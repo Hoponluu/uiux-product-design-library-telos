@@ -51,7 +51,7 @@ REPLACE = [
     ('<span class="tb-label">Về dự án</span>', '<span class="tb-label">About</span>', 1),
     ('<a class="tab-btn active" href="/team-map" aria-current="page">', '<a class="tab-btn active" href="/en/team-map" aria-current="page">', 1),
     ('<a class="tab-btn" href="/hanh-trinh-ui-ux">', '<a class="tab-btn" href="/hanh-trinh-ui-ux" hreflang="vi">', 1),
-    ('<span class="tb-label">Hành trình</span>', '<span class="tb-label">Learning path</span>', 1),
+    ('<span class="tb-label">Hành trang học tập</span>', '<span class="tb-label">Learning path</span>', 1),
     ('<span>Dùng lại nhân vật mặc định</span>', '<span>Use the default character</span>', 1),
     ('aria-label="Đóng menu"', 'aria-label="Close menu"', 1),
     ('<span id="nav-mode-label">Chế độ tối</span>', '<span id="nav-mode-label">Dark mode</span>', 1),

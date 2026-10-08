@@ -1,8 +1,12 @@
-/* Trang Hành trình UI/UX (/hanh-trinh-ui-ux) — bản 2D đi theo nấc. Header dùng chung lấy từ /glossary/glossary.css. */
-:root { --jx-pink: #E92F7C; --jx-cyan: #35C6E8; --jx-brand: #241775; --jx-ink: #1C1033; }
+/* Trang Hành trang học tập (/hanh-trinh-ui-ux) — bản 2D đi theo nấc. Header dùng chung lấy từ /glossary/glossary.css.
+   Màn rộng (> 1000px): bản đồ phủ cả chiều cao màn hình, tiêu đề + HUD nổi phía trên, hai bảng nổi ở góc dưới trái / phải.
+   Màn vừa: bản đồ cao 60vh, hai bảng bằng nhau bên dưới. Mobile: bản đồ dọc. */
+:root { --jx-pink: #E92F7C; --jx-cyan: #35C6E8; --jx-brand: #241775; --jx-ink: #1C1033;
+  --jx-t-blue: #241775; --jx-t-yellow: #FFC845; --jx-t-pink: #EF4A81; }   /* bảng màu TELOS (academy.telos.vn) */
 #jx { padding: 80px 0 0; }
 .jx-embed #jx { padding-top: 0; }
 .jx-game { max-width: 1180px; margin: 0 auto; padding: 22px 20px 48px; color: var(--jx-ink); position: relative; }
+.jx-panels { --jx-panel-h: 360px; }
 
 /* đầu trang + HUD */
 .jx-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
@@ -22,21 +26,32 @@
 .jx-track { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .jx-track .jx-road { fill: none; stroke: rgba(36,23,117,.16); stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; }
 .jx-track .jx-road-done { fill: none; stroke: var(--jx-pink); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
-.jx-track .jx-fork { fill: none; stroke: var(--jx-cyan); stroke-width: 4; stroke-dasharray: 2 9; stroke-linecap: round; opacity: .8; }
+.jx-track .jx-fork { fill: none; stroke: var(--jx-t-pink); stroke-width: 4; stroke-dasharray: 2 9; stroke-linecap: round; opacity: .75; }
 .jx-track .jx-fork.done { stroke-dasharray: none; opacity: 1; }
-.jx-track .jx-fork.skip { opacity: .25; }
-.jx-node { position: absolute; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 6px; background: none; border: 0; padding: 0; cursor: pointer; font: inherit; color: inherit; z-index: 2; width: 120px; }
+/* tâm chấm tròn nằm đúng toạ độ trạm; .lbl-up đưa nhãn lên trên chấm (cạnh nhánh rẽ xuống) */
+.jx-node { --r: 20px; position: absolute; transform: translate(-50%, calc(-1 * var(--r))); display: flex; flex-direction: column; align-items: center; gap: 6px; background: none; border: 0; padding: 0; cursor: pointer; font: inherit; color: inherit; z-index: 2; width: 120px; }
 .jx-dot { width: 40px; height: 40px; border-radius: 50%; background: #fff; border: 3px solid rgba(233,47,124,.45); display: flex; align-items: center; justify-content: center; font-size: 20px; box-sizing: border-box; transition: background .3s, border-color .3s, transform .2s; box-shadow: 0 2px 6px rgba(36,23,117,.12); }
 .jx-node:hover .jx-dot, .jx-node:focus-visible .jx-dot { transform: scale(1.1); }
-.jx-branch .jx-dot { width: 32px; height: 32px; border-color: rgba(53,198,232,.6); border-style: dashed; }
+.jx-branch { --r: 17px; }
+.jx-branch .jx-dot { width: 34px; height: 34px; }
+.jx-start, .jx-finish { --r: 23px; }
+.jx-node.lbl-up { flex-direction: column-reverse; transform: translate(-50%, calc(-100% + var(--r))); }
 .jx-start .jx-dot, .jx-finish .jx-dot { width: 46px; height: 46px; border-color: rgba(36,23,117,.25); }
 .jx-lbl { font-size: 12px; font-weight: 600; line-height: 1.25; text-align: center; color: rgba(28,16,51,.75); text-wrap: balance; }
-.jx-node.is-done .jx-dot { background: var(--jx-pink); border-color: var(--jx-pink); }
-.jx-node.jx-branch.is-done .jx-dot { background: var(--jx-cyan); border-color: var(--jx-cyan); border-style: solid; }
-.jx-node.jx-start.is-done .jx-dot, .jx-node.jx-finish.is-done .jx-dot { background: #fff; border-color: var(--jx-brand); }
-.jx-node.is-next .jx-dot { border-color: var(--jx-pink); border-style: solid; animation: jxPulse 1.4s infinite; }
-.jx-node.jx-branch.is-next .jx-dot { border-color: var(--jx-cyan); }
-.jx-node.is-skip { opacity: .4; }
+.jx-dot { font-weight: 800; font-size: 15px; }
+.jx-start .jx-dot, .jx-finish .jx-dot { font-size: 22px; }
+/* màu cố định theo trạm; trạm chưa tới thì nhạt, đã qua thì có dấu ✓ */
+.jx-t-blue .jx-dot { background: var(--jx-t-blue); border: 3px solid var(--jx-t-blue); color: #fff; }
+.jx-t-yellow .jx-dot { background: var(--jx-t-yellow); border: 3px solid var(--jx-t-yellow); color: var(--jx-ink); }
+.jx-t-line .jx-dot { background: #fff; border: 3px solid var(--jx-t-blue); color: var(--jx-t-blue); }
+.jx-t-pink .jx-dot { background: var(--jx-t-pink); border: 3px solid var(--jx-t-pink); color: #fff; font-size: 17px; }
+.jx-t-plain .jx-dot { background: #fff; border-color: rgba(36,23,117,.25); }
+.jx-node:not(.is-done):not(.is-here) .jx-dot { opacity: .6; }
+.jx-node.is-next .jx-dot { opacity: 1 !important; animation: jxPulse 1.4s infinite; }
+.jx-node.is-here .jx-dot { box-shadow: 0 0 0 4px #fff, 0 0 0 7px var(--jx-pink); }
+.jx-node.is-done:not(.jx-start):not(.is-here) .jx-dot::after { content: '✓'; position: absolute; right: -5px; top: -5px; width: 17px; height: 17px; border-radius: 50%;
+  background: #2FBF8F; color: #fff; font-size: 11px; line-height: 17px; text-align: center; box-shadow: 0 0 0 2px #fff; }
+.jx-dot { position: relative; }
 .jx-node.is-view .jx-lbl { color: var(--jx-brand); text-decoration: underline; text-underline-offset: 3px; }
 @keyframes jxPulse { 0% { box-shadow: 0 0 0 0 rgba(233,47,124,.45); } 100% { box-shadow: 0 0 0 12px rgba(233,47,124,0); } }
 
@@ -56,7 +71,7 @@
 @keyframes jxPop { 0% { transform: translate(-50%, -100%) scale(.3); } 100% { transform: translate(-50%, -100%) scale(1); } }
 .jx-confetti { position: absolute; inset: 0; pointer-events: none; z-index: 4; overflow: hidden; }
 .jx-confetti i { position: absolute; top: -20px; width: 8px; height: 12px; border-radius: 2px; animation: jxFall linear forwards; }
-@keyframes jxFall { to { transform: translateY(420px) rotate(720deg); } }
+@keyframes jxFall { to { transform: translateY(105vh) rotate(720deg); } }
 .jx-banner { position: absolute; left: 50%; top: 14px; transform: translateX(-50%); z-index: 5; background: linear-gradient(135deg, var(--jx-pink), #8A3FFC 55%, var(--jx-cyan)); color: #fff;
   font-size: clamp(16px, 2.4vw, 22px); font-weight: 800; padding: 9px 22px; border-radius: 999px; box-shadow: 0 8px 24px rgba(36,23,117,.3); white-space: nowrap; animation: jxBanner .7s cubic-bezier(.2,1.5,.4,1); pointer-events: none; }
 @keyframes jxBanner { from { transform: translateX(-50%) scale(.2); opacity: 0; } }
@@ -69,8 +84,9 @@
 .jx-reset { background: none; border: 0; font: inherit; font-size: 13px; color: rgba(28,16,51,.55); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; padding: 0 4px; }
 
 /* hai bảng */
-.jx-panels { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
-.jx-panel { background: #fff; border: 1px solid rgba(0,0,0,.07); border-radius: 18px; padding: 20px 22px; box-shadow: 0 1px 4px rgba(0,0,0,.04); min-width: 0; }
+.jx-panels { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: stretch; }
+.jx-panel { background: #fff; border: 1px solid rgba(0,0,0,.07); border-radius: 18px; padding: 18px 20px; box-shadow: 0 1px 4px rgba(0,0,0,.04); min-width: 0;
+  height: var(--jx-panel-h); overflow-y: auto; box-sizing: border-box; overscroll-behavior: contain; scrollbar-width: thin; }   /* hai bảng luôn bằng nhau, dài thì cuộn bên trong */
 .jx-panel h2 { font-size: 20px; line-height: 1.25; margin: 0 0 8px; }
 .jx-panel h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: rgba(28,16,51,.5); margin: 16px 0 8px; }
 .jx-panel p { font-size: 14.5px; line-height: 1.6; margin: 0 0 10px; color: rgba(28,16,51,.8); }
@@ -84,7 +100,9 @@
 .jx-now { display: inline-block; font-size: 12px; font-weight: 600; color: #4B3F86; background: rgba(36,23,117,.07); padding: 4px 10px; border-radius: 999px; margin-bottom: 10px; }
 .jx-link { display: inline-block; margin-top: 4px; font-size: 14px; font-weight: 600; color: var(--jx-brand); text-underline-offset: 3px; }
 .jx-panel .jx-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-.jx-thumb { display: block; margin: -4px -6px 14px; border-radius: 14px; overflow: hidden; aspect-ratio: 1200 / 630; background: #F3F0FC; }
+.jx-chead { display: flex; gap: 14px; align-items: center; margin-bottom: 6px; }
+.jx-chead h2 { margin: 0; }
+.jx-thumb { display: block; flex: 0 0 132px; width: 132px; border-radius: 10px; overflow: hidden; aspect-ratio: 1200 / 630; background: #F3F0FC; }
 .jx-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .3s; color: transparent; }   /* ẩn chữ alt khi đang tải */
 .jx-thumb { background: linear-gradient(100deg, #F3F0FC 30%, #FBFAFF 50%, #F3F0FC 70%) 0 0 / 200% 100%; animation: jxShimmer 1.4s linear infinite; }
 .jx-thumb.ok { animation: none; background: #F3F0FC; }
@@ -117,6 +135,27 @@
 .jx-fade.on { opacity: 1; }
 .jx-toast { position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%); z-index: 750; background: var(--jx-ink); color: #fff; font-size: 13.5px; padding: 9px 16px; border-radius: 999px; max-width: 90vw; text-align: center; }
 
+/* màn rộng: bản đồ phủ màn hình, mọi thứ khác nổi lên trên */
+@media (min-width: 1001px) {
+  .jx-game { max-width: none; height: max(600px, calc(100dvh - 80px)); padding: 0; }
+  .jx-embed .jx-game { height: max(600px, 100dvh); }
+  .jx-board { position: absolute; inset: 0; height: auto !important; border-radius: 0; border: 0; }
+  .jx-head { position: absolute; left: 24px; right: 24px; top: 18px; z-index: 6; pointer-events: none; align-items: flex-start; }
+  .jx-head > * { pointer-events: auto; }
+  .jx-hud { box-shadow: 0 6px 20px rgba(36,23,117,.1); }
+  .jx-panels { position: absolute; left: 16px; right: 16px; bottom: 16px; z-index: 6; display: flex; justify-content: space-between; pointer-events: none;
+    --jx-panel-h: clamp(220px, 40vh, 380px); }
+  .jx-panel { width: min(400px, 30vw); pointer-events: auto; box-shadow: 0 12px 34px rgba(36,23,117,.16); background: rgba(255,255,255,.97); backdrop-filter: blur(6px); }
+  .jx-bar { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 7; margin: 0; width: calc(100% - 2 * min(400px, 30vw) - 64px); max-width: 520px;
+    box-sizing: border-box; flex-direction: column; align-items: stretch; text-align: center; box-shadow: 0 12px 34px rgba(36,23,117,.16); }
+  .jx-bar .jx-msg { flex: none; }
+  .jx-bar .jx-acts { justify-content: center; }
+}
+@media (min-width: 701px) and (max-width: 1000px) {
+  .jx-board { height: 60vh !important; min-height: 380px; }
+  .jx-panels { --jx-panel-h: 420px; }
+}
+
 /* mobile: bản đồ dọc, hai bảng xếp chồng */
 @media (max-width: 700px) {
   #jx { padding-top: 56px; }
@@ -131,6 +170,8 @@
   .jx-start .jx-dot, .jx-finish .jx-dot { width: 38px; height: 38px; }
   .jx-branch .jx-dot { width: 28px; height: 28px; }
   .jx-panels { grid-template-columns: 1fr; }
+  .jx-panel { height: auto; overflow: visible; }
+  .jx-thumb { flex-basis: 104px; width: 104px; }
   .jx-bar { position: sticky; bottom: 72px; z-index: 6; box-shadow: 0 6px 20px rgba(36,23,117,.15); }
   .jx-embed .jx-bar { bottom: 8px; }
 }
@@ -140,7 +181,10 @@
 body.dark .jx-game { color: rgba(255,255,255,.9); }
 body.dark .jx-board { background: radial-gradient(circle at 1px 1px, rgba(255,255,255,.07) 1px, transparent 1.5px) 0 0 / 22px 22px, linear-gradient(160deg, #1A1640, #10283A); border-color: rgba(255,255,255,.08); }
 body.dark .jx-track .jx-road { stroke: rgba(255,255,255,.12); }
-body.dark .jx-dot { background: #1C1A38; }
+body.dark .jx-t-plain .jx-dot, body.dark .jx-t-line .jx-dot { background: #1C1A38; }
+body.dark .jx-t-line .jx-dot { border-color: #8D82FF; color: #C9C0FF; }
+body.dark .jx-t-blue .jx-dot { border-color: #8D82FF; }
+body.dark .jx-node.is-here .jx-dot { box-shadow: 0 0 0 4px #1C1A38, 0 0 0 7px var(--jx-pink); }
 body.dark .jx-lbl { color: rgba(255,255,255,.75); }
 body.dark .jx-hud, body.dark .jx-bar, body.dark .jx-panel { background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.09); box-shadow: none; }
 body.dark .jx-hud .jx-h-k, body.dark .jx-hud .jx-h-p, body.dark .jx-panel h3 { color: rgba(255,255,255,.5); }
@@ -153,3 +197,4 @@ body.dark .jx-sheet { background: #1C1A38; color: rgba(255,255,255,.9); }
 body.dark .jx-opts button, body.dark .jx-work button { background: rgba(255,255,255,.04); color: rgba(255,255,255,.9); border-color: rgba(255,255,255,.14); }
 body.dark .jx-def { background: rgba(123,107,245,.12); color: rgba(255,255,255,.88); }
 body.dark .jx-reset { color: rgba(255,255,255,.55); }
+@media (min-width: 1001px) { body.dark .jx-panel, body.dark .jx-bar, body.dark .jx-hud { background: rgba(28,26,56,.94); } }

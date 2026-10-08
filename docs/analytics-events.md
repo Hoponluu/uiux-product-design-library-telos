@@ -25,15 +25,13 @@ Mọi sự kiện kèm `click_source: term_page` và `term_slug`.
 | `term_map_click` | Bấm "Gặp … trong Product Map" ở trang vai trò | `link_url` |
 | `course_click` | Bấm "Khám phá khoá học TELOS" | `link_url` |
 
-## Trang Hành trình (`/hanh-trinh-ui-ux`)
+## Trang Hành trang học tập (`/hanh-trinh-ui-ux`)
 
 | Sự kiện | Khi nào | Tham số |
 | --- | --- | --- |
 | `journey_transform` | Tới một trạm và biến hình | `cp_id`, `form_title`, `milestone` |
-| `journey_branch` | Trả lời câu hỏi ngã rẽ | `cp_id` (nhánh), `choice` (`yes` / `no`) |
 | `journey_view` | Bấm một trạm khác trên bản đồ để xem nội dung | `cp_id` |
 | `journey_challenge` | Làm xong thử thách flashcard | `cp_id`, `pass`, `correct` |
-| `journey_save_image` | Lưu ảnh trước và sau | `cp_id` |
 | `journey_course_click` | Bấm ảnh / nút xem khóa học | `cp_id`, `link_url`, `click_source` |
 | `journey_reset` | Bấm "Đi lại từ đầu" | |
 | `journey_finish` | Chọn nơi làm việc đầu tiên, sang Team Map | `workplace`, `form_id`, `branches` |
