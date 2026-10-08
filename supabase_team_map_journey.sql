@@ -23,8 +23,17 @@ create table if not exists tm_journey_checkpoints (
   require_challenge  boolean not null default false,
   challenge_term_ids jsonb not null default '[]'::jsonb check (jsonb_typeof(challenge_term_ids) = 'array'),
   is_active          boolean not null default true,
+  role_summary       text,
+  role_skills        jsonb not null default '[]'::jsonb check (jsonb_typeof(role_skills) = 'array'),
+  role_link          text,
+  course_image_url   text,
   updated_at         timestamptz not null default now()
 );
+-- bản 2 (game 2D, hai bảng Vai trò / Khóa học): thêm cột cho DB đã tạo bảng trước đó
+alter table tm_journey_checkpoints add column if not exists role_summary text;
+alter table tm_journey_checkpoints add column if not exists role_skills jsonb not null default '[]'::jsonb;
+alter table tm_journey_checkpoints add column if not exists role_link text;
+alter table tm_journey_checkpoints add column if not exists course_image_url text;
 -- trạm chính / xuất phát / đích không tắt được
 alter table tm_journey_checkpoints drop constraint if exists tm_journey_main_active;
 alter table tm_journey_checkpoints add constraint tm_journey_main_active check (kind = 'branch' or is_active);
@@ -71,6 +80,26 @@ values
   ('finish', 'finish', 7, null, 'Đi làm', null, null, null, 'Product Designer', 'Tới cửa văn phòng. Ngày đầu đi làm bắt đầu.', '[]'::jsonb, false, 'Bạn đã đi hết con đường. Chọn nơi làm việc đầu tiên rồi bước vào văn phòng.', '[]'::jsonb, null, false, '[]'::jsonb, true)
 on conflict (id) do nothing;
 
+-- nội dung bảng Vai trò + ảnh khoá học: chỉ điền ô còn trống (không ghi đè bản đã sửa trong CMS)
+update tm_journey_checkpoints c set
+  role_summary     = coalesce(c.role_summary, v.role_summary),
+  role_skills      = case when c.role_skills is null or c.role_skills = '[]'::jsonb then v.role_skills else c.role_skills end,
+  role_link        = coalesce(c.role_link, v.role_link),
+  course_image_url = coalesce(c.course_image_url, v.course_image_url)
+from (values
+  ('start', 'Người mới tò mò về UI/UX. Chưa cần biết vẽ hay biết code, chỉ cần muốn hiểu vì sao có app dùng sướng còn có app dùng muốn ném điện thoại.', '["Tò mò về cách mọi người dùng sản phẩm số", "Dùng máy tính thành thạo, tự tìm được tài liệu", "Sẵn sàng làm bài tập và nhận góp ý"]'::jsonb, null, null),
+  ('figma', 'Dùng Figma nhanh và gọn: dựng được giao diện, tổ chức file sạch và làm prototype để người khác bấm thử.', '["Frame, constraint và cách tổ chức layer, page", "Component, instance, variants và properties", "Autolayout để dựng layout co giãn", "Style màu, chữ và Variable cơ bản", "Prototype và các tương tác thường gặp"]'::jsonb, null, 'https://academy.telos.vn/wp-content/uploads/2025/05/Thumb-figma.png'),
+  ('ui', 'Thiết kế giao diện đẹp, nhất quán và giải thích được vì sao chọn màu này, cỡ chữ kia.', '["Typography: cỡ chữ, line height, ghép font", "Màu sắc: hệ màu, contrast, palette, dark mode", "Grid, alignment và hệ thống khoảng cách", "Component phổ biến: button, form, card, modal", "Bàn giao giao diện cho developer"]'::jsonb, '/thuat-ngu/ui-designer', 'https://academy.telos.vn/wp-content/uploads/2025/05/Thumb-ui.png'),
+  ('ux', 'Mốc nghề đầu tiên: đi tìm vấn đề thật của người dùng trước khi vẽ, và kiểm chứng giải pháp sau khi vẽ.', '["Phỏng vấn và quan sát người dùng", "Persona, Journey Map, Jobs-to-be-Done", "10 nguyên lý Heuristic của Nielsen", "Kiến trúc thông tin, user flow, wireframe", "Usability Testing và A/B Testing"]'::jsonb, '/thuat-ngu/uiux-designer', 'https://academy.telos.vn/wp-content/uploads/2025/05/Thumb-ux.jpg'),
+  ('ds', 'Làm việc có hệ thống trong sản phẩm lớn: dựng và dùng Design System để team thiết kế và code nói cùng một ngôn ngữ.', '["Tư duy hệ thống, phân biệt UI Kit, Style Guide, Design System", "Design token và cách đặt tên", "Thư viện component có variants, slot, pattern", "Viết guideline, quản lý phiên bản", "Phối hợp với developer khi đưa vào code"]'::jsonb, '/thuat-ngu/design-system-designer', 'https://academy.telos.vn/wp-content/uploads/2025/05/Quangcao04-1.png'),
+  ('ai', 'Dùng AI làm trợ lý trong từng bước của quy trình mà vẫn giữ phán đoán của designer.', '["AI làm được gì và không làm được gì trong UX", "Viết prompt cho research, ý tưởng và prototype", "Kiểm soát hallucination khi tổng hợp insight", "Dùng AI để audit accessibility và Design System", "Dùng AI có trách nhiệm"]'::jsonb, null, 'https://academy.telos.vn/wp-content/uploads/2026/02/Screenshot-2026-07-01-173738.png'),
+  ('pdm', 'Trả lời được cả câu hỏi có nên làm không và làm xong đo bằng gì, không chỉ là thiết kế thế nào. Nối thiết kế với kinh doanh.', '["Tư duy sản phẩm và vai trò PM, PO, Designer", "Nghiên cứu thị trường, đối thủ, Product-Market Fit", "Ưu tiên tính năng: Kano, MoSCoW, RICE", "Business Model, Go-to-Market, AARRR, North Star Metric", "Viết PRD, User Story, Acceptance Criteria"]'::jsonb, '/thuat-ngu/product-designer', 'https://academy.telos.vn/wp-content/uploads/2025/10/SocialIMage.png'),
+  ('web', 'Nhận được dự án website, landing page và làm tốt ở agency.', '["Các loại website và quy trình làm web", "Responsive và HTML, CSS cơ bản", "Landing page và các trang thông tin", "Luồng thương mại điện tử: sản phẩm, giỏ hàng, thanh toán", "Bàn giao file web cho developer"]'::jsonb, null, 'https://academy.telos.vn/wp-content/uploads/2025/05/Thumb-web.png'),
+  ('code', 'Tự dựng được thứ mình vẽ và nói chuyện với developer không bị lạc.', '["HTML và cách trình duyệt hiển thị một trang", "CSS, responsive, TailwindCSS theo design system", "JavaScript và animation cơ bản", "Git cơ bản", "Chuyển Figma sang HTML và deploy lên mạng"]'::jsonb, '/thuat-ngu/design-engineer', 'https://academy.telos.vn/wp-content/uploads/2025/05/Thumb-code.png'),
+  ('finish', 'Đi hết con đường: sẵn sàng cho ngày đầu đi làm ở vị trí Product Designer.', '[]'::jsonb, '/thuat-ngu/product-designer', null)
+) as v(id, role_summary, role_skills, role_link, course_image_url)
+where c.id = v.id;
+
 insert into tm_journey_settings (id, seo_title, seo_description, intro_text, workplaces)
 values (1, 'Lộ trình học UI/UX Designer và Product Designer | TELOS Academy', 'Lộ trình từ con số 0 tới Product Designer tại TELOS Academy: Figma, UI, UX, Design System, A.I. và Product Design & Manage, cùng hai nhánh Web Design và Code for Designer. Chơi thử dạng game 3D hoặc đọc từng chặng.', 'Sáu trạm chính và hai nhánh tuỳ chọn, mỗi trạm là một khoá học tại TELOS Academy. Đi qua trạm nào, bạn biết mình sẽ học gì, học xong làm được gì, và lên đời thành phiên bản nào của một designer.', '[{"scale": "small", "label": "Startup", "note": "Ít người, làm đủ thứ, học nhanh nhất."}, {"scale": "large", "label": "Công ty sản phẩm", "note": "Vài trăm người, có squad và chapter, quy trình rõ."}, {"scale": "agency", "label": "Agency", "note": "Làm cho khách hàng, nhiều dự án, nhiều deadline.", "suggest_if": "web"}]'::jsonb)
 on conflict (id) do nothing;
@@ -96,7 +125,11 @@ begin
       outcome            = case when r ? 'outcome'            then r ->> 'outcome'            else outcome end,
       require_challenge  = case when r ? 'require_challenge'  then (r ->> 'require_challenge')::boolean else require_challenge end,
       challenge_term_ids = case when r ? 'challenge_term_ids' then coalesce(r -> 'challenge_term_ids', '[]'::jsonb) else challenge_term_ids end,
-      is_active          = case when r ? 'is_active'          then (r ->> 'is_active')::boolean else is_active end
+      is_active          = case when r ? 'is_active'          then (r ->> 'is_active')::boolean else is_active end,
+      role_summary       = case when r ? 'role_summary'       then r ->> 'role_summary'       else role_summary end,
+      role_skills        = case when r ? 'role_skills'        then coalesce(r -> 'role_skills', '[]'::jsonb) else role_skills end,
+      role_link          = case when r ? 'role_link'          then r ->> 'role_link'          else role_link end,
+      course_image_url   = case when r ? 'course_image_url'   then r ->> 'course_image_url'   else course_image_url end
     where id = r ->> 'id';
     get diagnostics cnt = row_count;
     if cnt = 0 then raise exception 'Checkpoint % không tồn tại (chỉ có 10 checkpoint cố định)', r ->> 'id'; end if;
