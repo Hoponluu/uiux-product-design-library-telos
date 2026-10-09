@@ -1423,7 +1423,11 @@ function initGraph(nodes, links) {
   }
 
   graphInstance.onEngineTick(updateLabels);
-  graphInstance.controls().addEventListener('change', updateLabels);
+  const ctrl = graphInstance.controls();
+  ctrl.enablePan = true;
+  ctrl.panSpeed = 2.5;
+  ctrl.screenSpacePanning = true;
+  ctrl.addEventListener('change', updateLabels);
 }
 
 function focusTerm(slug) {
