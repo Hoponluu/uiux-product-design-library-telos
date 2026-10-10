@@ -1513,11 +1513,6 @@
    },
    "cta": [
     {
-     "label": "Nhận quà",
-     "url": "https://nhanluu.com/contact/",
-     "primary": true
-    },
-    {
      "label": "Tìm hiểu thêm",
      "url": "https://nhanluu.com"
     }
@@ -1532,7 +1527,6 @@
      "with_designer": "He can show you a learning path for UI/UX and where to grow in this field.",
      "tag": "Academic Director · TELOS Academy",
      "cta": [
-      "Get a gift",
       "Learn more"
      ]
     }

@@ -294,6 +294,17 @@ body.dark #modal-term { color: #C9C0FF; }
 }
 .legend-item { display: flex; align-items: center; gap: 9px; color: rgba(0,0,0,0.55); font-size: 12px; }
 .legend-dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
+/* chú thích = nút zoom vào cụm */
+button.legend-item { background: none; border: 0; padding: 3px 8px 3px 4px; margin: -3px 0 -3px -4px; font: inherit; font-size: 12px; cursor: pointer; border-radius: 999px; text-align: left; transition: background .15s, color .15s; }
+button.legend-item:hover, button.legend-item:focus-visible { background: rgba(36,23,117,.07); color: rgba(0,0,0,.85); }
+button.legend-item.active { background: rgba(36,23,117,.1); color: #241775; font-weight: 600; }
+/* nút zoom: +, −, toàn cảnh */
+#graph-zoom { position: fixed; right: 24px; bottom: 78px; z-index: 100; display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+#graph-zoom button { min-width: 36px; height: 36px; border-radius: 10px; border: 1px solid rgba(36,23,117,.14); background: rgba(255,255,255,.9); color: #241775;
+  font: 600 18px/1 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; cursor: pointer; box-shadow: 0 2px 8px rgba(36,23,117,.08); }
+#graph-zoom button:hover { border-color: #241775; }
+#graph-zoom .gz-home { font-size: 12px; padding: 0 12px; }
+#graph-zoom .gz-home[hidden] { display: none; }
 #graph-hint {
   position: fixed; bottom: 24px; right: 24px;
   color: rgba(0,0,0,0.3); font-size: 11px; line-height: 1.9; text-align: right; z-index: 100;
@@ -392,6 +403,15 @@ body.dark #graph-title { color: rgba(255,255,255,0.88); }
 body.dark #graph-title span { color: rgba(255,255,255,0.38); }
 body.dark .legend-item { color: rgba(255,255,255,0.52); }
 body.dark #graph-hint { color: rgba(255,255,255,0.28); }
+body.dark button.legend-item:hover, body.dark button.legend-item:focus-visible { background: rgba(255,255,255,.08); color: rgba(255,255,255,.9); }
+body.dark button.legend-item.active { background: rgba(201,192,255,.14); color: #C9C0FF; }
+body.dark #graph-zoom button { background: rgba(28,26,56,.9); color: #C9C0FF; border-color: rgba(255,255,255,.14); }
+/* mobile: chú thích + nút zoom nằm trên thanh tab dưới đáy; ẩn dòng hướng dẫn dài */
+@media (max-width: 640px) {
+  #legend { bottom: calc(80px + env(safe-area-inset-bottom)); left: 12px; right: 64px; flex-direction: row; flex-wrap: wrap; gap: 4px 12px; }
+  #graph-zoom { right: 12px; bottom: calc(80px + env(safe-area-inset-bottom)); }
+  #graph-hint { display: none; }
+}
 body.dark #tooltip { background: #1C1F35; border-color: rgba(255,255,255,0.1); color: rgba(255,255,255,0.9); }
 body.dark #tooltip .tip-desc { color: rgba(255,255,255,0.52); }
 body.dark #tooltip .tip-none { color: rgba(255,255,255,0.3); }
@@ -821,12 +841,17 @@ body.dark .ascii-cell.fg { color: rgba(255,255,255,0.82); }
 <div id="panel-graph">
   <h1 id="graph-title">Thuật ngữ UI/UX Product</h1>
   <div id="legend">
-    <div class="legend-item"><div class="legend-dot" style="background:#EF4A81"></div>Tiêu chí Product</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#40B0E0"></div>Công cụ UX</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#FFC845"></div>Khái niệm</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#462B8B"></div>Vai trò</div>
+    <button type="button" class="legend-item" data-cluster="tieu-chi" title="Zoom vào cụm Tiêu chí Product"><div class="legend-dot" style="background:#EF4A81"></div>Tiêu chí Product</button>
+    <button type="button" class="legend-item" data-cluster="cong-cu" title="Zoom vào cụm Công cụ UX"><div class="legend-dot" style="background:#40B0E0"></div>Công cụ UX</button>
+    <button type="button" class="legend-item" data-cluster="khai-niem" title="Zoom vào cụm Khái niệm"><div class="legend-dot" style="background:#FFC845"></div>Khái niệm</button>
+    <button type="button" class="legend-item" data-cluster="vai-tro" title="Zoom vào cụm Vai trò"><div class="legend-dot" style="background:#462B8B"></div>Vai trò</button>
   </div>
-  <div id="graph-hint">● Màu nhạt = chưa có bài viết<br>● Kéo để xoay · Pinch/scroll để zoom</div>
+  <div id="graph-zoom" aria-label="Điều khiển zoom">
+    <button type="button" class="gz-home" data-zoom="home" hidden>⤢ Toàn cảnh</button>
+    <button type="button" data-zoom="in" aria-label="Phóng to" title="Phóng to">+</button>
+    <button type="button" data-zoom="out" aria-label="Thu nhỏ" title="Thu nhỏ">−</button>
+  </div>
+  <div id="graph-hint">● Màu nhạt = chưa có bài viết<br>● Cuộn / pinch để zoom vào chỗ con trỏ · Kéo để xoay · Chuột phải hoặc 2 ngón để di chuyển<br>● Bấm tên nhóm (chú thích hoặc nút lớn) để zoom vào cụm đó</div>
   <div id="graph-3d"></div>
 </div>
 
@@ -1311,23 +1336,27 @@ function initGraph(nodes, links) {
   gNodes = nodes.map(n => ({ ...n }));
   const gLinks = links.map(l => ({ ...l }));
 
-  graphInstance = ForceGraph3D()(container)
+  // orbit: cuộn zoom vào đúng chỗ con trỏ (không phải luôn vào giữa), chuột phải / 2 ngón để di chuyển
+  graphInstance = ForceGraph3D({ controlType: 'orbit' })(container)
     .width(container.clientWidth).height(container.clientHeight)
     .backgroundColor(isDark ? '#090B1E' : '#F5F5F5')
     .showNavInfo(false)
     .graphData({ nodes: gNodes, links: gLinks })
-    .nodeColor(n => nodeColor(n))
+    .nodeColor(n => dimmed(n.id) ? (isDark ? '#2A2848' : '#DCDCE6') : nodeColor(n))   // đang xem một cụm: nút ngoài cụm mờ đi
     .nodeVal(n => Math.pow(n.r, 3) / 100)
     .nodeOpacity(0.92).nodeResolution(16).nodeLabel('')
     .linkColor(l => {
-      const sid = typeof l.source === 'object' ? l.source.id : l.source;
+      const sid = typeof l.source === 'object' ? l.source.id : l.source, tid = typeof l.target === 'object' ? l.target.id : l.target;
+      if (dimmed(sid) || dimmed(tid)) return isDark ? '#2A2848' : '#E2E2EA';
       const s = nodeById[sid];
       return s ? nodeColor(s) : '#999';
     })
     .linkOpacity(0.4)
     .linkWidth(l => l.ltype === 'root-cat' ? 2.5 : l.ltype === 'cat-sub' ? 1.5 : 0.8)
     .onNodeClick(n => {
-      if (!n || n.type === 'root') return;
+      if (!n) return;
+      if (n.type === 'root') return resetView();
+      if (n.type === 'category' || n.type === 'subcategory') return focusCluster(n.id);   // nút nhóm: bay tới cụm
       track('term_open', { term_name: n.label, term_group: n.group || '', has_article: !!n.url, click_source: 'graph' });
       if (window.innerWidth < 768) openModal(n);
       else if (n.url){ track('article_click', { link_url: n.url, link_text: n.label, click_source: 'graph' }); window.open(n.url, '_blank'); }
@@ -1340,11 +1369,12 @@ function initGraph(nodes, links) {
         tip.innerHTML =
           `<div class="tip-title">${n.label}</div>` +
           (n.desc ? `<div class="tip-desc">${n.desc}</div>` : '') +
-          (n.url ? `<div class="tip-link">Nhấp để mở bài viết →</div>` : n.type === 'article' ? `<div class="tip-none">Sắp có bài viết · nhấp để xem định nghĩa →</div>` : '');
+          (n.url ? `<div class="tip-link">Nhấp để mở bài viết →</div>` : n.type === 'article' ? `<div class="tip-none">Sắp có bài viết · nhấp để xem định nghĩa →</div>`
+            : (n.type === 'category' || n.type === 'subcategory') ? `<div class="tip-link">Nhấp để zoom vào cụm này</div>` : '');
       } else {
         tip.style.opacity = '0';
       }
-      container.style.cursor = (n && (n.url || n.type === 'article')) ? 'pointer' : 'default';
+      container.style.cursor = (n && (n.url || n.type !== 'root' || gView.focused)) ? 'pointer' : 'default';
     });
 
   container.addEventListener('mousemove', e => {
@@ -1356,6 +1386,8 @@ function initGraph(nodes, links) {
   graphInstance.d3Force('link').distance(l => l.ltype === 'root-cat' ? 220 : l.ltype === 'cat-sub' ? 140 : 90);
   graphInstance.d3Force('charge').strength(n => n.type==='root' ? -800 : n.type==='category' ? -400 : n.type==='subcategory' ? -200 : -80);
   setTimeout(() => graphInstance.cameraPosition({ x: 0, y: 0, z: 520 }), 100);
+  // khi các cụm đã bung ra: tự canh vừa cả graph (thay vì đứng cố định gần tâm), trừ khi người dùng đã tự zoom / đang mở ?term=
+  setTimeout(() => { if (!gView.touched) fitAll(1000); }, 2600);
 
   // Star field
   const starCanvas = document.createElement('canvas');
@@ -1413,7 +1445,7 @@ function initGraph(nodes, links) {
     const cam=graphInstance.camera(), W=container.clientWidth, H=container.clientHeight;
     gNodes.forEach(n => {
       const el=labelEls[n.id];
-      if (!el||n.x===undefined){if(el)el.style.opacity='0';return;}
+      if (!el||n.x===undefined||dimmed(n.id)){if(el)el.style.opacity='0';return;}
       const pos=project3D(n.x,n.y,n.z,cam);
       if (!pos){el.style.opacity='0';return;}
       const sx=pos.x*W, sy=pos.y*H;
@@ -1425,19 +1457,93 @@ function initGraph(nodes, links) {
   graphInstance.onEngineTick(updateLabels);
   const ctrl = graphInstance.controls();
   ctrl.enablePan = true;
-  ctrl.panSpeed = 2.5;
   ctrl.screenSpacePanning = true;
+  ctrl.zoomToCursor = true;            // cuộn / pinch: zoom vào điểm dưới con trỏ, xem kỹ từng cụm
+  ctrl.enableDamping = true; ctrl.dampingFactor = 0.12;
+  ctrl.rotateSpeed = 0.7; ctrl.zoomSpeed = 1.4; ctrl.panSpeed = 1;
+  ctrl.minDistance = 25; ctrl.maxDistance = 2600;
   ctrl.addEventListener('change', updateLabels);
+  // người dùng tự xoay / cuộn / kéo xong → hiện nút "Toàn cảnh" để quay về
+  ctrl.addEventListener('start', () => { gView.touched = true; });
+  ctrl.addEventListener('end', () => { document.querySelector('#graph-zoom .gz-home').hidden = false; });
 }
+
+// ── Zoom: vào cụm, +/−, toàn cảnh ──────────────────────────
+const gView = { focused: null, touched: false, homeDist: 900, ids: null };
+const dimmed = id => !!(gView.ids && !gView.ids.has(id));
+function setDim(ids) {   // tô lại màu nút / đường sau khi đổi cụm đang xem
+  gView.ids = ids;
+  graphInstance.nodeColor(graphInstance.nodeColor()).linkColor(graphInstance.linkColor());
+}
+function fitAll(ms) {   // toàn cảnh: canh vừa mọi nút trong khung
+  graphInstance.zoomToFit(ms, 40);
+  setTimeout(() => { const c = graphInstance.camera().position, t = graphInstance.controls().target; gView.homeDist = Math.hypot(c.x - t.x, c.y - t.y, c.z - t.z); }, ms + 60);
+}
+const linkId = v => (v && typeof v === 'object') ? v.id : v;
+function clusterIds(id) {   // nút nhóm + mọi nhóm con + thuật ngữ bên dưới
+  const links = graphInstance.graphData().links, out = new Set([id]), q = [id];
+  while (q.length) { const cur = q.shift(); links.forEach(l => { if (linkId(l.source) === cur && !out.has(linkId(l.target))) { out.add(linkId(l.target)); q.push(linkId(l.target)); } }); }
+  return out;
+}
+function focusCluster(id) {
+  if (!graphInstance) return;
+  const ids = clusterIds(id), pts = gNodes.filter(n => ids.has(n.id) && n.x !== undefined);
+  if (!pts.length) return;
+  const c = pts.reduce((a, n) => ({ x: a.x + n.x / pts.length, y: a.y + n.y / pts.length, z: a.z + n.z / pts.length }), { x: 0, y: 0, z: 0 });
+  // khung theo phần lõi của cụm (80% nút gần tâm nhất): cụm lớn như Vai trò không bị lùi ra xa hơn toàn cảnh; muốn kỹ hơn thì bấm nhóm con
+  const ds = pts.map(n => Math.hypot(n.x - c.x, n.y - c.y, n.z - c.z)).sort((a, b) => a - b);
+  const R = Math.max(45, ds[Math.min(ds.length - 1, Math.floor(ds.length * 0.8))]);
+  const cam = graphInstance.camera(), el = document.getElementById('graph-3d');
+  const vf = cam.fov * Math.PI / 180, hf = 2 * Math.atan(Math.tan(vf / 2) * (el.clientWidth / Math.max(1, el.clientHeight)));
+  const dist = Math.min(R / Math.sin(Math.min(vf, hf) / 2) * 1.05, gView.homeDist * 0.75);
+  // nhìn cụm từ phía ngoài (hướng từ tâm graph ra cụm) để cụm không bị các cụm khác che
+  let d = { x: c.x, y: c.y, z: c.z }, len = Math.hypot(d.x, d.y, d.z);
+  if (len < 1) { const t = graphInstance.controls().target; d = { x: cam.position.x - t.x, y: cam.position.y - t.y, z: cam.position.z - t.z }; len = Math.hypot(d.x, d.y, d.z) || 1; }
+  graphInstance.cameraPosition({ x: c.x + d.x / len * dist, y: c.y + d.y / len * dist, z: c.z + d.z / len * dist }, c, 1000);
+  gView.focused = id; gView.touched = true; setDim(ids);
+  document.querySelectorAll('#legend [data-cluster]').forEach(b => b.classList.toggle('active', b.dataset.cluster === id));
+  document.querySelector('#graph-zoom .gz-home').hidden = false;
+  track('graph_focus_cluster', { cluster: id });
+}
+function resetView() {
+  if (!graphInstance) return;
+  fitAll(900);
+  gView.focused = null; setDim(null);
+  document.querySelectorAll('#legend [data-cluster]').forEach(b => b.classList.remove('active'));
+  document.querySelector('#graph-zoom .gz-home').hidden = true;
+}
+function zoomBy(f) {   // giữ nguyên điểm đang nhìn, chỉ tiến / lùi camera
+  if (!graphInstance) return;
+  const cam = graphInstance.camera(), t = graphInstance.controls().target, ctrl = graphInstance.controls();
+  const dx = cam.position.x - t.x, dy = cam.position.y - t.y, dz = cam.position.z - t.z, len = Math.hypot(dx, dy, dz) || 1;
+  const k = Math.min(ctrl.maxDistance, Math.max(ctrl.minDistance, len * f)) / len;
+  graphInstance.cameraPosition({ x: t.x + dx * k, y: t.y + dy * k, z: t.z + dz * k }, { x: t.x, y: t.y, z: t.z }, 350);
+  gView.touched = true;
+  document.querySelector('#graph-zoom .gz-home').hidden = false;
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('#legend [data-cluster], #graph-zoom [data-zoom]'); if (!b) return;
+  if (b.dataset.cluster) return b.classList.contains('active') ? resetView() : focusCluster(b.dataset.cluster);
+  if (b.dataset.zoom === 'in') zoomBy(0.6); else if (b.dataset.zoom === 'out') zoomBy(1.6); else resetView();
+});
+document.addEventListener('keydown', e => {
+  if (!graphInstance || /INPUT|TEXTAREA|SELECT/.test((e.target && e.target.tagName) || '')) return;
+  const pg = document.getElementById('panel-graph'); if (!pg || !pg.getClientRects().length || getComputedStyle(pg).visibility === 'hidden') return;
+  if (e.key === 'Escape' && gView.focused) resetView();
+  else if (e.key === '+' || e.key === '=') zoomBy(0.75);
+  else if (e.key === '-' || e.key === '_') zoomBy(1.33);
+});
 
 function focusTerm(slug) {
   const n = gNodes.find(x => x.id === slug && x.type === 'article');
   if (!n) return;
   let tries = 0;
   (function go() {
+    gView.touched = true;   // đang mở ?term=: không tự canh toàn cảnh đè lên
     if (n.x === undefined && tries++ < 40) return setTimeout(go, 150);
     const r = Math.hypot(n.x || 0, n.y || 0, n.z || 0) || 1, k = 1 + 110 / r;
     graphInstance.cameraPosition({ x: (n.x || 0) * k, y: (n.y || 0) * k, z: (n.z || 0) * k }, n, 1600);
+    document.querySelector('#graph-zoom .gz-home').hidden = false;
     const el = labelEls[n.id];
     if (el) { el.style.fontSize = '13px'; el.style.fontWeight = '700'; el.style.color = isDark ? '#C9C0FF' : '#241775'; }
     if (window.innerWidth < 768) setTimeout(() => openModal(n), 1700);
