@@ -20,3 +20,6 @@ Trong **⋯**: Flashcard Quiz ("Ôn thuật ngữ bằng thẻ lật"), UI Chall
   node scripts/build_site_nav.js      # dán menu vào TELOS_Knowledge_Graph.html, team-map.html
   python3 scripts/build_team_map_en.py # sinh lại en/team-map.html (menu tiếng Anh)
   ```
+
+## Product Map trên mobile
+Thanh tab dưới đáy luôn bấm được: mọi bottom sheet của game (chào mừng, bảng nhân vật, hội thoại, nhiệm vụ, nhiệm vụ theo giờ…) nằm ngay trên thanh (`team-map/team-map.css`), thanh tab có lớp cao hơn khung game (`team-map.html`), và bấm thanh tab / menu "⋯" không đóng sheet đang mở (`SHEET_SEL` trong `team-map/team-map.engine.js`).

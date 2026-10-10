@@ -359,6 +359,7 @@
   #mini.open .zoom button{width:34px;height:30px;}
 }
 @keyframes sheet-up{from{transform:translateY(24px);opacity:.4;}}
+
 @media (prefers-reduced-motion: reduce){#panel,#reader,#dialog,#welcome,#modal .card,#roomintro.open,#mini.open,#quest.open{animation:none;}}
 
 /* xem trước bài viết (chỉ mở trên mobile) */
@@ -562,3 +563,9 @@
 .h-awline .h-awid{font-size:14px;margin:0;}
 .h-splash-code{margin:10px 0 0;}
 .h-splash-code .h-awid{background:rgba(255,255,255,.14);color:#FFC53D;font-size:16px;}
+
+/* (để cuối file cho thắng các luật bottom sheet phía trên) ≤ 640px có thanh tab dưới đáy (cao 64px): mọi bottom sheet nằm ngay trên thanh, không che menu.
+   Thanh tab được đặt cao hơn khung game (team-map.html) để menu "⋯ Thêm" mở được cả khi đang có sheet. */
+@media (max-width:640px){
+  #panel,#reader,#dialog,#welcome,#modal .card,#roomintro.open,#mini.open,#quest.open,#h-sheet{bottom:64px;padding-bottom:0;}
+}

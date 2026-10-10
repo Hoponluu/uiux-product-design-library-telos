@@ -647,7 +647,7 @@ function closeSheets(except){
   if (except !== 'welcome' && !$('#welcome').hidden) $('#start').click();
   if (except !== 'modal' && !$('#modal').hidden){ const n = $('#next-q'); if (n) n.click(); else $('#modal').hidden = true; }
 }
-const SHEET_SEL = '#h-sheet:not([hidden]),#h-bar,#h-act,#h-radial,#h-card,#badges:not([hidden]),#reader:not([hidden]),#panel:not([hidden]),#dialog:not([hidden]),#welcome:not([hidden]),#modal .card,#roomintro.open,#mini.open,#quest.open,#list,#nav-overlay';
+const SHEET_SEL = '#h-sheet:not([hidden]),#h-bar,#h-act,#h-radial,#h-card,#badges:not([hidden]),#reader:not([hidden]),#panel:not([hidden]),#dialog:not([hidden]),#welcome:not([hidden]),#modal .card,#roomintro.open,#mini.open,#quest.open,#list,#nav-overlay,#tab-pill';   // bấm thanh tab / menu "⋯" không đóng sheet đang mở
 document.addEventListener('click', e => {
   if (!isMobile() || e.target === canvas || !e.target.closest) return;
   if (!$('#reader').hidden){ if (!e.target.closest('#reader')) closeReader(); return; }
