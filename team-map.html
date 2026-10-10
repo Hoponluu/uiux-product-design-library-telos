@@ -196,7 +196,8 @@ body.dark #header-logo { filter: brightness(0) invert(1); }
   .tab-btn:hover { background: transparent; }
   .tab-btn.active { background: transparent; color: #241775; }
   .tb-icon { display: block; }
-  #tm-shell { top: 56px; bottom: 64px; z-index: 300; } /* popup của game (bottom sheet) được phép đè lên bottom bar */
+  #tm-shell { top: 56px; bottom: 64px; z-index: 300; }
+  #tab-pill { z-index: 310; } /* bottom sheet của game nằm ngay trên thanh tab (team-map.css), thanh tab luôn bấm được */
 }
 </style>
 <script type="application/ld+json">
@@ -263,6 +264,7 @@ body.dark #header-logo { filter: brightness(0) invert(1); }
   ]
 }
 </script>
+<link rel="stylesheet" href="/nav/site-nav.css">
 </head>
 <body>
 
@@ -288,27 +290,28 @@ body.dark #header-logo { filter: brightness(0) invert(1); }
 
 <!-- TAB PILL -->
 <nav id="tab-pill" aria-label="Công cụ trong thư viện">
-  <a class="tab-btn" href="/">
-    <span class="tb-icon">🗺</span><span class="tb-label">Graph view</span>
+  <a class="tab-btn" href="/" data-tab="graph" title="Các thuật ngữ UI/UX nối với nhau thế nào">
+    <span class="tb-icon">🗺</span><span class="tb-label">Graph</span><span class="tb-short" aria-hidden="true">Graph</span>
   </a>
-  <a class="tab-btn" href="/?tab=glossary">
-    <span class="tb-icon">🔤</span><span class="tb-label">A-Z</span>
+  <a class="tab-btn" href="/?tab=glossary" data-tab="glossary" title="Tra nghĩa từng thuật ngữ">
+    <span class="tb-icon">🔤</span><span class="tb-label">Từ điển A–Z</span><span class="tb-short" aria-hidden="true">Từ điển</span>
   </a>
-  <a class="tab-btn" href="/?tab=flashcard">
-    <span class="tb-icon">🃏</span><span class="tb-label">Flashcard Quiz</span>
+  <a class="tab-btn active" href="/team-map" data-tab="map" title="Ai làm gì trong một team sản phẩm" aria-current="page">
+    <span class="tb-icon">🏢</span><span class="tb-label">Product Map</span><span class="tb-short" aria-hidden="true">Map</span>
   </a>
-  <a class="tab-btn" href="/?tab=challenge">
-    <span class="tb-icon">🎲</span><span class="tb-label">UI Challenge</span>
+  <a class="tab-btn" href="/hanh-trinh-ui-ux" data-tab="journey" title="Lộ trình học từ Newbie tới Product Designer">
+    <span class="tb-icon">🧭</span><span class="tb-label">Hành trình</span><span class="tb-short" aria-hidden="true">Hành trình</span>
   </a>
-  <a class="tab-btn active" href="/team-map" aria-current="page">
-    <span class="tb-icon">🏢</span><span class="tb-label">Product Map</span>
-  </a>
-  <a class="tab-btn" href="/hanh-trinh-ui-ux">
-    <span class="tb-icon">🧭</span><span class="tb-label">Hành trang học tập</span>
-  </a>
-  <a class="tab-btn" href="/?tab=about">
-    <span class="tb-icon">ℹ️</span><span class="tb-label">Về dự án</span>
-  </a>
+  <div class="tab-more">
+    <button type="button" class="tab-btn tab-more-btn" aria-haspopup="true" aria-expanded="false" aria-controls="tab-more-menu" title="Thêm công cụ: Flashcard Quiz, UI Challenge, Về dự án">
+      <span class="tb-icon" aria-hidden="true">⋯</span><span class="tb-label">Thêm</span><span class="tb-short" aria-hidden="true">Thêm</span>
+    </button>
+    <div class="tab-more-menu" id="tab-more-menu" hidden>
+      <a class="tm-item" href="/?tab=flashcard" data-tab="flashcard"><span class="tm-ic" aria-hidden="true">🃏</span><span class="tm-tx"><b>Flashcard Quiz</b><small>Ôn thuật ngữ bằng thẻ lật</small></span></a>
+      <a class="tm-item" href="/?tab=challenge" data-tab="challenge"><span class="tm-ic" aria-hidden="true">🎲</span><span class="tm-tx"><b>UI Challenge</b><small>Bốc đề thiết kế ngẫu nhiên để luyện tay</small></span></a>
+      <a class="tm-item" href="/?tab=about" data-tab="about"><span class="tm-ic" aria-hidden="true">ℹ️</span><span class="tm-tx"><b>Về dự án</b><small>Thư viện này là gì, ai làm</small></span></a>
+    </div>
+  </div>
 </nav>
 
 <!-- NAV OVERLAY (nhanluu.com style) -->
@@ -439,5 +442,6 @@ TeamMapLoader.load().then(data => {
   document.querySelector('#tm-loading div').textContent = 'Không tải được Team Map. Vui lòng tải lại trang.';
 });
 </script>
+<script src="/nav/site-nav.js" defer></script>
 </body>
 </html>

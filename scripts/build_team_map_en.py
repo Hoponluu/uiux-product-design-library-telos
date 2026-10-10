@@ -12,6 +12,7 @@ Sửa team-map.html xong thì chạy lại script này. Nếu một chuỗi ti�
 không còn trong team-map.html, script dừng và báo chuỗi đó để cập nhật bảng REPLACE.
 """
 import os
+import subprocess
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -47,11 +48,6 @@ REPLACE = [
      'content="3D map of a Product office: the UI/UX Designer meets the Dev team in the Handoff quest"', 1),
     ("window.TM_LANG = 'vi';", "window.TM_LANG = 'en';", 1),
     # header
-    ('aria-label="Công cụ trong thư viện"', 'aria-label="Library tools"', 1),
-    ('<span class="tb-label">Về dự án</span>', '<span class="tb-label">About</span>', 1),
-    ('<a class="tab-btn active" href="/team-map" aria-current="page">', '<a class="tab-btn active" href="/en/team-map" aria-current="page">', 1),
-    ('<a class="tab-btn" href="/hanh-trinh-ui-ux">', '<a class="tab-btn" href="/hanh-trinh-ui-ux" hreflang="vi">', 1),
-    ('<span class="tb-label">Hành trang học tập</span>', '<span class="tb-label">Learning path</span>', 1),
     ('<span>Dùng lại nhân vật mặc định</span>', '<span>Use the default character</span>', 1),
     ('aria-label="Đóng menu"', 'aria-label="Close menu"', 1),
     ('<span id="nav-mode-label">Chế độ tối</span>', '<span id="nav-mode-label">Dark mode</span>', 1),
@@ -99,8 +95,19 @@ REPLACE = [
 ]
 
 
+def nav(lang, active):
+    """Menu chính sinh từ api/_lib/nav.js (dùng chung với các trang khác)."""
+    js = f"process.stdout.write(require('./api/_lib/nav.js').tabPill('{lang}', '{active}'))"
+    return subprocess.run(['node', '-e', js], cwd=ROOT, check=True, capture_output=True, text=True).stdout
+
+
 def main():
     s = open(SRC, encoding='utf-8').read()
+    # header: thay cả khối menu bằng bản tiếng Anh
+    vi_nav = nav('vi', 'map')
+    if vi_nav not in s:
+        sys.exit('Menu trong team-map.html chưa khớp api/_lib/nav.js: chạy node scripts/build_site_nav.js trước')
+    s = s.replace(vi_nav, nav('en', 'map'), 1)
     missing = []
     for vi, en, n in REPLACE:
         if s.count(vi) != n:

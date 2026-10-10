@@ -8,8 +8,9 @@ Lượt xem trang (`page_view`) GA tự ghi nhận. Các sự kiện dưới đ�
 | Sự kiện | Khi nào | Tham số |
 | --- | --- | --- |
 | `tab_view` | Đổi tab (Graph, A-Z, Flashcard, UI Challenge, Về dự án), kể cả mở thẳng bằng `/?tab=…` | `tab_name` |
-| `term_open` | Bấm một thuật ngữ trên Graph view | `term_name`, `term_group`, `has_article`, `click_source` |
-| `graph_focus_cluster` | Graph view: zoom vào một cụm (bấm chú thích màu hoặc nút nhóm trên đồ thị) | `cluster` (slug nhóm) |
+| `term_open` | Bấm một thuật ngữ trên Graph view | `term_name`, `term_group`, `has_article`, `click_source` (`graph_2d` hoặc `graph` cho 3D) |
+| `graph_focus_cluster` | Graph view: zoom vào một cụm (bấm chú thích màu hoặc nút nhóm trên đồ thị) | `cluster` (slug nhóm), `mode` (`2d` / `3d`) |
+| `graph_view_mode` | Graph view: bấm tab 2D / 3D | `mode` (`2d` / `3d`) |
 | `article_click` | Bấm mở bài viết trên academy.telos.vn | `link_url`, `link_text`, `click_source` (`graph`, `graph_modal`, `glossary`, …) |
 | `search` | Gõ tìm trong A-Z (từ 2 ký tự, sau 1,5 giây ngừng gõ) | `search_term`, `click_source` |
 | `flashcard_start` / `flashcard_complete` | Bắt đầu / xong một lượt Flashcard | `score`, `total` |

@@ -5,6 +5,7 @@
 // Dữ liệu đọc thẳng từ Supabase (key công khai, chỉ đọc) nên sửa trong CMS là trang tự cập nhật
 // sau tối đa ~10 phút (cache CDN). Vai trò lấy thêm nội dung từ modal nhân vật của Product Map.
 
+const { tabPill } = require('./nav');
 const SITE = 'https://uiux-library.nhanluu.com';
 const REST = process.env.SB_REST || 'https://vvpqhsglgtfwjklvlvuh.supabase.co/rest/v1';
 const KEY = process.env.SB_KEY || 'sb_publishable_slwezFWl9SM0ngQiVdIZuQ_XvVkhmCU';
@@ -84,12 +85,6 @@ const S = {
 // ---------- khung trang (header dùng chung với trang chủ / Product Map) ----------
 const LOGO = `<svg fill="none" preserveAspectRatio="xMidYMid meet" viewBox="0 0 59.2927 68" style="width:100%;height:100%;"><path d="M6.01217 51.8294C5.42909 51.8294 4.97559 51.4134 4.97559 50.8785V34.5363C4.97559 34.0014 5.42909 33.5855 6.01217 33.5855C6.59525 33.5855 7.04876 34.0014 7.04876 34.5363V50.8191C7.04876 51.4134 6.59525 51.8294 6.01217 51.8294Z" fill="#282935"/><path d="M4.59018 60.2257L0.749669 63.9689C0.0181436 64.7176 0.566789 65.9269 1.60312 65.9269H10.3814C11.4787 65.9269 12.0274 64.66 11.2349 63.9689L7.27244 60.2257C6.54092 59.5346 5.32171 59.5346 4.59018 60.2257Z" fill="#282935"/><path d="M18.2095 2.48779H5.27699C3.47812 2.48779 1.56488 3.00049 0.733673 4.5942C-0.386691 6.74233 -0.247232 9.44754 1.31306 11.4884L42.7211 65.4923C44.8629 68.2938 48.9086 68.8303 51.7048 66.6845C52.5377 66.0288 53.0732 65.0155 53.0732 63.9425V46.9546C53.0732 46.1797 52.8352 45.4644 52.3592 44.8683L20.9462 3.85875C20.2918 3.02426 19.2804 2.48779 18.2095 2.48779Z" fill="#282935"/><path d="M43.0069 14.9041C44.6607 16.3014 46.9256 17 49.8017 17C52.8934 17 55.2302 16.2237 56.8121 14.6712C58.4658 13.1963 59.2927 11.1005 59.2927 8.38357C59.2927 5.58905 58.5018 3.49315 56.9199 2.09589C55.3381 0.698633 53.0732 0 50.1252 0C47.0334 0 44.6607 0.737447 43.0069 2.21233C41.4251 3.76484 40.6342 5.89954 40.6342 8.61644C40.6342 11.411 41.4251 13.5069 43.0069 14.9041Z" fill="#282935"/></svg>`;
 
-function tabs(lang){
-  const t = (href, icon, label, active) => `<a class="tab-btn${active ? ' active' : ''}" href="${href}"${active ? ' aria-current="page"' : ''}><span class="tb-icon">${icon}</span><span class="tb-label">${label}</span></a>`;
-  if (lang === 'en') return [t('/', '🗺', 'Graph view'), t('/en/glossary', '🔤', 'A-Z', true), t('/en/team-map', '🏢', 'Product Map')].join('');
-  return [t('/', '🗺', 'Graph view'), t('/?tab=glossary', '🔤', 'A-Z', true), t('/?tab=flashcard', '🃏', 'Flashcard Quiz'),
-    t('/?tab=challenge', '🎲', 'UI Challenge'), t('/team-map', '🏢', 'Product Map'), t('/hanh-trinh-ui-ux', '🧭', 'Hành trang học tập'), t('/?tab=about', 'ℹ️', 'Về dự án')].join('');
-}
 
 function page({ lang, title, desc, path, alt, body, ld, noindex, ogType, term }){
   const s = S[lang], url = SITE + path;
@@ -122,6 +117,7 @@ ${noindex ? '' : `<link rel="canonical" href="${url}">\n${alts}`}
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-PFSCQRQZM6"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-PFSCQRQZM6');</script>
 <link rel="stylesheet" href="/glossary/glossary.css">
+<link rel="stylesheet" href="/nav/site-nav.css">
 ${ld ? `<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, '\\u003c')}</script>` : ''}
 </head>
 <body${term ? ` data-term="${esc(term)}"` : ''}>
@@ -130,7 +126,7 @@ ${ld ? `<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, '\
   <a id="header-logo" href="https://nhanluu.com" target="_blank" rel="noopener" title="nhanluu.com" aria-label="Nhân Lưu">${LOGO}</a>
   <button id="menu-btn" onclick="openNav()" aria-label="Menu" title="Menu"><span class="mdot mdot-l"></span><span class="mdot mdot-c"></span><span class="mdot mdot-r"></span></button>
 </div>
-<nav id="tab-pill" aria-label="${s.tabs}">${tabs(lang)}</nav>
+${tabPill(lang, 'glossary')}
 <div id="nav-overlay" role="dialog" aria-modal="true" aria-label="Navigation">
   <div id="nav-backdrop" onclick="closeNav()"></div>
   <nav id="nav-panel">
@@ -155,6 +151,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')closeNav()})
 setModeUI(document.body.classList.contains('dark'));
 document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[data-ga]');if(!a)return;try{gtag('event',a.getAttribute('data-ga'),{link_url:a.href,link_text:a.textContent.trim().slice(0,80),click_source:'term_page',term_slug:document.body.getAttribute('data-term')||''})}catch(_){}});
 </script>
+<script src="/nav/site-nav.js" defer></script>
 </body>
 </html>`;
 }

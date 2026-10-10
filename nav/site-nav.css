@@ -1,0 +1,48 @@
+/* Menu chính dùng chung (trang chủ, Product Map, trang thuật ngữ, Hành trình):
+   4 mục lớn (Graph · Từ điển A–Z · Product Map · Hành trình) + nút "⋯" gom các công cụ còn lại.
+   Desktop: "⋯" mở menu thả xuống dưới thanh pill. Mobile (≤ 640px): thanh tab dưới đáy, "⋯ Thêm" mở bảng nổi phía trên thanh. */
+.tab-more { position: relative; display: flex; }
+#tab-pill .tb-short { display: none; }
+/* desktop: nút "⋯" chỉ hiện biểu tượng */
+#tab-pill .tab-more-btn .tb-icon { display: block; font-size: 18px; line-height: 1; letter-spacing: 1px; }
+#tab-pill .tab-more-btn .tb-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+#tab-pill .tab-more-btn { padding-left: 16px; padding-right: 16px; justify-content: center; }
+#tab-pill .tab-more-btn.open { background: rgba(0,0,0,0.06); }
+
+.tab-more-menu { position: absolute; top: calc(100% + 14px); right: -6px; min-width: 290px; padding: 6px; z-index: 650;
+  background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 16px; box-shadow: 0 16px 40px rgba(20,10,60,0.16);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+.tab-more-menu[hidden] { display: none; }
+.tm-item { display: flex; gap: 12px; align-items: flex-start; width: 100%; padding: 10px 12px; border: 0; border-radius: 12px; background: none;
+  color: #1C1033; text-decoration: none; text-align: left; font: inherit; cursor: pointer; box-sizing: border-box; }
+.tm-item:hover, .tm-item:focus-visible { background: rgba(36,23,117,0.06); outline: none; }
+.tm-item.active { background: rgba(36,23,117,0.1); }
+.tm-ic { font-size: 20px; line-height: 1.25; flex-shrink: 0; }
+.tm-tx { display: block; min-width: 0; }
+.tm-tx b { display: block; font-size: 14px; font-weight: 600; line-height: 1.35; }
+.tm-tx small { display: block; font-size: 12px; line-height: 1.4; color: rgba(28,16,51,0.55); margin-top: 1px; white-space: normal; }
+
+body.dark #tab-pill .tab-more-btn.open { background: rgba(255,255,255,0.08); }
+body.dark .tab-more-menu { background: #1C1A38; border-color: rgba(255,255,255,0.1); box-shadow: 0 16px 40px rgba(0,0,0,0.5); }
+body.dark .tm-item { color: rgba(255,255,255,0.9); }
+body.dark .tm-item:hover, body.dark .tm-item:focus-visible { background: rgba(255,255,255,0.07); }
+body.dark .tm-item.active { background: rgba(150,140,255,0.16); }
+body.dark .tm-tx small { color: rgba(255,255,255,0.5); }
+
+/* tablet: chỉ còn 5 mục nên hiện lại chữ (trước đây 641–780px chỉ còn biểu tượng) */
+@media (min-width: 641px) and (max-width: 780px) {
+  #tab-pill .tab-btn:not(.tab-more-btn) .tb-icon { display: none; }
+  #tab-pill .tab-btn:not(.tab-more-btn) .tb-label { position: static; width: auto; height: auto; overflow: visible; clip: auto; }
+  #tab-pill .tab-btn { padding-left: 12px; padding-right: 12px; }
+}
+/* mobile: thanh tab dưới đáy, nhãn ngắn một dòng */
+@media (max-width: 640px) {
+  #tab-pill .tb-label, #tab-pill .tab-more-btn .tb-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  #tab-pill .tb-short { display: block; font-size: 10.5px; line-height: 1.15; white-space: nowrap; text-align: center; }
+  #tab-pill .tab-more-btn .tb-icon { font-size: 20px; }
+  .tab-more { flex: 1; }
+  #tab-pill .tab-more-btn { width: 100%; padding: 8px 4px; }
+  #tab-pill .tab-more-btn.open { background: transparent; color: #241775; }
+  body.dark #tab-pill .tab-more-btn.open { color: rgba(150,140,255,0.9); }
+  .tab-more-menu { position: fixed; left: 12px; right: 12px; top: auto; bottom: calc(76px + env(safe-area-inset-bottom)); min-width: 0; }
+}
