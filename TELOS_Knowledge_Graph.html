@@ -209,8 +209,16 @@ a.tab-btn { text-decoration: none; }
 .nav-dark-toggle:hover { color: rgba(255,255,255,0.7); }
 .nav-dark-icon { font-size: 18px; }
 
-/* ── 3D GRAPH ────────────────────────────────────────────── */
-#graph-3d { width: 100%; height: 100%; }
+/* ── GRAPH 2D / 3D ───────────────────────────────────────── */
+#graph-2d, #graph-3d { width: 100%; height: 100%; }
+#graph-2d[hidden], #graph-3d[hidden] { display: none; }
+/* tab 2D | 3D */
+#graph-mode { position: fixed; top: 96px; right: 24px; z-index: 100; display: flex; padding: 3px; gap: 2px; border-radius: 999px;
+  background: rgba(255,255,255,.92); border: 1px solid rgba(36,23,117,.12); box-shadow: 0 2px 10px rgba(36,23,117,.08); }
+#graph-mode button { border: 0; background: none; font: 600 13px/1 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: rgba(0,0,0,.55);
+  padding: 8px 16px; border-radius: 999px; cursor: pointer; transition: background .15s, color .15s; }
+#graph-mode button:hover { color: #241775; }
+#graph-mode button[aria-selected="true"] { background: #241775; color: #fff; }
 
 /* ── LOADING ─────────────────────────────────────────────── */
 #loading {
@@ -299,7 +307,7 @@ button.legend-item { background: none; border: 0; padding: 3px 8px 3px 4px; marg
 button.legend-item:hover, button.legend-item:focus-visible { background: rgba(36,23,117,.07); color: rgba(0,0,0,.85); }
 button.legend-item.active { background: rgba(36,23,117,.1); color: #241775; font-weight: 600; }
 /* nút zoom: +, −, toàn cảnh */
-#graph-zoom { position: fixed; right: 24px; bottom: 78px; z-index: 100; display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+#graph-zoom { position: fixed; right: 24px; bottom: 100px; z-index: 100; display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
 #graph-zoom button { min-width: 36px; height: 36px; border-radius: 10px; border: 1px solid rgba(36,23,117,.14); background: rgba(255,255,255,.9); color: #241775;
   font: 600 18px/1 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; cursor: pointer; box-shadow: 0 2px 8px rgba(36,23,117,.08); }
 #graph-zoom button:hover { border-color: #241775; }
@@ -405,11 +413,15 @@ body.dark .legend-item { color: rgba(255,255,255,0.52); }
 body.dark #graph-hint { color: rgba(255,255,255,0.28); }
 body.dark button.legend-item:hover, body.dark button.legend-item:focus-visible { background: rgba(255,255,255,.08); color: rgba(255,255,255,.9); }
 body.dark button.legend-item.active { background: rgba(201,192,255,.14); color: #C9C0FF; }
+body.dark #graph-mode { background: rgba(28,26,56,.92); border-color: rgba(255,255,255,.12); }
+body.dark #graph-mode button { color: rgba(255,255,255,.55); }
+body.dark #graph-mode button[aria-selected="true"] { background: #4B3BC4; color: #fff; }
 body.dark #graph-zoom button { background: rgba(28,26,56,.9); color: #C9C0FF; border-color: rgba(255,255,255,.14); }
 /* mobile: chú thích + nút zoom nằm trên thanh tab dưới đáy; ẩn dòng hướng dẫn dài */
 @media (max-width: 640px) {
   #legend { bottom: calc(80px + env(safe-area-inset-bottom)); left: 12px; right: 64px; flex-direction: row; flex-wrap: wrap; gap: 4px 12px; }
   #graph-zoom { right: 12px; bottom: calc(80px + env(safe-area-inset-bottom)); }
+  #graph-mode { top: 66px; right: 12px; }
   #graph-hint { display: none; }
 }
 body.dark #tooltip { background: #1C1F35; border-color: rgba(255,255,255,0.1); color: rgba(255,255,255,0.9); }
@@ -752,6 +764,7 @@ body.dark .ascii-cell.fg { color: rgba(255,255,255,0.82); }
   body.dark .tab-btn { color: rgba(255,255,255,0.45); }
 }
 </style>
+<link rel="stylesheet" href="/nav/site-nav.css">
 </head>
 <body>
 
@@ -793,29 +806,30 @@ body.dark .ascii-cell.fg { color: rgba(255,255,255,0.82); }
 </div>
 
 <!-- TAB PILL (outside #tabs to avoid backdrop-filter stacking context) -->
-<div id="tab-pill">
-  <button class="tab-btn active" onclick="switchTab('graph',this)">
-    <span class="tb-icon">🗺</span><span class="tb-label">Graph view</span>
+<nav id="tab-pill" aria-label="Công cụ trong thư viện">
+  <button class="tab-btn active" type="button" data-tab="graph" onclick="switchTab('graph',this)" title="Các thuật ngữ UI/UX nối với nhau thế nào">
+    <span class="tb-icon">🗺</span><span class="tb-label">Graph</span><span class="tb-short" aria-hidden="true">Graph</span>
   </button>
-  <button class="tab-btn" onclick="switchTab('glossary',this)">
-    <span class="tb-icon">🔤</span><span class="tb-label">A-Z</span>
+  <button class="tab-btn" type="button" data-tab="glossary" onclick="switchTab('glossary',this)" title="Tra nghĩa từng thuật ngữ">
+    <span class="tb-icon">🔤</span><span class="tb-label">Từ điển A–Z</span><span class="tb-short" aria-hidden="true">Từ điển</span>
   </button>
-  <button class="tab-btn" onclick="switchTab('flashcard',this)">
-    <span class="tb-icon">🃏</span><span class="tb-label">Flashcard Quiz</span>
-  </button>
-  <button class="tab-btn" onclick="switchTab('challenge',this)">
-    <span class="tb-icon">🎲</span><span class="tb-label">UI Challenge</span>
-  </button>
-  <a class="tab-btn" href="/team-map">
-    <span class="tb-icon">🏢</span><span class="tb-label">Product Map</span>
+  <a class="tab-btn" href="/team-map" data-tab="map" title="Ai làm gì trong một team sản phẩm">
+    <span class="tb-icon">🏢</span><span class="tb-label">Product Map</span><span class="tb-short" aria-hidden="true">Map</span>
   </a>
-  <a class="tab-btn" href="/hanh-trinh-ui-ux">
-    <span class="tb-icon">🧭</span><span class="tb-label">Hành trang học tập</span>
+  <a class="tab-btn" href="/hanh-trinh-ui-ux" data-tab="journey" title="Lộ trình học từ Newbie tới Product Designer">
+    <span class="tb-icon">🧭</span><span class="tb-label">Hành trình</span><span class="tb-short" aria-hidden="true">Hành trình</span>
   </a>
-  <button class="tab-btn" onclick="switchTab('about',this)">
-    <span class="tb-icon">ℹ️</span><span class="tb-label">Về dự án</span>
-  </button>
-</div>
+  <div class="tab-more">
+    <button type="button" class="tab-btn tab-more-btn" aria-haspopup="true" aria-expanded="false" aria-controls="tab-more-menu" title="Thêm công cụ: Flashcard Quiz, UI Challenge, Về dự án">
+      <span class="tb-icon" aria-hidden="true">⋯</span><span class="tb-label">Thêm</span><span class="tb-short" aria-hidden="true">Thêm</span>
+    </button>
+    <div class="tab-more-menu" id="tab-more-menu" hidden>
+      <button class="tm-item" type="button" data-tab="flashcard" onclick="switchTab('flashcard',this)"><span class="tm-ic" aria-hidden="true">🃏</span><span class="tm-tx"><b>Flashcard Quiz</b><small>Ôn thuật ngữ bằng thẻ lật</small></span></button>
+      <button class="tm-item" type="button" data-tab="challenge" onclick="switchTab('challenge',this)"><span class="tm-ic" aria-hidden="true">🎲</span><span class="tm-tx"><b>UI Challenge</b><small>Bốc đề thiết kế ngẫu nhiên để luyện tay</small></span></button>
+      <button class="tm-item" type="button" data-tab="about" onclick="switchTab('about',this)"><span class="tm-ic" aria-hidden="true">ℹ️</span><span class="tm-tx"><b>Về dự án</b><small>Thư viện này là gì, ai làm</small></span></button>
+    </div>
+  </div>
+</nav>
 
 <!-- NAV OVERLAY (nhanluu.com style) -->
 <div id="nav-overlay" role="dialog" aria-modal="true" aria-label="Navigation">
@@ -851,8 +865,13 @@ body.dark .ascii-cell.fg { color: rgba(255,255,255,0.82); }
     <button type="button" data-zoom="in" aria-label="Phóng to" title="Phóng to">+</button>
     <button type="button" data-zoom="out" aria-label="Thu nhỏ" title="Thu nhỏ">−</button>
   </div>
-  <div id="graph-hint">● Màu nhạt = chưa có bài viết<br>● Cuộn / pinch để zoom vào chỗ con trỏ · Kéo để xoay · Chuột phải hoặc 2 ngón để di chuyển<br>● Bấm tên nhóm (chú thích hoặc nút lớn) để zoom vào cụm đó</div>
-  <div id="graph-3d"></div>
+  <div id="graph-mode" role="tablist" aria-label="Kiểu xem đồ thị">
+    <button type="button" role="tab" data-mode="2d" aria-selected="true" title="Đồ thị phẳng, dễ đọc chữ">2D</button>
+    <button type="button" role="tab" data-mode="3d" aria-selected="false" title="Đồ thị không gian, xoay để khám phá">3D</button>
+  </div>
+  <div id="graph-hint"></div>
+  <div id="graph-2d"></div>
+  <div id="graph-3d" hidden></div>
 </div>
 
 <!-- FLASHCARD PANEL -->
@@ -1104,6 +1123,7 @@ body.dark .ascii-cell.fg { color: rgba(255,255,255,0.82); }
 </div>
 
 <script src="/supabase.config.js"></script>
+<script src="https://unpkg.com/force-graph@1.51.4/dist/force-graph.min.js"></script>
 <script src="https://unpkg.com/3d-force-graph@1.73.4/dist/3d-force-graph.min.js"></script>
 <script>
 // ════════════════════════════════════════════════════════
@@ -1200,6 +1220,8 @@ function buildGraphData(categories, concepts) {
 // STATE
 // ════════════════════════════════════════════════════════
 let isDark = false, graphInitialized = false, graphInstance = null;
+// Graph view có 2 kiểu xem: 2D (force-graph, mặc định) và 3D (3d-force-graph, chỉ dựng khi bấm tab 3D lần đầu)
+let gMode = '2d', graph2d = null, g2Nodes = [], graphSrc = null;
 let gNodes = [], labelEls = {}, allConcepts = [], allCats = [];
 
 // ════════════════════════════════════════════════════════
@@ -1227,7 +1249,12 @@ window.addEventListener('DOMContentLoaded', async () => {
     renderGlossary('');
     injectConceptsJsonLd(concepts, categories);
     document.getElementById('loading').classList.add('hidden');
-    initGraph(nodes, links);
+    graphSrc = { nodes, links };
+    let want = '2d';
+    try { want = localStorage.getItem('telos-graph-mode') || '2d'; } catch (e) {}
+    const qv = new URLSearchParams(location.search).get('view'); if (qv === '2d' || qv === '3d') want = qv;
+    initGraph2D(nodes, links);
+    setGraphMode(want === '3d' ? '3d' : '2d', false);
   } catch(err) {
     document.querySelector('.loading-text').textContent = 'Không tải được dữ liệu. Vui lòng thử lại.';
     console.error(err);
@@ -1236,16 +1263,16 @@ window.addEventListener('DOMContentLoaded', async () => {
   // Mở thẳng một tab qua ?tab=… (dùng khi bấm tab từ trang con như /team-map)
   const startTab = new URLSearchParams(location.search).get('tab');
   if (['glossary','flashcard','challenge','about'].includes(startTab)) {
-    const btn = document.querySelector(`.tab-btn[onclick*="'${startTab}'"]`);
+    const btn = document.querySelector(`#tab-pill [data-tab="${startTab}"]`);
     if (btn) switchTab(startTab, btn);
   }
   // ?term=<slug> (nút "Xem trên đồ thị 3D" ở trang thuật ngữ): bay tới nút đó trên đồ thị
   const startTerm = new URLSearchParams(location.search).get('term');
-  if (startTerm && !startTab && graphInstance) focusTerm(startTerm);
+  if (startTerm && !startTab && graphSrc) focusTerm(startTerm);
   // ?q=… (khai báo trong SearchAction): mở tab A–Z và tìm luôn
   const startQ = (new URLSearchParams(location.search).get('q') || '').trim();
   if (startQ && allConcepts.length) {
-    const btn = document.querySelector(`.tab-btn[onclick*="'glossary'"]`);
+    const btn = document.querySelector(`#tab-pill [data-tab="glossary"]`);
     if (btn) switchTab('glossary', btn);
     document.getElementById('gl-search').value = startQ.slice(0, 80);
     onGlSearch();
@@ -1257,8 +1284,11 @@ window.addEventListener('DOMContentLoaded', async () => {
 // ════════════════════════════════════════════════════════
 function switchTab(tab, btn) {
   track('tab_view', { tab_name: tab });
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+  // mục đang mở sáng lên; mục nằm trong "⋯" thì nút "⋯" sáng theo
+  document.querySelectorAll('#tab-pill [data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  const more = document.querySelector('#tab-pill .tab-more-btn');
+  if (more) more.classList.toggle('active', !!document.querySelector(`#tab-more-menu [data-tab="${tab}"]`));
+  if (window.closeTabMore) window.closeTabMore();
   document.getElementById('panel-graph').style.display     = tab === 'graph'     ? 'block' : 'none';
   document.getElementById('panel-flashcard').style.display = tab === 'flashcard' ? 'block' : 'none';
   document.getElementById('panel-glossary').style.display  = tab === 'glossary'  ? 'block' : 'none';
@@ -1302,6 +1332,7 @@ function toggleMode() {
     graphInstance.backgroundColor(isDark ? '#090B1E' : '#F5F5F5');
     updateLabelColors(isDark);
   }
+  if (graph2d) graph2d.backgroundColor(isDark ? '#090B1E' : '#F5F5F5').linkColor(graph2d.linkColor());
   try { localStorage.setItem('telos-theme', isDark ? 'dark' : 'light'); } catch(e) {}
 }
 
@@ -1326,6 +1357,118 @@ document.addEventListener('click', e => {
 // ════════════════════════════════════════════════════════
 // 3D GRAPH
 // ════════════════════════════════════════════════════════
+// ── dùng chung cho 2D và 3D ──
+function onGraphClick(n) {
+  if (!n) return;
+  if (n.type === 'root') return resetView();
+  if (n.type === 'category' || n.type === 'subcategory') return focusCluster(n.id);   // nút nhóm: bay tới cụm
+  track('term_open', { term_name: n.label, term_group: n.group || '', has_article: !!n.url, click_source: gMode === '3d' ? 'graph' : 'graph_2d' });
+  if (window.innerWidth < 768) openModal(n);
+  else if (n.url){ track('article_click', { link_url: n.url, link_text: n.label, click_source: 'graph' }); window.open(n.url, '_blank'); }
+  else if (n.type === 'article') location.href = '/thuat-ngu/' + encodeURIComponent(n.id);   // chưa có bài → trang thuật ngữ
+}
+function onGraphHover(n, container) {
+  const tip = document.getElementById('tooltip');
+  if (n && n.type !== 'root') {
+    tip.style.opacity = '1';
+    tip.innerHTML =
+      `<div class="tip-title">${n.label}</div>` +
+      (n.desc ? `<div class="tip-desc">${n.desc}</div>` : '') +
+      (n.url ? `<div class="tip-link">Nhấp để mở bài viết →</div>` : n.type === 'article' ? `<div class="tip-none">Sắp có bài viết · nhấp để xem định nghĩa →</div>`
+        : (n.type === 'category' || n.type === 'subcategory') ? `<div class="tip-link">Nhấp để zoom vào cụm này</div>` : '');
+  } else {
+    tip.style.opacity = '0';
+  }
+  container.style.cursor = (n && (n.url || n.type !== 'root' || gView.focused)) ? 'pointer' : 'default';
+}
+const hexA = (hex, a) => { const h = String(hex).replace('#', ''); if (h.length !== 6) return hex; return `rgba(${parseInt(h.slice(0, 2), 16)},${parseInt(h.slice(2, 4), 16)},${parseInt(h.slice(4, 6), 16)},${a})`; };
+
+// ── 2D (mặc định) ──
+const R2 = n => n.type === 'root' ? 16 : n.type === 'category' ? 12 : n.type === 'subcategory' ? 8 : Math.max(4, (n.r || 8) * 0.65);
+function draw2D(n, ctx, k) {
+  const r = R2(n), dim = dimmed(n.id), hot = n.id === gView.hl || n.id === gView.hover;
+  ctx.beginPath(); ctx.arc(n.x, n.y, r, 0, 2 * Math.PI);
+  ctx.fillStyle = dim ? (isDark ? '#2A2848' : '#DCDCE6') : nodeColor(n); ctx.fill();
+  if (hot) { ctx.lineWidth = 2 / k; ctx.strokeStyle = isDark ? '#fff' : '#241775'; ctx.stroke(); }
+  if (dim) return;
+  // nhãn: gốc + nhóm luôn hiện; nhóm con và thuật ngữ hiện dần khi zoom gần (hoặc khi đang xem một cụm) để chữ không chồng nhau
+  const t = n.type, focus = !!gView.ids;
+  const show = t === 'root' || t === 'category' || hot || (t === 'subcategory' && (k > 0.8 || focus)) || (t === 'article' && (k > 1.6 || (focus && k > 0.75)));
+  if (!show) return;
+  const px = t === 'root' ? 13 : t === 'category' ? 12 : t === 'subcategory' ? 11 : 10.5, label = t === 'root' ? 'UI/UX Product' : n.label, x = n.x + r + 3 / k;
+  ctx.font = `${t === 'article' && !hot ? 400 : 600} ${px / k}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+  ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+  ctx.lineWidth = 3 / k; ctx.strokeStyle = isDark ? 'rgba(9,11,30,0.85)' : 'rgba(245,245,245,0.92)'; ctx.strokeText(label, x, n.y);
+  ctx.fillStyle = isDark
+    ? (t === 'root' ? '#C9C0FF' : t === 'category' ? '#fff' : t === 'subcategory' ? 'rgba(255,255,255,0.78)' : n.url ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.4)')
+    : (t === 'root' ? '#241775' : t === 'category' ? '#111' : t === 'subcategory' ? 'rgba(0,0,0,0.72)' : n.url ? 'rgba(0,0,0,0.65)' : 'rgba(0,0,0,0.38)');
+  if (hot && t === 'article') ctx.fillStyle = isDark ? '#C9C0FF' : '#241775';
+  ctx.fillText(label, x, n.y);
+}
+function initGraph2D(nodes, links) {
+  const el = document.getElementById('graph-2d');
+  g2Nodes = nodes.map(n => ({ ...n }));
+  const byId = Object.fromEntries(g2Nodes.map(n => [n.id, n]));
+  const mark = () => { gView.touched = true; gView.userAt = Date.now(); document.querySelector('#graph-zoom .gz-home').hidden = false; };
+  el.addEventListener('wheel', mark, { passive: true, capture: true });   // capture: d3-zoom của canvas chặn sự kiện trước khi nổi lên
+  el.addEventListener('pointerdown', mark, { capture: true });
+  graph2d = ForceGraph()(el)
+    .width(el.clientWidth || innerWidth).height(el.clientHeight || innerHeight - 80)
+    .backgroundColor(isDark ? '#090B1E' : '#F5F5F5')
+    .graphData({ nodes: g2Nodes, links: links.map(l => ({ ...l })) })
+    .nodeRelSize(1).nodeVal(n => R2(n) * R2(n)).nodeLabel('')
+    .nodeCanvasObject(draw2D)
+    .linkColor(l => {
+      const sid = typeof l.source === 'object' ? l.source.id : l.source, tid = typeof l.target === 'object' ? l.target.id : l.target;
+      if (dimmed(sid) || dimmed(tid)) return isDark ? 'rgba(60,56,100,0.35)' : 'rgba(200,200,215,0.45)';
+      const src = byId[sid], c = src ? nodeColor(src) : '#999999';
+      return isDark ? hexA(c === '#462B8B' || c === '#241775' ? '#8D82FF' : c, 0.55) : hexA(c, 0.45);   // nền tối: tím đậm đổi sang tím sáng cho khỏi chìm
+    })
+    .linkWidth(l => l.ltype === 'root-cat' ? 2 : l.ltype === 'cat-sub' ? 1.2 : 0.6)
+    .onNodeClick(onGraphClick)
+    .onNodeHover(n => { gView.hover = n ? n.id : null; onGraphHover(n, el); })
+    .cooldownTime(8000);
+  // nhóm càng nhiều thuật ngữ thì vòng thuật ngữ càng rộng, chữ đỡ chen nhau
+  const kids = {}; links.forEach(l => { if (l.ltype === 'art') kids[l.source] = (kids[l.source] || 0) + 1; });
+  graph2d.d3Force('link').distance(l => l.ltype === 'root-cat' ? 150 : l.ltype === 'cat-sub' ? 90 : Math.max(42, (kids[typeof l.source === 'object' ? l.source.id : l.source] || 0) * 3.4));
+  graph2d.d3Force('charge').strength(n => n.type === 'root' ? -500 : n.type === 'category' ? -260 : n.type === 'subcategory' ? -130 : -45);
+  // canh vừa cả graph khi các cụm đã bung ra (trừ khi người dùng đã tự zoom / đang mở ?term=)
+  setTimeout(() => { if (!gView.touched && gMode === '2d') graph2d.zoomToFit(700, 40); }, 1800);
+  el.addEventListener('mousemove', e => { const tip = document.getElementById('tooltip'); tip.style.left = (e.clientX + 16) + 'px'; tip.style.top = (e.clientY - 12) + 'px'; });
+}
+
+// ── tab 2D | 3D ──
+const HINT = {
+  '2d': '● Màu nhạt = chưa có bài viết<br>● Cuộn / pinch để zoom vào chỗ con trỏ · Kéo nền để di chuyển · Zoom gần để hiện tên thuật ngữ<br>● Bấm tên nhóm (chú thích hoặc nút lớn) để zoom vào cụm đó',
+  '3d': '● Màu nhạt = chưa có bài viết<br>● Cuộn / pinch để zoom vào chỗ con trỏ · Kéo để xoay · Chuột phải hoặc 2 ngón để di chuyển<br>● Bấm tên nhóm (chú thích hoặc nút lớn) để zoom vào cụm đó',
+};
+function setGraphMode(mode, user) {
+  if (mode === '3d' && !window.ForceGraph3D) mode = '2d';
+  const was = gMode; gMode = mode;
+  document.getElementById('graph-2d').hidden = mode !== '2d';
+  document.getElementById('graph-3d').hidden = mode !== '3d';
+  document.querySelectorAll('#graph-mode [data-mode]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.mode === mode)));
+  document.getElementById('graph-hint').innerHTML = HINT[mode];
+  // đổi kiểu xem: bỏ cụm đang chọn, về toàn cảnh
+  gView.focused = null; gView.touched = false; gView.ids = null;
+  document.querySelectorAll('#legend [data-cluster]').forEach(b => b.classList.remove('active'));
+  document.querySelector('#graph-zoom .gz-home').hidden = true;
+  document.getElementById('tooltip').style.opacity = '0';
+  if (mode === '3d') {
+    if (!graphInstance) {
+      try { initGraph(graphSrc.nodes, graphSrc.links); }
+      catch (e) { console.error(e); graphInitialized = false; graphInstance = null; return setGraphMode('2d', false); }   // máy không có WebGL: ở lại 2D
+    } else { const c = document.getElementById('graph-3d'); graphInstance.width(c.clientWidth).height(c.clientHeight).resumeAnimation(); setDim(null); fitAll(600); }
+    if (graph2d) graph2d.pauseAnimation();
+  } else if (graph2d) {
+    const c = document.getElementById('graph-2d'); graph2d.width(c.clientWidth).height(c.clientHeight).resumeAnimation(); setDim(null);
+    if (graphInstance) graphInstance.pauseAnimation();
+    if (was !== mode) graph2d.zoomToFit(500, 40);
+  }
+  if (user) { try { localStorage.setItem('telos-graph-mode', mode); } catch (e) {} track('graph_view_mode', { mode }); }
+}
+document.addEventListener('click', e => { const b = e.target.closest('#graph-mode [data-mode]'); if (b && b.dataset.mode !== gMode) setGraphMode(b.dataset.mode, true); });
+
 function initGraph(nodes, links) {
   if (graphInitialized) return;
   graphInitialized = true;
@@ -1353,29 +1496,8 @@ function initGraph(nodes, links) {
     })
     .linkOpacity(0.4)
     .linkWidth(l => l.ltype === 'root-cat' ? 2.5 : l.ltype === 'cat-sub' ? 1.5 : 0.8)
-    .onNodeClick(n => {
-      if (!n) return;
-      if (n.type === 'root') return resetView();
-      if (n.type === 'category' || n.type === 'subcategory') return focusCluster(n.id);   // nút nhóm: bay tới cụm
-      track('term_open', { term_name: n.label, term_group: n.group || '', has_article: !!n.url, click_source: 'graph' });
-      if (window.innerWidth < 768) openModal(n);
-      else if (n.url){ track('article_click', { link_url: n.url, link_text: n.label, click_source: 'graph' }); window.open(n.url, '_blank'); }
-      else if (n.type === 'article') location.href = '/thuat-ngu/' + encodeURIComponent(n.id);   // chưa có bài → trang thuật ngữ
-    })
-    .onNodeHover(n => {
-      const tip = document.getElementById('tooltip');
-      if (n && n.type !== 'root') {
-        tip.style.opacity = '1';
-        tip.innerHTML =
-          `<div class="tip-title">${n.label}</div>` +
-          (n.desc ? `<div class="tip-desc">${n.desc}</div>` : '') +
-          (n.url ? `<div class="tip-link">Nhấp để mở bài viết →</div>` : n.type === 'article' ? `<div class="tip-none">Sắp có bài viết · nhấp để xem định nghĩa →</div>`
-            : (n.type === 'category' || n.type === 'subcategory') ? `<div class="tip-link">Nhấp để zoom vào cụm này</div>` : '');
-      } else {
-        tip.style.opacity = '0';
-      }
-      container.style.cursor = (n && (n.url || n.type !== 'root' || gView.focused)) ? 'pointer' : 'default';
-    });
+    .onNodeClick(onGraphClick)
+    .onNodeHover(n => onGraphHover(n, container));
 
   container.addEventListener('mousemove', e => {
     const tip = document.getElementById('tooltip');
@@ -1473,20 +1595,31 @@ const gView = { focused: null, touched: false, homeDist: 900, ids: null };
 const dimmed = id => !!(gView.ids && !gView.ids.has(id));
 function setDim(ids) {   // tô lại màu nút / đường sau khi đổi cụm đang xem
   gView.ids = ids;
-  graphInstance.nodeColor(graphInstance.nodeColor()).linkColor(graphInstance.linkColor());
+  if (graphInstance) graphInstance.nodeColor(graphInstance.nodeColor()).linkColor(graphInstance.linkColor());
+  if (graph2d) graph2d.linkColor(graph2d.linkColor());   // vẽ lại canvas 2D
 }
+const activeGraph = () => gMode === '2d' ? graph2d : graphInstance;
 function fitAll(ms) {   // toàn cảnh: canh vừa mọi nút trong khung
   graphInstance.zoomToFit(ms, 40);
   setTimeout(() => { const c = graphInstance.camera().position, t = graphInstance.controls().target; gView.homeDist = Math.hypot(c.x - t.x, c.y - t.y, c.z - t.z); }, ms + 60);
 }
 const linkId = v => (v && typeof v === 'object') ? v.id : v;
 function clusterIds(id) {   // nút nhóm + mọi nhóm con + thuật ngữ bên dưới
-  const links = graphInstance.graphData().links, out = new Set([id]), q = [id];
+  const links = activeGraph().graphData().links, out = new Set([id]), q = [id];
   while (q.length) { const cur = q.shift(); links.forEach(l => { if (linkId(l.source) === cur && !out.has(linkId(l.target))) { out.add(linkId(l.target)); q.push(linkId(l.target)); } }); }
   return out;
 }
 function focusCluster(id) {
-  if (!graphInstance) return;
+  if (!activeGraph()) return;
+  if (gMode === '2d') {
+    const ids = clusterIds(id);
+    setDim(ids); graph2d.zoomToFit(800, 60, n => ids.has(n.id));
+    setTimeout(() => { if (gView.focused === id && graph2d.zoom() > 4) graph2d.zoom(4, 300); }, 850);   // cụm nhỏ: không phóng quá sát
+    gView.focused = id; gView.touched = true;
+    document.querySelectorAll('#legend [data-cluster]').forEach(b => b.classList.toggle('active', b.dataset.cluster === id));
+    document.querySelector('#graph-zoom .gz-home').hidden = false;
+    return track('graph_focus_cluster', { cluster: id, mode: '2d' });
+  }
   const ids = clusterIds(id), pts = gNodes.filter(n => ids.has(n.id) && n.x !== undefined);
   if (!pts.length) return;
   const c = pts.reduce((a, n) => ({ x: a.x + n.x / pts.length, y: a.y + n.y / pts.length, z: a.z + n.z / pts.length }), { x: 0, y: 0, z: 0 });
@@ -1503,17 +1636,18 @@ function focusCluster(id) {
   gView.focused = id; gView.touched = true; setDim(ids);
   document.querySelectorAll('#legend [data-cluster]').forEach(b => b.classList.toggle('active', b.dataset.cluster === id));
   document.querySelector('#graph-zoom .gz-home').hidden = false;
-  track('graph_focus_cluster', { cluster: id });
+  track('graph_focus_cluster', { cluster: id, mode: '3d' });
 }
 function resetView() {
-  if (!graphInstance) return;
-  fitAll(900);
+  if (!activeGraph()) return;
+  if (gMode === '2d') graph2d.zoomToFit(800, 40); else fitAll(900);
   gView.focused = null; setDim(null);
   document.querySelectorAll('#legend [data-cluster]').forEach(b => b.classList.remove('active'));
   document.querySelector('#graph-zoom .gz-home').hidden = true;
 }
 function zoomBy(f) {   // giữ nguyên điểm đang nhìn, chỉ tiến / lùi camera
-  if (!graphInstance) return;
+  if (!activeGraph()) return;
+  if (gMode === '2d') { graph2d.zoom(Math.min(12, Math.max(0.15, graph2d.zoom() / f)), 300); gView.touched = true; document.querySelector('#graph-zoom .gz-home').hidden = false; return; }
   const cam = graphInstance.camera(), t = graphInstance.controls().target, ctrl = graphInstance.controls();
   const dx = cam.position.x - t.x, dy = cam.position.y - t.y, dz = cam.position.z - t.z, len = Math.hypot(dx, dy, dz) || 1;
   const k = Math.min(ctrl.maxDistance, Math.max(ctrl.minDistance, len * f)) / len;
@@ -1527,7 +1661,7 @@ document.addEventListener('click', e => {
   if (b.dataset.zoom === 'in') zoomBy(0.6); else if (b.dataset.zoom === 'out') zoomBy(1.6); else resetView();
 });
 document.addEventListener('keydown', e => {
-  if (!graphInstance || /INPUT|TEXTAREA|SELECT/.test((e.target && e.target.tagName) || '')) return;
+  if (!activeGraph() || /INPUT|TEXTAREA|SELECT/.test((e.target && e.target.tagName) || '')) return;
   const pg = document.getElementById('panel-graph'); if (!pg || !pg.getClientRects().length || getComputedStyle(pg).visibility === 'hidden') return;
   if (e.key === 'Escape' && gView.focused) resetView();
   else if (e.key === '+' || e.key === '=') zoomBy(0.75);
@@ -1535,6 +1669,19 @@ document.addEventListener('keydown', e => {
 });
 
 function focusTerm(slug) {
+  if (gMode === '2d') {
+    const m = g2Nodes.find(x => x.id === slug && x.type === 'article'); if (!m) return;
+    gView.touched = true; gView.hl = slug; let tries = 0;
+    (function go() {
+      if (m.x === undefined && tries++ < 40) return setTimeout(go, 150);
+      const t0 = Date.now();
+      setTimeout(() => { graph2d.centerAt(m.x, m.y, 1000); graph2d.zoom(3.2, 1000); }, 900);   // đợi bố cục bung ra rồi mới bay tới
+      setTimeout(() => { if (!(gView.userAt > t0)) graph2d.centerAt(m.x, m.y, 500); }, 2600);   // canh lại khi bố cục đã đứng yên (nếu người dùng chưa tự kéo)
+      document.querySelector('#graph-zoom .gz-home').hidden = false;
+      if (window.innerWidth < 768) setTimeout(() => openModal(m), 2000);
+    })();
+    return;
+  }
   const n = gNodes.find(x => x.id === slug && x.type === 'article');
   if (!n) return;
   let tries = 0;
@@ -1551,9 +1698,8 @@ function focusTerm(slug) {
 }
 
 window.addEventListener('resize', () => {
-  if (!graphInstance) return;
-  const c = document.getElementById('graph-3d');
-  graphInstance.width(c.clientWidth).height(c.clientHeight);
+  if (graphInstance && gMode === '3d') { const c = document.getElementById('graph-3d'); graphInstance.width(c.clientWidth).height(c.clientHeight); }
+  if (graph2d && gMode === '2d') { const c = document.getElementById('graph-2d'); graph2d.width(c.clientWidth).height(c.clientHeight); }
 });
 
 // ════════════════════════════════════════════════════════
@@ -2240,5 +2386,6 @@ function injectConceptsJsonLd(concepts, categories) {
   };
 })();
 </script>
+<script src="/nav/site-nav.js" defer></script>
 </body>
 </html>

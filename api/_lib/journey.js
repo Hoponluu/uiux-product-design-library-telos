@@ -3,6 +3,7 @@
 // bản đồ trạm và hai bảng Vai trò / Khóa học ở trạm xuất phát. Supabase lỗi thì dùng seed đi kèm repo.
 // Game (journey/journey.js) đọc cùng dữ liệu (nhúng trong trang) rồi tự tải lại bản mới nhất từ Supabase.
 
+const { tabPill } = require('./nav');
 const SITE = 'https://uiux-library.nhanluu.com';
 const PATH = '/hanh-trinh-ui-ux';
 const REST = process.env.SB_REST || 'https://vvpqhsglgtfwjklvlvuh.supabase.co/rest/v1';
@@ -98,13 +99,11 @@ function render(d, opts = {}){
   const nodes = list.map(c => `<button class="jx-node jx-${esc(c.kind)} jx-t-${tone(c)}" type="button" data-cp="${esc(c.id)}" aria-label="${esc(c.name)}${c.course_title ? ' · ' + esc(c.course_title) : ''}">
       <span class="jx-dot">${c.kind === 'start' ? '🐔' : c.kind === 'finish' ? '🏢' : c.kind === 'main' ? ++n : '+'}</span><span class="jx-lbl">${esc(c.name)}</span></button>`).join('');
 
-  const tab = (href, icon, label, active) => `<a class="tab-btn${active ? ' active' : ''}" href="${href}"${active ? ' aria-current="page"' : ''}><span class="tb-icon">${icon}</span><span class="tb-label">${label}</span></a>`;
   const shell = embed ? '' : `<div id="tabs">
   <a id="header-logo" href="https://nhanluu.com" target="_blank" rel="noopener" title="nhanluu.com" aria-label="Nhân Lưu">${LOGO}</a>
   <button id="menu-btn" onclick="openNav()" aria-label="Menu" title="Menu"><span class="mdot mdot-l"></span><span class="mdot mdot-c"></span><span class="mdot mdot-r"></span></button>
 </div>
-<nav id="tab-pill" aria-label="Công cụ trong thư viện">${[tab('/', '🗺', 'Graph view'), tab('/?tab=glossary', '🔤', 'A-Z'), tab('/?tab=flashcard', '🃏', 'Flashcard Quiz'),
-    tab('/?tab=challenge', '🎲', 'UI Challenge'), tab('/team-map', '🏢', 'Product Map'), tab(PATH, '🧭', 'Hành trang học tập', true), tab('/?tab=about', 'ℹ️', 'Về dự án')].join('')}</nav>
+${tabPill('vi', 'journey')}
 <div id="nav-overlay" role="dialog" aria-modal="true" aria-label="Navigation">
   <div id="nav-backdrop" onclick="closeNav()"></div>
   <nav id="nav-panel">
@@ -149,6 +148,7 @@ ${embed ? '<base target="_blank">' : ''}
 document.documentElement.classList.remove('no-js');try{if(localStorage.getItem('telos-theme')==='dark')document.documentElement.classList.add('jx-dark')}catch(e){}</script>
 <link rel="preconnect" href="https://vvpqhsglgtfwjklvlvuh.supabase.co">
 <link rel="stylesheet" href="/glossary/glossary.css">
+<link rel="stylesheet" href="/nav/site-nav.css">
 <link rel="stylesheet" href="/journey/journey.css">
 <script type="application/ld+json">${JSON.stringify(ld).replace(/</g, '\\u003c')}</script>
 </head>
@@ -194,6 +194,7 @@ setModeUI(document.body.classList.contains('dark'));
 <script src="/team-map/team-map.mascot.js" defer></script>
 <script src="/journey/journey.form.js" defer></script>
 <script src="/journey/journey.js" defer></script>
+<script src="/nav/site-nav.js" defer></script>
 </body>
 </html>`;
 }

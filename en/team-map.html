@@ -264,6 +264,7 @@ body.dark #header-logo { filter: brightness(0) invert(1); }
   ]
 }
 </script>
+<link rel="stylesheet" href="/nav/site-nav.css">
 </head>
 <body>
 
@@ -289,27 +290,28 @@ body.dark #header-logo { filter: brightness(0) invert(1); }
 
 <!-- TAB PILL -->
 <nav id="tab-pill" aria-label="Library tools">
-  <a class="tab-btn" href="/">
-    <span class="tb-icon">🗺</span><span class="tb-label">Graph view</span>
+  <a class="tab-btn" href="/" data-tab="graph" title="How UI/UX terms connect (Vietnamese)">
+    <span class="tb-icon">🗺</span><span class="tb-label">Graph</span><span class="tb-short" aria-hidden="true">Graph</span>
   </a>
-  <a class="tab-btn" href="/?tab=glossary">
-    <span class="tb-icon">🔤</span><span class="tb-label">A-Z</span>
+  <a class="tab-btn" href="/en/glossary" data-tab="glossary" title="Look up any term">
+    <span class="tb-icon">🔤</span><span class="tb-label">Glossary A–Z</span><span class="tb-short" aria-hidden="true">Glossary</span>
   </a>
-  <a class="tab-btn" href="/?tab=flashcard">
-    <span class="tb-icon">🃏</span><span class="tb-label">Flashcard Quiz</span>
+  <a class="tab-btn active" href="/en/team-map" data-tab="map" title="Who does what in a product team" aria-current="page">
+    <span class="tb-icon">🏢</span><span class="tb-label">Product Map</span><span class="tb-short" aria-hidden="true">Map</span>
   </a>
-  <a class="tab-btn" href="/?tab=challenge">
-    <span class="tb-icon">🎲</span><span class="tb-label">UI Challenge</span>
+  <a class="tab-btn" href="/hanh-trinh-ui-ux" data-tab="journey" hreflang="vi" title="From newbie to Product Designer (Vietnamese)">
+    <span class="tb-icon">🧭</span><span class="tb-label">Learning path</span><span class="tb-short" aria-hidden="true">Path</span>
   </a>
-  <a class="tab-btn active" href="/en/team-map" aria-current="page">
-    <span class="tb-icon">🏢</span><span class="tb-label">Product Map</span>
-  </a>
-  <a class="tab-btn" href="/hanh-trinh-ui-ux" hreflang="vi">
-    <span class="tb-icon">🧭</span><span class="tb-label">Learning path</span>
-  </a>
-  <a class="tab-btn" href="/?tab=about">
-    <span class="tb-icon">ℹ️</span><span class="tb-label">About</span>
-  </a>
+  <div class="tab-more">
+    <button type="button" class="tab-btn tab-more-btn" aria-haspopup="true" aria-expanded="false" aria-controls="tab-more-menu" title="More tools: Flashcard Quiz, UI Challenge, About">
+      <span class="tb-icon" aria-hidden="true">⋯</span><span class="tb-label">More</span><span class="tb-short" aria-hidden="true">More</span>
+    </button>
+    <div class="tab-more-menu" id="tab-more-menu" hidden>
+      <a class="tm-item" href="/?tab=flashcard" data-tab="flashcard"><span class="tm-ic" aria-hidden="true">🃏</span><span class="tm-tx"><b>Flashcard Quiz</b><small>Flip cards to review terms (Vietnamese)</small></span></a>
+      <a class="tm-item" href="/?tab=challenge" data-tab="challenge"><span class="tm-ic" aria-hidden="true">🎲</span><span class="tm-tx"><b>UI Challenge</b><small>Random design briefs to practise (Vietnamese)</small></span></a>
+      <a class="tm-item" href="/?tab=about" data-tab="about"><span class="tm-ic" aria-hidden="true">ℹ️</span><span class="tm-tx"><b>About</b><small>What this library is and who made it (Vietnamese)</small></span></a>
+    </div>
+  </div>
 </nav>
 
 <!-- NAV OVERLAY (nhanluu.com style) -->
@@ -440,5 +442,6 @@ TeamMapLoader.load().then(data => {
   document.querySelector('#tm-loading div').textContent = 'Could not load the map. Please reload the page.';
 });
 </script>
+<script src="/nav/site-nav.js" defer></script>
 </body>
 </html>
