@@ -97,13 +97,14 @@ function openCp(id){
       ${c.kind === 'branch' ? `<div class="form-group">${ck('j_active', 'Hiển thị nhánh này trên bản đồ và phần chữ', c.is_active !== false)}</div>` : ''}
     </fieldset>
     <fieldset><legend>Vai trò (bảng "Vai trò" trong game)</legend>
+      ${ta('j_role_tagline', 'Câu lý giải kỹ năng <small style="font-weight:400;color:#888">— hiện ngay dưới tên vai trò, nói vai trò này giỏi gì</small>', c.role_tagline)}
       ${ta('j_role_summary', 'Mô tả vai trò', c.role_summary)}
       <div class="form-group"><label>Kiến thức cần có <small style="font-weight:400;color:#888">— mỗi dòng một ý, kéo ⋮⋮ để đổi thứ tự</small></label><ul class="tmj-know" data-jskills></ul><button class="btn-cancel" type="button" data-act="js-add">+ Thêm dòng</button></div>
       ${inp('j_role_link', 'Link tìm hiểu vai trò', c.role_link, 'placeholder="/thuat-ngu/uiux-designer hoặc https://..."')}
     </fieldset>
     <fieldset><legend>Biến hình</legend>
       ${inp('j_form_title', 'Nhân vật biến thành (chức danh) *', c.form_title)}
-      ${ta('j_form_description', 'Câu mô tả hình thái', c.form_description)}
+      ${ta('j_form_description', 'Câu mô tả hình thái <small style="font-weight:400;color:#888">— ghi chú nội bộ về đồ nghề, không hiện trên trang</small>', c.form_description)}
       <div class="form-group"><label>Đồ nghề ${c.kind === 'branch' ? '<small style="font-weight:400;color:#888">— đồ cộng thêm vào hình thái của trạm chính</small>' : ''}</label><div class="tm-chipgrid">${PROPS().map(p => `<label class="tm-chip"><input type="checkbox" data-jprop="${esc(p)}"${S.jform.props.has(p) ? ' checked' : ''}/>${esc(p)}</label>`).join('')}</div></div>
       ${se ? '' : `<div class="form-group">${ck('j_milestone', 'Mốc nghề (pháo giấy + dòng "Lên cấp")', c.is_milestone)}</div>`}
     </fieldset>
@@ -174,7 +175,7 @@ async function saveCp(){
   const se = c.kind === 'start' || c.kind === 'finish';
   const o = { name:fv('j_name'), description:fv('j_description') || '', outcome:fv('j_outcome') || null, form_title:fv('j_form_title'), form_description:fv('j_form_description') || '',
     form_props:PROPS().filter(p => F().props.has(p)),
-    role_summary:fv('j_role_summary') || null, role_skills:F().skills.map(k => k.trim()).filter(Boolean), role_link:fv('j_role_link') || null };
+    role_tagline:fv('j_role_tagline') || null, role_summary:fv('j_role_summary') || null, role_skills:F().skills.map(k => k.trim()).filter(Boolean), role_link:fv('j_role_link') || null };
   if (o.role_link && !/^(\/|https?:\/\/)\S+$/i.test(o.role_link)) err('[name="j_role_link"]', 'Link bắt đầu bằng / (trang trong thư viện) hoặc https://');
   if (!o.name) err('[name="j_name"]', 'Nhập tên checkpoint');
   if (!o.form_title) err('[name="j_form_title"]', 'Nhập chức danh nhân vật biến thành');
@@ -258,14 +259,14 @@ function sheets(){
     cols:[['id','id',10],['_kind','Loại',11],['_sort','Thứ tự',8],['name','Tên checkpoint',26],['course_title','Tên khóa học',36],['course_url','Link khóa học',44],['sessions','Số buổi',9],
       ['form_title','Nhân vật biến thành',24],['form_description','Mô tả hình thái',44,{ wrap:1 }],['form_props','Đồ nghề',26],['is_milestone','Mốc nghề',10,{ list:[YES, NO] }],
       ['description','Mô tả',60,{ wrap:1 }],['knowledge','Kiến thức (mỗi dòng một ý)',70,{ wrap:1 }],['outcome','Học xong bạn sẽ',50,{ wrap:1 }],
-      ['course_image_url','Ảnh khóa học',44],['role_summary','Mô tả vai trò',50,{ wrap:1 }],['role_skills','Kiến thức cần có (mỗi dòng một ý)',60,{ wrap:1 }],['role_link','Link vai trò',30],
+      ['course_image_url','Ảnh khóa học',44],['role_tagline','Câu lý giải kỹ năng',50,{ wrap:1 }],['role_summary','Mô tả vai trò',50,{ wrap:1 }],['role_skills','Kiến thức cần có (mỗi dòng một ý)',60,{ wrap:1 }],['role_link','Link vai trò',30],
       ['require_challenge','Bắt buộc thử thách',12,{ list:[YES, NO] }],['challenge_term_ids','Thuật ngữ thử thách (id)',40,{ wrap:1 }],['is_active','Hiển thị',10,{ list:[YES, NO] }]],
     rows:() => ordered(), cur:() => S.journey.cps,
     toCells:c => ({ id:c.id, _kind:KIND[c.kind] || c.kind, _sort:c.sort_order, name:c.name, course_title:c.course_title || '', course_url:c.course_url || '', sessions:c.sessions ?? '',
       form_title:c.form_title, form_description:c.form_description || '', form_props:joinList(c.form_props), is_milestone:c.is_milestone ? YES : NO, description:c.description || '',
-      knowledge:joinKnow(c.knowledge), outcome:c.outcome || '', course_image_url:c.course_image_url || '', role_summary:c.role_summary || '', role_skills:joinKnow(c.role_skills), role_link:c.role_link || '', require_challenge:c.require_challenge ? YES : NO, challenge_term_ids:joinList(c.challenge_term_ids), is_active:c.is_active === false ? NO : YES }),
+      knowledge:joinKnow(c.knowledge), outcome:c.outcome || '', course_image_url:c.course_image_url || '', role_tagline:c.role_tagline || '', role_summary:c.role_summary || '', role_skills:joinKnow(c.role_skills), role_link:c.role_link || '', require_challenge:c.require_challenge ? YES : NO, challenge_term_ids:joinList(c.challenge_term_ids), is_active:c.is_active === false ? NO : YES }),
     fromCells:(v, has) => { const o = { id:v.id };
-      ['name','course_title','course_url','form_title','outcome','course_image_url','role_summary','role_link'].forEach(k => { if (has(k)) o[k] = v[k] || null; });
+      ['name','course_title','course_url','form_title','outcome','course_image_url','role_tagline','role_summary','role_link'].forEach(k => { if (has(k)) o[k] = v[k] || null; });
       if (has('role_skills')) o.role_skills = splitKnow(v.role_skills);
       ['form_description','description'].forEach(k => { if (has(k)) o[k] = v[k] || ''; });
       if (has('sessions')) o.sessions = v.sessions === '' || v.sessions == null ? null : Number(v.sessions);

@@ -19,7 +19,7 @@ def q(v):
 def j(v): return q(json.dumps(v, ensure_ascii=False)) + '::jsonb'
 
 cps = SEED['checkpoints']
-role_rows = ',\n'.join('  (' + ', '.join([q(c['id']), q(c.get('role_summary')), j(c.get('role_skills') or []), q(c.get('role_link')), q(c.get('course_image_url'))]) + ')' for c in cps)
+role_rows = ',\n'.join('  (' + ', '.join([q(c['id']), q(c.get('role_tagline')), q(c.get('role_summary')), j(c.get('role_skills') or []), q(c.get('role_link')), q(c.get('course_image_url'))]) + ')' for c in cps)
 assert sorted(c['id'] for c in cps) == sorted(IDS), 'seed phải có đúng 10 checkpoint'
 rows = ',\n'.join('  (' + ', '.join([q(c['id']), q(c['kind']), q(c['sort_order']), q(c.get('branch_after')), q(c['name']), q(c.get('course_title')),
     q(c.get('course_url')), q(c.get('sessions')), q(c['form_title']), q(c.get('form_description') or ''), j(c.get('form_props') or []), q(bool(c.get('is_milestone'))),
@@ -57,6 +57,7 @@ create table if not exists tm_journey_checkpoints (
   require_challenge  boolean not null default false,
   challenge_term_ids jsonb not null default '[]'::jsonb check (jsonb_typeof(challenge_term_ids) = 'array'),
   is_active          boolean not null default true,
+  role_tagline       text,
   role_summary       text,
   role_skills        jsonb not null default '[]'::jsonb check (jsonb_typeof(role_skills) = 'array'),
   role_link          text,
@@ -68,6 +69,8 @@ alter table tm_journey_checkpoints add column if not exists role_summary text;
 alter table tm_journey_checkpoints add column if not exists role_skills jsonb not null default '[]'::jsonb;
 alter table tm_journey_checkpoints add column if not exists role_link text;
 alter table tm_journey_checkpoints add column if not exists course_image_url text;
+-- câu lý giải kỹ năng (hiện ngay dưới tên vai trò trong bảng Vai trò)
+alter table tm_journey_checkpoints add column if not exists role_tagline text;
 -- trạm chính / xuất phát / đích không tắt được
 alter table tm_journey_checkpoints drop constraint if exists tm_journey_main_active;
 alter table tm_journey_checkpoints add constraint tm_journey_main_active check (kind = 'branch' or is_active);
@@ -107,13 +110,14 @@ on conflict (id) do nothing;
 
 -- nội dung bảng Vai trò + ảnh khoá học: chỉ điền ô còn trống (không ghi đè bản đã sửa trong CMS)
 update tm_journey_checkpoints c set
+  role_tagline     = coalesce(nullif(c.role_tagline, ''), v.role_tagline),
   role_summary     = coalesce(c.role_summary, v.role_summary),
   role_skills      = case when c.role_skills is null or c.role_skills = '[]'::jsonb then v.role_skills else c.role_skills end,
   role_link        = coalesce(c.role_link, v.role_link),
   course_image_url = coalesce(c.course_image_url, v.course_image_url)
 from (values
 {role_rows}
-) as v(id, role_summary, role_skills, role_link, course_image_url)
+) as v(id, role_tagline, role_summary, role_skills, role_link, course_image_url)
 where c.id = v.id;
 
 -- bản 3: tên nhánh bỏ chữ "Rẽ trái: / Rẽ phải:" (chỉ đổi khi vẫn còn tên cũ, tên đã sửa trong CMS giữ nguyên)
@@ -146,6 +150,7 @@ begin
       require_challenge  = case when r ? 'require_challenge'  then (r ->> 'require_challenge')::boolean else require_challenge end,
       challenge_term_ids = case when r ? 'challenge_term_ids' then coalesce(r -> 'challenge_term_ids', '[]'::jsonb) else challenge_term_ids end,
       is_active          = case when r ? 'is_active'          then (r ->> 'is_active')::boolean else is_active end,
+      role_tagline       = case when r ? 'role_tagline'       then r ->> 'role_tagline'       else role_tagline end,
       role_summary       = case when r ? 'role_summary'       then r ->> 'role_summary'       else role_summary end,
       role_skills        = case when r ? 'role_skills'        then coalesce(r -> 'role_skills', '[]'::jsonb) else role_skills end,
       role_link          = case when r ? 'role_link'          then r ->> 'role_link'          else role_link end,

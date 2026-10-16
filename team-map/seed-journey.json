@@ -22,6 +22,7 @@
    "require_challenge": false,
    "challenge_term_ids": [],
    "is_active": true,
+   "role_tagline": "Chưa cần kỹ năng gì, chỉ cần tò mò vì sao có sản phẩm dùng sướng, có sản phẩm khiến người ta bực.",
    "role_summary": "Người mới tò mò về UI/UX. Chưa cần biết vẽ hay biết code, chỉ cần muốn hiểu vì sao có app dùng sướng còn có app dùng muốn ném điện thoại.",
    "role_skills": [
     "Tò mò về cách mọi người dùng sản phẩm số",
@@ -60,6 +61,7 @@
    "require_challenge": false,
    "challenge_term_ids": [],
    "is_active": true,
+   "role_tagline": "Dùng Figma thành thạo nên ý tưởng nào cũng dựng được thành giao diện và prototype cho người khác bấm thử.",
    "role_summary": "Dùng Figma nhanh và gọn: dựng được giao diện, tổ chức file sạch và làm prototype để người khác bấm thử.",
    "role_skills": [
     "Frame, constraint và cách tổ chức layer, page",
@@ -100,6 +102,7 @@
    "require_challenge": false,
    "challenge_term_ids": [],
    "is_active": true,
+   "role_tagline": "Chọn màu, chữ, khoảng cách đều có lý do, nên giao diện vừa đẹp vừa nhất quán và giải thích được với team.",
    "role_summary": "Thiết kế giao diện đẹp, nhất quán và giải thích được vì sao chọn màu này, cỡ chữ kia.",
    "role_skills": [
     "Typography: cỡ chữ, line height, ghép font",
@@ -140,6 +143,7 @@
    "require_challenge": false,
    "challenge_term_ids": [],
    "is_active": true,
+   "role_tagline": "Hỏi đúng người dùng trước khi vẽ và kiểm chứng giải pháp bằng test, thay vì đoán mò.",
    "role_summary": "Mốc nghề đầu tiên: đi tìm vấn đề thật của người dùng trước khi vẽ, và kiểm chứng giải pháp sau khi vẽ.",
    "role_skills": [
     "Phỏng vấn và quan sát người dùng",
@@ -180,6 +184,7 @@
    "require_challenge": false,
    "challenge_term_ids": [],
    "is_active": true,
+   "role_tagline": "Dựng và giữ một hệ thống component chung, để cả team thiết kế và code nhanh hơn mà không lệch nhau.",
    "role_summary": "Làm việc có hệ thống trong sản phẩm lớn: dựng và dùng Design System để team thiết kế và code nói cùng một ngôn ngữ.",
    "role_skills": [
     "Tư duy hệ thống, phân biệt UI Kit, Style Guide, Design System",
@@ -221,6 +226,7 @@
    "require_challenge": false,
    "challenge_term_ids": [],
    "is_active": true,
+   "role_tagline": "Giao phần việc lặp lại cho AI và biết kiểm tra lại kết quả, dành thời gian cho những quyết định cần phán đoán.",
    "role_summary": "Dùng AI làm trợ lý trong từng bước của quy trình mà vẫn giữ phán đoán của designer.",
    "role_skills": [
     "AI làm được gì và không làm được gì trong UX",
@@ -262,6 +268,7 @@
    "require_challenge": false,
    "challenge_term_ids": [],
    "is_active": true,
+   "role_tagline": "Cân được nhu cầu người dùng với mục tiêu kinh doanh: chọn làm gì trước và đo kết quả bằng số liệu.",
    "role_summary": "Trả lời được cả câu hỏi có nên làm không và làm xong đo bằng gì, không chỉ là thiết kế thế nào. Nối thiết kế với kinh doanh.",
    "role_skills": [
     "Tư duy sản phẩm và vai trò PM, PO, Designer",
@@ -301,6 +308,7 @@
    "require_challenge": false,
    "challenge_term_ids": [],
    "is_active": true,
+   "role_tagline": "Hiểu một website vận hành thế nào, từ sitemap tới responsive, nên nhận được dự án web và landing page.",
    "role_summary": "Nhận được dự án website, landing page và làm tốt ở agency.",
    "role_skills": [
     "Các loại website và quy trình làm web",
@@ -340,6 +348,7 @@
    "require_challenge": false,
    "challenge_term_ids": [],
    "is_active": true,
+   "role_tagline": "Đọc và viết được HTML, CSS cơ bản, nên thiết kế sát với cách code và trao đổi trôi chảy với developer.",
    "role_summary": "Tự dựng được thứ mình vẽ và nói chuyện với developer không bị lạc.",
    "role_skills": [
     "HTML và cách trình duyệt hiển thị một trang",
@@ -370,6 +379,7 @@
    "require_challenge": false,
    "challenge_term_ids": [],
    "is_active": true,
+   "role_tagline": "Đủ kỹ năng từ công cụ, giao diện, người dùng tới sản phẩm để bắt đầu công việc của một Product Designer.",
    "role_summary": "Đi hết con đường: sẵn sàng cho ngày đầu đi làm ở vị trí Product Designer.",
    "role_skills": [],
    "role_link": "/thuat-ngu/product-designer",

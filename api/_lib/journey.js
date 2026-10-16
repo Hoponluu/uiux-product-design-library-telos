@@ -63,7 +63,7 @@ function rolePanel(c){
   const skills = (c.role_skills || []).filter(Boolean), link = c.role_link && /^(\/|https?:\/\/)/.test(c.role_link) ? c.role_link : null;
   return `<div class="jx-col"><p class="jx-k">${c.kind === 'start' ? 'Bạn bắt đầu là' : c.kind === 'finish' ? 'Bạn vào văn phòng là' : 'Vai trò sau trạm này'}</p>
     <h2 class="jx-role-t">${esc(c.form_title)}</h2>
-    ${c.form_description ? `<p class="jx-quote">${esc(c.form_description)}</p>` : ''}
+    ${c.role_tagline ? `<p class="jx-quote">${esc(c.role_tagline)}</p>` : ''}
     ${c.role_summary ? `<p>${esc(c.role_summary)}</p>` : ''}
 </div>
     <div class="jx-col">${skills.length ? `<h3>Kiến thức cần có</h3><ul class="jx-skills">${skills.map(k => `<li>${esc(k)}</li>`).join('')}</ul>` : ''}
