@@ -210,7 +210,7 @@ function panels(c){
   const peek = ST.view && ST.view === c.id && c.id !== ST.pos ? `<span class="jx-peek">${ST.visited.includes(c.id) ? 'Xem lại' : 'Xem trước'} · bấm trạm đang đứng để quay về</span>` : '';
   rolePanel.innerHTML = `<div class="jx-col">${peek}<p class="jx-k">${c.kind === 'start' ? 'Bạn bắt đầu là' : c.kind === 'finish' ? 'Bạn vào văn phòng là' : 'Vai trò sau trạm này'}</p>
     <h2 class="jx-role-t">${esc(c.form_title)}</h2>
-    ${c.form_description ? `<p class="jx-quote">${esc(c.form_description)}</p>` : ''}
+    ${c.role_tagline ? `<p class="jx-quote">${esc(c.role_tagline)}</p>` : ''}
     ${c.role_summary ? `<p>${esc(c.role_summary)}</p>` : ''}
 </div>
     <div class="jx-col">${skills.length ? `<h3>Kiến thức cần có</h3><ul class="jx-skills">${skills.map(k => `<li>${esc(k)}</li>`).join('')}</ul>` : ''}
