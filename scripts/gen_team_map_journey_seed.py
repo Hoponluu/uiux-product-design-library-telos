@@ -4,12 +4,16 @@
 Chạy:  python3 scripts/gen_team_map_journey_seed.py
 SQL sinh ra chạy lại nhiều lần an toàn: tạo bảng nếu chưa có, chỉ chèn checkpoint / cài đặt còn thiếu
 (không ghi đè nội dung đã sửa trong CMS).
+
+Sinh thêm supabase_team_map_journey_2026.sql: chuyển nội dung 10 trạm sang chuỗi AI-Driven Product Designer 2026
+(GHI ĐÈ nội dung trong DB, chạy một lần sau file chính).
 """
 import json, pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SEED = json.loads((ROOT / 'team-map' / 'seed-journey.json').read_text(encoding='utf-8'))
-IDS = ['start', 'figma', 'ui', 'ux', 'ds', 'ai', 'pdm', 'web', 'code', 'finish']
+# chuỗi 2026: xuất phát → 8 khóa → đích (id "web" cũ đổi thành "portfolio")
+IDS = ['start', 'figma', 'ui', 'ux', 'ds', 'ai', 'code', 'portfolio', 'pdm', 'finish']
 
 def q(v):
     if v is None: return 'null'
@@ -26,11 +30,11 @@ rows = ',\n'.join('  (' + ', '.join([q(c['id']), q(c['kind']), q(c['sort_order']
     q(c.get('description') or ''), j(c.get('knowledge') or []), q(c.get('outcome')), q(bool(c.get('require_challenge'))), j(c.get('challenge_term_ids') or []),
     q(c.get('is_active', True))]) + ')' for c in cps)
 
-SEO_TITLE = 'Lộ trình học UI/UX Designer và Product Designer | TELOS Academy'
-SEO_DESC = ('Lộ trình từ con số 0 tới Product Designer tại TELOS Academy: Figma, UI, UX, Design System, A.I. và Product Design & Manage, '
-            'cùng hai nhánh Web Design và Code for Designer. Chơi thử dạng game 3D hoặc đọc từng chặng.')
-INTRO = ('Sáu trạm chính và hai nhánh tuỳ chọn, mỗi trạm là một khoá học tại TELOS Academy. Đi qua trạm nào, bạn biết mình sẽ học gì, '
-         'học xong làm được gì, và lên đời thành phiên bản nào của một designer.')
+SEO_TITLE = 'Lộ trình AI-Driven Product Designer: 8 khóa từ Newbie tới Product Designer | TELOS Academy'
+SEO_DESC = ('Hành trình 8 khóa, 68 buổi tại TELOS Academy: Công cụ, Thẩm mỹ, Trải nghiệm, Hệ thống, Dự án, Code, Portfolio, Chiến lược. '
+            'Học làm sản phẩm cùng AI: AI làm nhanh hơn, designer quyết định cái gì đáng làm. Chơi thử dạng game.')
+INTRO = ('8 trạm, mỗi trạm là một khóa trong chuỗi AI-Driven Product Designer. Đi qua trạm nào, bạn biết mình học gì, '
+         'làm ra đầu ra gì, và lên đời thành phiên bản nào của một designer.')
 
 sql = f"""-- ════════════════════════════════════════════════════════════════════
 -- Trang Hành trình UI/UX (/hanh-trinh-ui-ux) — docs/SPEC-journey.md
@@ -71,6 +75,11 @@ alter table tm_journey_checkpoints add column if not exists role_link text;
 alter table tm_journey_checkpoints add column if not exists course_image_url text;
 -- câu lý giải kỹ năng (hiện ngay dưới tên vai trò trong bảng Vai trò)
 alter table tm_journey_checkpoints add column if not exists role_tagline text;
+-- chuỗi 2026: id "web" (nhánh Web Design cũ) đổi thành "portfolio"; danh sách id hợp lệ cập nhật theo
+alter table tm_journey_checkpoints drop constraint if exists tm_journey_checkpoints_id_check;
+update tm_journey_checkpoints set id = 'portfolio' where id = 'web' and not exists (select 1 from tm_journey_checkpoints where id = 'portfolio');
+delete from tm_journey_checkpoints where id = 'web';
+alter table tm_journey_checkpoints add constraint tm_journey_checkpoints_id_check check (id in ({', '.join(q(i) for i in IDS)}));
 -- trạm chính / xuất phát / đích không tắt được
 alter table tm_journey_checkpoints drop constraint if exists tm_journey_main_active;
 alter table tm_journey_checkpoints add constraint tm_journey_main_active check (kind = 'branch' or is_active);
@@ -121,7 +130,6 @@ from (values
 where c.id = v.id;
 
 -- bản 3: tên nhánh bỏ chữ "Rẽ trái: / Rẽ phải:" (chỉ đổi khi vẫn còn tên cũ, tên đã sửa trong CMS giữ nguyên)
-update tm_journey_checkpoints set name = 'Làm web' where id = 'web' and name = 'Rẽ trái: làm web';
 update tm_journey_checkpoints set name = 'Biết code' where id = 'code' and name = 'Rẽ phải: biết code';
 
 insert into tm_journey_settings (id, seo_title, seo_description, intro_text, workplaces)
@@ -167,3 +175,31 @@ notify pgrst, 'reload schema';
 """
 (ROOT / 'supabase_team_map_journey.sql').write_text(sql, encoding='utf-8')
 print('wrote supabase_team_map_journey.sql:', len(cps), 'checkpoints')
+
+# ---------- chuyển sang chuỗi 2026 (ghi đè nội dung) ----------
+def upd(c):
+    cols = [('kind', q(c['kind'])), ('sort_order', q(c['sort_order'])), ('branch_after', q(c.get('branch_after'))), ('name', q(c['name'])),
+            ('course_title', q(c.get('course_title'))), ('course_url', q(c.get('course_url'))), ('sessions', q(c.get('sessions'))),
+            ('form_title', q(c['form_title'])), ('form_description', q(c.get('form_description') or '')), ('form_props', j(c.get('form_props') or [])),
+            ('is_milestone', q(bool(c.get('is_milestone')))), ('description', q(c.get('description') or '')), ('knowledge', j(c.get('knowledge') or [])),
+            ('outcome', q(c.get('outcome'))), ('is_active', q(c.get('is_active', True))), ('role_tagline', q(c.get('role_tagline'))),
+            ('role_summary', q(c.get('role_summary'))), ('role_skills', j(c.get('role_skills') or [])), ('role_link', q(c.get('role_link'))),
+            ('course_image_url', q(c.get('course_image_url')))]
+    return f"update tm_journey_checkpoints set\n  " + ',\n  '.join(f'{k} = {v}' for k, v in cols) + f"\nwhere id = {q(c['id'])};"
+sql26 = f"""-- ════════════════════════════════════════════════════════════════════
+-- Trang Hành trình: chuyển sang chuỗi AI-Driven Product Designer 2026 (8 khóa, 68 buổi)
+-- Sinh từ team-map/seed-journey.json bằng scripts/gen_team_map_journey_seed.py.
+-- CHẠY SAU supabase_team_map_journey.sql (file đó thêm cột và đổi id "web" thành "portfolio").
+-- GHI ĐÈ nội dung 10 trạm và phần SEO của trang bằng nội dung mới; giữ nguyên cài đặt thử thách flashcard.
+-- ════════════════════════════════════════════════════════════════════
+begin;
+{chr(10).join(upd(c) for c in cps)}
+
+update tm_journey_settings set seo_title = {q(SEO_TITLE)}, seo_description = {q(SEO_DESC)}, intro_text = {q(INTRO)}, workplaces = {j(SEED['workplaces'])}
+where id = 1;
+commit;
+
+notify pgrst, 'reload schema';
+"""
+(ROOT / 'supabase_team_map_journey_2026.sql').write_text(sql26, encoding='utf-8')
+print('wrote supabase_team_map_journey_2026.sql')

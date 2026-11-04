@@ -3,7 +3,7 @@
 window.TM_ADMIN_JOURNEY = function(X){
 'use strict';
 const { S, esc, toast } = X;
-const IDS = ['start', 'figma', 'ui', 'ux', 'ds', 'ai', 'pdm', 'web', 'code', 'finish'];
+const IDS = ['start', 'figma', 'ui', 'ux', 'ds', 'ai', 'code', 'portfolio', 'pdm', 'finish'];   // chuỗi 2026: 8 khóa
 const KIND = { start:'Xuất phát', main:'Trạm chính', branch:'Nhánh rẽ', finish:'Đích' };
 const PROPS = () => (window.TM_MASCOT ? window.TM_MASCOT.PROP_LIST : (window.TM_LAYOUT && window.TM_LAYOUT.props) || []);
 const URL_RE = /^https?:\/\/\S+$/i;
@@ -211,7 +211,7 @@ function renderSettings(){
       <input type="file" accept="image/png,image/jpeg,image/webp" data-act="js-og"/> <span data-jogstate style="font-size:12px;color:#666"></span></div>
     <div class="form-group"><label>Ba thẻ "Chọn nơi làm việc đầu tiên"</label>
       ${S.jset.work.map((w, i) => `<div class="tmj-work"><code>${esc(w.scale)}</code><input class="form-control" data-jw="${i}" data-k="label" value="${esc(w.label)}" placeholder="Nhãn"/><input class="form-control" data-jw="${i}" data-k="note" value="${esc(w.note || '')}" placeholder="Ghi chú"/></div>`).join('')}
-      <small style="color:#888">Quy mô (small, large, agency) cố định. Người đã đi nhánh Web thấy nhãn "Hợp với bạn" ở thẻ Agency.</small></div>
+      <small style="color:#888">Quy mô (small, large, agency) cố định.</small></div>
     <div class="form-group"><button class="btn-save" data-act="js-save">Lưu cài đặt</button></div>
     <div class="form-group"><label>Nhúng vào trang khác (vd. academy.telos.vn)</label><textarea class="form-control" rows="2" readonly data-jembed>${esc(embed)}</textarea>
       <button class="btn-cancel" type="button" data-act="js-copy" style="margin-top:6px">Copy mã nhúng</button></div></div>`;

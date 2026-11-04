@@ -278,9 +278,8 @@ function challenge(id){
 
 // ---------- đích: chọn nơi làm việc → Team Map ----------
 function openWork(){
-  const web = ST.visited.includes('web');
   openModal(`<p class="jx-k">Ngày đầu đi làm</p><h2>Chọn nơi làm việc đầu tiên</h2><p>Bạn bước vào với tư cách <b>${esc(FORM.title)}</b>${FORM.sub ? ` · ${esc(FORM.sub)}` : ''}. Muốn bắt đầu ở đâu?</p>
-    <div class="jx-work">${WORK.map(w => `<button type="button" data-scale="${esc(w.scale)}"><b>${esc(w.label)}</b><span>${esc(w.note || '')}</span>${web && (w.suggest_if === 'web' || w.scale === 'agency') ? '<em>Hợp với bạn</em>' : ''}</button>`).join('')}</div>`);
+    <div class="jx-work">${WORK.map(w => `<button type="button" data-scale="${esc(w.scale)}"><b>${esc(w.label)}</b><span>${esc(w.note || '')}</span></button>`).join('')}</div>`);
   sheet.querySelectorAll('[data-scale]').forEach(b => b.onclick = () => goWork(b.dataset.scale));
 }
 async function goWork(scale){

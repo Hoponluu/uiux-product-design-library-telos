@@ -142,6 +142,8 @@ Lưu ý: bản dịch dựa trên nội dung seed gốc. Nếu đã sửa nội 
 
 ## 14. Trang Hành trang học tập (/hanh-trinh-ui-ux) — docs/SPEC-journey.md, bản 2 (2D)
 
+> **Từ 04/11/2026 trang theo chuỗi AI-Driven Product Designer 2026: 8 trạm đi thẳng, không còn nhánh rẽ. Xem `docs/journey-2026.md`.** Các mục về nhánh rẽ bên dưới chỉ còn đúng về mặt kỹ thuật (engine vẫn hỗ trợ nhánh).
+
 Tab trên menu tên **"Hành trang học tập"** (đường dẫn giữ nguyên `/hanh-trinh-ui-ux`).
 
 Spec gốc là game 3D có phần lộ trình dạng chữ bên dưới. Theo góp ý của chủ dự án, bản hiện tại đổi thành:
