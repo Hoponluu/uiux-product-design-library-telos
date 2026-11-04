@@ -6,14 +6,15 @@
 const { tabPill } = require('./nav');
 const SITE = 'https://uiux-library.nhanluu.com';
 const PATH = '/hanh-trinh-ui-ux';
+const L00 = 'https://academy.telos.vn/lo-trinh-ai-driven-product-design/';   // trang tổng của chuỗi trên TELOS
 const REST = process.env.SB_REST || 'https://vvpqhsglgtfwjklvlvuh.supabase.co/rest/v1';
 const KEY = process.env.SB_KEY || 'sb_publishable_slwezFWl9SM0ngQiVdIZuQ_XvVkhmCU';
 const TTL = 2 * 60 * 1000;
 const SEED = require('../../team-map/seed-journey.json');
 const DEFAULTS = {
-  seo_title:'Lộ trình học UI/UX Designer và Product Designer | TELOS Academy',
-  seo_description:'Lộ trình từ con số 0 tới Product Designer tại TELOS Academy: Figma, UI, UX, Design System, A.I. và Product Design & Manage, cùng hai nhánh Web Design và Code for Designer. Chơi thử dạng game, mỗi trạm là một khoá học.',
-  intro_text:'Sáu trạm chính và hai nhánh tuỳ chọn, mỗi trạm là một khoá học tại TELOS Academy. Đi qua trạm nào, bạn biết mình sẽ học gì, học xong làm được gì, và lên đời thành phiên bản nào của một designer.',
+  seo_title:'Lộ trình AI-Driven Product Designer: 8 khóa từ Newbie tới Product Designer | TELOS Academy',
+  seo_description:'Hành trình 8 khóa, 68 buổi tại TELOS Academy: Công cụ, Thẩm mỹ, Trải nghiệm, Hệ thống, Dự án, Code, Portfolio, Chiến lược. Học làm sản phẩm cùng AI: AI làm nhanh hơn, designer quyết định cái gì đáng làm. Chơi thử dạng game.',
+  intro_text:'8 trạm, mỗi trạm là một khóa trong chuỗi AI-Driven Product Designer. Đi qua trạm nào, bạn biết mình học gì, làm ra đầu ra gì, và lên đời thành phiên bản nào của một designer.',
   og_image_url:null, workplaces:SEED.workplaces,
 };
 
@@ -53,9 +54,10 @@ function ordered(cps){
   return out.concat(on.filter(c => c.kind === 'finish'));
 }
 
-// Màu ô trạm: Figma (và trạm cuối) xanh dương TELOS, UI + UX vàng, Design System + A.I. trắng viền xanh, nhánh rẽ hồng.
+// Màu ô trạm (bảng màu TELOS); nhánh rẽ (nếu sau này thêm lại) màu hồng.
 // Trạm chính mới tạo trong CMS mà chưa có ở đây thì dùng kiểu trắng viền xanh.
-const TONE = { figma:'blue', ui:'yellow', ux:'yellow', ds:'line', ai:'line', pdm:'blue' };
+// chuỗi 2026 theo 4 tầng: Căn bản (01–03) xanh, vàng, vàng · Hệ thống hóa (04–05) trắng viền xanh · Mở rộng & ra mắt (06–07) hồng · Đóng chuỗi (08) xanh
+const TONE = { figma:'blue', ui:'yellow', ux:'yellow', ds:'line', ai:'line', code:'pink', portfolio:'pink', pdm:'blue' };
 const tone = c => c.kind === 'branch' ? 'pink' : c.kind === 'main' ? (TONE[c.id] || 'line') : 'plain';
 
 // Bảng "Vai trò" và "Khóa học" của một trạm (server render trạng thái ban đầu; journey.js vẽ lại khi đi tới trạm khác)
@@ -86,7 +88,7 @@ function render(d, opts = {}){
   const courses = list.filter(c => (c.kind === 'main' || c.kind === 'branch') && c.course_title);
   const og = safeUrl(s.og_image_url) || `${SITE}/Thumb.png`;
   const ld = { '@context':'https://schema.org', '@graph':[
-    { '@type':'ItemList', '@id':SITE + PATH + '#lo-trinh', name:'Lộ trình trở thành UI/UX Designer và Product Designer', numberOfItems:courses.length,
+    { '@type':'ItemList', '@id':SITE + PATH + '#lo-trinh', name:'Lộ trình AI-Driven Product Designer', numberOfItems:courses.length,
       itemListElement:courses.map((c, i) => ({ '@type':'ListItem', position:i + 1, item:{ '@type':'Course', name:c.course_title, description:c.description || c.name,
         ...(safeUrl(c.course_url) ? { url:c.course_url } : {}), ...(safeUrl(c.course_image_url) ? { image:c.course_image_url } : {}),
         provider:{ '@type':'Organization', name:'TELOS Academy', sameAs:'https://academy.telos.vn' } } })) },
@@ -158,7 +160,8 @@ ${shell}
 <main id="jx">
 <section class="jx-game" id="jx-game" aria-label="Game hành trang học tập">
   <header class="jx-head">
-    <div><p class="jx-eyebrow">TELOS Academy · Từ Newbie tới Product Designer</p><h1>Hành trình trở thành Product Designer</h1></div>
+    <div><p class="jx-eyebrow">TELOS Academy · Lộ trình AI-Driven Product Designer</p><h1>Hành trình trở thành AI-Driven Product Designer</h1>
+      <p class="jx-sub">AI làm nhanh hơn. Designer quyết định cái gì đáng làm. <a href="${L00}" target="_blank" rel="noopener" data-ga="journey_program_click">Xem lộ trình 8 khóa ↗</a></p></div>
     <button class="jx-reset" id="jx-reset" type="button" data-act="reset" hidden>↺ Đi lại từ đầu</button>
   </header>
   <div class="jx-board" id="jx-board">
