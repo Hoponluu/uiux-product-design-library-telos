@@ -8,6 +8,7 @@ Chủ dự án chọn cách kiểm thử tiết kiệm. Áp dụng cho mọi phi
 - **Chỉ test trong phạm vi được yêu cầu.** Không tự chạy lại toàn bộ test cũ (hồi quy).
 - **Sửa phần dùng chung thì cảnh báo, không tự test.** Phần dùng chung gồm menu (`api/_lib/nav.js`, `nav/`), engine Product Map (`team-map/team-map.engine.js`), SQL / schema Supabase. Khi sửa các phần này, nêu vùng có thể bị ảnh hưởng để chủ dự án quyết định có test hay không.
 - **Không đụng production khi test.** Dùng DB local, chặn GA.
+- **Cách test, công cụ và lỗi môi trường đã gặp:** xem `tests/README.md`.
 
 ## Quy ước khác
 - Trả lời bằng tiếng Việt.
